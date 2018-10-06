@@ -1,0 +1,655 @@
+#!/usr/bin/env ruby
+
+require 'docopt'
+require 'gitlab'
+require 'logger'
+require 'pp'
+require 'terminal-table'
+require 'yaml'
+
+# My App Class for storing app related info, like logger info
+class MyApp
+  attr_reader :logger
+  def initialize(name)
+    @logger = Logger.new($stdout).tap do |log|
+      log.progname = name
+    end
+
+    # simplify logger output format
+    @logger.formatter = proc do |severity, datetime, progname, msg|
+      "#{severity}: #{msg}\n"
+    end
+
+    @logger.level = Logger::INFO
+  end
+end
+
+# Handles everything Git branch related
+class Branch
+  SITS_URL = 'http://sits.schrader.co.uk:8080'.freeze
+  @prefix = nil
+  @description = 'Generic Merge Request Description'
+  def initialize(project_id, name, logger)
+    # strip out prefix from branch name, will be re-added as required
+    @name = name.gsub(@prefix, '')
+    @project_id = project_id
+    @logger = logger
+
+    # reject any branches with same name as protected branches
+    if %w(master develop).include? @name
+      @logger.error "branch #{name} conflicts protected branch naming"
+      exit 1
+    end
+  end
+
+  # gets full name of branch including prefix
+  def full_name
+    "#{@prefix}#{@name}"
+  end
+
+  def mr_page_url
+    "#{Gitlab.project(@project_id).web_url}/merge_requests"
+  end
+
+  # parses branch name, extracts SITS id and description
+  def parse_name
+    result = {}
+
+    # parse for SITS id
+    match = full_name.match(%r{(?<prefix>.*/)(?<sits_id>TPMS_\d{5}-\d+)?_?(?<summary>.*)})
+    if match
+      result[:sits_id] = match['sits_id']
+      result[:summary] = match['summary']
+    else
+      result[:summary] = branch_name
+    end
+
+    # convert underscores to spaces for readability
+    result[:summary].tr('_', ' ')
+
+    result
+  end
+
+  # creates a server side branch
+  def start
+    begin
+      Gitlab.create_branch(@project_id, full_name, 'develop')
+      @logger.info "Successfully created feature branch: #{full_name}"
+    rescue => e
+      @logger.error "Failed to create feature branch #{full_name}"
+      @logger.error e.message
+    end
+  end
+
+  # create a new WIP: merge request for given branch
+  def publish
+    branch_info = parse_name
+    sits_id = branch_info[:sits_id]
+    @logger.debug "branch_info: #{branch_info}"
+
+    new_mrs = []
+    @merge_directions.each do |merge_direction|
+      title = 'WIP: '
+      title += "Release " if self.is_a? Release
+      title += "#{sits_id}: " if sits_id
+      title += branch_info[:summary]
+      title += " into #{merge_direction[:target_branch]}" if self.is_a? Release
+
+      description = ''
+
+      # Add Merge Request type description
+      description = @description
+
+      # Add SITS link if available
+      description += "SITS link: [#{sits_id}](#{SITS_URL}/browse/#{sits_id}) \n  \n" if sits_id
+
+      # Add Merge Request direction specific description
+      description += "#{merge_direction[:desc]} \n  \n"
+
+      options = { description: description }.merge! merge_direction
+
+      @logger.debug "title: #{title}"
+      @logger.debug "options: #{options}"
+
+      begin
+        new_mrs << Gitlab.create_merge_request(@project_id, title, options)
+        url = "#{mr_page_url}/#{new_mrs.last.iid}"
+        @logger.info "Successfully Created Merge Request: #{url}"
+        `start #{url}`
+      rescue => e
+        @logger.error "Failed to create merge request check #{@mr_page_url}"
+        @logger.error e.message
+        `start #{mr_page_url}`
+      end
+    end
+
+    new_mrs
+  end
+
+  # Removes WIP from existing Merge request or creates a new one if not
+  # currently published
+  def finish
+    # if not previously published, then publish it now
+    mrs = merge_requests
+    mrs = publish if mrs.count == 0
+
+    updated_mrs = []
+    mrs.each do |mr|
+      # remove WIP:
+      title = mr.title.gsub('WIP: ', '').gsub('[WIP] ', '')
+      options = { title: title }
+
+      begin
+        updated_mrs << Gitlab.update_merge_request(@project_id, mr.id, options)
+        url = "#{mr_page_url}/#{updated_mrs.last.iid}"
+        @logger.info "Successfully Updated Merge Request: #{url}"
+        `start #{url}`
+      rescue => e
+        @logger.error "Failed to update merge request check #{@mr_page_url}"
+        @logger.error e.message
+        `start #{mr_page_url}`
+      end
+    end
+
+    updated_mrs
+  end
+
+  # gets all merge request for a given source branch
+  def merge_requests
+    options = { per_page: 100, 'state' => 'opened' }
+    mrs = Gitlab.merge_requests(@project_id, options)
+    matches = mrs.select { |mr| mr.source_branch == full_name }
+
+    case matches.count
+    when 0
+      @logger.debug "Merge Request for #{full_name}, not found"
+    when 1
+      @logger.debug "Merge Request for #{full_name} found"
+    else
+      @logger.debug "Multiple Merge Request for #{full_name} found"
+    end
+
+    matches
+  end
+end
+
+# Handles everything Feature Branch related
+class Feature < Branch
+  # inits the class
+  def initialize(name, project_id, logger)
+    @prefix = 'feature/'.freeze
+
+    # Template for Feature Merge Request Description in markdown format
+    @description = %(
+## What does this MR do?
+*Note to MR creator - Edit this section to your needs*
+> This should be a nice description of the added functionality and the context around it in business domain language.  It can also be helpful to include what this MR does *not* do.  Include links to pertinent information.
+
+## Are there points in the code the reviewer needs to pay particular attention to?
+*Note to MR creator - Edit this section to your needs*
+> If there are areas that have changed significantly and need particular attention then point them out here.
+It is good practice to also self-review the MR and put some initial discussions and specific concerns in place. Using `@mention` notation to ask for specific remark from specific people is also beneficial.
+
+## Are there any relevant sequence / design diagrams that may help understanding of the changes?
+*Note to MR creator - Edit this section to your needs*
+> These really need to be snippets from the official up-to-date Jama sections and also checked in to the EA diagrams project on Z: Drive.
+You can use the snip tool and paste the annotated images here.
+If there are no helpful diagrams, please simply enter 'None'
+
+## For the changes introduced, has the '[definition of done](http://confluence.schrader.co.uk:8090/pages/viewpage.action?pageId=40960625)' been considered?
+*Note to MR creator - Please edit markdown to strike-through any that are not relevant with a note*
+> *e.g.   - [ ] ~~Manual test cases captured in Jama and relationships added~~ - No manual tests
+
+
+**Design complete**
+  - [ ] Doxygen [compatible commenting](http://www.stack.nl/~dimitri/doxygen/manual/docblocks.html) used
+  - [ ] Latest C Module & Header templates used (ref [genCModule](http://sanpgit01.schrader.local/tools/buildenv/wikis/genCModule))
+  - [ ] [Software Design Guidelines](http://jama.schrader.co.uk:8080/contour/perspective.req?projectId=80&docId=243915) considered
+  - [ ] Jama Software Architectural Design updated
+
+**Test suite complete**
+  - [ ] Automated test case added with correct [naming convention](http://jama.schrader.co.uk:8080/contour/perspective.req?projectId=80&docId=250597)
+  - [ ] Manual tests captured in Jama with relationships + test executed and passed
+  - [ ] All User Story Acceptance Criteria covered by Test suite
+
+**Quality metrics achieved**
+  - [ ] Static Code Analysis performed and reviewed
+
+## What are the relevant issue numbers?
+).freeze
+
+    super(name, project_id, logger)
+
+    @merge_directions = [
+      { source_branch: full_name, target_branch: 'develop', labels: 'feature' }
+    ]
+  end
+end
+
+# Handles everything Release Branch related
+class Release < Branch
+  # inits the class
+  def initialize(name, project_id, logger)
+    @prefix = 'release/'.freeze
+
+    # Template for Release Merge Request Description in markdown format
+    @description = %(
+## Release Procedure
+1. Review & approve 'Release into develop' merge request
+2. Review & approve 'Release into master' merge request
+3. Accept 'Release into master' merge request, do not delete source branch
+4. Check master release pipeline passes
+5. Accept 'Release into develop' merge request & delete source branch
+).freeze
+
+    super(name, project_id, logger)
+
+    master_desc = %(
+
+## Checklist
+- [ ] 'Release into develop' merge request has been reviewed and approved
+
+## Merge Sequence
+This 'Release into master' merge request should be merged **1st** before 'Release into develop' merge request.
+
+**Do NOT** 'Remove source branch'
+).freeze
+
+  develop_desc = %(
+
+## Checklist
+- [ ] Version Numbers have been updated
+  - [ ] Sensata specific part & version numbers are updated e.g. project.yml
+  - [ ] OEM specific part & version numbers are updated
+- [ ] Release branch contains all expected Feature branches
+- [ ] Release package contents have been updated if required
+- [ ] Release branch smoke test passes
+- [ ] Release documentation has been updated
+
+## Merge Sequence
+This 'Release into develop' merge request should be merged **2nd** after 'Release into master' merge request.
+
+**Do** 'Remove source branch' after merge
+).freeze
+
+    @merge_directions = [
+      { source_branch: full_name, target_branch: 'master',  labels: 'release', desc: master_desc },
+      { source_branch: full_name, target_branch: 'develop', labels: 'release', desc: develop_desc }
+    ]
+  end
+end
+
+# This class handles everything Sensata Git Flow related
+class SGitFlow
+  # URL for SITS \ Jira server
+  SITS_URL = 'http://sits.schrader.co.uk:8080'.freeze
+
+  # Initializes the class
+  def initialize(logger)
+    # use logger specified otherwise create a new one
+    @logger = logger || Logger.new($stdout).tap do |log|
+      log.progname = name
+
+      # simplify logger output format
+      log.formatter = proc do |severity, datetime, progname, msg|
+        "#{severity}: #{msg}\n"
+      end
+
+      log.level = Logger::DEBUG
+    end
+
+    check_gitlab_env
+
+    @project_id = gitlab_proj_id
+    @project_info = Gitlab.project(@project_id)
+  end
+
+  # Gitlab gem uses GITLAB_API_ENDPOINT & GITLAB_API_PRIVATE_TOKEN environment
+  # variables, ensure that these have been setup
+  def check_gitlab_env
+    env_vars = %w(GITLAB_API_ENDPOINT GITLAB_API_PRIVATE_TOKEN)
+    env_vars.each do |env_var|
+      unless ENV[env_var]
+        @logger.error "#{env_var} environment variables need to be setup"
+        exit 1
+      end
+    end
+  end
+
+  # Works out the corresponding Gitlab project id based on Git's origin remote
+  def gitlab_proj_id
+    # see where origin points to
+    remotes = `git remote -v`.split("\n")
+
+    gitlab_remotes = []
+    remotes.each do |remote|
+      gitlab_remote_match = remote.match(/origin.*(?<url>git@sanpgit01.schrader.local.*).*\(.*\)/)
+      gitlab_remotes << gitlab_remote_match['url'].strip if gitlab_remote_match
+    end
+
+    # get all projects
+    projects = Gitlab.projects.auto_paginate
+
+    # find all GitLab projects with matching tags
+    ids = []
+    projects.each do |project|
+      if gitlab_remotes.include? project.ssh_url_to_repo
+        ids << project.id
+        @logger.debug "Found matching GitLab project tag... ProjectId #{project.id}: #{project.description}, #{project.web_url}"
+      end
+    end
+
+    if ids.count == 0
+      @logger.error "No projects found for origin remotes #{gitlab_remotes.join(', ')}"
+      exit 1
+    end
+
+    if ids.count > 1
+      @logger.error "Multiple projects found, using 1st #{ids.first}"
+    end
+    ids.first
+  end
+
+  # Initializes the GitLab repository on the server side for the work flow
+  def init
+    %w(master develop).each do |branch|
+      create_branch(branch)
+      enable_protection(branch)
+    end
+  end
+
+  def create_branch(branch)
+    # Check if branch exists
+    if branches.include? branch
+      @logger.info "#{branch} branch: exists"
+    else
+      @logger.info "#{branch} branch: creating"
+      if branch != 'master'
+        # create branch based on master (master must always exist)
+        Gitlab.create_branch(@project_id, branch, 'master')
+      else
+        # unable to create master branch if it doesn't already exist
+        @logger.fatal 'Can not create master branch, add and push a README.md to create master branch'
+        exit 1
+      end
+    end
+  end
+
+  def enable_protection(branch)
+    # check protection
+    info = Gitlab.branch(@project_id, branch)
+
+    if info.protected == false
+      @logger.info "Enabling protection for #{branch}"
+      Gitlab.protect_branch(@project_id, branch)
+    else
+      @logger.info "#{branch} branch: protection already enabled"
+    end
+  end
+
+  # outputs list of releases and corresponding merge requests to std-out
+  def releases_list
+    output_branches(releases_merge_info)
+  end
+
+  # outputs list of features and corresponding merge requests to std-out
+  def features_list
+    output_branches(features_merge_info)
+  end
+
+  def output_branches(branches)
+    if branches.count > 0
+      table = Terminal::Table.new do |t|
+        t << %w( Branch Id MergeRequest State Assignee Destination Votes)
+        t << :separator
+      end
+
+      na = '--'
+
+      puts "#{branches.count} Server Side Branches:\n"
+      branches.each do |branch|
+        if branch[:merge_requests].count == 0
+          table.add_row([branch[:branch], na, na, na, na, na, na])
+        else
+          branch[:merge_requests].each do |mr|
+            assignee = na
+            assignee = mr.assignee.username if mr.assignee
+            table.add_row(
+              [branch[:branch], mr.iid, mr.title, mr.state,
+               assignee, mr.target_branch,
+               "#{mr.upvotes}u\\#{mr.downvotes}d"])
+          end
+        end
+      end
+    else
+      @logger.error 'No Server Side Branches found...'
+      @logger.error ' * Check branch is correctly named with prefix'
+      @logger.error ' * Check branch is pushed to Gitlab origin'
+    end
+    puts table
+  end
+
+  # creates a new feature based off latest develop branch
+  def feature_start(branch)
+    branch = Feature.new(@project_id, branch, @logger)
+    branch.start
+  end
+
+  # creates a new release based off latest develop branch
+  def release_start(branch)
+    branch = Release.new(@project_id, branch, @logger)
+    branch.start
+  end
+
+  # creates a feature merge request
+  def feature_publish(branch)
+    branch = Feature.new(@project_id, branch, @logger)
+    branch.publish
+  end
+
+  # creates a release merge request
+  def release_publish(branch)
+    branch = Release.new(@project_id, branch, @logger)
+    branch.publish
+  end
+
+  # removes WIP tag from merge request
+  def feature_finish(branch)
+    branch = Feature.new(@project_id, branch, @logger)
+    branch.finish
+  end
+
+  # removes WIP tag from merge request
+  def release_finish(branch)
+    branch = Release.new(@project_id, branch, @logger)
+    branch.finish
+  end
+
+  # gets all server branches for repo
+  def branches
+    branches = Gitlab.branches(@project_id)
+    names = []
+    branches.each do |branch|
+      names << branch.name
+    end
+    names
+  end
+
+  # gets all branches and associated merge request info
+  def branch_merge_info
+    merge_info = []
+
+    mrs = Gitlab.merge_requests(@project_id, per_page: 100)
+    branches.each do |branch|
+      # find all matching merge requests
+      matches = mrs.select do |mr|
+        mr.source_branch == branch && mr.state != 'closed'
+      end
+      merge_info << { branch: branch, merge_requests: matches }
+    end
+    merge_info
+  end
+
+  # gets all server feature branches for repo
+  def features
+    branches.select { |branch| branch =~ %r{feature/.*} }
+  end
+
+  # gets all release branches and associated merge request info
+  def features_merge_info
+    branch_merge_info.select { |br| br[:branch] =~ %r{feature/.*} }
+  end
+
+  # gets all server release branches for repo
+  def releases
+    branches.select { |branch| branch =~ %r{release/.*} }
+  end
+
+  # gets all release branches and associated merge request info
+  def releases_merge_info
+    branch_merge_info.select { |br| br[:branch] =~ %r{release/.*} }
+  end
+
+  # gets local current branch
+  def current_branch
+    `git rev-parse --abbrev-ref HEAD`.chomp
+  end
+
+  # lists all merge requests
+  def list(state)
+    options = { per_page: 100, 'state' => state }
+    merge_requests = Gitlab.merge_requests(@project_id, options)
+    merge_requests
+  end
+end
+
+if $PROGRAM_NAME == __FILE__
+
+  # ****************************************************************************
+  #   \brief          Main Program
+  # ****************************************************************************
+  # Grab just the filename for convenience
+
+  # Name of this file
+  NAME = File.basename($PROGRAM_NAME)
+
+  # Project Level Directory
+  PTLD = File.expand_path(ENV['PTLD'])
+
+  # Version information string
+  VERSION_NUM = '1.0.5.RC'.freeze
+
+  # Description of Tool and version
+  VERSION = %(
+  ########################################################################
+  #  #{NAME} #{VERSION_NUM}
+  #  Git Workflow Tool to setup server side branches & merge requests
+  #  Based on git-flow
+  #
+  #  Copyright (C) 2016 Sensata Technologies.
+  ########################################################################
+).freeze
+
+  # Build the options!  Notice that #{VERSION} will include a newline at end
+  DOC_OPT = %(
+  #{VERSION}
+  Usage:
+    #{NAME} init
+    #{NAME} feature list
+    #{NAME} feature start [MYFEATURE]
+    #{NAME} feature publish [MYFEATURE]
+    #{NAME} feature finish [MYFEATURE]
+    #{NAME} release list
+    #{NAME} release start [RELEASE]
+    #{NAME} release publish [RELEASE]
+    #{NAME} release finish [RELEASE]
+    #{NAME} -h | --help
+    #{NAME} --version
+
+  Arguments:
+    MYFEATURE         Feature Branch e.g. "feature/MyNewFeature"
+    RELEASE           Release Branch e.g. "release/X.Y.Z.RC"
+
+  Options:
+    -h --help         Show this screen.
+    -v --version      Show version.
+).freeze
+
+  ma = MyApp.new(NAME)
+
+  # Extract options!
+  options = {}
+  begin
+    options = Docopt.docopt(DOC_OPT)
+  rescue Docopt::Exit => e
+    puts e.message
+    exit 1
+  end
+
+  ma.logger.debug options
+
+  sgflow = SGitFlow.new(ma.logger)
+
+  feature_branch = options['MYFEATURE'] || sgflow.current_branch
+  release_branch = options['RELEASE'] || sgflow.current_branch
+
+  ma.logger.debug feature_branch
+  ma.logger.debug release_branch
+
+  if options['init']
+    sgflow.init
+
+  elsif options['feature'] && options['list']
+    sgflow.features_list
+
+  elsif options['feature'] && options['start']
+    sgflow.feature_start(feature_branch)
+
+  elsif options['feature'] && options['publish']
+    if sgflow.features.include? feature_branch
+      sgflow.feature_publish(feature_branch)
+    else
+      ma.logger.error "Feature Branch #{feature_branch}, not found on server"
+      ma.logger.error ' * Check feature branch is named "feature/MyNewFeature"'
+      ma.logger.error ' * Check feature branch is pushed to Gitlab origin'
+    end
+
+  elsif options['feature'] && options['finish']
+    if sgflow.features.include? feature_branch
+      sgflow.feature_finish(feature_branch)
+    else
+      ma.logger.error "Feature Branch #{feature_branch}, not found on server"
+      ma.logger.error ' * Check feature branch is named "feature/MyNewFeature"'
+      ma.logger.error ' * Check feature branch is pushed to Gitlab origin'
+    end
+
+  elsif options['release'] && options['list']
+    sgflow.releases_list
+
+  elsif options['release'] && options['start']
+    sgflow.release_start(release_branch)
+
+  elsif options['release'] && options['publish']
+    if sgflow.releases.include? release_branch
+      sgflow.release_publish(release_branch)
+    else
+      ma.logger.error "Release Branch #{release_branch}, not found on server"
+      ma.logger.error ' * Check release branch is named "release/X.Y.ZRC"'
+      ma.logger.error ' * Check release branch is pushed to Gitlab origin'
+    end
+
+  elsif options['release'] && options['finish']
+    if sgflow.releases.include? release_branch
+      sgflow.release_finish(release_branch)
+    else
+      ma.logger.error "Release Branch #{release_branch}, not found on server"
+      ma.logger.error ' * Check release branch is named "release/X.Y.ZRC"'
+      ma.logger.error ' * Check release branch is pushed to Gitlab origin'
+    end
+
+  else
+    ma.logger.error 'Unknown options'
+  end
+
+  exit 0
+end

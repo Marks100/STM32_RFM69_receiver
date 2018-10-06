@@ -1,0 +1,3916 @@
+#!/usr/bin/env ruby
+
+require 'nokogiri'
+require 'docopt'
+require 'fileutils'
+
+
+class CodeBlocksConfTool
+  attr_reader :user_conf_filename, :proj_conf_filename, :extra_conf_filename
+
+  def initialize( user_conf, proj_conf, extra_conf, force_use_default = false, no_merge = false )
+    @user_conf_filename  = user_conf
+    @proj_conf_filename  = proj_conf
+    @extra_conf_filename = extra_conf
+
+    @proj_conf_doc = nil
+
+    createConfFile( force_use_default, no_merge )
+  end
+
+  #***************************************************************************************************
+  #   \brief Lists the xml sections given
+  #***************************************************************************************************
+  def listXml( cmd )
+
+    xml_doc = Nokogiri::XML( '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?><CodeBlocksConfig version="1">' )
+
+    case cmd
+    when 'user_sets'
+      if @proj_conf_doc.at_xpath("//compiler/user_sets")
+        xml_doc.root.add_child( Nokogiri::XML::Node.new("compiler", xml_doc) )
+        xml_doc.at_xpath("//compiler").add_child( Nokogiri::XML::Node.new("user_sets", xml_doc) )
+        xml_doc.at_xpath("//compiler/user_sets").replace @proj_conf_doc.at_xpath("//compiler/user_sets")
+      end
+    when 'tools'
+      if @proj_conf_doc.at_xpath("//ShellExtensions/shellcmds")
+        xml_doc.root.add_child( Nokogiri::XML::Node.new("ShellExtensions", xml_doc) )
+        xml_doc.at_xpath("//ShellExtensions").add_child( Nokogiri::XML::Node.new("shellcmds", xml_doc) )
+        xml_doc.at_xpath("//ShellExtensions/shellcmds").replace @proj_conf_doc.at_xpath("//ShellExtensions/shellcmds")
+      end
+    when 'all'
+
+      if @proj_conf_doc.at_xpath("//compiler/user_sets")
+        xml_doc.root.add_child( Nokogiri::XML::Node.new("compiler", xml_doc) )
+        xml_doc.at_xpath("//compiler").add_child( Nokogiri::XML::Node.new("user_sets", xml_doc) )
+        xml_doc.at_xpath("//compiler/user_sets").replace @proj_conf_doc.at_xpath("//compiler/user_sets")
+      end
+
+      if @proj_conf_doc.at_xpath("//ShellExtensions/shellcmds")
+        xml_doc.root.add_child( Nokogiri::XML::Node.new("ShellExtensions", xml_doc) )
+        xml_doc.at_xpath("//ShellExtensions").add_child( Nokogiri::XML::Node.new("shellcmds", xml_doc) )
+        xml_doc.at_xpath("//ShellExtensions/shellcmds").replace @proj_conf_doc.at_xpath("//ShellExtensions/shellcmds")
+      end
+
+    else
+      puts "Error: unknown list_xml sub-command"
+      exit 1
+    end
+
+    puts xml_doc
+  end
+
+  #***************************************************************************************************
+  #   \brief Writes the project file to disk
+  #***************************************************************************************************
+  def write_to( fname )
+    File.open(fname, 'w') do |file|
+      @proj_conf_doc.write_xml_to file
+    end
+  end
+
+  #***************************************************************************************************
+  #   \brief Resets the users default.conf to the internal supplied by this tool
+  #***************************************************************************************************
+  def resetUserDefaultConf
+    if File.exists?( @user_conf_filename )
+      FileUtils.cp( @user_conf_filename, "#{@user_conf_filename}.bak")
+    end
+
+    # Use the built-in default
+    int_conf_doc = Nokogiri::XML( SEL_CONF_XML )
+
+    File.open(@user_conf_filename, 'w') do |file|
+      int_conf_doc.write_xml_to file
+    end
+  end
+
+  private
+  #***************************************************************************************************
+  #   \brief Creates project specific
+  #***************************************************************************************************
+  def createConfFile( force_use_default = false, no_merge = false )
+
+    # Check for local_conf first and use it if possible
+    unless File.exists?( @proj_conf_filename ) or force_use_default
+
+      # Copy over the user's own file if it exists
+      if File.exists?( @user_conf_filename )
+        FileUtils.cp( @user_conf_filename, @proj_conf_filename )
+      else
+        # Otherwise use the built-in default
+        int_conf_doc = Nokogiri::XML( SEL_CONF_XML )
+
+        File.open(@proj_conf_filename, 'w') do |file|
+          int_conf_doc.write_xml_to file
+        end
+      end
+    end #unless proj_conf_filename exists
+
+
+    ### Okay - now the file should definately exist in some form so we can merge in our user_sets
+    @proj_conf_doc = Nokogiri::XML( File.read( @proj_conf_filename ) )
+    user_sets_doc  = Nokogiri::XML( SEL_USER_SETS_XML )
+
+
+    ### Are we merging
+    return if no_merge
+
+    @proj_conf_doc.at_xpath("//compiler").add_child( Nokogiri::XML::Node.new("user_sets", @proj_conf_doc) ) unless @proj_conf_doc.at_xpath "//compiler/user_sets"
+    @proj_conf_doc.at_xpath("//compiler/user_sets").replace user_sets_doc.at_xpath("//compiler/user_sets")
+
+
+    ### Toast the recent file and project lists
+    @proj_conf_doc.xpath("RECENT_FILES").each     { |element| element.delete('*') }
+    @proj_conf_doc.xpath("RECENT_PROJECTS").each  { |element| element.delete('*') }
+
+
+    ### Merge in the project specific tools if they exist
+    if File.exists?( @extra_conf_filename )
+      extra_conf_doc = Nokogiri::XML( File.read( @extra_conf_filename ) )
+
+      if extra_conf_doc.at_xpath("//ShellExtensions/shellcmds")
+        @proj_conf_doc.at_xpath("//ShellExtensions").add_child( Nokogiri::XML::Node.new("shellcmds", @proj_conf_doc) ) unless @proj_conf_doc.at_xpath "//ShellExtensions/shellcmds"
+        @proj_conf_doc.at_xpath("//ShellExtensions/shellcmds").replace extra_conf_doc.at_xpath("//ShellExtensions/shellcmds")
+      end
+
+      ## Now any additional/overrides from user_sets
+      if extra_conf_doc.at_xpath("//compiler/user_sets")
+        extra_conf_doc.at_xpath("//compiler/user_sets").elements.each do |compiler|
+
+          if @proj_conf_doc.at_xpath( "//compiler/user_sets/#{compiler.name}" )
+            @proj_conf_doc.at_xpath( "//compiler/user_sets/#{compiler.name}" ).replace compiler
+          else
+            @proj_conf_doc.at_xpath( "//compiler/user_sets" ).add_child compiler
+          end
+        end
+      end
+    end
+  end #createConfFile
+
+end # class CodeBlocksConfTool
+
+
+
+# Grab just the filename for convenience
+NAME = File.basename($0)
+
+# Version information string
+VERSION_NUM = "1.0"
+VERSION = <<END_VERSION
+########################################################################
+#  #{NAME} #{VERSION_NUM}
+#  Tool for manipulating the CodeBlocks default.conf file
+#  Copyright (C) 2014 Schrader Electronics
+########################################################################
+END_VERSION
+
+# Build the options!  Notice that #{VERSION} will include a newline at end
+DOC_OPT = <<DOCOPT
+#{VERSION}
+Usage:
+  #{NAME} [--force-default]
+  #{NAME} list_xml (user_sets|tools|all)
+  #{NAME} make_default
+  #{NAME} reset_default
+  #{NAME} cleanup
+  #{NAME} -h | --help
+  #{NAME} --version
+
+Options:
+  --version           Show version info.
+  -h --help           Show this screen.
+  -f --force-default  Forces the use of the users default.conf (if it exists)
+DOCOPT
+
+#***************************************************************************************************
+#   \brief          Main Program
+#***************************************************************************************************
+# Command Line Support ###############################
+if ($0 == __FILE__)
+
+  # Extract options!
+  options = {}
+  begin
+    options = Docopt::docopt(DOC_OPT)
+  rescue Docopt::Exit => e
+    puts e.message
+    exit 1
+  end
+
+  user_conf_filename  = "#{ENV['APPDATA']}/CodeBlocks/default.conf"
+  proj_conf_filename  = "#{ENV['APPDATA']}/CodeBlocks/#{ENV['PROJ_TITLE']}.conf"
+  extra_conf_filename = "#{ENV['PBCD']}/CodeBlocks/proj.conf"
+
+
+  if options['list_xml']
+    tool = CodeBlocksConfTool.new( user_conf_filename, proj_conf_filename, extra_conf_filename, false, true )
+    tool.listXml( 'user_sets' ) if options['user_sets']
+    tool.listXml( 'tools' )     if options['tools']
+    tool.listXml( 'all' )       if options['all']
+
+  elsif options['make_default']
+    tool = CodeBlocksConfTool.new( user_conf_filename, proj_conf_filename, extra_conf_filename )
+    tool.write_to( user_conf_filename )
+
+  elsif options['reset_default']
+    tool = CodeBlocksConfTool.new( user_conf_filename, proj_conf_filename, extra_conf_filename )
+    tool.resetUserDefaultConf()
+
+  elsif options['cleanup']
+    Dir.chdir ("#{ENV['APPDATA']}/CodeBlocks/") do
+      FileUtils.rm_f Dir.glob("#{ENV['PROJ_TITLE']}.*")
+    end
+
+  else
+    tool = CodeBlocksConfTool.new( user_conf_filename, proj_conf_filename, extra_conf_filename, options['--force-default'] )
+    tool.write_to( proj_conf_filename )
+  end
+
+  exit 0
+
+end #if ($0 == __FILE__)
+
+
+
+### Placed here out of the way.  BEGIN means this is the start of the script!
+BEGIN {
+
+SEL_USER_SETS_XML = <<'SEL_USER_SETS'
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<CodeBlocksConfig version="1">
+  <compiler>
+    <user_sets>
+			<rake_with_unity>
+				<NAME>
+					<str>
+						<![CDATA[Rake with Unity]]>
+					</str>
+				</NAME>
+				<PARENT>
+					<str>
+						<![CDATA[gcc]]>
+					</str>
+				</PARENT>
+				<MASTER_PATH>
+					<str>
+						<![CDATA[%SEL_GCC%]]>
+					</str>
+				</MASTER_PATH>
+				<EXTRA_PATHS>
+					<str>
+						<![CDATA[%TTLD%\CodeBlocks;]]>
+					</str>
+				</EXTRA_PATHS>
+				<C_COMPILER>
+					<str>
+						<![CDATA[cb-dummy-compiler.exe]]>
+					</str>
+				</C_COMPILER>
+				<CPP_COMPILER>
+					<str>
+						<![CDATA[cb-dummy-compiler.exe]]>
+					</str>
+				</CPP_COMPILER>
+				<LINKER>
+					<str>
+						<![CDATA[cb-dummy-compiler.exe]]>
+					</str>
+				</LINKER>
+				<LIB_LINKER>
+					<str>
+						<![CDATA[cb-dummy-compiler.exe]]>
+					</str>
+				</LIB_LINKER>
+				<RES_COMPILER>
+					<str>
+						<![CDATA[cb-dummy-compiler.exe]]>
+					</str>
+				</RES_COMPILER>
+			</rake_with_unity>
+			<hcs12x_message_parser>
+				<NAME>
+					<str>
+						<![CDATA[HCS12X_message_parser]]>
+					</str>
+				</NAME>
+				<PARENT>
+					<str>
+						<![CDATA[sdcc]]>
+					</str>
+				</PARENT>
+				<MASTER_PATH>
+					<str>
+						<![CDATA[%SEL_GCC%]]>
+					</str>
+				</MASTER_PATH>
+				<EXTRA_PATHS>
+					<str>
+						<![CDATA[%TTLD%\CodeBlocks;]]>
+					</str>
+				</EXTRA_PATHS>
+				<C_COMPILER>
+					<str>
+						<![CDATA[cb-dummy-compiler.exe]]>
+					</str>
+				</C_COMPILER>
+				<CPP_COMPILER>
+					<str>
+						<![CDATA[cb-dummy-compiler.exe]]>
+					</str>
+				</CPP_COMPILER>
+				<LINKER>
+					<str>
+						<![CDATA[cb-dummy-compiler.exe]]>
+					</str>
+				</LINKER>
+				<LIB_LINKER>
+					<str>
+						<![CDATA[cb-dummy-compiler.exe]]>
+					</str>
+				</LIB_LINKER>
+				<MAKE>
+					<str>
+						<![CDATA[mingw32-make.exe]]>
+					</str>
+				</MAKE>
+				<regex>
+					<re001>
+						<DESCRIPTION>
+							<str>
+								<![CDATA[Fatal error]]>
+							</str>
+						</DESCRIPTION>
+						<TYPE int="2"/>
+						<REGEX>
+							<str>
+								<![CDATA[FATAL:[  ]*(.*)]]>
+							</str>
+						</REGEX>
+						<MSG1 int="1"/>
+					</re001>
+					<re002>
+						<DESCRIPTION>
+							<str>
+								<![CDATA[Compiler warning]]>
+							</str>
+						</DESCRIPTION>
+						<TYPE int="1"/>
+						<REGEX>
+							<str>
+								<![CDATA[#warning [A-Za-z0-9]+ ([][{}()   #%$~A-Za-z0-9_+/\.-]+):([0-9]+)(\([0-9+]+\)) (.*)]]>
+							</str>
+						</REGEX>
+						<MSG1 int="4"/>
+						<FILENAME int="1"/>
+						<LINE int="2"/>
+					</re002>
+					<re003>
+						<DESCRIPTION>
+							<str>
+								<![CDATA[Compiler error]]>
+							</str>
+						</DESCRIPTION>
+						<TYPE int="2"/>
+						<REGEX>
+							<str>
+								<![CDATA[#error [A-Za-z0-9]+ ([][{}()   #%$~A-Za-z0-9_+/\.-]+):([0-9]+)(\([0-9+]+\)) (.*)]]>
+							</str>
+						</REGEX>
+						<MSG1 int="4"/>
+						<FILENAME int="1"/>
+						<LINE int="2"/>
+					</re003>
+					<re004>
+						<DESCRIPTION>
+							<str>
+								<![CDATA[Linker warning]]>
+							</str>
+						</DESCRIPTION>
+						<TYPE int="1"/>
+						<REGEX>
+							<str>
+								<![CDATA[([][{}()   #%$~A-Za-z0-9_:+/\.-]+):\(\.text\+[0-9a-fA-FxX]+\):[  ]([Ww]arning:[  ].*)]]>
+							</str>
+						</REGEX>
+						<MSG1 int="2"/>
+						<FILENAME int="1"/>
+					</re004>
+					<re005>
+						<DESCRIPTION>
+							<str>
+								<![CDATA[Linker error]]>
+							</str>
+						</DESCRIPTION>
+						<TYPE int="2"/>
+						<REGEX>
+							<str>
+								<![CDATA[#error [A-Za-z0-9]+ ([][{}()   #%$~A-Za-z0-9_+/\.-]+):([0-9]+) (.*)]]>
+							</str>
+						</REGEX>
+						<MSG1 int="3"/>
+						<FILENAME int="1"/>
+						<LINE int="2"/>
+					</re005>
+					<re006>
+						<DESCRIPTION>
+							<str>
+								<![CDATA[General warning]]>
+							</str>
+						</DESCRIPTION>
+						<TYPE int="1"/>
+						<REGEX>
+							<str>
+								<![CDATA[([Ww]arning:[  ].*)]]>
+							</str>
+						</REGEX>
+						<MSG1 int="1"/>
+					</re006>
+					<re007>
+						<DESCRIPTION>
+							<str>
+								<![CDATA[No such file or directory]]>
+							</str>
+						</DESCRIPTION>
+						<TYPE int="2"/>
+						<REGEX>
+							<str>
+								<![CDATA[.*:(.*):[  ](No such file or directory.*)]]>
+							</str>
+						</REGEX>
+						<MSG1 int="2"/>
+						<FILENAME int="1"/>
+					</re007>
+					<re008>
+						<DESCRIPTION>
+							<str>
+								<![CDATA[MUX preprocessor warning]]>
+							</str>
+						</DESCRIPTION>
+						<TYPE int="1"/>
+						<REGEX>
+							<str>
+								<![CDATA[([][{}()   #%$~[:alnum:]&_:+/\.-]+):([0-9]+):[   ]([Ww]arning:[  ].*)]]>
+							</str>
+						</REGEX>
+						<MSG1 int="3"/>
+						<FILENAME int="1"/>
+						<LINE int="2"/>
+					</re008>
+					<re009>
+						<DESCRIPTION>
+							<str>
+								<![CDATA[MUX preprocessor error]]>
+							</str>
+						</DESCRIPTION>
+						<TYPE int="2"/>
+						<REGEX>
+							<str>
+								<![CDATA[([][{}()   #%$~[:alnum:]&_:+/\.-]+):([0-9]+):[   ]([Ee]rror:[  ].*)]]>
+							</str>
+						</REGEX>
+						<MSG1 int="3"/>
+						<FILENAME int="1"/>
+						<LINE int="2"/>
+					</re009>
+				</regex>
+			</hcs12x_message_parser>
+			<windriver_diab_message_parser>
+				<NAME>
+					<str>
+						<![CDATA[WindRiver_Diab_message_parser]]>
+					</str>
+				</NAME>
+				<PARENT>
+					<str>
+						<![CDATA[gcc]]>
+					</str>
+				</PARENT>
+				<MASTER_PATH>
+					<str>
+						<![CDATA[%SEL_GCC%]]>
+					</str>
+				</MASTER_PATH>
+				<EXTRA_PATHS>
+					<str>
+						<![CDATA[%TTLD%\CodeBlocks;]]>
+					</str>
+				</EXTRA_PATHS>
+				<C_COMPILER>
+					<str>
+						<![CDATA[cb-dummy-compiler.exe]]>
+					</str>
+				</C_COMPILER>
+				<CPP_COMPILER>
+					<str>
+						<![CDATA[cb-dummy-compiler.exe]]>
+					</str>
+				</CPP_COMPILER>
+				<LINKER>
+					<str>
+						<![CDATA[cb-dummy-compiler.exe]]>
+					</str>
+				</LINKER>
+				<LIB_LINKER>
+					<str>
+						<![CDATA[cb-dummy-compiler.exe]]>
+					</str>
+				</LIB_LINKER>
+				<RES_COMPILER>
+					<str>
+						<![CDATA[cb-dummy-compiler.exe]]>
+					</str>
+				</RES_COMPILER>
+				<regex>
+					<re030>
+						<DESCRIPTION>
+							<str>
+								<![CDATA[WindRiver Diab Compiler Warning]]>
+							</str>
+						</DESCRIPTION>
+						<TYPE int="1"/>
+						<REGEX>
+							<str>
+								<![CDATA["(.*)", line (.*): warning (.*)]]>
+							</str>
+						</REGEX>
+						<MSG1 int="3"/>
+						<FILENAME int="1"/>
+						<LINE int="2"/>
+					</re030>
+					<re031>
+						<DESCRIPTION>
+							<str>
+								<![CDATA[WindRiver Diab Compiler Error]]>
+							</str>
+						</DESCRIPTION>
+						<TYPE int="2"/>
+						<REGEX>
+							<str>
+								<![CDATA["(.*)", line (.*): error (.*)]]>
+							</str>
+						</REGEX>
+						<MSG1 int="3"/>
+						<FILENAME int="1"/>
+						<LINE int="2"/>
+					</re031>
+					<re032>
+						<DESCRIPTION>
+							<str>
+								<![CDATA[WindRiver Diab Fatal Compiler Error]]>
+							</str>
+						</DESCRIPTION>
+						<TYPE int="2"/>
+						<REGEX>
+							<str>
+								<![CDATA[fatal error (.*)]]>
+							</str>
+						</REGEX>
+						<MSG1 int="1"/>
+					</re032>
+					<re033>
+						<DESCRIPTION>
+							<str>
+								<![CDATA[MUX preprocessor warning]]>
+							</str>
+						</DESCRIPTION>
+						<TYPE int="1"/>
+						<REGEX>
+							<str>
+								<![CDATA[([][{}()   #%$~[:alnum:]&_:+/\.-]+):([0-9]+):[   ]([Ww]arning:[  ].*)]]>
+							</str>
+						</REGEX>
+						<MSG1 int="3"/>
+						<FILENAME int="1"/>
+						<LINE int="2"/>
+					</re033>
+					<re034>
+						<DESCRIPTION>
+							<str>
+								<![CDATA[MUX preprocessor error]]>
+							</str>
+						</DESCRIPTION>
+						<TYPE int="2"/>
+						<REGEX>
+							<str>
+								<![CDATA[([][{}()   #%$~[:alnum:]&_:+/\.-]+):([0-9]+):[   ]([Ee]rror:[  ].*)]]>
+							</str>
+						</REGEX>
+						<MSG1 int="3"/>
+						<FILENAME int="1"/>
+						<LINE int="2"/>
+					</re034>
+				</regex>
+			</windriver_diab_message_parser>
+			<greenhills_message_parser>
+				<NAME>
+					<str>
+						<![CDATA[GreenHills_message_parser]]>
+					</str>
+				</NAME>
+				<PARENT>
+					<str>
+						<![CDATA[sdcc]]>
+					</str>
+				</PARENT>
+				<MASTER_PATH>
+					<str>
+						<![CDATA[%SEL_GCC%]]>
+					</str>
+				</MASTER_PATH>
+				<EXTRA_PATHS>
+					<str>
+						<![CDATA[%TTLD%\CodeBlocks;]]>
+					</str>
+				</EXTRA_PATHS>
+				<C_COMPILER>
+					<str>
+						<![CDATA[cb-dummy-compiler.exe]]>
+					</str>
+				</C_COMPILER>
+				<CPP_COMPILER>
+					<str>
+						<![CDATA[cb-dummy-compiler.exe]]>
+					</str>
+				</CPP_COMPILER>
+				<LINKER>
+					<str>
+						<![CDATA[cb-dummy-compiler.exe]]>
+					</str>
+				</LINKER>
+				<LIB_LINKER>
+					<str>
+						<![CDATA[cb-dummy-compiler.exe]]>
+					</str>
+				</LIB_LINKER>
+				<MAKE>
+					<str>
+						<![CDATA[mingw32-make.exe]]>
+					</str>
+				</MAKE>
+				<regex>
+					<re001>
+						<DESCRIPTION>
+							<str>
+								<![CDATA[Fatal error]]>
+							</str>
+						</DESCRIPTION>
+						<TYPE int="2"/>
+						<REGEX>
+							<str>
+								<![CDATA[FATAL:[  ]*(.*)]]>
+							</str>
+						</REGEX>
+						<MSG1 int="1"/>
+					</re001>
+					<re002>
+						<DESCRIPTION>
+							<str>
+								<![CDATA[Compiler warning]]>
+							</str>
+						</DESCRIPTION>
+						<TYPE int="1"/>
+						<REGEX>
+							<str>
+								<![CDATA[#warning [A-Za-z0-9]+ ([][{}()   #%$~A-Za-z0-9_+/\.-]+):([0-9]+)(\([0-9+]+\)) (.*)]]>
+							</str>
+						</REGEX>
+						<MSG1 int="4"/>
+						<FILENAME int="1"/>
+						<LINE int="2"/>
+					</re002>
+					<re003>
+						<DESCRIPTION>
+							<str>
+								<![CDATA[Compiler error]]>
+							</str>
+						</DESCRIPTION>
+						<TYPE int="2"/>
+						<REGEX>
+							<str>
+								<![CDATA["([][{}()   #%$~A-Za-z0-9_+/\.-]+)", line ([0-9]+): (error .*)]]>
+							</str>
+						</REGEX>
+						<MSG1 int="3"/>
+						<FILENAME int="1"/>
+						<LINE int="2"/>
+					</re003>
+					<re004>
+						<DESCRIPTION>
+							<str>
+								<![CDATA[Linker warning]]>
+							</str>
+						</DESCRIPTION>
+						<TYPE int="1"/>
+						<REGEX>
+							<str>
+								<![CDATA[([][{}()   #%$~A-Za-z0-9_:+/\.-]+):\(\.text\+[0-9a-fA-FxX]+\):[  ]([Ww]arning:[  ].*)]]>
+							</str>
+						</REGEX>
+						<MSG1 int="2"/>
+						<FILENAME int="1"/>
+					</re004>
+					<re005>
+						<DESCRIPTION>
+							<str>
+								<![CDATA[Linker error]]>
+							</str>
+						</DESCRIPTION>
+						<TYPE int="2"/>
+						<REGEX>
+							<str>
+								<![CDATA[#error [A-Za-z0-9]+ ([][{}()   #%$~A-Za-z0-9_+/\.-]+):([0-9]+) (.*)]]>
+							</str>
+						</REGEX>
+						<MSG1 int="3"/>
+						<FILENAME int="1"/>
+						<LINE int="2"/>
+					</re005>
+					<re006>
+						<DESCRIPTION>
+							<str>
+								<![CDATA[General warning]]>
+							</str>
+						</DESCRIPTION>
+						<TYPE int="1"/>
+						<REGEX>
+							<str>
+								<![CDATA[([Ww]arning:[  ].*)]]>
+							</str>
+						</REGEX>
+						<MSG1 int="1"/>
+					</re006>
+					<re007>
+						<DESCRIPTION>
+							<str>
+								<![CDATA[No such file or directory]]>
+							</str>
+						</DESCRIPTION>
+						<TYPE int="2"/>
+						<REGEX>
+							<str>
+								<![CDATA[.*:(.*):[  ](No such file or directory.*)]]>
+							</str>
+						</REGEX>
+						<MSG1 int="2"/>
+						<FILENAME int="1"/>
+					</re007>
+					<re008>
+						<DESCRIPTION>
+							<str>
+								<![CDATA[MUX preprocessor warning]]>
+							</str>
+						</DESCRIPTION>
+						<TYPE int="1"/>
+						<REGEX>
+							<str>
+								<![CDATA[([][{}()   #%$~[:alnum:]&_:+/\.-]+):([0-9]+):[   ]([Ww]arning:[  ].*)]]>
+							</str>
+						</REGEX>
+						<MSG1 int="3"/>
+						<FILENAME int="1"/>
+						<LINE int="2"/>
+					</re008>
+					<re009>
+						<DESCRIPTION>
+							<str>
+								<![CDATA[MUX preprocessor error]]>
+							</str>
+						</DESCRIPTION>
+						<TYPE int="2"/>
+						<REGEX>
+							<str>
+								<![CDATA[([][{}()   #%$~[:alnum:]&_:+/\.-]+):([0-9]+):[   ]([Ee]rror:[  ].*)]]>
+							</str>
+						</REGEX>
+						<MSG1 int="3"/>
+						<FILENAME int="1"/>
+						<LINE int="2"/>
+					</re009>
+				</regex>
+			</greenhills_message_parser>
+		</user_sets>
+  </compiler>
+</CodeBlocksConfig>
+SEL_USER_SETS
+
+
+
+
+
+## The default sel.conf to use if none exists
+SEL_CONF_XML = <<'SEL_CONF'
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocksConfig version="1">
+  <app>
+    <locale>
+      <CATALOGNUM int="68" />
+      <DOMAIN1>
+        <str>
+          <![CDATA[Abbreviations]]>
+        </str>
+      </DOMAIN1>
+      <DOMAIN2>
+        <str>
+          <![CDATA[AStylePlugin]]>
+        </str>
+      </DOMAIN2>
+      <DOMAIN3>
+        <str>
+          <![CDATA[Autosave]]>
+        </str>
+      </DOMAIN3>
+      <DOMAIN4>
+        <str>
+          <![CDATA[AutoVersioning]]>
+        </str>
+      </DOMAIN4>
+      <DOMAIN5>
+        <str>
+          <![CDATA[BrowseTracker]]>
+        </str>
+      </DOMAIN5>
+      <DOMAIN6>
+        <str>
+          <![CDATA[BYOGames]]>
+        </str>
+      </DOMAIN6>
+      <DOMAIN7>
+        <str>
+          <![CDATA[CB_Koders]]>
+        </str>
+      </DOMAIN7>
+      <DOMAIN8>
+        <str>
+          <![CDATA[Cccc]]>
+        </str>
+      </DOMAIN8>
+      <DOMAIN9>
+        <str>
+          <![CDATA[ClassWizard]]>
+        </str>
+      </DOMAIN9>
+      <DOMAIN10>
+        <str>
+          <![CDATA[CodeCompletion]]>
+        </str>
+      </DOMAIN10>
+      <DOMAIN11>
+        <str>
+          <![CDATA[CodeSnippets]]>
+        </str>
+      </DOMAIN11>
+      <DOMAIN12>
+        <str>
+          <![CDATA[CodeStat]]>
+        </str>
+      </DOMAIN12>
+      <DOMAIN13>
+        <str>
+          <![CDATA[Compiler]]>
+        </str>
+      </DOMAIN13>
+      <DOMAIN14>
+        <str>
+          <![CDATA[copystrings]]>
+        </str>
+      </DOMAIN14>
+      <DOMAIN15>
+        <str>
+          <![CDATA[CppCheck]]>
+        </str>
+      </DOMAIN15>
+      <DOMAIN16>
+        <str>
+          <![CDATA[Cscope]]>
+        </str>
+      </DOMAIN16>
+      <DOMAIN17>
+        <str>
+          <![CDATA[Debugger]]>
+        </str>
+      </DOMAIN17>
+      <DOMAIN18>
+        <str>
+          <![CDATA[FilesExtensionHandler]]>
+        </str>
+      </DOMAIN18>
+      <DOMAIN19>
+        <str>
+          <![CDATA[DevPakUpdater]]>
+        </str>
+      </DOMAIN19>
+      <DOMAIN20>
+        <str>
+          <![CDATA[DoxyBlocks]]>
+        </str>
+      </DOMAIN20>
+      <DOMAIN21>
+        <str>
+          <![CDATA[cbDragScroll]]>
+        </str>
+      </DOMAIN21>
+      <DOMAIN22>
+        <str>
+          <![CDATA[EditorTweaks]]>
+        </str>
+      </DOMAIN22>
+      <DOMAIN23>
+        <str>
+          <![CDATA[EnvVars]]>
+        </str>
+      </DOMAIN23>
+      <DOMAIN24>
+        <str>
+          <![CDATA[Exporter]]>
+        </str>
+      </DOMAIN24>
+      <DOMAIN25>
+        <str>
+          <![CDATA[FileManager]]>
+        </str>
+      </DOMAIN25>
+      <DOMAIN26>
+        <str>
+          <![CDATA[HeaderFixup]]>
+        </str>
+      </DOMAIN26>
+      <DOMAIN27>
+        <str>
+          <![CDATA[HelpPlugin]]>
+        </str>
+      </DOMAIN27>
+      <DOMAIN28>
+        <str>
+          <![CDATA[HexEditor]]>
+        </str>
+      </DOMAIN28>
+      <DOMAIN29>
+        <str>
+          <![CDATA[IncrementalSearch]]>
+        </str>
+      </DOMAIN29>
+      <DOMAIN30>
+        <str>
+          <![CDATA[cbKeyBinder]]>
+        </str>
+      </DOMAIN30>
+      <DOMAIN31>
+        <str>
+          <![CDATA[lib_finder]]>
+        </str>
+      </DOMAIN31>
+      <DOMAIN32>
+        <str>
+          <![CDATA[MouseSap]]>
+        </str>
+      </DOMAIN32>
+      <DOMAIN33>
+        <str>
+          <![CDATA[NassiShneidermanPlugin]]>
+        </str>
+      </DOMAIN33>
+      <DOMAIN34>
+        <str>
+          <![CDATA[OpenFilesList]]>
+        </str>
+      </DOMAIN34>
+      <DOMAIN35>
+        <str>
+          <![CDATA[Profiler]]>
+        </str>
+      </DOMAIN35>
+      <DOMAIN36>
+        <str>
+          <![CDATA[ProjectsImporter]]>
+        </str>
+      </DOMAIN36>
+      <DOMAIN37>
+        <str>
+          <![CDATA[RegExTestbed]]>
+        </str>
+      </DOMAIN37>
+      <DOMAIN38>
+        <str>
+          <![CDATA[ReopenEditor]]>
+        </str>
+      </DOMAIN38>
+      <DOMAIN39>
+        <str>
+          <![CDATA[ScriptedWizard]]>
+        </str>
+      </DOMAIN39>
+      <DOMAIN40>
+        <str>
+          <![CDATA[SpellChecker]]>
+        </str>
+      </DOMAIN40>
+      <DOMAIN41>
+        <str>
+          <![CDATA[SymTab]]>
+        </str>
+      </DOMAIN41>
+      <DOMAIN42>
+        <str>
+          <![CDATA[ThreadSearch]]>
+        </str>
+      </DOMAIN42>
+      <DOMAIN43>
+        <str>
+          <![CDATA[ToDoList]]>
+        </str>
+      </DOMAIN43>
+      <DOMAIN44>
+        <str>
+          <![CDATA[ToolsPlus]]>
+        </str>
+      </DOMAIN44>
+      <DOMAIN45>
+        <str>
+          <![CDATA[wxSmith]]>
+        </str>
+      </DOMAIN45>
+      <DOMAIN46>
+        <str>
+          <![CDATA[wxSmithMime]]>
+        </str>
+      </DOMAIN46>
+      <DOMAIN47>
+        <str>
+          <![CDATA[wxSmithAui]]>
+        </str>
+      </DOMAIN47>
+      <DOMAIN48>
+        <str>
+          <![CDATA[wxSmithContribItems]]>
+        </str>
+      </DOMAIN48>
+      <DOMAIN49>
+        <str>
+          <![CDATA[WindowsXPLookNFeel]]>
+        </str>
+      </DOMAIN49>
+      <ENABLE bool="0" />
+      <LANGUAGE>
+        <str>
+          <![CDATA[]]>
+        </str>
+      </LANGUAGE>
+      <DOMAIN50>
+        <str>
+          <![CDATA[CppSmartIndent]]>
+        </str>
+      </DOMAIN50>
+      <DOMAIN51>
+        <str>
+          <![CDATA[EditorConfig]]>
+        </str>
+      </DOMAIN51>
+      <DOMAIN52>
+        <str>
+          <![CDATA[FortranSmartIndent]]>
+        </str>
+      </DOMAIN52>
+      <DOMAIN53>
+        <str>
+          <![CDATA[HDLSmartIndent]]>
+        </str>
+      </DOMAIN53>
+      <DOMAIN54>
+        <str>
+          <![CDATA[LuaSmartIndent]]>
+        </str>
+      </DOMAIN54>
+      <DOMAIN55>
+        <str>
+          <![CDATA[PascalSmartIndent]]>
+        </str>
+      </DOMAIN55>
+      <DOMAIN56>
+        <str>
+          <![CDATA[PythonSmartIndent]]>
+        </str>
+      </DOMAIN56>
+      <DOMAIN57>
+        <str>
+          <![CDATA[rndgen]]>
+        </str>
+      </DOMAIN57>
+      <DOMAIN58>
+        <str>
+          <![CDATA[SmartIndentCpp]]>
+        </str>
+      </DOMAIN58>
+      <DOMAIN59>
+        <str>
+          <![CDATA[SmartIndentFortran]]>
+        </str>
+      </DOMAIN59>
+      <DOMAIN60>
+        <str>
+          <![CDATA[SmartIndentHDL]]>
+        </str>
+      </DOMAIN60>
+      <DOMAIN61>
+        <str>
+          <![CDATA[SmartIndentLua]]>
+        </str>
+      </DOMAIN61>
+      <DOMAIN62>
+        <str>
+          <![CDATA[SmartIndentPascal]]>
+        </str>
+      </DOMAIN62>
+      <DOMAIN63>
+        <str>
+          <![CDATA[SmartIndentPython]]>
+        </str>
+      </DOMAIN63>
+      <DOMAIN64>
+        <str>
+          <![CDATA[SmartIndentXML]]>
+        </str>
+      </DOMAIN64>
+      <DOMAIN65>
+        <str>
+          <![CDATA[FortranProject]]>
+        </str>
+      </DOMAIN65>
+      <DOMAIN66>
+        <str>
+          <![CDATA[OccurrencesHighlighting]]>
+        </str>
+      </DOMAIN66>
+      <DOMAIN67>
+        <str>
+          <![CDATA[wxsSmithPlot]]>
+        </str>
+      </DOMAIN67>
+      <DOMAIN68>
+        <str>
+          <![CDATA[ProjectOptionsManipulator]]>
+        </str>
+      </DOMAIN68>
+    </locale>
+    <environment>
+      <aui>
+        <BORDER_SIZE int="1" />
+        <SASH_SIZE int="4" />
+        <CAPTION_SIZE int="17" />
+        <ACTIVE_CAPTION_COLOUR>
+          <colour r="10" g="36" b="106" />
+        </ACTIVE_CAPTION_COLOUR>
+        <ACTIVE_CAPTION_GRADIENT_COLOUR>
+          <colour r="157" g="167" b="195" />
+        </ACTIVE_CAPTION_GRADIENT_COLOUR>
+        <ACTIVE_CAPTION_TEXT_COLOUR>
+          <colour r="255" g="255" b="255" />
+        </ACTIVE_CAPTION_TEXT_COLOUR>
+        <INACTIVE_CAPTION_COLOUR>
+          <colour r="180" g="176" b="170" />
+        </INACTIVE_CAPTION_COLOUR>
+        <INACTIVE_CAPTION_GRADIENT_COLOUR>
+          <colour r="205" g="201" b="194" />
+        </INACTIVE_CAPTION_GRADIENT_COLOUR>
+        <INACTIVE_CAPTION_TEXT_COLOUR>
+          <colour r="0" g="0" b="0" />
+        </INACTIVE_CAPTION_TEXT_COLOUR>
+      </aui>
+      <CHECK_ASSOCIATIONS bool="0" />
+      <view>
+        <DBL_CLK_MAXIMIZE bool="1" />
+        <LAYOUT_TO_TOGGLE>
+          <str>
+            <![CDATA[Code::Blocks default]]>
+          </str>
+        </LAYOUT_TO_TOGGLE>
+      </view>
+      <SHOW_SPLASH bool="1" />
+      <SINGLE_INSTANCE bool="0" />
+      <USE_IPC bool="0" />
+      <RAISE_VIA_IPC bool="1" />
+      <CHECK_MODIFIED_FILES bool="1" />
+      <IGNORE_INVALID_TARGETS bool="1" />
+      <BLANK_WORKSPACE bool="1" />
+      <TOOLBAR_SIZE bool="1" />
+      <SETTINGS_SIZE int="0" />
+      <START_HERE_PAGE bool="1" />
+      <TABS_STYLE int="0" />
+      <TABS_CLOSESTYLE int="0" />
+      <TABS_LIST bool="1" />
+      <TABS_STACKED_BASED_SWITCHING bool="1" />
+      <TABS_USE_MOUSEWHEEL bool="1" />
+      <TABS_MOUSEWHEEL_MODIFIER>
+        <str>
+          <![CDATA[Ctrl]]>
+        </str>
+      </TABS_MOUSEWHEEL_MODIFIER>
+      <TABS_MOUSEWHEEL_ADVANCE bool="0" />
+      <TABS_INVERT_ADVANCE bool="0" />
+      <TABS_INVERT_MOVE bool="0" />
+      <TABS_USE_TOOLTIPS bool="1" />
+      <TABS_DWELL_TIME int="1000" />
+    </environment>
+    <main_frame>
+      <layout>
+        <DEFAULT>
+          <str>
+            <![CDATA[GDB/CDB debugger:Default]]>
+          </str>
+        </DEFAULT>
+        <LEFT_BLOCK_SELECTION int="0" />
+        <BOTTOM_BLOCK_SELECTION int="3" />
+        <MAXIMIZED bool="1" />
+        <DISPLAY int="0" />
+        <LEFT int="1423" />
+        <TOP int="52" />
+        <WIDTH int="1580" />
+        <HEIGHT int="860" />
+        <view1>
+          <NAME>
+            <str>
+              <![CDATA[Code::Blocks minimal]]>
+            </str>
+          </NAME>
+          <DATA>
+            <str>
+              <![CDATA[layout2|name=ManagementPane;caption=Management;state=2099198;dir=4;layer=1;row=0;pos=0;prop=100000;bestw=200;besth=223;minw=100;minh=100;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=MessagesPane;caption=Logs & others;state=2099198;dir=3;layer=0;row=0;pos=0;prop=100000;bestw=392;besth=150;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=CallStackPane;caption=Call stack;state=2099199;dir=4;layer=0;row=0;pos=0;prop=100000;bestw=150;besth=150;minw=150;minh=150;maxw=-1;maxh=-1;floatx=200;floaty=150;floatw=450;floath=184|name=BreakpointsPane;caption=Breakpoints;state=2099199;dir=4;layer=0;row=0;pos=0;prop=100000;bestw=350;besth=250;minw=150;minh=150;maxw=-1;maxh=-1;floatx=200;floaty=150;floatw=350;floath=250|name=CPURegistersPane;caption=CPU Registers;state=2099199;dir=4;layer=0;row=0;pos=0;prop=100000;bestw=350;besth=250;minw=150;minh=150;maxw=-1;maxh=-1;floatx=200;floaty=150;floatw=350;floath=250|name=DisassemblyPane;caption=Disassembly;state=2099199;dir=4;layer=0;row=0;pos=0;prop=100000;bestw=350;besth=250;minw=150;minh=150;maxw=-1;maxh=-1;floatx=200;floaty=150;floatw=350;floath=250|name=ExamineMemoryPane;caption=Memory;state=2099199;dir=4;layer=0;row=0;pos=0;prop=100000;bestw=450;besth=250;minw=350;minh=150;maxw=-1;maxh=-1;floatx=200;floaty=150;floatw=450;floath=250|name=ThreadsPane;caption=Running threads;state=2099199;dir=4;layer=0;row=0;pos=0;prop=100000;bestw=350;besth=75;minw=250;minh=75;maxw=-1;maxh=-1;floatx=200;floaty=150;floatw=450;floath=75|name=WatchesPane;caption=Watches (new);state=2099199;dir=4;layer=0;row=0;pos=0;prop=100000;bestw=150;besth=250;minw=150;minh=150;maxw=-1;maxh=-1;floatx=200;floaty=150;floatw=166;floath=250|name=MainPane;caption=;state=17152;dir=5;layer=0;row=0;pos=0;prop=100000;bestw=16;besth=16;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=ScriptConsole;caption=Scripting console;state=2099199;dir=4;layer=0;row=0;pos=0;prop=100000;bestw=278;besth=100;minw=100;minh=100;maxw=-1;maxh=-1;floatx=300;floaty=200;floatw=-1;floath=-1|name=CodeSnippetsPane;caption=CodeSnippets;state=2099199;dir=4;layer=1;row=0;pos=0;prop=100000;bestw=300;besth=400;minw=30;minh=40;maxw=-1;maxh=-1;floatx=200;floaty=150;floatw=300;floath=400|name=DefMimeHandler_HTMLViewer;caption=HTML viewer;state=2099199;dir=4;layer=0;row=0;pos=0;prop=100000;bestw=350;besth=250;minw=150;minh=150;maxw=-1;maxh=-1;floatx=200;floaty=150;floatw=350;floath=250|name=MANViewer;caption=Man/Html pages viewer;state=2099198;dir=2;layer=0;row=0;pos=0;prop=100000;bestw=320;besth=240;minw=240;minh=160;maxw=-1;maxh=-1;floatx=200;floaty=150;floatw=320;floath=240|name=HighlightedOccurrences;caption=Highlighted Occurrences;state=2099198;dir=4;layer=1;row=0;pos=0;prop=100000;bestw=150;besth=100;minw=50;minh=50;maxw=-1;maxh=-1;floatx=200;floaty=150;floatw=100;floath=150|name=OpenFilesPane;caption=Open files list;state=2099198;dir=4;layer=1;row=0;pos=0;prop=100000;bestw=150;besth=100;minw=50;minh=50;maxw=-1;maxh=-1;floatx=200;floaty=150;floatw=100;floath=150|name=Tools;caption=Tool Output;state=2099199;dir=4;layer=0;row=0;pos=0;prop=100000;bestw=400;besth=300;minw=200;minh=150;maxw=-1;maxh=-1;floatx=200;floaty=150;floatw=400;floath=300|name=MainToolbar;caption=Main Toolbar;state=2108158;dir=1;layer=10;row=0;pos=0;prop=100000;bestw=277;besth=23;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=CompilerToolbar;caption=Compiler Toolbar;state=2108158;dir=1;layer=10;row=0;pos=277;prop=100000;bestw=251;besth=23;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=DebuggerToolbar;caption=Debugger Toolbar;state=2108158;dir=1;layer=10;row=0;pos=595;prop=100000;bestw=261;besth=23;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=CodeCompletionToolbar;caption=Code completion Toolbar;state=2108158;dir=1;layer=10;row=0;pos=856;prop=100000;bestw=946;besth=23;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=DoxyBlocksToolbar;caption=DoxyBlocks Toolbar;state=2108158;dir=1;layer=10;row=1;pos=0;prop=100000;bestw=185;besth=23;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=IncrementalSearchToolbar;caption=IncrementalSearch Toolbar;state=2108158;dir=1;layer=10;row=1;pos=185;prop=100000;bestw=329;besth=23;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=NassiShneidermanPluginToolbar;caption=NassiShneidermanPlugin Toolbar;state=2108158;dir=1;layer=10;row=1;pos=514;prop=100000;bestw=1;besth=23;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=ThreadSearchToolbar;caption=ThreadSearch Toolbar;state=2108158;dir=1;layer=10;row=1;pos=907;prop=100000;bestw=1;besth=23;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|dock_size(5,0,0)=18|]]>
+            </str>
+          </DATA>
+          <DATAMESSAGEPANE>
+            <str>
+              <![CDATA[Code::Blocks=0;Search results=1;Build log=2;Build messages=3;Debugger=4;DoxyBlocks=5;Closed files list=6;Thread search=7;To Do=8;|selection=6;]]>
+            </str>
+          </DATAMESSAGEPANE>
+        </view1>
+        <view2>
+          <NAME>
+            <str>
+              <![CDATA[GDB/CDB debugger:Default]]>
+            </str>
+          </NAME>
+          <DATA>
+            <str>
+              <![CDATA[layout2|name=ManagementPane;caption=Management;state=2099196;dir=4;layer=1;row=0;pos=0;prop=100000;bestw=315;besth=726;minw=100;minh=100;maxw=-1;maxh=-1;floatx=1;floaty=98;floatw=400;floath=250|name=MessagesPane;caption=Logs & others;state=2099196;dir=3;layer=0;row=2;pos=0;prop=160136;bestw=1097;besth=533;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=936;floaty=961;floatw=1099;floath=592|name=CallStackPane;caption=Call stack;state=2099199;dir=4;layer=0;row=0;pos=0;prop=100000;bestw=150;besth=150;minw=150;minh=150;maxw=-1;maxh=-1;floatx=200;floaty=150;floatw=450;floath=184|name=BreakpointsPane;caption=Breakpoints;state=2099199;dir=4;layer=0;row=0;pos=0;prop=100000;bestw=350;besth=250;minw=150;minh=150;maxw=-1;maxh=-1;floatx=200;floaty=150;floatw=350;floath=250|name=CPURegistersPane;caption=CPU Registers;state=2099199;dir=4;layer=0;row=0;pos=0;prop=100000;bestw=350;besth=250;minw=150;minh=150;maxw=-1;maxh=-1;floatx=200;floaty=150;floatw=350;floath=250|name=DisassemblyPane;caption=Disassembly;state=2099199;dir=4;layer=0;row=0;pos=0;prop=100000;bestw=350;besth=250;minw=150;minh=150;maxw=-1;maxh=-1;floatx=200;floaty=150;floatw=350;floath=250|name=ExamineMemoryPane;caption=Memory;state=2099199;dir=4;layer=0;row=0;pos=0;prop=100000;bestw=450;besth=250;minw=350;minh=150;maxw=-1;maxh=-1;floatx=200;floaty=150;floatw=450;floath=250|name=ThreadsPane;caption=Running threads;state=2099199;dir=4;layer=0;row=0;pos=0;prop=100000;bestw=350;besth=75;minw=250;minh=75;maxw=-1;maxh=-1;floatx=200;floaty=150;floatw=450;floath=109|name=WatchesPane;caption=Watches (new);state=2099199;dir=4;layer=0;row=0;pos=0;prop=100000;bestw=150;besth=250;minw=150;minh=150;maxw=-1;maxh=-1;floatx=200;floaty=150;floatw=166;floath=250|name=MainPane;caption=;state=768;dir=5;layer=0;row=0;pos=0;prop=100000;bestw=16;besth=16;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=ScriptConsole;caption=Scripting console;state=2099199;dir=4;layer=0;row=0;pos=0;prop=100000;bestw=278;besth=100;minw=100;minh=100;maxw=-1;maxh=-1;floatx=300;floaty=200;floatw=903;floath=302|name=CodeSnippetsPane;caption=CodeSnippets;state=2099199;dir=4;layer=1;row=0;pos=0;prop=100000;bestw=300;besth=400;minw=30;minh=40;maxw=-1;maxh=-1;floatx=200;floaty=150;floatw=300;floath=400|name=DefMimeHandler_HTMLViewer;caption=HTML viewer;state=2099199;dir=4;layer=0;row=0;pos=0;prop=100000;bestw=350;besth=250;minw=150;minh=150;maxw=-1;maxh=-1;floatx=200;floaty=150;floatw=923;floath=511|name=MANViewer;caption=Man/Html pages viewer;state=2099198;dir=2;layer=0;row=0;pos=0;prop=100000;bestw=320;besth=240;minw=240;minh=160;maxw=-1;maxh=-1;floatx=200;floaty=150;floatw=320;floath=240|name=HighlightedOccurrences;caption=Highlighted Occurrences;state=2099198;dir=4;layer=1;row=0;pos=0;prop=100000;bestw=150;besth=100;minw=50;minh=50;maxw=-1;maxh=-1;floatx=200;floaty=150;floatw=100;floath=150|name=OpenFilesPane;caption=Open files list;state=2099198;dir=4;layer=1;row=0;pos=0;prop=100000;bestw=150;besth=100;minw=50;minh=50;maxw=-1;maxh=-1;floatx=200;floaty=150;floatw=100;floath=150|name=Tools;caption=Tool Output;state=2099198;dir=3;layer=0;row=1;pos=1;prop=39864;bestw=400;besth=300;minw=200;minh=150;maxw=-1;maxh=-1;floatx=1174;floaty=263;floatw=400;floath=300|name=MainToolbar;caption=Main Toolbar;state=2108156;dir=1;layer=10;row=0;pos=0;prop=100000;bestw=277;besth=23;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=CompilerToolbar;caption=Compiler Toolbar;state=2108156;dir=1;layer=10;row=11;pos=0;prop=100000;bestw=251;besth=23;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-3;floaty=61;floatw=-1;floath=-1|name=DebuggerToolbar;caption=Debugger Toolbar;state=2108156;dir=1;layer=10;row=0;pos=628;prop=100000;bestw=261;besth=23;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=CodeCompletionToolbar;caption=Code completion Toolbar;state=2108156;dir=1;layer=10;row=11;pos=262;prop=100000;bestw=946;besth=23;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=714;floaty=89;floatw=-1;floath=-1|name=DoxyBlocksToolbar;caption=DoxyBlocks Toolbar;state=2108156;dir=1;layer=10;row=0;pos=900;prop=100000;bestw=185;besth=23;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=FortranProjectToolbar;caption=FortranProject Toolbar;state=2108158;dir=1;layer=10;row=1;pos=185;prop=100000;bestw=69;besth=23;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=IncrementalSearchToolbar;caption=IncrementalSearch Toolbar;state=2108156;dir=1;layer=10;row=0;pos=288;prop=100000;bestw=329;besth=23;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=117;floatw=-1;floath=-1|name=NassiShneidermanPluginToolbar;caption=NassiShneidermanPlugin Toolbar;state=2108159;dir=1;layer=10;row=1;pos=0;prop=100000;bestw=403;besth=23;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=924;floaty=147;floatw=-1;floath=-1|name=ThreadSearchToolbar;caption=ThreadSearch Toolbar;state=2124543;dir=1;layer=10;row=1;pos=573;prop=100000;bestw=186;besth=23;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=719;floaty=169;floatw=-1;floath=-1|dock_size(5,0,0)=18|dock_size(1,10,0)=25|dock_size(1,10,11)=25|dock_size(4,1,0)=257|dock_size(3,0,2)=352|]]>
+            </str>
+          </DATA>
+          <DATAMESSAGEPANE>
+            <str>
+              <![CDATA[Code::Blocks=-1;Search results=0;Build log=1;Build messages=2;Debugger=3;Closed files list=4;Thread search=5;Fortran info=6;To Do=7;DoxyBlocks=8;|selection=3;]]>
+            </str>
+          </DATAMESSAGEPANE>
+        </view2>
+        <view3>
+          <NAME>
+            <str>
+              <![CDATA[Code::Blocks default]]>
+            </str>
+          </NAME>
+          <DATA>
+            <str>
+              <![CDATA[layout2|name=ManagementPane;caption=Management;state=2099196;dir=4;layer=1;row=0;pos=0;prop=100000;bestw=315;besth=726;minw=100;minh=100;maxw=-1;maxh=-1;floatx=1;floaty=98;floatw=400;floath=250|name=MessagesPane;caption=Logs & others;state=2099196;dir=3;layer=0;row=2;pos=0;prop=160136;bestw=1097;besth=533;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=936;floaty=961;floatw=1099;floath=592|name=CallStackPane;caption=Call stack;state=2099199;dir=4;layer=0;row=0;pos=0;prop=100000;bestw=150;besth=150;minw=150;minh=150;maxw=-1;maxh=-1;floatx=200;floaty=150;floatw=450;floath=184|name=BreakpointsPane;caption=Breakpoints;state=2099199;dir=4;layer=0;row=0;pos=0;prop=100000;bestw=350;besth=250;minw=150;minh=150;maxw=-1;maxh=-1;floatx=200;floaty=150;floatw=350;floath=250|name=CPURegistersPane;caption=CPU Registers;state=2099199;dir=4;layer=0;row=0;pos=0;prop=100000;bestw=350;besth=250;minw=150;minh=150;maxw=-1;maxh=-1;floatx=200;floaty=150;floatw=350;floath=250|name=DisassemblyPane;caption=Disassembly;state=2099199;dir=4;layer=0;row=0;pos=0;prop=100000;bestw=350;besth=250;minw=150;minh=150;maxw=-1;maxh=-1;floatx=200;floaty=150;floatw=350;floath=250|name=ExamineMemoryPane;caption=Memory;state=2099199;dir=4;layer=0;row=0;pos=0;prop=100000;bestw=450;besth=250;minw=350;minh=150;maxw=-1;maxh=-1;floatx=200;floaty=150;floatw=450;floath=250|name=ThreadsPane;caption=Running threads;state=2099199;dir=4;layer=0;row=0;pos=0;prop=100000;bestw=350;besth=75;minw=250;minh=75;maxw=-1;maxh=-1;floatx=200;floaty=150;floatw=450;floath=109|name=WatchesPane;caption=Watches (new);state=2099199;dir=4;layer=0;row=0;pos=0;prop=100000;bestw=150;besth=250;minw=150;minh=150;maxw=-1;maxh=-1;floatx=200;floaty=150;floatw=166;floath=250|name=MainPane;caption=;state=768;dir=5;layer=0;row=0;pos=0;prop=100000;bestw=16;besth=16;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=ScriptConsole;caption=Scripting console;state=2099199;dir=4;layer=0;row=0;pos=0;prop=100000;bestw=278;besth=100;minw=100;minh=100;maxw=-1;maxh=-1;floatx=300;floaty=200;floatw=903;floath=302|name=CodeSnippetsPane;caption=CodeSnippets;state=2099199;dir=4;layer=1;row=0;pos=0;prop=100000;bestw=300;besth=400;minw=30;minh=40;maxw=-1;maxh=-1;floatx=200;floaty=150;floatw=300;floath=400|name=DefMimeHandler_HTMLViewer;caption=HTML viewer;state=2099199;dir=4;layer=0;row=0;pos=0;prop=100000;bestw=350;besth=250;minw=150;minh=150;maxw=-1;maxh=-1;floatx=200;floaty=150;floatw=923;floath=511|name=MANViewer;caption=Man/Html pages viewer;state=2099198;dir=2;layer=0;row=0;pos=0;prop=100000;bestw=320;besth=240;minw=240;minh=160;maxw=-1;maxh=-1;floatx=200;floaty=150;floatw=320;floath=240|name=HighlightedOccurrences;caption=Highlighted Occurrences;state=2099198;dir=4;layer=1;row=0;pos=0;prop=100000;bestw=150;besth=100;minw=50;minh=50;maxw=-1;maxh=-1;floatx=200;floaty=150;floatw=100;floath=150|name=OpenFilesPane;caption=Open files list;state=2099198;dir=4;layer=1;row=0;pos=0;prop=100000;bestw=150;besth=100;minw=50;minh=50;maxw=-1;maxh=-1;floatx=200;floaty=150;floatw=100;floath=150|name=Tools;caption=Tool Output;state=2099198;dir=3;layer=0;row=1;pos=1;prop=39864;bestw=400;besth=300;minw=200;minh=150;maxw=-1;maxh=-1;floatx=1174;floaty=263;floatw=400;floath=300|name=MainToolbar;caption=Main Toolbar;state=2108156;dir=1;layer=10;row=0;pos=0;prop=100000;bestw=277;besth=23;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=CompilerToolbar;caption=Compiler Toolbar;state=2108156;dir=1;layer=10;row=11;pos=0;prop=100000;bestw=251;besth=23;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-3;floaty=61;floatw=-1;floath=-1|name=DebuggerToolbar;caption=Debugger Toolbar;state=2108156;dir=1;layer=10;row=0;pos=628;prop=100000;bestw=261;besth=23;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=CodeCompletionToolbar;caption=Code completion Toolbar;state=2108156;dir=1;layer=10;row=11;pos=262;prop=100000;bestw=946;besth=23;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=714;floaty=89;floatw=-1;floath=-1|name=DoxyBlocksToolbar;caption=DoxyBlocks Toolbar;state=2108156;dir=1;layer=10;row=0;pos=900;prop=100000;bestw=185;besth=23;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=FortranProjectToolbar;caption=FortranProject Toolbar;state=2108158;dir=1;layer=10;row=1;pos=185;prop=100000;bestw=69;besth=23;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=IncrementalSearchToolbar;caption=IncrementalSearch Toolbar;state=2108156;dir=1;layer=10;row=0;pos=288;prop=100000;bestw=329;besth=23;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=117;floatw=-1;floath=-1|name=NassiShneidermanPluginToolbar;caption=NassiShneidermanPlugin Toolbar;state=2108159;dir=1;layer=10;row=1;pos=0;prop=100000;bestw=403;besth=23;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=924;floaty=147;floatw=-1;floath=-1|name=ThreadSearchToolbar;caption=ThreadSearch Toolbar;state=2124543;dir=1;layer=10;row=1;pos=573;prop=100000;bestw=186;besth=23;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=719;floaty=169;floatw=-1;floath=-1|dock_size(5,0,0)=18|dock_size(1,10,0)=25|dock_size(1,10,11)=25|dock_size(4,1,0)=257|dock_size(3,0,2)=352|]]>
+            </str>
+          </DATA>
+          <DATAMESSAGEPANE>
+            <str>
+              <![CDATA[Code::Blocks=-1;Search results=0;Build log=1;Build messages=2;Debugger=3;Closed files list=4;Thread search=5;Fortran info=6;To Do=7;DoxyBlocks=8;|selection=1;]]>
+            </str>
+          </DATAMESSAGEPANE>
+        </view3>
+      </layout>
+      <STATUSBAR bool="1" />
+    </main_frame>
+    <dialog_placement>
+      <DO_PLACE bool="1" />
+      <DIALOG_POSITION int="3" />
+    </dialog_placement>
+    <VERSION>
+      <str>
+        <![CDATA[svn-r9761]]>
+      </str>
+    </VERSION>
+    <CONSOLE_SHELL>
+      <str>
+        <![CDATA[/bin/sh -c]]>
+      </str>
+    </CONSOLE_SHELL>
+    <CONSOLE_TERMINAL>
+      <str>
+        <![CDATA[]]>
+      </str>
+    </CONSOLE_TERMINAL>
+    <NETWORK_PROXY>
+      <str>
+        <![CDATA[]]>
+      </str>
+    </NETWORK_PROXY>
+    <RECENT_FILES>
+      <astr />
+    </RECENT_FILES>
+    <RECENT_PROJECTS>
+      <astr />
+    </RECENT_PROJECTS>
+    <file_dialogs>
+      <file_new_open>
+        <FILTER>
+          <str>
+            <![CDATA[All files (*.*)]]>
+          </str>
+        </FILTER>
+        <DIRECTORY>
+          <str>
+            <![CDATA[C:\SVN_source\DCX\DCS_CORAX2_trunk\APP]]>
+          </str>
+        </DIRECTORY>
+      </file_new_open>
+      <file_run_dbg_script />
+      <save_file_as>
+        <FILTER>
+          <str>
+            <![CDATA[C/C++ files]]>
+          </str>
+        </FILTER>
+        <DIRECTORY>
+          <str>
+            <![CDATA[C:\SVN_source\DCS_PAL_MFR\devel\SWTest\test\support]]>
+          </str>
+        </DIRECTORY>
+      </save_file_as>
+      <file_run_script>
+        <DIRECTORY>
+          <str>
+            <![CDATA[C:\TEMP\hdf]]>
+          </str>
+        </DIRECTORY>
+      </file_run_script>
+    </file_dialogs>
+    <SHOW_TIPS bool="0" />
+    <NEXT_TIP int="2" />
+    <PRINT_MODE int="0" />
+    <PRINT_LINE_NUMBERS bool="1" />
+    <printerdialog>
+      <PAPERID int="3" />
+      <PAPERORIENTATION int="1" />
+    </printerdialog>
+  </app>
+  <security>
+    <TRUSTED_SCRIPTS>
+      <ssmap />
+    </TRUSTED_SCRIPTS>
+  </security>
+  <project_manager>
+    <HIDE_FOLDER_NAME bool="0" />
+    <OPEN_FILES int="1" />
+    <DEFAULT_PATH>
+      <str>
+        <![CDATA[C:\TEMP\]]>
+      </str>
+    </DEFAULT_PATH>
+    <CATEGORIZE_TREE bool="0" />
+    <file_groups>
+      <group0>
+        <NAME>
+          <str>
+            <![CDATA[Sources]]>
+          </str>
+        </NAME>
+        <MASK>
+          <str>
+            <![CDATA[*.c;*.cpp;*.cc;*.cxx;]]>
+          </str>
+        </MASK>
+      </group0>
+      <group1>
+        <NAME>
+          <str>
+            <![CDATA[D Sources]]>
+          </str>
+        </NAME>
+        <MASK>
+          <str>
+            <![CDATA[*.d;]]>
+          </str>
+        </MASK>
+      </group1>
+      <group2>
+        <NAME>
+          <str>
+            <![CDATA[Fortran Sources]]>
+          </str>
+        </NAME>
+        <MASK>
+          <str>
+            <![CDATA[*.f;*.f77;*.for;*.fpp;*.f90;*.f95;*.f03;*.f08;]]>
+          </str>
+        </MASK>
+      </group2>
+      <group3>
+        <NAME>
+          <str>
+            <![CDATA[Java Sources]]>
+          </str>
+        </NAME>
+        <MASK>
+          <str>
+            <![CDATA[*.java;]]>
+          </str>
+        </MASK>
+      </group3>
+      <group4>
+        <NAME>
+          <str>
+            <![CDATA[Headers]]>
+          </str>
+        </NAME>
+        <MASK>
+          <str>
+            <![CDATA[*.h;*.hpp;*.hh;*.hxx;]]>
+          </str>
+        </MASK>
+      </group4>
+      <group5>
+        <NAME>
+          <str>
+            <![CDATA[ASM Sources]]>
+          </str>
+        </NAME>
+        <MASK>
+          <str>
+            <![CDATA[*.asm;*.s;*.ss;*.s62;]]>
+          </str>
+        </MASK>
+      </group5>
+      <group6>
+        <NAME>
+          <str>
+            <![CDATA[Resources]]>
+          </str>
+        </NAME>
+        <MASK>
+          <str>
+            <![CDATA[*.res;*.xrc;*.rc;*.wxs;]]>
+          </str>
+        </MASK>
+      </group6>
+      <group7>
+        <NAME>
+          <str>
+            <![CDATA[Scripts]]>
+          </str>
+        </NAME>
+        <MASK>
+          <str>
+            <![CDATA[*.script;]]>
+          </str>
+        </MASK>
+      </group7>
+    </file_groups>
+  </project_manager>
+  <message_manager>
+    <AUTO_HIDE bool="0" />
+    <AUTO_SHOW_SEARCH bool="1" />
+    <AUTO_SHOW_BUILD_WARNINGS bool="1" />
+    <AUTO_SHOW_BUILD_ERRORS bool="1" />
+    <SAVE_SELECTION_CHANGE_IN_MP bool="1" />
+    <LOG_FONT_SIZE int="8" />
+    <batch_build_log>
+      <WIDTH int="1108" />
+      <HEIGHT int="274" />
+    </batch_build_log>
+  </message_manager>
+  <debugger_common>
+    <common>
+      <AUTO_BUILD bool="0" />
+      <AUTO_SWITCH_FRAME bool="1" />
+      <DEBUG_LOG bool="0" />
+      <JUMP_ON_DOUBLE_CLICK bool="0" />
+      <REQUIRE_CTRL_FOR_TOOLTIPS bool="1" />
+      <PERSPECTIVE int="2" />
+    </common>
+    <sets>
+      <gdb_debugger>
+        <conf0>
+          <NAME>
+            <str>
+              <![CDATA[Default]]>
+            </str>
+          </NAME>
+          <values>
+            <EXECUTABLE_PATH>
+              <str>
+                <![CDATA[%SEL_GCC%\bin\gdb.exe]]>
+              </str>
+            </EXECUTABLE_PATH>
+            <USER_ARGUMENTS>
+              <str>
+                <![CDATA[]]>
+              </str>
+            </USER_ARGUMENTS>
+            <TYPE int="0" />
+            <INIT_COMMANDS>
+              <str>
+                <![CDATA[]]>
+              </str>
+            </INIT_COMMANDS>
+            <WATCH_ARGS bool="1" />
+            <WATCH_LOCALS bool="1" />
+            <WATCH_SCRIPT_PRINTERS bool="1" />
+            <CATCH_EXCEPTIONS bool="1" />
+            <EVAL_TOOLTIP bool="1" />
+            <ADD_OTHER_SEARCH_DIRS bool="0" />
+            <DO_NOT_RUN bool="0" />
+            <DISASSEMBLY_FLAVOR int="0" />
+            <INSTRUCTION_SET>
+              <str>
+                <![CDATA[]]>
+              </str>
+            </INSTRUCTION_SET>
+          </values>
+        </conf0>
+      </gdb_debugger>
+    </sets>
+    <ACTIVE_DEBUGGER>
+      <str>
+        <![CDATA[]]>
+      </str>
+    </ACTIVE_DEBUGGER>
+    <ACTIVE_DEBUGGER_CONFIG int="-1" />
+  </debugger_common>
+  <editor>
+    <colour_sets>
+      <ACTIVE_COLOUR_SET>
+        <str>
+          <![CDATA[default]]>
+        </str>
+      </ACTIVE_COLOUR_SET>
+      <ACTIVE_LANG>
+        <str>
+          <![CDATA[C/C++]]>
+        </str>
+      </ACTIVE_LANG>
+      <default>
+        <NAME>
+          <str>
+            <![CDATA[default]]>
+          </str>
+        </NAME>
+        <cc>
+          <style0>
+            <BACK>
+              <colour r="253" g="251" b="227" />
+            </BACK>
+            <NAME>
+              <str>
+                <![CDATA[Default]]>
+              </str>
+            </NAME>
+          </style0>
+          <style1>
+            <BACK>
+              <colour r="253" g="251" b="227" />
+            </BACK>
+            <NAME>
+              <str>
+                <![CDATA[Default]]>
+              </str>
+            </NAME>
+          </style1>
+          <editor>
+            <keywords>
+              <SET0>
+                <str>
+                  <![CDATA[_Char16_t _Char32_t align_union alignof asm auto bool break case catch char class const const_cast constexpr continue decltype default delete do double dynamic_cast else enum explicit export extern false final float for friend goto if import inline int long mutable namespace new nullptr operator override private protected public register reinterpret_cast return short signed sizeof static static_cast struct switch template this throw true try typedef typeid typename union unsigned using virtual void volatile wchar_t while static_assert int8_t uint8_t int16_t uint16_t int32_t uint32_t int64_t uint64_t int_least8_t uint_least8_t int_least16_t uint_least16_t int_least32_t uint_least32_t int_least64_t uint_least64_t int_fast8_t uint_fast8_t int_fast16_t uint_fast16_t int_fast32_t uint_fast32_t int_fast64_t uint_fast64_t intptr_t uintptr_t intmax_t uintmax_t wint_t wchar_t wctrans_t wctype_t size_t time_t and and_eq bitand bitor compl not not_eq or or_eq xor xor_eq STATIC INLINE]]>
+                </str>
+              </SET0>
+              <SET1>
+                <str>
+                  <![CDATA[__gnu_cxx accumulate add_const add_cv add_lvalue_reference add_pointer add_reference add_rvalue_reference add_volatile adjacent_difference adjacent_find aligned_storage Alignment alignment_of all_of allocate_shared allocator allocator_base allocator_chunklist allocator_fixed_size allocator_newdel allocator_suballoc allocator_unbounded allocator_variable_size any_of array assign at atomic_bool atomic_char atomic_char16_t atomic_char32_t atomic_compare_exchange_strong atomic_compare_exchange_strong_explicit atomic_compare_exchange_weak atomic_compare_exchange_weak_explicit atomic_exchange atomic_exchange_explicit atomic_fetch_add atomic_fetch_and atomic_fetch_or atomic_fetch_sub atomic_fetch_xor atomic_int atomic_int_fast16_t atomic_int_fast32_t atomic_int_fast64_t atomic_int_fast8_t atomic_int_least16_t atomic_int_least32_t atomic_int_least64_t atomic_int_least8_t atomic_intmax_t atomic_intptr_t atomic_is_lock_free atomic_llong atomic_load atomic_load_explicit atomic_long atomic_ptrdiff_t atomic_schar atomic_short atomic_size_t atomic_ssize_t atomic_store atomic_store_explicit atomic_uchar atomic_uint atomic_uint_fast16_t atomic_uint_fast32_t atomic_uint_fast64_t atomic_uint_fast8_t atomic_uint_least16_t atomic_uint_least32_t atomic_uint_least64_t atomic_uint_least8_t atomic_uintmax_t atomic_uintptr_t atomic_ullong atomic_ulong atomic_ushort atomic_wchar_t auto_ptr back back_insert_iterator back_item bad_alloc bad_function_call bad_weak_ptr basic_filebuf basic_fstream basic_ifstream basic_ofstream basic_regex basic_streambuf basic_string begin bernoulli_distribution bidirectional_iterator_tag binary_function binary_negate binary_search bind bind1st bind2nd binder1st binder2nd binomial_distribution bit_and bit_or bit_xor bitset boost cache_chunklist cache_freelist cache_suballoc cauchy_distribution cbegin cend cerr char_traits checked_array_iterator checked_uninitialized_copy checked_uninitialized_fill_n chi_squared_distribution cin clear codecvt codecvt_base codecvt_byname codecvt_mode codecvt_utf16 codecvt_utf8 codecvt_utf8_utf16 collate collate_byname common_type compare_exchange_strong compare_exchange_weak complex condition_variable conditional const_iterator const_mem_fun_ref_t const_mem_fun_t const_mem_fun1_ref_t const_mem_fun1_t const_pointer_cast const_reference const_reverse_iterator copy copy_backward copy_if copy_n count count_if cout crbegin cref crend ctype ctype_base ctype_byname decay declare_no_pointers declare_reachable declval default_delete default_random_engine deque difference_type discard_block discard_block_engine discrete_distribution divides domain_error dynamic_pointer_cast empty enable_if enable_shared_from_this end equal equal_range equal_to EqualityComparable erase error_category error_code error_condition exception exponential_distribution extent extreme_value_distribution fetch_add fetch_and fetch_or fetch_sub fetch_xor filebuf fill fill_n find find_end find_first_of find_if find_if_not fisher_f_distribution float_denorm_style float_round_style for_each forward forward_iterator_tag forward_list freelist front front_insert_iterator front_item fstream function gamma_distribution generate generate_n generic_container generic_iterator generic_reverse_iterator generic_value geometric_distribution get_deleter get_pointer_safety get_temporary_buffer greater greater_equal has_nothrow_assign has_nothrow_constructor has_nothrow_copy has_nothrow_copy_assign has_nothrow_copy_constructor has_nothrow_default_constructor has_trivial_assign has_trivial_constructor has_trivial_copy has_trivial_copy_assign has_trivial_copy_constructor has_trivial_default_constructor has_trivial_destructor has_virtual_destructor hash hash_map hash_set ifstream includes independent_bits_engine initializer_list inner_product inplace_merge input_iterator_tag insert insert_iterator integral_constant invalid_argument iostream is_abstract is_arithmetic is_array is_base_of is_bind_expression is_class is_compound is_const is_constructible is_convertible is_empty is_enum is_error_code_enum is_error_condition_enum is_explicitly_convertible is_floating_point is_function is_fundamental is_heap is_heap_until is_integral is_literal_type is_lock_free is_lvalue_reference is_member_function_pointer is_member_object_pointer is_member_pointer is_nothrow_constructible is_object is_partitioned is_placeholder is_pod is_pointer is_polymorphic is_reference is_rvalue_reference is_same is_scalar is_signed is_sorted is_sorted_until is_standard_layout is_trivial is_union is_unsigned is_void is_volatile istream istream_iterator istreambuf_iterator iter_swap iterator iterator_traits knuth_b length_error less less_equal LessThanComparable lexicographical_compare linear_congruential linear_congruential_engine list locale logic_error logical_and logical_not logical_or lognormal_distribution lower_bound make_checked_array_iterator make_heap make_shared make_signed make_unsigned map match_results max max_element max_fixed_size max_none max_unbounded max_variable_size mem_fn mem_fun mem_fun_ref mem_fun_ref_t mem_fun_t mem_fun1_ref_t mem_fun1_t merge mersenne_twister mersenne_twister_engine messages messages_base messages_byname min min_element minmax minmax_element minstd_rand minstd_rand0 minus mismatch modulus money_base money_get money_put moneypunct moneypunct_byname move move_backward move_iterator mt19937 mt19937_64 multimap multiplies multiset negate negative_binomial_distribution new_handler next_permutation none_of normal_distribution not_equal_to not1 not2 nothrow nothrow_t nth_element num_get num_put numeric_limits numpunct numpunct_byname ofstream ostream_iterator ostreambuf_iterator out_of_range output_iterator_tag overflow_error owner_less pair partial_sort partial_sort_copy partial_sum partition partition_copy partition_point piecewise_constant_distribution piecewise_linear_distribution plus pointer_safety pointer_to_binary_function pointer_to_unary_function poisson_distribution pop_back pop_front pop_heap prev_permutation priority_queue ptr_fun push_back push_front push_heap queue random_access_iterator_tag random_device random_shuffle range_error rank ranlux_base_01 ranlux24 ranlux24_base ranlux3 ranlux3_01 ranlux4 ranlux4_01 ranlux48 ranlux48_base ranlux64_base_01 ratio ratio_add ratio_divide ratio_multiply ratio_subtract raw_storage_iterator rbegin ref reference reference_wrapper regex regex_constants regex_error regex_iterator regex_token_iterator regex_traits remove remove_all_extents remove_const remove_copy remove_copy_if remove_cv remove_extent remove_if remove_pointer remove_reference remove_volatile rend replace replace_copy replace_copy_if replace_if requires resize result_of return_temporary_buffer reverse reverse_copy reverse_iterator rotate rotate_copy rts_alloc runtime_error search search_n seed_seq set set_difference set_intersection set_new_handler set_symmetric_difference set_union shared_ptr shuffle_order_engine size size_type sort sort_heap stable_partition stable_sort stack static_pointer_cast std string student_t_distribution sub_match subtract_with_carry subtract_with_carry_01 subtract_with_carry_engine swap swap_ranges sync_none sync_per_container sync_per_thread sync_shared system_error time_base time_get time_get_byname time_put time_put_byname to_array tr1 transform tuple tuple_element tuple_size type_info unary_function unary_negate unchecked_uninitialized_copy unchecked_uninitialized_fill_n undeclare_no_pointers undeclare_reachable underflow_error uniform_int uniform_int_distribution uniform_real uniform_real_distribution uninitialized_copy uninitialized_copy_n uninitialized_fill uninitialized_fill_n unique unique_copy unique_ptr unordered_map unordered_multimap unordered_multiset unordered_set upper_bound valarray value_type variate_generator vector wcerr wcin wcout weak_ptr weibull_distribution wfilebuf wfstream wifstream wiostream wistream wofstream wregex xor_combine ]]>
+                </str>
+              </SET1>
+              <SET3>
+                <str>
+                  <![CDATA[u8_t u16_t u32_t s8_t s16_t s32_t f32_t SEL_false_true_et  SEL_disable_enable_et SEL_pass_fail_et SEL_low_high_et SEL_off_on_et SEL_rtn_et SEL_bool_et]]>
+                </str>
+              </SET3>
+              <SET4>
+                <str>
+                  <![CDATA[__GNUC__ __GNUG__]]>
+                </str>
+              </SET4>
+            </keywords>
+          </editor>
+          <NAME>
+            <str>
+              <![CDATA[C/C++]]>
+            </str>
+          </NAME>
+        </cc>
+      </default>
+    </colour_sets>
+    <incremental_search>
+      <CENTER_FOUND_TEXT_ON_SCREEN bool="1" />
+      <SELECT_FOUND_TEXT_ON_ESCAPE bool="0" />
+      <SELECT_TEXT_ON_FOCUS bool="0" />
+      <HIGHLIGHT_DEFAULT_STATE int="0" />
+      <SELECTED_DEFAULT_STATE int="0" />
+      <MATCH_CASE_DEFAULT_STATE int="0" />
+      <REGEX_DEFAULT_STATE int="0" />
+      <TEXT_FOUND_COLOUR>
+        <colour r="160" g="32" b="240" />
+      </TEXT_FOUND_COLOUR>
+      <HIGHLIGHT_COLOUR>
+        <colour r="255" g="165" b="0" />
+      </HIGHLIGHT_COLOUR>
+      <TEXT_NOT_FOUND_COLOUR>
+        <colour r="255" g="127" b="127" />
+      </TEXT_NOT_FOUND_COLOUR>
+      <WRAPPED_COLOUR>
+        <colour r="127" g="127" b="255" />
+      </WRAPPED_COLOUR>
+      <LAST_SEARCHED_ITEMS>
+        <astr />
+      </LAST_SEARCHED_ITEMS>
+      <MAX_ITEMS_IN_HISTORY int="20" />
+    </incremental_search>
+    <reopen_editor />
+    <spellchecker>
+      <ENABLEONLINECHECKER bool="1" />
+      <DICTIONARY>
+        <str>
+          <![CDATA[en_GB]]>
+        </str>
+      </DICTIONARY>
+      <DICTPATH>
+        <str>
+          <![CDATA[C:\SVN_source\Tools\CodeBlocks/share/codeblocks\SpellChecker]]>
+        </str>
+      </DICTPATH>
+      <THESPATH>
+        <str>
+          <![CDATA[C:\SVN_source\Tools\CodeBlocks/share/codeblocks\SpellChecker]]>
+        </str>
+      </THESPATH>
+      <BITMPATH>
+        <str>
+          <![CDATA[C:\SVN_source\Tools\CodeBlocks/share/codeblocks\SpellChecker]]>
+        </str>
+      </BITMPATH>
+      <SPELLTOOLTIPS bool="1" />
+      <THESTOOLTIPS bool="1" />
+    </spellchecker>
+    <margin>
+      <WIDTH_CHARS int="6" />
+      <DYNAMIC_WIDTH bool="1" />
+      <SCROLL_WIDTH_TRACKING bool="0" />
+      <USE_CHANGEBAR bool="1" />
+    </margin>
+    <highlight_occurrence>
+      <ENABLED bool="1" />
+      <CASE_SENSITIVE bool="1" />
+      <WHOLE_WORD bool="1" />
+      <COLOUR>
+        <colour r="255" g="0" b="0" />
+      </COLOUR>
+      <MIN_LENGTH int="3" />
+      <CASE_SENSITIVE_PERMANENTLY bool="1" />
+      <WHOLE_WORD_PERMANENTLY bool="1" />
+    </highlight_occurrence>
+    <eol>
+      <STRIP_TRAILING_SPACES bool="1" />
+      <ENSURE_FINAL_LINE_END bool="1" />
+      <ENSURE_CONSISTENT_LINE_ENDS bool="1" />
+      <EOLMODE int="0" />
+    </eol>
+    <caret>
+      <STYLE int="1" />
+      <WIDTH int="1" />
+      <COLOUR>
+        <colour r="0" g="0" b="0" />
+      </COLOUR>
+      <PERIOD int="500" />
+    </caret>
+    <selection>
+      <USE_VSPACE bool="0" />
+      <MULTI_SELECT bool="1" />
+      <MULTI_TYPING bool="1" />
+    </selection>
+    <folding>
+      <SHOW_FOLDS bool="1" />
+      <FOLD_ALL_ON_OPEN bool="0" />
+      <FOLD_PREPROCESSOR bool="1" />
+      <FOLD_COMMENTS bool="1" />
+      <FOLD_XML bool="1" />
+      <UNDERLINE_FOLDED_LINE bool="1" />
+      <INDICATOR int="2" />
+      <LIMIT bool="0" />
+      <LIMIT_LEVEL int="1" />
+    </folding>
+    <gutter>
+      <MODE int="1" />
+      <COLOUR>
+        <colour r="192" g="192" b="192" />
+      </COLOUR>
+      <COLUMN int="100" />
+    </gutter>
+    <HIGHLIGHT_CARET_LINE_COLOUR>
+      <colour r="255" g="255" b="160" />
+    </HIGHLIGHT_CARET_LINE_COLOUR>
+    <default_encoding>
+      <USE_OPTION int="0" />
+      <FIND_LATIN2 bool="0" />
+      <USE_SYSTEM bool="1" />
+    </default_encoding>
+    <default_code>
+      <SET10>
+        <str>
+          <![CDATA[]]>
+        </str>
+      </SET10>
+      <SET11>
+        <str>
+          <![CDATA[]]>
+        </str>
+      </SET11>
+    </default_code>
+    <FONT>
+      <str>
+        <![CDATA[0;-12;0;0;0;400;0;0;0;0;3;2;1;49;Courier New]]>
+      </str>
+    </FONT>
+    <AUTO_INDENT bool="1" />
+    <SMART_INDENT bool="1" />
+    <BRACE_COMPLETION bool="1" />
+    <USE_TAB bool="0" />
+    <SHOW_INDENT_GUIDES bool="0" />
+    <BRACE_SMART_INDENT bool="1" />
+    <SELECTION_BRACE_COMPLETION bool="0" />
+    <TAB_INDENTS bool="1" />
+    <BACKSPACE_UNINDENTS bool="1" />
+    <WORD_WRAP bool="0" />
+    <WORD_WRAP_STYLE_HOME_END bool="1" />
+    <USE_POSIX_STYLE_REGEXES bool="0" />
+    <USE_ADVANCED_REGEXES bool="0" />
+    <SHOW_LINE_NUMBERS bool="1" />
+    <TRACK_PREPROCESSOR bool="0" />
+    <HIGHLIGHT_CARET_LINE bool="0" />
+    <SIMPLIFIED_HOME bool="0" />
+    <CAMEL_CASE bool="1" />
+    <RESET_ZOOM bool="1" />
+    <ZOOM_ALL bool="0" />
+    <TAB_SIZE int="4" />
+    <VIEW_WHITESPACE int="2" />
+    <OPEN_CONTAINING_FOLDER>
+      <str>
+        <![CDATA[explorer.exe /select,]]>
+      </str>
+    </OPEN_CONTAINING_FOLDER>
+    <TAB_TEXT_RELATIVE bool="0" />
+    <SHOW_EOL bool="0" />
+    <MARGIN_1_SENSITIVE bool="1" />
+    <DEFAULT_ENCODING>
+      <str>
+        <![CDATA[WINDOWS-1252]]>
+      </str>
+    </DEFAULT_ENCODING>
+    <ZOOM int="0" />
+    <doxyblocks>
+      <PATH_DOXYGEN>
+        <str>
+          <![CDATA[]]>
+        </str>
+      </PATH_DOXYGEN>
+      <PATH_DOXYWIZARD>
+        <str>
+          <![CDATA[]]>
+        </str>
+      </PATH_DOXYWIZARD>
+      <PATH_HHC>
+        <str>
+          <![CDATA[]]>
+        </str>
+      </PATH_HHC>
+      <PATH_DOT>
+        <str>
+          <![CDATA[]]>
+        </str>
+      </PATH_DOT>
+      <PATH_CHM_VIEWER>
+        <str>
+          <![CDATA[]]>
+        </str>
+      </PATH_CHM_VIEWER>
+      <OVERWRITE_DOXYFILE bool="0" />
+      <PROMPT_BEFORE_OVERWRITING bool="0" />
+      <LOAD_TEMPLATE bool="0" />
+      <USE_INTERNAL_VIEWER bool="0" />
+      <RUN_HTML bool="0" />
+      <RUN_CHM bool="0" />
+    </doxyblocks>
+    <find_options>
+      <SEARCH_PATH />
+      <SEARCH_MASK />
+      <SEARCH_RECURSIVE bool="0" />
+      <SEARCH_HIDDEN bool="0" />
+      <MATCH_WORD1 bool="0" />
+      <START_WORD1 bool="0" />
+      <MATCH_CASE1 bool="0" />
+      <REGEX1 bool="0" />
+      <AUTO_WRAP_SEARCH bool="1" />
+      <FINDUSESSELECTEDTEXT bool="0" />
+      <DIRECTION int="1" />
+      <ORIGIN int="0" />
+      <MATCH_WORD2 bool="0" />
+      <START_WORD2 bool="0" />
+      <MATCH_CASE2 bool="0" />
+      <REGEX2 bool="0" />
+      <DELETE_OLD_SEARCHES2 bool="1" />
+      <SORT_SEARCH_RESULTS2 bool="1" />
+      <SCOPE2 int="0" />
+    </find_options>
+    <replace_options>
+      <LASTMULTILINEFIND />
+      <LASTMULTILINEREPLACE />
+      <MATCH_WORD2 bool="0" />
+      <START_WORD2 bool="0" />
+      <START_FILE2 bool="0" />
+      <FIX_EOLS2 bool="0" />
+      <MATCH_CASE2 bool="0" />
+      <REGEX2 bool="0" />
+      <SCOPE2 int="1" />
+      <DELETE_OLD_SEARCHES2 bool="1" />
+      <FIX_EOLS1 bool="0" />
+      <MATCH_CASE bool="0" />
+      <REGEX bool="0" />
+      <DIRECTION int="1" />
+      <ORIGIN int="0" />
+      <MATCH_WORD bool="0" />
+      <START_WORD bool="0" />
+      <START_FILE bool="0" />
+      <SEARCH_PATH />
+      <SEARCH_RECURSIVE bool="0" />
+      <SEARCH_HIDDEN bool="0" />
+      <TARGET_SCOPE_ALL bool="1" />
+      <SEARCH_MASKS />
+    </replace_options>
+    <COLLECT_PRJ_DEFINES bool="1" />
+    <PLATFORM_DEFINES bool="0" />
+    <HIGHLIGHT_WXSMITH bool="1" />
+    <NO_STL_IN_C bool="1" />
+    <MARGIN_1_IMAGE_BP bool="1" />
+    <DETECT_INDENT bool="0" />
+    <SYNC_EDITOR_WITH_PROJECT_MANAGER bool="1" />
+    <auto_complete>
+      <entry1>
+        <LANGUAGE>
+          <str>
+            <![CDATA[Fortran]]>
+          </str>
+        </LANGUAGE>
+        <NAME>
+          <str>
+            <![CDATA[sc]]>
+          </str>
+        </NAME>
+        <CODE>
+          <str>
+            <![CDATA[select case (|)\n    case ()\n        \n    case default\n        \nend select\n]]>
+          </str>
+        </CODE>
+      </entry1>
+      <entry2>
+        <LANGUAGE>
+          <str>
+            <![CDATA[Fortran]]>
+          </str>
+        </LANGUAGE>
+        <NAME>
+          <str>
+            <![CDATA[dw]]>
+          </str>
+        </NAME>
+        <CODE>
+          <str>
+            <![CDATA[do while (|)\n    \nend do\n]]>
+          </str>
+        </CODE>
+      </entry2>
+      <entry3>
+        <LANGUAGE>
+          <str>
+            <![CDATA[Fortran]]>
+          </str>
+        </LANGUAGE>
+        <NAME>
+          <str>
+            <![CDATA[do]]>
+          </str>
+        </NAME>
+        <CODE>
+          <str>
+            <![CDATA[do |\n    \nend do\n]]>
+          </str>
+        </CODE>
+      </entry3>
+      <entry4>
+        <LANGUAGE>
+          <str>
+            <![CDATA[Fortran]]>
+          </str>
+        </LANGUAGE>
+        <NAME>
+          <str>
+            <![CDATA[fun]]>
+          </str>
+        </NAME>
+        <CODE>
+          <str>
+            <![CDATA[function |()\n    \nend function\n]]>
+          </str>
+        </CODE>
+      </entry4>
+      <entry5>
+        <LANGUAGE>
+          <str>
+            <![CDATA[Fortran]]>
+          </str>
+        </LANGUAGE>
+        <NAME>
+          <str>
+            <![CDATA[if]]>
+          </str>
+        </NAME>
+        <CODE>
+          <str>
+            <![CDATA[if (|) then\n    \nend if\n]]>
+          </str>
+        </CODE>
+      </entry5>
+      <entry6>
+        <LANGUAGE>
+          <str>
+            <![CDATA[Fortran]]>
+          </str>
+        </LANGUAGE>
+        <NAME>
+          <str>
+            <![CDATA[ty]]>
+          </str>
+        </NAME>
+        <CODE>
+          <str>
+            <![CDATA[type |\n    \nend type\n]]>
+          </str>
+        </CODE>
+      </entry6>
+      <entry7>
+        <LANGUAGE>
+          <str>
+            <![CDATA[Fortran]]>
+          </str>
+        </LANGUAGE>
+        <NAME>
+          <str>
+            <![CDATA[mod]]>
+          </str>
+        </NAME>
+        <CODE>
+          <str>
+            <![CDATA[module |\n    \nend module\n]]>
+          </str>
+        </CODE>
+      </entry7>
+      <entry8>
+        <LANGUAGE>
+          <str>
+            <![CDATA[Fortran]]>
+          </str>
+        </LANGUAGE>
+        <NAME>
+          <str>
+            <![CDATA[sub]]>
+          </str>
+        </NAME>
+        <CODE>
+          <str>
+            <![CDATA[subroutine |()\n    \nend subroutine\n]]>
+          </str>
+        </CODE>
+      </entry8>
+      <entry9>
+        <NAME>
+          <str>
+            <![CDATA[ifei]]>
+          </str>
+        </NAME>
+        <CODE>
+          <str>
+            <![CDATA[if (|)\n{\n    \n}\nelse if ()\n{\n    \n}\nelse\n{\n    \n}]]>
+          </str>
+        </CODE>
+      </entry9>
+      <entry10>
+        <NAME>
+          <str>
+            <![CDATA[nowl]]>
+          </str>
+        </NAME>
+        <CODE>
+          <str>
+            <![CDATA[$NOW_L]]>
+          </str>
+        </CODE>
+      </entry10>
+      <entry11>
+        <NAME>
+          <str>
+            <![CDATA[forb]]>
+          </str>
+        </NAME>
+        <CODE>
+          <str>
+            <![CDATA[for (|; ; )\n{\n    \n}]]>
+          </str>
+        </CODE>
+      </entry11>
+      <entry12>
+        <NAME>
+          <str>
+            <![CDATA[ife]]>
+          </str>
+        </NAME>
+        <CODE>
+          <str>
+            <![CDATA[if (|)\n{\n    \n}\nelse\n{\n    \n}]]>
+          </str>
+        </CODE>
+      </entry12>
+      <entry13>
+        <NAME>
+          <str>
+            <![CDATA[todayu]]>
+          </str>
+        </NAME>
+        <CODE>
+          <str>
+            <![CDATA[$TODAY_UTC]]>
+          </str>
+        </CODE>
+      </entry13>
+      <entry14>
+        <NAME>
+          <str>
+            <![CDATA[nowlu]]>
+          </str>
+        </NAME>
+        <CODE>
+          <str>
+            <![CDATA[$NOW_L_UTC]]>
+          </str>
+        </CODE>
+      </entry14>
+      <entry15>
+        <NAME>
+          <str>
+            <![CDATA[wdu]]>
+          </str>
+        </NAME>
+        <CODE>
+          <str>
+            <![CDATA[$WEEKDAY_UTC]]>
+          </str>
+        </CODE>
+      </entry15>
+      <entry16>
+        <NAME>
+          <str>
+            <![CDATA[tday]]>
+          </str>
+        </NAME>
+        <CODE>
+          <str>
+            <![CDATA[$TDAY]]>
+          </str>
+        </CODE>
+      </entry16>
+      <entry17>
+        <NAME>
+          <str>
+            <![CDATA[while]]>
+          </str>
+        </NAME>
+        <CODE>
+          <str>
+            <![CDATA[while (|)\n    ;]]>
+          </str>
+        </CODE>
+      </entry17>
+      <entry18>
+        <NAME>
+          <str>
+            <![CDATA[guard]]>
+          </str>
+        </NAME>
+        <CODE>
+          <str>
+            <![CDATA[#ifndef $(Guard token)\n#define $(Guard token)\n\n|\n\n#endif // $(Guard token)\n]]>
+          </str>
+        </CODE>
+      </entry18>
+      <entry19>
+        <NAME>
+          <str>
+            <![CDATA[today]]>
+          </str>
+        </NAME>
+        <CODE>
+          <str>
+            <![CDATA[$TODAY]]>
+          </str>
+        </CODE>
+      </entry19>
+      <entry20>
+        <NAME>
+          <str>
+            <![CDATA[for]]>
+          </str>
+        </NAME>
+        <CODE>
+          <str>
+            <![CDATA[for (|; ; )\n    ;]]>
+          </str>
+        </CODE>
+      </entry20>
+      <entry21>
+        <NAME>
+          <str>
+            <![CDATA[if]]>
+          </str>
+        </NAME>
+        <CODE>
+          <str>
+            <![CDATA[if (|)\n    ;]]>
+          </str>
+        </CODE>
+      </entry21>
+      <entry22>
+        <NAME>
+          <str>
+            <![CDATA[now]]>
+          </str>
+        </NAME>
+        <CODE>
+          <str>
+            <![CDATA[$NOW]]>
+          </str>
+        </CODE>
+      </entry22>
+      <entry23>
+        <NAME>
+          <str>
+            <![CDATA[tdayu]]>
+          </str>
+        </NAME>
+        <CODE>
+          <str>
+            <![CDATA[$TDAY_UTC]]>
+          </str>
+        </CODE>
+      </entry23>
+      <entry24>
+        <NAME>
+          <str>
+            <![CDATA[whileb]]>
+          </str>
+        </NAME>
+        <CODE>
+          <str>
+            <![CDATA[while (|)\n{\n    \n}]]>
+          </str>
+        </CODE>
+      </entry24>
+      <entry25>
+        <NAME>
+          <str>
+            <![CDATA[class]]>
+          </str>
+        </NAME>
+        <CODE>
+          <str>
+            <![CDATA[class $(Class name)|\n{\npublic:\n    $(Class name)();\n    ~$(Class name)();\nprotected:\nprivate:\n};\n]]>
+          </str>
+        </CODE>
+      </entry25>
+      <entry26>
+        <NAME>
+          <str>
+            <![CDATA[switch]]>
+          </str>
+        </NAME>
+        <CODE>
+          <str>
+            <![CDATA[switch (|)\n{\ncase :\n    break;\n\ndefault:\n    break;\n}\n]]>
+          </str>
+        </CODE>
+      </entry26>
+      <entry27>
+        <NAME>
+          <str>
+            <![CDATA[struct]]>
+          </str>
+        </NAME>
+        <CODE>
+          <str>
+            <![CDATA[struct |\n{\n    \n};\n]]>
+          </str>
+        </CODE>
+      </entry27>
+      <entry28>
+        <NAME>
+          <str>
+            <![CDATA[ifb]]>
+          </str>
+        </NAME>
+        <CODE>
+          <str>
+            <![CDATA[if (|)\n{\n    \n}]]>
+          </str>
+        </CODE>
+      </entry28>
+      <entry29>
+        <NAME>
+          <str>
+            <![CDATA[nowu]]>
+          </str>
+        </NAME>
+        <CODE>
+          <str>
+            <![CDATA[$NOW_UTC]]>
+          </str>
+        </CODE>
+      </entry29>
+    </auto_complete>
+  </editor>
+  <tools />
+  <code_completion>
+    <PARSER_DEFAULTS_CHANGED bool="1" />
+    <PARSER_FOLLOW_LOCAL_INCLUDES bool="1" />
+    <PARSER_FOLLOW_GLOBAL_INCLUDES bool="1" />
+    <WANT_PREPROCESSOR bool="1" />
+    <PARSE_COMPLEX_MACROS bool="1" />
+    <max />
+    <USE_SMARTSENSE bool="1" />
+    <WHILE_TYPING bool="1" />
+    <CASE_SENSITIVE bool="0" />
+    <BROWSER_SHOW_INHERITANCE bool="1" />
+    <BROWSER_EXPAND_NS bool="0" />
+    <BROWSER_TREE_MEMBERS bool="1" />
+    <BROWSER_DISPLAY_FILTER int="0" />
+    <BROWSER_SORT_TYPE int="1" />
+    <USE_CODE_COMPLETION bool="1" />
+    <EVAL_TOOLTIP bool="1" />
+    <AUTO_SELECT_ONE bool="0" />
+    <AUTO_ADD_PARENTHESES bool="1" />
+    <ADD_DOXGEN_COMMENT bool="0" />
+    <ENABLE_HEADERS bool="1" />
+    <AUTO_LAUNCH bool="1" />
+    <AUTO_LAUNCH_CHARS int="3" />
+    <MAX_MATCHES int="16384" />
+    <FILLUP_CHARS>
+      <str>
+        <![CDATA[]]>
+      </str>
+    </FILLUP_CHARS>
+    <CC_DELAY int="300" />
+    <LEXER_KEYWORDS_SET1 bool="1" />
+    <LEXER_KEYWORDS_SET2 bool="1" />
+    <LEXER_KEYWORDS_SET3 bool="1" />
+    <LEXER_KEYWORDS_SET4 bool="0" />
+    <LEXER_KEYWORDS_SET5 bool="0" />
+    <LEXER_KEYWORDS_SET6 bool="0" />
+    <LEXER_KEYWORDS_SET7 bool="0" />
+    <LEXER_KEYWORDS_SET8 bool="0" />
+    <LEXER_KEYWORDS_SET9 bool="0" />
+    <PRIORITY_HEADERS>
+      <str>
+        <![CDATA[<cstddef>, <w32api.h>, <wx/defs.h>, <wx/dlimpexp.h>, <wx/toplevel.h>, <boost/config.hpp>, <boost/filesystem/config.hpp>, "pch.h", "sdk.h", "stdafx.h"]]>
+      </str>
+    </PRIORITY_HEADERS>
+    <MAX_THREADS int="1" />
+    <PARSER_PER_WORKSPACE bool="0" />
+    <MAX_PARSERS int="5" />
+    <HEADER_EXT>
+      <str>
+        <![CDATA[h,hpp,tcc,xpm]]>
+      </str>
+    </HEADER_EXT>
+    <EMPTY_EXT bool="1" />
+    <SOURCE_EXT>
+      <str>
+        <![CDATA[c,cpp,cxx,cc,c++]]>
+      </str>
+    </SOURCE_EXT>
+    <USE_SYMBOLS_BROWSER bool="1" />
+    <AS_FLOATING_WINDOW bool="0" />
+    <SCOPE_FILTER bool="1" />
+    <TOKEN_REPLACEMENTS>
+      <ssmap>
+        <BEGIN_EVENT_TABLE>
+          <![CDATA[-END_EVENT_TABLE]]>
+        </BEGIN_EVENT_TABLE>
+        <STATIC>
+          <![CDATA[static]]>
+        </STATIC>
+        <WXDLLEXPORT>
+          <![CDATA[]]>
+        </WXDLLEXPORT>
+        <WXDLLIMPORT>
+          <![CDATA[]]>
+        </WXDLLIMPORT>
+        <WXEXPORT>
+          <![CDATA[]]>
+        </WXEXPORT>
+        <WXIMPORT>
+          <![CDATA[]]>
+        </WXIMPORT>
+        <_GLIBCXX_BEGIN_NAMESPACE>
+          <![CDATA[+namespace std {]]>
+        </_GLIBCXX_BEGIN_NAMESPACE>
+        <_GLIBCXX_BEGIN_NAMESPACE_TR1>
+          <![CDATA[namespace tr1 {]]>
+        </_GLIBCXX_BEGIN_NAMESPACE_TR1>
+        <_GLIBCXX_BEGIN_NAMESPACE_VERSION>
+          <![CDATA[]]>
+        </_GLIBCXX_BEGIN_NAMESPACE_VERSION>
+        <_GLIBCXX_BEGIN_NESTED_NAMESPACE>
+          <![CDATA[+namespace std {]]>
+        </_GLIBCXX_BEGIN_NESTED_NAMESPACE>
+        <_GLIBCXX_END_NAMESPACE>
+          <![CDATA[}]]>
+        </_GLIBCXX_END_NAMESPACE>
+        <_GLIBCXX_END_NAMESPACE_TR1>
+          <![CDATA[}]]>
+        </_GLIBCXX_END_NAMESPACE_TR1>
+        <_GLIBCXX_END_NAMESPACE_VERSION>
+          <![CDATA[]]>
+        </_GLIBCXX_END_NAMESPACE_VERSION>
+        <_GLIBCXX_END_NESTED_NAMESPACE>
+          <![CDATA[}]]>
+        </_GLIBCXX_END_NESTED_NAMESPACE>
+        <_GLIBCXX_STD>
+          <![CDATA[std]]>
+        </_GLIBCXX_STD>
+        <_GLIBCXX_STD_D>
+          <![CDATA[std]]>
+        </_GLIBCXX_STD_D>
+        <_GLIBCXX_STD_P>
+          <![CDATA[std]]>
+        </_GLIBCXX_STD_P>
+        <_GLIBCXX_VISIBILITY>
+          <![CDATA[+]]>
+        </_GLIBCXX_VISIBILITY>
+        <_STATIC_>
+          <![CDATA[static]]>
+        </_STATIC_>
+        <_STDEXT_BEGIN>
+          <![CDATA[namespace std {]]>
+        </_STDEXT_BEGIN>
+        <_STDEXT_END>
+          <![CDATA[}]]>
+        </_STDEXT_END>
+        <_STD_BEGIN>
+          <![CDATA[namespace std {]]>
+        </_STD_BEGIN>
+        <_STD_END>
+          <![CDATA[}]]>
+        </_STD_END>
+      </ssmap>
+    </TOKEN_REPLACEMENTS>
+    <SPLITTER_POS int="10" />
+    <SEMANTIC_KEYWORDS bool="0" />
+    <DETECT_IMPLEMENTATION bool="0" />
+    <USE_DOCUMENTATION_HELPER bool="1" />
+    <ALWAYS_SHOW_DOC bool="0" />
+    <DOCUMENTATION_HELPER_BACKGROUND_COLOR>
+      <colour r="255" g="255" b="255" />
+    </DOCUMENTATION_HELPER_BACKGROUND_COLOR>
+    <DOCUMENTATION_HELPER_TEXT_COLOR>
+      <colour r="0" g="0" b="0" />
+    </DOCUMENTATION_HELPER_TEXT_COLOR>
+    <DOCUMENTATION_HELPER_LINK_COLOR>
+      <colour r="0" g="0" b="255" />
+    </DOCUMENTATION_HELPER_LINK_COLOR>
+  </code_completion>
+  <devpak_plugin />
+  <ShellExtensions>
+    <fileexplorer />
+    <shellcmds>
+    </shellcmds>
+    <HIDETOOLSMENU bool="1" />
+    <REUSETOOLSPAGE bool="1" />
+  </ShellExtensions>
+  <plugins>
+    <TRY_TO_ACTIVATE>
+      <str>
+        <![CDATA[]]>
+      </str>
+    </TRY_TO_ACTIVATE>
+    <BATCH_BUILD_PLUGINS>
+      <astr>
+        <s>
+          <![CDATA[compiler.dll]]>
+        </s>
+      </astr>
+    </BATCH_BUILD_PLUGINS>
+    <INSTALL_GLOBALLY bool="1" />
+    <INSTALL_CONFIRMATION bool="1" />
+  </plugins>
+  <autosave>
+    <DO_PROJECT bool="0" />
+    <DO_SOURCES bool="0" />
+    <DO_WORKSPACE bool="1" />
+    <ALL_PROJECTS bool="1" />
+    <PROJECT_MINS int="1" />
+    <SOURCE_MINS int="1" />
+    <METHOD int="2" />
+  </autosave>
+  <byogames>
+    <ISMAXPLAYTIME bool="1" />
+    <MAXPLAYTIME int="600" />
+    <ISMINWORKTIME bool="1" />
+    <MINWORKTIME int="3600" />
+    <ISOVERWORKTIME bool="0" />
+    <OVERWORKTIME int="10800" />
+    <COL01>
+      <colour r="255" g="0" b="0" />
+    </COL01>
+    <COL02>
+      <colour r="0" g="255" b="0" />
+    </COL02>
+    <COL03>
+      <colour r="0" g="0" b="255" />
+    </COL03>
+    <COL04>
+      <colour r="255" g="255" b="0" />
+    </COL04>
+    <COL05>
+      <colour r="255" g="0" b="255" />
+    </COL05>
+    <COL06>
+      <colour r="0" g="255" b="255" />
+    </COL06>
+  </byogames>
+  <compiler>
+    <build_progress>
+      <BAR bool="0" />
+      <PERCENTAGE bool="0" />
+    </build_progress>
+    <SETTINGS_VERSION>
+      <str>
+        <![CDATA[0.0.3]]>
+      </str>
+    </SETTINGS_VERSION>
+    <DEFAULT_COMPILER>
+      <str>
+        <![CDATA[gcc]]>
+      </str>
+    </DEFAULT_COMPILER>
+    <save_html_build_log>
+      <FULL_COMMAND_LINE bool="0" />
+    </save_html_build_log>
+    <INCLUDE_FILE_CWD bool="0" />
+    <INCLUDE_PRJ_CWD bool="0" />
+    <SAVE_HTML_BUILD_LOG bool="0" />
+    <PARALLEL_PROCESSES int="1" />
+    <MAX_REPORTED_ERRORS int="50" />
+    <REBUILD_SEPERATELY bool="0" />
+    <IGNORE_OUTPUT>
+      <astr />
+    </IGNORE_OUTPUT>
+    <sets>
+      <gcc>
+        <NAME>
+          <str>
+            <![CDATA[GNU GCC Compiler]]>
+          </str>
+        </NAME>
+        <MASTER_PATH>
+          <str>
+            <![CDATA[%SEL_GCC%]]>
+          </str>
+        </MASTER_PATH>
+        <C_COMPILER>
+          <str>
+            <![CDATA[gcc.exe]]>
+          </str>
+        </C_COMPILER>
+        <CPP_COMPILER>
+          <str>
+            <![CDATA[g++.exe]]>
+          </str>
+        </CPP_COMPILER>
+        <LINKER>
+          <str>
+            <![CDATA[g++.exe]]>
+          </str>
+        </LINKER>
+      </gcc>
+      <msvctk>
+        <NAME>
+          <str>
+            <![CDATA[Microsoft Visual C++ Toolkit 2003]]>
+          </str>
+        </NAME>
+        <INCLUDE_DIRS>
+          <str>
+            <![CDATA[C:\Program Files\Microsoft Visual C++ Toolkit 2003\include;]]>
+          </str>
+        </INCLUDE_DIRS>
+        <LIBRARY_DIRS>
+          <str>
+            <![CDATA[C:\Program Files\Microsoft Visual C++ Toolkit 2003\lib;]]>
+          </str>
+        </LIBRARY_DIRS>
+        <MASTER_PATH>
+          <str>
+            <![CDATA[C:\Program Files\Microsoft Visual C++ Toolkit 2003]]>
+          </str>
+        </MASTER_PATH>
+      </msvctk>
+      <msvc8>
+        <NAME>
+          <str>
+            <![CDATA[Microsoft Visual C++ 2005/2008]]>
+          </str>
+        </NAME>
+        <INCLUDE_DIRS>
+          <str>
+            <![CDATA[C:\Program Files\Microsoft Visual Studio 8\VC\include;C:\Program Files (x86)\Microsoft Visual Studio 8\VC\include;C:\Program Files\Microsoft SDKs\Windows\v7.0A\include;]]>
+          </str>
+        </INCLUDE_DIRS>
+        <RES_INCLUDE_DIRS>
+          <str>
+            <![CDATA[C:\Program Files\Microsoft Visual Studio 8\VC\include;C:\Program Files (x86)\Microsoft Visual Studio 8\VC\include;C:\Program Files\Microsoft SDKs\Windows\v7.0A\include;]]>
+          </str>
+        </RES_INCLUDE_DIRS>
+        <LIBRARY_DIRS>
+          <str>
+            <![CDATA[C:\Program Files\Microsoft Visual Studio 8\VC\lib;C:\Program Files (x86)\Microsoft Visual Studio 8\VC\lib;C:\Program Files\Microsoft SDKs\Windows\v7.0A\lib;]]>
+          </str>
+        </LIBRARY_DIRS>
+        <MASTER_PATH>
+          <str>
+            <![CDATA[C:\Program Files\Microsoft Visual Studio 8\VC]]>
+          </str>
+        </MASTER_PATH>
+        <EXTRA_PATHS>
+          <str>
+            <![CDATA[C:\Program Files\Microsoft Visual Studio 8\Common7\IDE;C:\Program Files (x86)\Microsoft Visual Studio 8\Common7\IDE;C:\Program Files\Microsoft SDKs\Windows\v7.0A\bin;]]>
+          </str>
+        </EXTRA_PATHS>
+      </msvc8>
+      <msvc10>
+        <NAME>
+          <str>
+            <![CDATA[Microsoft Visual C++ 2010]]>
+          </str>
+        </NAME>
+        <INCLUDE_DIRS>
+          <str>
+            <![CDATA[C:\Program Files\Microsoft Visual Studio 10.0\VC\include;C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include;C:\Program Files\Microsoft SDKs\Windows\v7.0A\include;]]>
+          </str>
+        </INCLUDE_DIRS>
+        <RES_INCLUDE_DIRS>
+          <str>
+            <![CDATA[C:\Program Files\Microsoft Visual Studio 10.0\VC\include;C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include;C:\Program Files\Microsoft SDKs\Windows\v7.0A\include;]]>
+          </str>
+        </RES_INCLUDE_DIRS>
+        <LIBRARY_DIRS>
+          <str>
+            <![CDATA[C:\Program Files\Microsoft Visual Studio 10.0\VC\lib;C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\lib;C:\Program Files\Microsoft SDKs\Windows\v7.0A\lib;]]>
+          </str>
+        </LIBRARY_DIRS>
+        <MASTER_PATH>
+          <str>
+            <![CDATA[C:\Program Files\Microsoft Visual Studio 10.0\VC]]>
+          </str>
+        </MASTER_PATH>
+        <EXTRA_PATHS>
+          <str>
+            <![CDATA[C:\Program Files\Microsoft Visual Studio 10.0\Common7\IDE;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Common7\IDE;C:\Program Files\Microsoft SDKs\Windows\v7.0A\bin;]]>
+          </str>
+        </EXTRA_PATHS>
+      </msvc10>
+      <bcc>
+        <NAME>
+          <str>
+            <![CDATA[Borland C++ Compiler (5.5, 5.82)]]>
+          </str>
+        </NAME>
+        <INCLUDE_DIRS>
+          <str>
+            <![CDATA[C:\Program Files\Borland\BDS\4.0\include;C:\Borland\BCC55\include;]]>
+          </str>
+        </INCLUDE_DIRS>
+        <LIBRARY_DIRS>
+          <str>
+            <![CDATA[C:\Program Files\Borland\BDS\4.0\lib;C:\Program Files\Borland\BDS\4.0\lib\psdk;C:\Borland\BCC55\lib;C:\Borland\BCC55\lib\psdk;]]>
+          </str>
+        </LIBRARY_DIRS>
+        <MASTER_PATH>
+          <str>
+            <![CDATA[C:\Program Files\Borland\BDS\4.0]]>
+          </str>
+        </MASTER_PATH>
+      </bcc>
+      <dmc>
+        <NAME>
+          <str>
+            <![CDATA[Digital Mars Compiler]]>
+          </str>
+        </NAME>
+        <INCLUDE_DIRS>
+          <str>
+            <![CDATA[C:\dm\stlport\stlport;C:\dm\include;]]>
+          </str>
+        </INCLUDE_DIRS>
+        <LIBRARY_DIRS>
+          <str>
+            <![CDATA[C:\dm\lib;]]>
+          </str>
+        </LIBRARY_DIRS>
+        <MASTER_PATH>
+          <str>
+            <![CDATA[C:\dm]]>
+          </str>
+        </MASTER_PATH>
+      </dmc>
+      <ow>
+        <NAME>
+          <str>
+            <![CDATA[OpenWatcom (W32) Compiler]]>
+          </str>
+        </NAME>
+        <INCLUDE_DIRS>
+          <str>
+            <![CDATA[C:\watcom\h;C:\watcom\h\nt;]]>
+          </str>
+        </INCLUDE_DIRS>
+        <RES_INCLUDE_DIRS>
+          <str>
+            <![CDATA[C:\watcom\h;C:\watcom\h\nt;]]>
+          </str>
+        </RES_INCLUDE_DIRS>
+        <LIBRARY_DIRS>
+          <str>
+            <![CDATA[C:\watcom\lib386;C:\watcom\lib386\nt;]]>
+          </str>
+        </LIBRARY_DIRS>
+        <MASTER_PATH>
+          <str>
+            <![CDATA[C:\watcom]]>
+          </str>
+        </MASTER_PATH>
+        <EXTRA_PATHS>
+          <str>
+            <![CDATA[C:\watcom\binnt;C:\watcom\binw;]]>
+          </str>
+        </EXTRA_PATHS>
+      </ow>
+      <cygwin>
+        <NAME>
+          <str>
+            <![CDATA[Cygwin GCC]]>
+          </str>
+        </NAME>
+        <MASTER_PATH>
+          <str>
+            <![CDATA[C:\Cygwin]]>
+          </str>
+        </MASTER_PATH>
+      </cygwin>
+      <lcc>
+        <NAME>
+          <str>
+            <![CDATA[LCC Compiler]]>
+          </str>
+        </NAME>
+        <INCLUDE_DIRS>
+          <str>
+            <![CDATA[C:\lcc\include;]]>
+          </str>
+        </INCLUDE_DIRS>
+        <LIBRARY_DIRS>
+          <str>
+            <![CDATA[C:\lcc\lib;]]>
+          </str>
+        </LIBRARY_DIRS>
+        <MASTER_PATH>
+          <str>
+            <![CDATA[C:\lcc]]>
+          </str>
+        </MASTER_PATH>
+        <EXTRA_PATHS>
+          <str>
+            <![CDATA[C:\lcc\bin;]]>
+          </str>
+        </EXTRA_PATHS>
+      </lcc>
+      <icc>
+        <NAME>
+          <str>
+            <![CDATA[Intel C/C++ Compiler]]>
+          </str>
+        </NAME>
+        <MASTER_PATH>
+          <str>
+            <![CDATA[C:\Program Files\Intel\Compiler\C++\9.0]]>
+          </str>
+        </MASTER_PATH>
+      </icc>
+      <sdcc>
+        <NAME>
+          <str>
+            <![CDATA[SDCC Compiler]]>
+          </str>
+        </NAME>
+        <INCLUDE_DIRS>
+          <str>
+            <![CDATA[C:\sdcc\include;C:\include;C:\Program Files\sdcc\include;C:\Program Files (x86)\sdcc\include;]]>
+          </str>
+        </INCLUDE_DIRS>
+        <LIBRARY_DIRS>
+          <str>
+            <![CDATA[C:\sdcc\lib;C:\lib;C:\Program Files\sdcc\lib;C:\Program Files (x86)\sdcc\lib;]]>
+          </str>
+        </LIBRARY_DIRS>
+        <MASTER_PATH>
+          <str>
+            <![CDATA[C:\sdcc]]>
+          </str>
+        </MASTER_PATH>
+        <EXTRA_PATHS>
+          <str>
+            <![CDATA[C:\sdcc\bin;C:\\bin;]]>
+          </str>
+        </EXTRA_PATHS>
+      </sdcc>
+      <tcc>
+        <NAME>
+          <str>
+            <![CDATA[Tiny C Compiler]]>
+          </str>
+        </NAME>
+        <INCLUDE_DIRS>
+          <str>
+            <![CDATA[C:\tcc\include;]]>
+          </str>
+        </INCLUDE_DIRS>
+        <LIBRARY_DIRS>
+          <str>
+            <![CDATA[C:\tcc\lib;]]>
+          </str>
+        </LIBRARY_DIRS>
+        <MASTER_PATH>
+          <str>
+            <![CDATA[C:\tcc]]>
+          </str>
+        </MASTER_PATH>
+      </tcc>
+      <clang>
+        <NAME>
+          <str>
+            <![CDATA[LLVM Clang Compiler]]>
+          </str>
+        </NAME>
+        <MASTER_PATH>
+          <str>
+            <![CDATA[C:\MinGW]]>
+          </str>
+        </MASTER_PATH>
+      </clang>
+      <arm_elf_gcc>
+        <NAME>
+          <str>
+            <![CDATA[GNU ARM GCC Compiler]]>
+          </str>
+        </NAME>
+        <MASTER_PATH>
+          <str>
+            <![CDATA[C:\Program Files\GNUARM]]>
+          </str>
+        </MASTER_PATH>
+      </arm_elf_gcc>
+      <avr_gcc>
+        <NAME>
+          <str>
+            <![CDATA[GNU AVR GCC Compiler]]>
+          </str>
+        </NAME>
+        <INCLUDE_DIRS>
+          <str>
+            <![CDATA[C:\WinAVR\avr\include;]]>
+          </str>
+        </INCLUDE_DIRS>
+        <LIBRARY_DIRS>
+          <str>
+            <![CDATA[C:\WinAVR\avr\lib;]]>
+          </str>
+        </LIBRARY_DIRS>
+        <MASTER_PATH>
+          <str>
+            <![CDATA[C:\WinAVR]]>
+          </str>
+        </MASTER_PATH>
+        <EXTRA_PATHS>
+          <str>
+            <![CDATA[C:\WinAVR\utils\bin;]]>
+          </str>
+        </EXTRA_PATHS>
+      </avr_gcc>
+      <msp430_gcc>
+        <NAME>
+          <str>
+            <![CDATA[GNU GCC Compiler for MSP430]]>
+          </str>
+        </NAME>
+        <INCLUDE_DIRS>
+          <str>
+            <![CDATA[C:\HighTec\Msp430\msp430\include;]]>
+          </str>
+        </INCLUDE_DIRS>
+        <MASTER_PATH>
+          <str>
+            <![CDATA[C:\HighTec\Msp430]]>
+          </str>
+        </MASTER_PATH>
+      </msp430_gcc>
+      <ppc_gcc>
+        <NAME>
+          <str>
+            <![CDATA[GNU GCC Compiler for PowerPC]]>
+          </str>
+        </NAME>
+        <MASTER_PATH>
+          <str>
+            <![CDATA[C:\HighTec\PowerPC]]>
+          </str>
+        </MASTER_PATH>
+      </ppc_gcc>
+      <tricore_gcc>
+        <NAME>
+          <str>
+            <![CDATA[GNU GCC Compiler for TriCore]]>
+          </str>
+        </NAME>
+        <INCLUDE_DIRS>
+          <str>
+            <![CDATA[C:\HighTec\TriCore\tricore\include;]]>
+          </str>
+        </INCLUDE_DIRS>
+        <MASTER_PATH>
+          <str>
+            <![CDATA[C:\HighTec\TriCore]]>
+          </str>
+        </MASTER_PATH>
+      </tricore_gcc>
+      <keilc51>
+        <NAME>
+          <str>
+            <![CDATA[Keil C51 Compiler]]>
+          </str>
+        </NAME>
+        <MASTER_PATH>
+          <str>
+            <![CDATA[C:\Keil\C51]]>
+          </str>
+        </MASTER_PATH>
+      </keilc51>
+      <keilcx51>
+        <NAME>
+          <str>
+            <![CDATA[Keil CX51 Compiler]]>
+          </str>
+        </NAME>
+        <MASTER_PATH>
+          <str>
+            <![CDATA[C:\Keil\C51]]>
+          </str>
+        </MASTER_PATH>
+      </keilcx51>
+      <iar8051>
+        <NAME>
+          <str>
+            <![CDATA[IAR 8051 Compiler]]>
+          </str>
+        </NAME>
+        <LINKER_OPTIONS>
+          <str>
+            <![CDATA[-f "C:\Program Files\IAR Systems\Embedded Workbench\8051\config\devices\_generic\lnk51ew_plain.xcl";-f "C:\Program Files (x86)\IAR Systems\Embedded Workbench\8051\config\devices\_generic\lnk51ew_plain.xcl";-f "\IAR Systems\Embedded Workbench\8051\config\devices\_generic\lnk51ew_plain.xcl";]]>
+          </str>
+        </LINKER_OPTIONS>
+        <MASTER_PATH>
+          <str>
+            <![CDATA[C:\Program Files\IAR Systems\Embedded Workbench\8051]]>
+          </str>
+        </MASTER_PATH>
+      </iar8051>
+      <iararm>
+        <NAME>
+          <str>
+            <![CDATA[IAR ARM Compiler]]>
+          </str>
+        </NAME>
+        <COMPILER_OPTIONS>
+          <str>
+            <![CDATA[--no_wrap_diagnostics;]]>
+          </str>
+        </COMPILER_OPTIONS>
+        <MASTER_PATH>
+          <str>
+            <![CDATA[\IAR Systems\Embedded Workbench\ARM]]>
+          </str>
+        </MASTER_PATH>
+      </iararm>
+      <gdc>
+        <NAME>
+          <str>
+            <![CDATA[GDC D Compiler]]>
+          </str>
+        </NAME>
+        <MASTER_PATH>
+          <str>
+            <![CDATA[C:\MinGW]]>
+          </str>
+        </MASTER_PATH>
+      </gdc>
+      <ldc>
+        <NAME>
+          <str>
+            <![CDATA[LLVM D Compiler]]>
+          </str>
+        </NAME>
+        <INCLUDE_DIRS>
+          <str>
+            <![CDATA[\usr\import;C:\ldc\import;]]>
+          </str>
+        </INCLUDE_DIRS>
+        <LIBRARY_DIRS>
+          <str>
+            <![CDATA[\usr\lib;C:\ldc\lib;]]>
+          </str>
+        </LIBRARY_DIRS>
+        <MASTER_PATH>
+          <str>
+            <![CDATA[/usr]]>
+          </str>
+        </MASTER_PATH>
+      </ldc>
+      <dmd>
+        <NAME>
+          <str>
+            <![CDATA[Digital Mars D Compiler]]>
+          </str>
+        </NAME>
+        <INCLUDE_DIRS>
+          <str>
+            <![CDATA[C:\dmd\src\phobos;]]>
+          </str>
+        </INCLUDE_DIRS>
+        <LIBRARY_DIRS>
+          <str>
+            <![CDATA[C:\dmd\lib;]]>
+          </str>
+        </LIBRARY_DIRS>
+        <LIBRARIES>
+          <str>
+            <![CDATA[phobos.lib;phobos2.lib;]]>
+          </str>
+        </LIBRARIES>
+        <MASTER_PATH>
+          <str>
+            <![CDATA[C:\dmd]]>
+          </str>
+        </MASTER_PATH>
+        <EXTRA_PATHS>
+          <str>
+            <![CDATA[C:\dm\bin;]]>
+          </str>
+        </EXTRA_PATHS>
+      </dmd>
+      <gfortran>
+        <NAME>
+          <str>
+            <![CDATA[GNU Fortran Compiler]]>
+          </str>
+        </NAME>
+        <MASTER_PATH>
+          <str>
+            <![CDATA[C:\MinGW]]>
+          </str>
+        </MASTER_PATH>
+      </gfortran>
+      <g95>
+        <NAME>
+          <str>
+            <![CDATA[G95 Fortran Compiler]]>
+          </str>
+        </NAME>
+        <MASTER_PATH>
+          <str>
+            <![CDATA[C:\MinGW]]>
+          </str>
+        </MASTER_PATH>
+      </g95>
+      <pgifortran>
+        <NAME>
+          <str>
+            <![CDATA[PGI Fortran Compiler]]>
+          </str>
+        </NAME>
+        <MASTER_PATH>
+          <str>
+            <![CDATA[C:\Program Files\PGI\win32]]>
+          </str>
+        </MASTER_PATH>
+      </pgifortran>
+      <null>
+        <NAME>
+          <str>
+            <![CDATA[*No Compiler*]]>
+          </str>
+        </NAME>
+        <MASTER_PATH>
+          <str>
+            <![CDATA[-- No Compiler --]]>
+          </str>
+        </MASTER_PATH>
+      </null>
+    </sets>
+  </compiler>
+  <gcv>
+    <sets>
+      <default>
+        <wx29>
+          <BASE>
+            <str>
+              <![CDATA[C:\wxWidgets-2.9.4]]>
+            </str>
+          </BASE>
+        </wx29>
+        <wx>
+          <BASE>
+            <str>
+              <![CDATA[D:\wxWidgets-2.8.12]]>
+            </str>
+          </BASE>
+        </wx>
+        <cb_release_type>
+          <BASE>
+            <str>
+              <![CDATA[-g]]>
+            </str>
+          </BASE>
+        </cb_release_type>
+      </default>
+    </sets>
+    <ACTIVE>
+      <str>
+        <![CDATA[default]]>
+      </str>
+    </ACTIVE>
+  </gcv>
+  <mime_types>
+    <MIMETYPE0>
+      <str>
+        <![CDATA[true;false;true;*.lib; ]]>
+      </str>
+    </MIMETYPE0>
+    <MIMETYPE1>
+      <str>
+        <![CDATA[true;false;true;makefile; ]]>
+      </str>
+    </MIMETYPE1>
+    <MIMETYPE2>
+      <str>
+        <![CDATA[true;false;true;*.yml; ]]>
+      </str>
+    </MIMETYPE2>
+    <MIMETYPE3>
+      <str>
+        <![CDATA[true;false;true;*.txt; ]]>
+      </str>
+    </MIMETYPE3>
+    <MIMETYPE4>
+      <str>
+        <![CDATA[false;true;true;*.bat; ]]>
+      </str>
+    </MIMETYPE4>
+  </mime_types>
+  <EditorTweaks>
+    <ALIGNERFIRSTNAME0>
+      <str>
+        <![CDATA[Equality Operator]]>
+      </str>
+    </ALIGNERFIRSTNAME0>
+    <ALIGNERFIRSTARGUMENTSTRING0>
+      <str>
+        <![CDATA[=]]>
+      </str>
+    </ALIGNERFIRSTARGUMENTSTRING0>
+    <ALIGNERFIRSTNAME1>
+      <str>
+        <![CDATA[C/C++ line Comment ]]>
+      </str>
+    </ALIGNERFIRSTNAME1>
+    <ALIGNERFIRSTARGUMENTSTRING1>
+      <str>
+        <![CDATA[//]]>
+      </str>
+    </ALIGNERFIRSTARGUMENTSTRING1>
+    <ALIGNERFIRSTNAME2>
+      <str>
+        <![CDATA[VHDL Signal Assignment]]>
+      </str>
+    </ALIGNERFIRSTNAME2>
+    <ALIGNERFIRSTARGUMENTSTRING2>
+      <str>
+        <![CDATA[<=]]>
+      </str>
+    </ALIGNERFIRSTARGUMENTSTRING2>
+    <ALIGNERFIRSTNAME3>
+      <str>
+        <![CDATA[VHDL named association]]>
+      </str>
+    </ALIGNERFIRSTNAME3>
+    <ALIGNERFIRSTARGUMENTSTRING3>
+      <str>
+        <![CDATA[=>]]>
+      </str>
+    </ALIGNERFIRSTARGUMENTSTRING3>
+    <ALINGERSAVEDENTRIES int="4" />
+    <SUPPRESSINSERTKEY int="0" />
+    <ALIGNERSAVEDENTRIES int="4" />
+    <aligner>
+      <FIRST_NAME_0>
+        <str>
+          <![CDATA[Equality Operator]]>
+        </str>
+      </FIRST_NAME_0>
+      <FIRST_ARGUMENT_STRING_0>
+        <str>
+          <![CDATA[=]]>
+        </str>
+      </FIRST_ARGUMENT_STRING_0>
+      <FIRST_NAME_1>
+        <str>
+          <![CDATA[C/C++ line Comment ]]>
+        </str>
+      </FIRST_NAME_1>
+      <FIRST_ARGUMENT_STRING_1>
+        <str>
+          <![CDATA[//]]>
+        </str>
+      </FIRST_ARGUMENT_STRING_1>
+      <FIRST_NAME_2>
+        <str>
+          <![CDATA[VHDL Signal Assignment]]>
+        </str>
+      </FIRST_NAME_2>
+      <FIRST_ARGUMENT_STRING_2>
+        <str>
+          <![CDATA[<=]]>
+        </str>
+      </FIRST_ARGUMENT_STRING_2>
+      <SAVED_ENTRIES int="3" />
+    </aligner>
+    <SUPPRESS_INSERT_KEY bool="0" />
+    <CONVERT_BRACES bool="0" />
+  </EditorTweaks>
+  <envvars>
+    <sets>
+      <default />
+    </sets>
+    <ACTIVE_SET>
+      <str>
+        <![CDATA[default]]>
+      </str>
+    </ACTIVE_SET>
+    <DEBUG_LOG bool="0" />
+  </envvars>
+  <FileManager>
+    <fileexplorer>
+      <favrootlist>
+        <LEN int="0" />
+      </favrootlist>
+      <rootlist>
+        <LEN int="1" />
+        <I0>
+          <str>
+            <![CDATA[\]]>
+          </str>
+        </I0>
+      </rootlist>
+      <wildmask>
+        <LEN int="1" />
+        <I0>
+          <str>
+            <![CDATA[]]>
+          </str>
+        </I0>
+      </wildmask>
+      <PARSECVS bool="0" />
+      <PARSESVN bool="0" />
+      <PARSEHG bool="0" />
+      <PARSEBZR bool="0" />
+      <SHOWHIDDENFILES bool="0" />
+    </fileexplorer>
+  </FileManager>
+  <help_plugin>
+    <DEFAULT int="-1" />
+    <BASE_FONT_SIZE int="10" />
+  </help_plugin>
+  <lib_finder>
+    <stored_results />
+  </lib_finder>
+  <an_dlg>
+    <DISABLED>
+      <sset>
+        <s>
+          <![CDATA[Clean project]]>
+        </s>
+        <s>
+          <![CDATA[Debug anyway?]]>
+        </s>
+        <s>
+          <![CDATA[Edit advanced compiler settings?]]>
+        </s>
+        <s>
+          <![CDATA[Layout changed]]>
+        </s>
+        <s>
+          <![CDATA[Project closed while debugging message]]>
+        </s>
+        <s>
+          <![CDATA[Project/Target change with changed settings]]>
+        </s>
+        <s>
+          <![CDATA[Rebuild project]]>
+        </s>
+        <s>
+          <![CDATA[Replace in files]]>
+        </s>
+      </sset>
+    </DISABLED>
+    <DISABLED_RET>
+      <sset>
+        <s>
+          <![CDATA[Clean project:4]]>
+        </s>
+        <s>
+          <![CDATA[Debug anyway?]]>
+        </s>
+        <s>
+          <![CDATA[Dictionaries needed!:6]]>
+        </s>
+        <s>
+          <![CDATA[Edit advanced compiler settings?:4]]>
+        </s>
+        <s>
+          <![CDATA[Layout changed:4]]>
+        </s>
+        <s>
+          <![CDATA[Project closed while debugging message:4]]>
+        </s>
+        <s>
+          <![CDATA[Project/Target change with changed settings:4]]>
+        </s>
+        <s>
+          <![CDATA[Rebuild project:4]]>
+        </s>
+        <s>
+          <![CDATA[Replace in files:4]]>
+        </s>
+      </sset>
+    </DISABLED_RET>
+  </an_dlg>
+  <ThreadSearch>
+    <SHOWCANTOPENFILEERROR bool="1" />
+    <MATCHWORD bool="1" />
+    <STARTWORD bool="0" />
+    <MATCHCASE bool="1" />
+    <REGEX bool="0" />
+    <HIDDENSEARCH bool="1" />
+    <RECURSIVESEARCH bool="1" />
+    <CTXMENUINTEGRATION bool="1" />
+    <USEDEFAULTVALUES bool="1" />
+    <SHOWSEARCHCONTROLS bool="1" />
+    <SHOWDIRCONTROLS bool="0" />
+    <SHOWCODEPREVIEW bool="1" />
+    <DELETEPREVIOUSRESULTS bool="1" />
+    <DISPLAYLOGHEADERS bool="1" />
+    <DRAWLOGLINES bool="0" />
+    <SHOWPANEL bool="0" />
+    <SCOPE int="2" />
+    <DIRPATH>
+      <str>
+        <![CDATA[]]>
+      </str>
+    </DIRPATH>
+    <MASK>
+      <str>
+        <![CDATA[*.cpp;*.c;*.h]]>
+      </str>
+    </MASK>
+    <SPLITTERPOSN int="50" />
+    <SPLITTERMODE int="2" />
+    <VIEWMANAGERTYPE int="0" />
+    <LOGGERTYPE int="0" />
+    <FILESORTING int="0" />
+    <SEARCHPATTERNS>
+      <astr>
+        <s>
+          <![CDATA[SCrc_CalculateCRC8H2F]]>
+        </s>
+        <s>
+          <![CDATA[MUX_ID_CLOCK_SYNC]]>
+        </s>
+        <s>
+          <![CDATA[MUX_ID_INTERPRETED_RX_SIGNALS_PART2]]>
+        </s>
+        <s>
+          <![CDATA[FAIL_get_mux_data]]>
+        </s>
+        <s>
+          <![CDATA[MUX_ID_FAIL_MGR_PART1]]>
+        </s>
+        <s>
+          <![CDATA[MUX_ID_AUTOLOC_STATE]]>
+        </s>
+        <s>
+          <![CDATA[PAL_APP_get_pal_status_info]]>
+        </s>
+        <s>
+          <![CDATA[local_result_s]]>
+        </s>
+        <s>
+          <![CDATA[pal_result]]>
+        </s>
+        <s>
+          <![CDATA[prelearnt_tx_id]]>
+        </s>
+        <s>
+          <![CDATA[Appl_Dcm_DidServices_0x0278_ReadData]]>
+        </s>
+        <s>
+          <![CDATA[Appl_Dcm_DidServices_0x022e_ReadData]]>
+        </s>
+        <s>
+          <![CDATA[POS_UNALLOCATED]]>
+        </s>
+        <s>
+          <![CDATA[DIAG_SENSOR_MISSING]]>
+        </s>
+        <s>
+          <![CDATA[POS_UNKNOWN]]>
+        </s>
+        <s>
+          <![CDATA[total_blocks]]>
+        </s>
+        <s>
+          <![CDATA[PDS_clear_wheel_unit_diagnostic_stats]]>
+        </s>
+        <s>
+          <![CDATA[PAL_CBK_write_nvm]]>
+        </s>
+        <s>
+          <![CDATA[PDS_update_individual_wu_diag_stats]]>
+        </s>
+        <s>
+          <![CDATA[PDS_clear_certain_wheel_unit_diagnostic_stats]]>
+        </s>
+        <s>
+          <![CDATA[total_corr_block_cnt_percent]]>
+        </s>
+      </astr>
+    </SEARCHPATTERNS>
+    <SHOWFILEMISSINGERROR bool="0" />
+    <SEARCHDIRS>
+      <astr />
+    </SEARCHDIRS>
+    <SEARCHMASKS>
+      <astr>
+        <s>
+          <![CDATA[*.cpp;*.c;*.h]]>
+        </s>
+      </astr>
+    </SEARCHMASKS>
+  </ThreadSearch>
+  <todo_list>
+    <USERS>
+      <astr>
+        <s>
+          <![CDATA[amillen]]>
+        </s>
+      </astr>
+    </USERS>
+    <TYPES>
+      <astr>
+        <s>
+          <![CDATA[TODO]]>
+        </s>
+        <s>
+          <![CDATA[@todo]]>
+        </s>
+        <s>
+          <![CDATA[\todo]]>
+        </s>
+        <s>
+          <![CDATA[FIXME]]>
+        </s>
+        <s>
+          <![CDATA[@fixme]]>
+        </s>
+        <s>
+          <![CDATA[\fixme]]>
+        </s>
+        <s>
+          <![CDATA[NOTE]]>
+        </s>
+        <s>
+          <![CDATA[@note]]>
+        </s>
+        <s>
+          <![CDATA[\note]]>
+        </s>
+      </astr>
+    </TYPES>
+    <AUTO_REFRESH bool="1" />
+    <STAND_ALONE bool="0" />
+    <TYPES_SELECTED>
+      <astr>
+        <s>
+          <![CDATA[TODO]]>
+        </s>
+        <s>
+          <![CDATA[@todo]]>
+        </s>
+        <s>
+          <![CDATA[\todo]]>
+        </s>
+        <s>
+          <![CDATA[FIXME]]>
+        </s>
+        <s>
+          <![CDATA[@fixme]]>
+        </s>
+        <s>
+          <![CDATA[\fixme]]>
+        </s>
+        <s>
+          <![CDATA[NOTE]]>
+        </s>
+        <s>
+          <![CDATA[@note]]>
+        </s>
+        <s>
+          <![CDATA[\note]]>
+        </s>
+      </astr>
+    </TYPES_SELECTED>
+    <SOURCE int="0" />
+  </todo_list>
+  <InterpretedLangs>
+    <interpprops />
+  </InterpretedLangs>
+  <wxsmith>
+    <defsizer>
+      <PROPORTION int="1" />
+      <FLAGS int="24591" />
+      <BORDER int="5" />
+      <BORDERDU bool="0" />
+    </defsizer>
+    <UNIQUEIDS bool="1" />
+    <BROWSERPLACEMENTS int="0" />
+    <DRAGTARGETCOL int="6327519" />
+    <DRAGPARENTCOL int="857979" />
+    <DRAGASSISTTYPE int="2" />
+    <PALETTEICONSIZE int="16" />
+    <TOOLICONSIZE int="32" />
+    <GRIDSIZE int="8" />
+    <CONTINOUSINSERT bool="0" />
+    <REMOVEPREFIX bool="0" />
+    <RES_PANEL_SPLIT int="-1" />
+  </wxsmith>
+  <scripting>
+    <startup_scripts />
+  </scripting>
+  <astyle>
+    <STYLE int="12" />
+    <INDENTATION int="4" />
+    <USE_TABS bool="0" />
+    <FORCE_TABS bool="0" />
+    <INDENT_CLASSES bool="0" />
+    <INDENT_SWITCHES bool="1" />
+    <INDENT_CASE bool="1" />
+    <INDENT_BRACKETS bool="0" />
+    <INDENT_BLOCKS bool="0" />
+    <INDENT_NAMESPACES bool="0" />
+    <INDENT_LABELS bool="0" />
+    <INDENT_PREPROCESSOR bool="1" />
+    <INDENT_COL1_COMMENTS bool="0" />
+    <POINTER_ALIGN>
+      <str>
+        <![CDATA[None]]>
+      </str>
+    </POINTER_ALIGN>
+    <BREAK_CLOSING bool="0" />
+    <BREAK_BLOCKS bool="0" />
+    <BREAK_ELSEIFS bool="0" />
+    <PAD_OPERATORS bool="1" />
+    <PAD_PARENTHESES_IN bool="1" />
+    <PAD_PARENTHESES_OUT bool="0" />
+    <PAD_HEADER bool="0" />
+    <UNPAD_PARENTHESES bool="1" />
+    <DELETE_EMPTY_LINES bool="0" />
+    <KEEP_COMPLEX bool="0" />
+    <KEEP_BLOCKS bool="1" />
+    <CONVERT_TABS bool="1" />
+    <FILL_EMPTY_LINES bool="0" />
+    <ADD_BRACKETS bool="1" />
+    <BREAK_LINES bool="0" />
+    <MAX_LINE_LENGTH>
+      <str>
+        <![CDATA[200]]>
+      </str>
+    </MAX_LINE_LENGTH>
+  </astyle>
+  <HeaderFixup>
+    <groups />
+  </HeaderFixup>
+  <cbprofiler>
+    <ANN_SOURCE_CHK bool="0" />
+    <ANN_SOURCE_TXT>
+      <str>
+        <![CDATA[]]>
+      </str>
+    </ANN_SOURCE_TXT>
+    <BRIEF bool="0" />
+    <FILE_INFO bool="0" />
+    <UNUSED_FUNCTIONS bool="0" />
+    <STATIC_CALL_GRAPH bool="0" />
+    <NO_STATIC bool="0" />
+    <MIN_COUNT_CHK bool="0" />
+    <MIN_COUNT_SPN int="1" />
+    <SUM bool="0" />
+    <EXTRA_TXT>
+      <str>
+        <![CDATA[]]>
+      </str>
+    </EXTRA_TXT>
+  </cbprofiler>
+  <new_from_template>
+    <VIEW int="0" />
+  </new_from_template>
+  <cppcheck>
+    <CPPCHECK_APP>
+      <str>
+        <![CDATA[C:\SVN_source\Tools\CodeBlocks\tools\cppcheck.exe]]>
+      </str>
+    </CPPCHECK_APP>
+    <CPPCHECK_ARGS>
+      <str>
+        <![CDATA[--verbose --enable=all --enable=style --xml]]>
+      </str>
+    </CPPCHECK_ARGS>
+  </cppcheck>
+  <scripts>
+    <generic_wizard>
+      <consoleintro>
+        <SKIP bool="1" />
+      </consoleintro>
+      <consolelanguagepage>
+        <SKIP bool="0" />
+      </consolelanguagepage>
+      <projectpathpage>
+        <SKIP bool="0" />
+      </projectpathpage>
+      <compilerpage>
+        <SKIP bool="0" />
+      </compilerpage>
+      <WANT_DEBUG bool="1" />
+      <DEBUG_NAME>
+        <str>
+          <![CDATA[Debug]]>
+        </str>
+      </DEBUG_NAME>
+      <DEBUG_OUTPUT>
+        <str>
+          <![CDATA[bin\Debug\]]>
+        </str>
+      </DEBUG_OUTPUT>
+      <DEBUG_OBJECTS_OUTPUT>
+        <str>
+          <![CDATA[obj\Debug\]]>
+        </str>
+      </DEBUG_OBJECTS_OUTPUT>
+      <WANT_RELEASE bool="1" />
+      <RELEASE_NAME>
+        <str>
+          <![CDATA[Release]]>
+        </str>
+      </RELEASE_NAME>
+      <RELEASE_OUTPUT>
+        <str>
+          <![CDATA[bin\Release\]]>
+        </str>
+      </RELEASE_OUTPUT>
+      <RELEASE_OBJECTS_OUTPUT>
+        <str>
+          <![CDATA[obj\Release\]]>
+        </str>
+      </RELEASE_OBJECTS_OUTPUT>
+      <wxintro>
+        <SKIP bool="0" />
+      </wxintro>
+      <wxversionpage>
+        <SKIP bool="0" />
+      </wxversionpage>
+      <wxprojdetails>
+        <SKIP bool="0" />
+      </wxprojdetails>
+      <wxguiselect>
+        <SKIP bool="0" />
+      </wxguiselect>
+      <wxpath>
+        <SKIP bool="0" />
+      </wxpath>
+      <wxconf>
+        <SKIP bool="0" />
+      </wxconf>
+      <wxconfadvopt>
+        <SKIP bool="0" />
+      </wxconfadvopt>
+      <wxaddlib />
+      <emptyprojectintro>
+        <SKIP bool="0" />
+      </emptyprojectintro>
+      <dllintro>
+        <SKIP bool="0" />
+      </dllintro>
+      <selmoduleintro>
+        <SKIP bool="1" />
+      </selmoduleintro>
+      <modulepathselection>
+        <SKIP bool="0" />
+      </modulepathselection>
+      <selmodulepanel>
+        <SKIP bool="0" />
+      </selmodulepanel>
+    </generic_wizard>
+    <wx_project_wizard>
+      <AUTHOR>
+        <str>
+          <![CDATA[]]>
+        </str>
+      </AUTHOR>
+      <EMAIL>
+        <str>
+          <![CDATA[]]>
+        </str>
+      </EMAIL>
+      <WEBSITE>
+        <str>
+          <![CDATA[]]>
+        </str>
+      </WEBSITE>
+      <GUIBUILDER int="1" />
+      <GUIAPPTYPE int="0" />
+      <DLL int="1" />
+      <MONOLITHIC int="1" />
+      <UNICODE int="1" />
+      <DEBUG int="1" />
+      <PCH int="0" />
+    </wx_project_wizard>
+  </scripts>
+  <project_wizard>
+    <generic_single_choices>
+      <CONSOLELANGUAGEPAGE int="1" />
+      <WXVERSIONPAGE int="1" />
+    </generic_single_choices>
+    <generic_paths>
+      <WXPATH>
+        <str>
+          <![CDATA[$(#wx)]]>
+        </str>
+      </WXPATH>
+      <MODULEPATHSELECTION>
+        <str>
+          <![CDATA[C:\SVN_source\BMW\TPMS_SWC\src\A_partition\RdciWarn\RDCI_WARN]]>
+        </str>
+      </MODULEPATHSELECTION>
+    </generic_paths>
+  </project_wizard>
+  <colours>
+    <list />
+  </colours>
+  <fortran_project>
+    <SPLITTER_POS int="250" />
+    <BROWSER_DISPLAY_FILTER int="2" />
+  </fortran_project>
+  <codestat>
+    <NB_LANGUAGES int="7" />
+    <l0>
+      <NAME>
+        <str>
+          <![CDATA[C/C++]]>
+        </str>
+      </NAME>
+      <EXT>
+        <str>
+          <![CDATA[c cpp h hpp ]]>
+        </str>
+      </EXT>
+      <SINGLE_LINE_COMMENT>
+        <str>
+          <![CDATA[//]]>
+        </str>
+      </SINGLE_LINE_COMMENT>
+      <MULTIPLE_LINE_COMMENT_BEGIN>
+        <str>
+          <![CDATA[/*]]>
+        </str>
+      </MULTIPLE_LINE_COMMENT_BEGIN>
+      <MULTIPLE_LINE_COMMENT_END>
+        <str>
+          <![CDATA[*/]]>
+        </str>
+      </MULTIPLE_LINE_COMMENT_END>
+    </l0>
+    <l1>
+      <NAME>
+        <str>
+          <![CDATA[Java]]>
+        </str>
+      </NAME>
+      <EXT>
+        <str>
+          <![CDATA[java ]]>
+        </str>
+      </EXT>
+      <SINGLE_LINE_COMMENT>
+        <str>
+          <![CDATA[//]]>
+        </str>
+      </SINGLE_LINE_COMMENT>
+      <MULTIPLE_LINE_COMMENT_BEGIN>
+        <str>
+          <![CDATA[/*]]>
+        </str>
+      </MULTIPLE_LINE_COMMENT_BEGIN>
+      <MULTIPLE_LINE_COMMENT_END>
+        <str>
+          <![CDATA[*/]]>
+        </str>
+      </MULTIPLE_LINE_COMMENT_END>
+    </l1>
+    <l2>
+      <NAME>
+        <str>
+          <![CDATA[Python]]>
+        </str>
+      </NAME>
+      <EXT>
+        <str>
+          <![CDATA[py ]]>
+        </str>
+      </EXT>
+      <SINGLE_LINE_COMMENT>
+        <str>
+          <![CDATA[#]]>
+        </str>
+      </SINGLE_LINE_COMMENT>
+      <MULTIPLE_LINE_COMMENT_BEGIN>
+        <str>
+          <![CDATA[]]>
+        </str>
+      </MULTIPLE_LINE_COMMENT_BEGIN>
+      <MULTIPLE_LINE_COMMENT_END>
+        <str>
+          <![CDATA[]]>
+        </str>
+      </MULTIPLE_LINE_COMMENT_END>
+    </l2>
+    <l3>
+      <NAME>
+        <str>
+          <![CDATA[Perl]]>
+        </str>
+      </NAME>
+      <EXT>
+        <str>
+          <![CDATA[pl ]]>
+        </str>
+      </EXT>
+      <SINGLE_LINE_COMMENT>
+        <str>
+          <![CDATA[#]]>
+        </str>
+      </SINGLE_LINE_COMMENT>
+      <MULTIPLE_LINE_COMMENT_BEGIN>
+        <str>
+          <![CDATA[]]>
+        </str>
+      </MULTIPLE_LINE_COMMENT_BEGIN>
+      <MULTIPLE_LINE_COMMENT_END>
+        <str>
+          <![CDATA[]]>
+        </str>
+      </MULTIPLE_LINE_COMMENT_END>
+    </l3>
+    <l4>
+      <NAME>
+        <str>
+          <![CDATA[ASM]]>
+        </str>
+      </NAME>
+      <EXT>
+        <str>
+          <![CDATA[asm ]]>
+        </str>
+      </EXT>
+      <SINGLE_LINE_COMMENT>
+        <str>
+          <![CDATA[;]]>
+        </str>
+      </SINGLE_LINE_COMMENT>
+      <MULTIPLE_LINE_COMMENT_BEGIN>
+        <str>
+          <![CDATA[]]>
+        </str>
+      </MULTIPLE_LINE_COMMENT_BEGIN>
+      <MULTIPLE_LINE_COMMENT_END>
+        <str>
+          <![CDATA[]]>
+        </str>
+      </MULTIPLE_LINE_COMMENT_END>
+    </l4>
+    <l5>
+      <NAME>
+        <str>
+          <![CDATA[Pascal]]>
+        </str>
+      </NAME>
+      <EXT>
+        <str>
+          <![CDATA[pas ]]>
+        </str>
+      </EXT>
+      <SINGLE_LINE_COMMENT>
+        <str>
+          <![CDATA[]]>
+        </str>
+      </SINGLE_LINE_COMMENT>
+      <MULTIPLE_LINE_COMMENT_BEGIN>
+        <str>
+          <![CDATA[{]]>
+        </str>
+      </MULTIPLE_LINE_COMMENT_BEGIN>
+      <MULTIPLE_LINE_COMMENT_END>
+        <str>
+          <![CDATA[}]]>
+        </str>
+      </MULTIPLE_LINE_COMMENT_END>
+    </l5>
+    <l6>
+      <NAME>
+        <str>
+          <![CDATA[Matlab]]>
+        </str>
+      </NAME>
+      <EXT>
+        <str>
+          <![CDATA[m ]]>
+        </str>
+      </EXT>
+      <SINGLE_LINE_COMMENT>
+        <str>
+          <![CDATA[%]]>
+        </str>
+      </SINGLE_LINE_COMMENT>
+      <MULTIPLE_LINE_COMMENT_BEGIN>
+        <str>
+          <![CDATA[]]>
+        </str>
+      </MULTIPLE_LINE_COMMENT_BEGIN>
+      <MULTIPLE_LINE_COMMENT_END>
+        <str>
+          <![CDATA[]]>
+        </str>
+      </MULTIPLE_LINE_COMMENT_END>
+    </l6>
+  </codestat>
+  <ccmanager />
+</CodeBlocksConfig>
+SEL_CONF
+
+} #End BEGIN

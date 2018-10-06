@@ -1,0 +1,2 @@
+connect '/C=37'
+setbaud 115200

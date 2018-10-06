@@ -1,0 +1,9 @@
+;To generate a GMT/UTC time stamp
+tz="GMT-1"
+gettime timestr "%H:%M:%S" tz
+;messagebox timestr tz
+sprintf2 msg "TIME:%s" timestr
+;messagebox msg timestr
+
+sendln msg
+

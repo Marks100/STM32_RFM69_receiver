@@ -1,0 +1,693 @@
+#!/usr/bin/env ruby
+
+require 'docopt'
+require 'logger'
+
+class MyApp
+  attr_reader :logger
+  def initialize(name)
+    @logger = Logger.new($stdout).tap do |log|
+      log.progname = name
+    end
+
+    # simplify logger output format
+    @logger.formatter = proc do |severity, datetime, progname, msg|
+      "#{severity}: #{msg}\n"
+    end
+
+    @logger.level = Logger::INFO
+  end
+end
+
+#
+class WindriverLicenseChecker
+  def initialize(logger)
+    @logger          = logger
+    @license_file    = "#{ENV['TTLD']}\\Windriver\\License\\zwrsLicense.lic"
+    @license_feature = 'WR_COMPILER_PPC'
+    @license_cmd     = 'lmutil lmstat -a -c'
+  end
+
+  def windriver_list_license_status
+    lic_avail       = true
+    min_linger_time = 0
+
+    # issue the actual command to query FlexLM server
+    flex_resp = `#{@license_cmd} #{@license_file}`
+
+    @logger.debug flex_resp
+
+    # regex
+    # match the line stating how many licenses available and how many in use ?<summary>
+    # ^.*WR_COMPILER_PPC:\s+(.*)
+    # Input - Users of WR_COMPILER_PPC:  (Total of 2 licenses issued;  Total of 1 license in use)
+    # Match - $1 = (Total of 2 licenses issued;  Total of 1 license in use)
+    lic_stats = flex_resp.match(/^.*#{@license_feature}:\s+(?<grp>.*)/)
+
+    if lic_stats
+      @logger.debug "LICENSE STATS for feature #{@license_feature}: #{lic_stats['grp']}"
+
+      # get the count of how many available and in use
+      # (\d+)
+      # Input - (Total of 2 licenses issued;  Total of 1 license in use)
+      # match - $1 = 2, $2 = 1
+      lic_count = lic_stats['grp'].match(/(?<avail>\d+).*(?<used>\d+)/)
+
+      if lic_count
+        # check to see how many licenses are in use out of the total
+        lic_available_cnt = lic_count['avail']
+        lic_in_use_cnt    = lic_count['used']
+
+        if lic_in_use_cnt != '0'
+          linger_infos = windriver_get_lic_feature_users(flex_resp)
+
+          lic_avail, min_linger_time = windriver_check_license_availability(linger_infos, lic_in_use_cnt, lic_available_cnt)
+        end
+      end
+    end
+
+    # Grab the employeeID, linger time remaining and total linger time
+    # (^\w{8}).*linger:\s?(\d+)\s?\/\s?(\d+)
+    # Input - a1038045 SELL20039 SELL20039 (v5.9) (SELATPM01/27000 50804), start Thu 6/30 16:26  (linger: 0 / 300)
+    # Match - $1 = a1038045, $2 = 0, $3 = 300
+    return lic_avail, min_linger_time
+  end
+
+  def windriver_get_lic_feature_users(lic_resp)
+    linger_infos  = []
+    feature_found = false
+
+    lic_resp.each_line do |line|
+      if feature_found == false
+        if line =~ /.*#{@license_feature}:/
+          feature_found = true
+        end
+      else
+        if line =~ /.*linger:/
+          # Grab the employeeID, linger time remaining and total linger time
+          # (^\w{8}).*linger:\s?(\d+)\s?\/\s?(\d+)
+          # (?<user>\D\d{7}).*linger:\s*(?<time_left>\d+)\s*\/\s*(?<linger_time>\d+)
+          # Input - a1038045 SELL20039 SELL20039 (v5.9) (SELATPM01/27000 50804), start Thu 6/30 16:26  (linger: 0 / 300)
+          # Match - $1 = a1038045, $2 = 0, $3 = 300
+          match = line.match(/\s*(?<user>\w+).*linger:\s*(?<time_left>\d+)\s*\/\s*(?<linger_time>\d+)/)
+          linger_infos << [user: match['user'], lingering: match['time_left']] if match
+        end
+      end
+    end
+
+    linger_infos
+  end
+
+  def windriver_check_license_availability(linger_details, licenses_used, licenses_available)
+    # decide how long we must wait for a free license
+    # if full license allocation is not in use, then we don't need to wait
+    # we only wait if all licenses are in use
+    # BUT even at that it depends on linger time too, as if linger time
+    # has expired, then we also don't have to wait either
+    lic_avail       = true
+    min_linger_time = 65535
+
+    @logger.debug "Lic avail = #{licenses_available}: lic used = #{licenses_used}"
+
+    lic_avail = false if licenses_used == licenses_available
+
+    if lic_avail == false
+      # all licenses still lingering, figure out minimum wait time
+      linger_details.each do |time_left|
+        if time_left[0][:lingering].to_i < min_linger_time
+          min_linger_time = time_left[0][:lingering].to_i
+        end
+      end
+    end
+
+    if lic_avail == true
+      @logger.info 'License is available now...'
+    else
+      # final check, is it the current user who actually has a license
+      user_check = windriver_lic_used_by_current_user(linger_details)
+
+      if user_check == true
+        @logger.debug 'Current user already has a license, ok to continue'
+
+        # override the decision on availability
+        lic_avail = true
+      end
+    end
+
+    return lic_avail, min_linger_time
+  end
+
+  def windriver_lic_used_by_current_user(details)
+    # find out who is currently executing the license request as if we are
+    # currently using it, then we do not need to hand around still waiting
+    current_user = ENV['USERNAME']
+
+    details.any? { |u| u[0][:user] == current_user }
+  end
+
+  def windriver_wait_for_license
+    connect_result         = false
+    timeout_sec            = 300
+    timeout_check_rate_sec = 5
+
+    until connect_result == true || timeout_sec == 0 do
+      connect_result, wait_time = windriver_list_license_status
+
+      if connect_result == false
+        if wait_time > 0
+          @logger.info "lingering... going to sleep for #{wait_time} seconds"
+          sleep(wait_time.to_i)
+        else
+          # only check every X seconds
+          timeout_sec -= timeout_check_rate_sec
+
+          @logger.info "check again... #{timeout_sec} seconds until give up..."
+
+          # no longer lingering, waiting for license to expire, setup a timeout
+          sleep(timeout_check_rate_sec) if timeout_sec > 0
+        end
+      else
+        @logger.info 'License is available to use now'
+      end
+    end
+
+    connect_result
+  end
+end
+
+class UsbLicenseChecker
+  # CONSTS
+
+  # How long will we wait before giving up looking for a license(seconds)
+  USB_LIC_DEFAULT_TIMEOUT_SEC        = 300
+
+  # How often should we check for the license(seconds)
+  USB_LIC_DEFAULT_LIC_CHECK_RATE_SEC = 2
+
+  def initialize(license_server, logger)
+    @logger             = logger
+    @lic_server_address = license_server
+    @usb_devices        = []
+    @usb_redir_cmd      = 'usbrdrltsh.exe'
+  end
+
+  # ****************************************************************************
+  #
+  #
+  # ****************************************************************************
+  def get_list
+    attr_reader :usb_devices
+
+    @usb_devices
+  end
+
+  # ****************************************************************************
+  #
+  #
+  # ****************************************************************************
+  def usb_populate_device_list
+    @usb_devices = { 'Cosmic_S12X_4-7-10_1BF9CDB2'         => { :GAN => 'COSMIC',     :SGAN => 'S12X_4_7_10',  :PORT => '', :VID => '', :PID => '', :STATUS => '', :TIMEOUT => USB_LIC_DEFAULT_TIMEOUT_SEC },
+                     'Cosmic_S12X_4-7-10_1083FE65'         => { :GAN => 'COSMIC',     :SGAN => 'S12X_4_7_10',  :PORT => '', :VID => '', :PID => '', :STATUS => '', :TIMEOUT => USB_LIC_DEFAULT_TIMEOUT_SEC },
+                     'Cosmic_S12X_4-8-10_261E8F1C'         => { :GAN => 'COSMIC',     :SGAN => 'S12X_4_8_10',  :PORT => '', :VID => '', :PID => '', :STATUS => '', :TIMEOUT => USB_LIC_DEFAULT_TIMEOUT_SEC },
+                     'Cosmic_S12_1CB6815A'                 => { :GAN => 'COSMIC',     :SGAN => 'S12',          :PORT => '', :VID => '', :PID => '', :STATUS => '', :TIMEOUT => USB_LIC_DEFAULT_TIMEOUT_SEC },
+                     'Cosmic_STM8_5453D3F9'                => { :GAN => 'COSMIC',     :SGAN => 'STM8',         :PORT => '', :VID => '', :PID => '', :STATUS => '', :TIMEOUT => USB_LIC_DEFAULT_TIMEOUT_SEC },
+                     'Greehills_V850_B_09469'              => { :GAN => 'GREENHILLS', :SGAN => 'V850',         :PORT => '', :VID => '', :PID => '', :STATUS => '', :TIMEOUT => USB_LIC_DEFAULT_TIMEOUT_SEC },
+                     'Greenhills_PowerPC_B_09032'          => { :GAN => 'GREENHILLS', :SGAN => 'PPC',          :PORT => '', :VID => '', :PID => '', :STATUS => '', :TIMEOUT => USB_LIC_DEFAULT_TIMEOUT_SEC },
+                     'IAR_TI-MSP430-USB_Superpro'          => { :GAN => 'IAR',        :SGAN => 'MSP430',       :PORT => '', :VID => '', :PID => '', :STATUS => '', :TIMEOUT => USB_LIC_DEFAULT_TIMEOUT_SEC },
+                     'IAR_Renesas_RL78_3F7E'               => { :GAN => 'IAR',        :SGAN => 'RL78',         :PORT => '', :VID => '', :PID => '', :STATUS => '', :TIMEOUT => USB_LIC_DEFAULT_TIMEOUT_SEC },
+                     'Mentor_VsaVsi_124C8E40'              => { :GAN => 'MENTOR',     :SGAN => 'VSA',          :PORT => '', :VID => '', :PID => '', :STATUS => '', :TIMEOUT => USB_LIC_DEFAULT_TIMEOUT_SEC },
+                     'Metrowerks_S12X_1D6143B8'            => { :GAN => 'METROWERKS', :SGAN => 'S12X',         :PORT => '', :VID => '', :PID => '', :STATUS => '', :TIMEOUT => USB_LIC_DEFAULT_TIMEOUT_SEC },
+                     'NEC 78k0 - USB UltraPro'             => { :GAN => 'NEC',        :SGAN => '78K0',         :PORT => '', :VID => '', :PID => '', :STATUS => '', :TIMEOUT => USB_LIC_DEFAULT_TIMEOUT_SEC },
+                     'CANape_CANcaseXL'                    => { :GAN => 'VECTOR',     :SGAN => 'CANAPE',       :PORT => '', :VID => '', :PID => '', :STATUS => '', :TIMEOUT => USB_LIC_DEFAULT_TIMEOUT_SEC },
+                     'CANoe_CAN_FlexRay-Vector_VN1611'     => { :GAN => 'VECTOR',     :SGAN => 'CANOE_CAN_FR', :PORT => '', :VID => '', :PID => '', :STATUS => '', :TIMEOUT => USB_LIC_DEFAULT_TIMEOUT_SEC },
+                     'CANoe_CAN-Vector_VN1610'             => { :GAN => 'VECTOR',     :SGAN => 'CANOE_CAN',    :PORT => '', :VID => '', :PID => '', :STATUS => '', :TIMEOUT => USB_LIC_DEFAULT_TIMEOUT_SEC },
+                     'vFlash-Vector_CANcaseXL'             => { :GAN => 'VECTOR',     :SGAN => 'VFLASH',       :PORT => '', :VID => '', :PID => '', :STATUS => '', :TIMEOUT => USB_LIC_DEFAULT_TIMEOUT_SEC },
+                     'DaVinciConfiguratorPro_VectorKeyman' => { :GAN => 'VECTOR',     :SGAN => 'DAVINCI_CONF', :PORT => '', :VID => '', :PID => '', :STATUS => '', :TIMEOUT => USB_LIC_DEFAULT_TIMEOUT_SEC },
+                     'DaVinciDeveloper_VectorKeyman'       => { :GAN => 'VECTOR',     :SGAN => 'DAVINCI_DEV',  :PORT => '', :VID => '', :PID => '', :STATUS => '', :TIMEOUT => USB_LIC_DEFAULT_TIMEOUT_SEC } }
+  end
+
+  # ****************************************************************************
+  #
+  #
+  # ****************************************************************************
+  def usb_list_licenses
+    # go do the connect to USB server and check to see if we got a connection
+    # first of all
+    lic_listing = `#{@usb_redir_cmd} -server #{@lic_server_address} -list`
+
+    @logger.debug lic_listing
+
+    lic_listing = lic_listing.split("\n")
+
+    if usb_validate_license_server(@lic_server_address) == true
+      if usb_check_license_server(lic_listing) == true
+        usb_extract_license_details(lic_listing)
+      else
+        @logger.error 'USB Server is NOT AVAILABLE'
+      end
+    else
+      @logger.error 'ERROR: Server address is not well formed'
+    end
+  end
+
+  # ****************************************************************************
+  # Pull all the output from USB server query into a manageable format
+  #
+  # Pre-requisite - Server validated and connection already checked
+  # ****************************************************************************
+  def usb_extract_license_details(server_response)
+    parser_state      = 0
+    retval            = false
+    @usb_device_count = 0
+    @usb_devicename   = []
+    @usb_devicevid    = []
+    @usb_devicepid    = []
+    @usb_deviceport   = []
+    @usb_devicestatus = []
+
+    server_response.each do |line|
+      if parser_state == 0
+        if line =~ /\-\s+\d+:\s*(.*)/
+          parser_state = 1
+
+          @usb_devicename.push($1)
+        end
+      elsif parser_state == 1
+        if line =~ /Vid:\s+(\w+)\s+Pid:\s+(\w+)\s+(\bSerial|Port):\s+(.+$)/
+
+          parser_state = 2
+
+          @usb_devicevid.push($1)
+          @usb_devicepid.push($2)
+          @usb_deviceport.push($4)
+        end
+      else
+        if line =~ /.*Status:\s+(.*)/
+
+          simple_status = $1.chomp.downcase
+
+          if simple_status.include? 'available for connection'
+            simple_status = 'FREE'
+          elsif simple_status.include? 'connected'
+            simple_status = 'CONN'
+          elsif simple_status.include? 'in use by'
+            simple_status = 'BUSY'
+          else
+          end
+
+          parser_state = 0
+
+          @usb_devicestatus.push(simple_status)
+
+          @usb_device_count += 1
+        end
+      end
+    end
+
+    @usb_devicename.each_with_index do |name, idx|
+      # index into hash and populate the port
+      @usb_devices[name][:PORT]   = @usb_deviceport[idx]
+      @usb_devices[name][:VID]    = @usb_devicevid[idx]
+      @usb_devices[name][:PID]    = @usb_devicepid[idx]
+      @usb_devices[name][:STATUS] = @usb_devicestatus[idx]
+    end
+  end
+
+  # ****************************************************************************
+  #
+  #
+  # ****************************************************************************
+  def usb_attempt_connnect(lic_option)
+    license_status = false
+
+    if usb_validate_license_options(lic_option) == true
+      license_status = usb_connnect(lic_option)
+    else
+      @logger.error 'option error whilst attempting to connect to USB device'
+    end
+
+    license_status
+  end
+
+  # ****************************************************************************
+  #
+  #
+  # ****************************************************************************
+  def usb_attempt_disconnnect(lic_option)
+    if usb_validate_license_options(lic_option) == true
+      lic_status = usb_disconnnect(lic_option)
+
+      @logger.error "USB DISCONNECT ERROR for license option #{lic_option}" unless lic_status == true
+    else
+      @logger.error 'license option error'
+    end
+
+    lic_status
+  end
+
+  # ****************************************************************************
+  #
+  #
+  # ****************************************************************************
+  def usb_disconnnect(lic_option)
+    result = true
+
+    # ensure USB license status are up to date
+    usb_list_licenses
+
+    lic_status, index = usb_find_connected_license(lic_option)
+
+    @logger.info "Attempting to disconnect from #{lic_option}..."
+
+    lic_vid  = @usb_devices[index][:VID]
+    lic_pid  = @usb_devices[index][:PID]
+    lic_port = @usb_devices[index][:PORT]
+
+    connect_port = usb_determine_connection_port(lic_port)
+
+    lic_request = "#{@usb_redir_cmd} -disconnect -server #{@lic_server_address} -vid 0x#{lic_vid} -pid 0x#{lic_pid} -#{connect_port} #{lic_port}"
+
+    if lic_status == 'CONN'
+      lic_resp = `#{lic_request}`
+
+      # now parse this response to check if we did a good job disconnecting
+      if lic_resp =~ /.*ERROR.*/m
+        result = false
+      else
+        # everything else we shall regard as sucess, even if it was not
+        # connected in the first place as there is no harm
+        result = true
+      end
+    end
+
+    result
+  end
+
+  # ****************************************************************************
+  #
+  #
+  # ****************************************************************************
+  def usb_find_connected_license(lic_option)
+    lic = lic_option.split(':')
+
+    # extract the bits we want
+    gan            = lic[0]
+    sgan           = lic[1]
+    status         = 'FREE'
+    free_lic_index = 0
+
+    # Check it is a valid GAN and SGAN
+    @usb_devices.each_with_index do |device, idx|
+      next unless device[1][:GAN]  == gan
+      next unless device[1][:SGAN] == sgan
+      # Check if the license is available to use or not, if we are already
+      # connected to this type of license then no need to have another one
+      next unless device[1][:STATUS] == 'CONN'
+
+      # already connected to a desirable device so exit out...
+      free_lic_index = idx
+
+      # Tried using && as rubocop suggests, but I didn't get the expetced
+      # behaviour as using 'and'
+      status = 'CONN' and break
+    end
+
+    # TODO: need to strengthen up this, all that error checking above could
+    # mean this is dangerous
+    keys = @usb_devices.keys
+
+    return status, keys[free_lic_index]
+  end
+
+  # ****************************************************************************
+  #
+  #
+  # ****************************************************************************
+  def usb_connnect(lic_option)
+    connect_result = false
+
+    # TODO: want to take this specifically from the license table lookup
+    # in case they start taking their own timeouts for whatever reason
+    connect_timeout = USB_LIC_DEFAULT_TIMEOUT_SEC
+
+    until connect_result == true || connect_timeout == 0 do
+
+      @logger.info "Attempting to connect to #{lic_option}..."
+
+      # ensure USB license status are up to date
+      usb_list_licenses
+
+      lic_status, index = usb_find_first_free_license(lic_option)
+
+      lic_vid  = @usb_devices[index][:VID]
+      lic_pid  = @usb_devices[index][:PID]
+      lic_port = @usb_devices[index][:PORT]
+
+      connect_port = usb_determine_connection_port(lic_port)
+
+      lic_connect_request = "#{@usb_redir_cmd} -connect -server #{@lic_server_address} -vid 0x#{lic_vid} -pid 0x#{lic_pid} -#{connect_port} #{lic_port}"
+
+      @logger.debug "#{lic_connect_request}"
+
+      if lic_status == 'FREE'
+        # Attempt the connection to the USB server
+        lic_connect_resp = `#{lic_connect_request}`
+
+        connect_result = true
+      elsif lic_status == 'CONN'
+        @logger.debug 'already connected to the license'
+
+        connect_result = true
+      else
+        connect_timeout -= USB_LIC_DEFAULT_LIC_CHECK_RATE_SEC
+
+        @logger.debug "no available license and timeout = #{connect_timeout}"
+
+        # time to start waiting around for a license then
+        sleep USB_LIC_DEFAULT_LIC_CHECK_RATE_SEC unless connect_timeout == 0
+      end
+    end
+
+    connect_result
+  end
+
+  # ****************************************************************************
+  #
+  #
+  # ****************************************************************************
+  def usb_determine_connection_port(port_string)
+    retval = 'usbport'
+
+    if port_string =~ /\d-+/
+      retval = 'usbport'
+    elsif port_string =~ /\d{12}/
+      retval = 'serial'
+    end
+
+    retval
+  end
+
+  # ****************************************************************************
+  #
+  #
+  # ****************************************************************************
+  def usb_find_first_free_license(lic_option)
+    lic = lic_option.split(':')
+
+    # extract the bits we want
+    gan            = lic[0]
+    sgan           = lic[1]
+    status         = 'FREE'
+    free_lic_index = 0
+
+    # Check it is a valid GAN and SGAN
+    @usb_devices.each_with_index do |device, idx|
+      next unless device[1][:GAN] == gan
+      next unless device[1][:SGAN] == sgan
+      # Check if the license is available to use or not, if we are already
+      # connected to this type of license then no need to have another one
+      if device[1][:STATUS] == 'FREE'
+        status = 'FREE'
+
+        # need the index for later too, but now we found one just exit the
+        # search loop
+        free_lic_index = idx and break
+
+      elsif device[1][:STATUS] == 'CONN'
+        # already connected to a desirable device so exit out...
+
+        # Tried using && as rubocop suggests, but I didn't get the expetced
+        # behaviour as using 'and'
+        status = 'CONN' and break
+      else
+        status = device[1][:STATUS]
+      end
+    end
+
+    @logger.error "GAN:#{gan} SGAN:#{sgan} not found" unless status
+
+    # TODO: need to strengthen up this, all that error checking above could
+    # mean this is dangerous
+    keys = @usb_devices.keys
+
+    # TODO: this function should retuen FREE< BUSY, CONNECTED so that the
+    # license server knows what to attempt next
+    return status, keys[free_lic_index]
+  end
+
+  # ****************************************************************************
+  #
+  #
+  # ****************************************************************************
+  def usb_validate_license_options(lic_option)
+    # do we have the correct formation of the license option, really just check
+    # here for the : to split on
+    match = lic_option.match(/(?<gan>^.*):(?<sgan>.*$)/)
+
+    if match
+      lic_valid = false
+
+      # Check it is a valid GAN and SGAN
+      @usb_devices.each do |device|
+        next unless device[1][:GAN]  == match['gan']
+        next unless device[1][:SGAN] == match['sgan']
+
+        lic_valid = true
+      end
+
+      @logger.error "GAN:#{match['gan']} SGAN:#{match['sgan']} not found" unless lic_valid
+    else
+      @logger.error "#{lic_option} is NOT GOOD"
+    end
+
+    lic_valid
+  end
+
+  # ****************************************************************************
+  # Make sure the license server address is <server>:<port>
+  # ****************************************************************************
+  def usb_validate_license_server(server_address)
+    true if server_address =~ /^.+:\d+/
+  end
+
+  # ****************************************************************************
+  # Check if the license server is connected or not
+  # ****************************************************************************
+  def usb_check_license_server(server_response)
+    srvr_status_found = false
+    retval            = false
+
+    # First check to see if the USB server is available
+    server_response.each do |line|
+      if srvr_status_found == false
+        srvr_status_found = true if line =~ /^\s*.*#{@lic_server_address}/
+      else
+        if line =~ /^\s*.*Mode:\s*\S+\s+Status:\s+(\S+)/
+          status = Regexp.last_match[1] if Regexp.last_match
+          retval = true if status == 'connected'
+        end
+      end
+    end
+
+    retval
+  end
+end
+
+# Program starts here
+if $PROGRAM_NAME == __FILE__
+
+  # ****************************************************************************
+  #   \brief          Main Program
+  # ****************************************************************************
+  # Grab just the filename for convenience
+  NAME = File.basename($PROGRAM_NAME)
+  PTLD = File.expand_path(ENV['PTLD'])
+
+  # Version information string
+  VERSION_NUM = '1.0.0.RC'.freeze
+  VERSION = <<END_VERSION.freeze
+########################################################################
+#  #{NAME} #{VERSION_NUM}
+#  Smart license manager tool:
+#  Currently supports connect/disconnect from all current USB devices
+#  Also supports Windriver FlexLM management
+#
+#  Copyright (C) 2016 Sensata Technologies.
+########################################################################
+END_VERSION
+
+  # Build the options!  Notice that #{VERSION} will include a newline at end
+  DOC_OPT = <<DOCOPT.freeze
+#{VERSION}
+Usage:
+  #{NAME} connect lic <GAN:SGAN>
+  #{NAME} disconnect lic <GAN:SGAN>
+  #{NAME} list
+  #{NAME} wrcheck
+  #{NAME} --version
+  #{NAME} -h | --help
+
+Arguments:
+  VERSION           Version number in standard Sensata format e.g. X.Y.Z.RC
+
+Options:
+  -h --help         Show this screen.
+  -v --version      Tool version
+
+User Manual: http://sanpgit01.schrader.local/tools/buildenv/wikis/TBD
+DOCOPT
+
+  ma = MyApp.new(NAME)
+
+  # Extract options!
+  options = {}
+  begin
+    options = Docopt.docopt(DOC_OPT)
+  rescue Docopt::Exit => e
+    puts DOC_OPT
+    exit 1
+  end
+
+  ma.logger.debug options
+
+  # embed the license server details in the script until the next round of
+  # updates to thsi script
+  server_addr_port = 'selpc20706.schrader.local:32032'
+  license_option   = options['<GAN:SGAN>'] || 'ERROR'
+
+  usb_licenses  = UsbLicenseChecker.new(server_addr_port, ma.logger)
+  flex_licenses = WindriverLicenseChecker.new(ma.logger)
+
+  # default to false so that builds will fail rather then plough on
+  status = false
+
+  # This list is populated with a known list of USB devices
+  usb_licenses.usb_populate_device_list
+
+  if options['list']
+    puts usb_licenses.usb_list_licenses
+  elsif options['connect'] && options['lic']
+    # get the current status of everything
+    usb_licenses.usb_list_licenses
+
+    status = usb_licenses.usb_attempt_connnect(license_option)
+  elsif options['disconnect'] && options['lic']
+    # get the current status of everything
+    usb_licenses.usb_list_licenses
+
+    status = usb_licenses.usb_attempt_disconnnect(license_option)
+  elsif options['wrcheck']
+    status = flex_licenses.windriver_wait_for_license
+  end
+
+  # final check of return code
+  case status
+  when true
+    ma.logger.info 'Success'
+    exit 0
+  when false
+    exit 1
+  end
+
+  exit 0
+end

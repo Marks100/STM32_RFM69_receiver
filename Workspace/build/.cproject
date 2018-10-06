@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?fileVersion 4.0.0?>
+
+<cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
+	<storageModule moduleId="org.eclipse.cdt.core.settings">
+		<cconfiguration id="org.eclipse.cdt.core.default.config.1758903934">
+			<storageModule buildSystemId="org.eclipse.cdt.core.defaultConfigDataProvider" id="org.eclipse.cdt.core.default.config.1758903934" moduleId="org.eclipse.cdt.core.settings" name="Configuration">
+				<externalSettings/>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings">
+				<externalSettings containerId="org.coocox.ExternalSettings" factoryId="org.eclipse.cdt.core.extension.container.factory">
+					<externalSetting>
+						<entry flags="" kind="includePath" name="C:\Program Files (x86)\GNU Tools ARM Embedded\5.4 2016q3\arm-none-eabi\include"/>
+						<entry flags="" kind="includePath" name="C:\Program Files (x86)\GNU Tools ARM Embedded\5.4 2016q3\lib\gcc\arm-none-eabi\5.4.1\include"/>
+						<entry flags="" kind="includePath" name="C:\Program Files (x86)\GNU Tools ARM Embedded\5.4 2016q3\lib\gcc\arm-none-eabi\5.4.1\include-fixed"/>
+						<entry flags="" kind="includePath" name="C:/Users/a1037598/Dropbox/Projects/stm32_devel_projects/Servo_Laser@/Workspace"/>
+						<entry flags="" kind="macro" name="__GNUC__" value=""/>
+						<entry flags="" kind="macro" name="STM32F103C8" value=""/>
+						<entry flags="" kind="macro" name="STM32F10X_MD" value=""/>
+						<entry flags="" kind="macro" name="USE_STDPERIPH_DRIVER" value=""/>
+						<entry flags="" kind="macro" name="__ASSEMBLY__" value=""/>
+					</externalSetting>
+				</externalSettings>
+			</storageModule>
+		</cconfiguration>
+	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.core.pathentry">
+		<pathentry kind="src" path=""/>
+		<pathentry include="C:/Program Files (x86)/GNU Tools ARM Embedded/5.4 2016q3/arm-none-eabi/include" kind="inc" path="" system="true"/>
+		<pathentry include="C:/Program Files (x86)/GNU Tools ARM Embedded/5.4 2016q3/lib/gcc/arm-none-eabi/5.4.1/include" kind="inc" path="" system="true"/>
+		<pathentry include="C:/Program Files (x86)/GNU Tools ARM Embedded/5.4 2016q3/lib/gcc/arm-none-eabi/5.4.1/include-fixed" kind="inc" path="" system="true"/>
+		<pathentry include="C:/Users/a1037598/Dropbox/Projects/stm32_devel_projects/Servo_Laser@/Workspace" kind="inc" path="" system="true"/>
+		<pathentry include="C:/Program Files (x86)/GNU Tools ARM Embedded/5.4 2016q3/arm-none-eabi/include" kind="inc" path="" system="true"/>
+		<pathentry include="C:/Program Files (x86)/GNU Tools ARM Embedded/5.4 2016q3/lib/gcc/arm-none-eabi/5.4.1/include" kind="inc" path="" system="true"/>
+		<pathentry include="C:/Program Files (x86)/GNU Tools ARM Embedded/5.4 2016q3/lib/gcc/arm-none-eabi/5.4.1/include-fixed" kind="inc" path="" system="true"/>
+		<pathentry kind="mac" name="__GNUC__" path="" value=""/>
+		<pathentry kind="mac" name="STM32F103C8" path="" value=""/>
+		<pathentry kind="mac" name="STM32F10X_MD" path="" value=""/>
+		<pathentry kind="mac" name="USE_STDPERIPH_DRIVER" path="" value=""/>
+		<pathentry kind="mac" name="__ASSEMBLY__" path="" value=""/>
+		<pathentry kind="out" path=""/>
+	</storageModule>
+</cproject>

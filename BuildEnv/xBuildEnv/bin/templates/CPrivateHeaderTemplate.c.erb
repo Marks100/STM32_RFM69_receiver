@@ -1,0 +1,71 @@
+/*! \file
+*
+*   \brief      Private Header file for <%= @full_name %>
+*/
+/* =================================== COPYRIGHT NOTICE ============================================
+* The contents of this document are protected under copyright and contain commercially and/or
+* technically confidential information. The content of this document must not be used other than
+* for the purpose for which it was provided nor may it be disclosed or copied (by the authorised
+* recipient or otherwise) without the prior written consent of an authorised officer of Sensata
+*
+*   Copyright <%= Time.now.year %> Sensata Technologies.
+*
+***************************************************************************************************/
+#ifndef <%= @short_name %>_PRI_H
+#define <%= @short_name %>_PRI_H
+
+
+/***************************************************************************************************
+**                              Includes                                                          **
+***************************************************************************************************/
+#include "C_defs.h"
+
+
+/***************************************************************************************************
+**                              Defines                                                           **
+***************************************************************************************************/
+<% if @sparse == false %>
+#define COW_MEAT                   ( 0xBEEFu )    //! Cow meat is BEEF :-)
+#define CAFFINE                    ( 0xC0FFEEu )  //! A must for any day
+<% else %>/* None */<% end %>
+
+
+/***************************************************************************************************
+**                              Enums & Data Types                                                **
+***************************************************************************************************/
+<% if @sparse == false %>
+//! A named enum
+typedef enum <%= @short_name.downcase %>_enum_example
+{
+    <%= @short_name %>_ENUM_EXAMPLE_VAL_A     =  0u,
+    <%= @short_name %>_ENUM_EXAMPLE_VAL_B     =  1u,
+    <%= @short_name %>_ENUM_EXAMPLE_VAL_C     =  2u
+
+} <%= @short_name.downcase %>_enum_example_et;
+
+//! MSN_name structured data type makes things pretty
+typedef struct <%= @short_name.downcase %>_name
+{
+    u8_t element_a;
+    u8_t element_b;
+
+} <%= @short_name.downcase %>_name_st;
+<% else %>/* None */<% end %>
+
+
+/***************************************************************************************************
+**                              Constants                                                         **
+***************************************************************************************************/
+/* None */
+
+
+/***************************************************************************************************
+**                              Function Prototypes                                               **
+***************************************************************************************************/
+<% if @sparse == false %>
+STATIC FUNC(void, <%= @short_name %>_PRI_CODE) <%= @short_name.downcase %>_private_fn_example( void );
+<% else %>/* None */<% end %>
+
+#endif /* <%= @short_name %>_PRI_H */
+
+/****************************** END OF FILE *******************************************************/

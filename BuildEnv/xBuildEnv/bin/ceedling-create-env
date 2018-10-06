@@ -1,0 +1,106 @@
+#!/bin/sh
+#
+# Creates Ceedling environment
+
+RAKEFILE=rakefile.rb
+YAML=project.yml
+
+RAKEFILE_TMP=$RAKEFILE.tmp
+YAML_TMP=$YAML.tmp
+
+NAME=${0##*/}
+
+# Script expects parent of test directory to be passed in as para 1 e.g. app to create CeedlingEnv within app/test
+DIRECTORY="$1"
+
+#######################################
+# Displays usage for tool
+# Globals: None
+# Arguments: None
+# Returns: None
+#######################################
+display_usage() {
+  echo "########################################################################"
+  echo "#  $NAME 1.0.1.RC"
+  echo "#  Ceedling Tool to create a Ceedling Environment"
+  echo "#"
+  echo "#  Copyright (C) 2016 Sensata Technologies."
+  echo "########################################################################"
+  echo ""
+  echo "Usage:"
+  echo "  $NAME DIRECTORY"
+  echo ""
+  echo "Example:"
+  echo "  To create CeedlingEnv within app/test execute this command..."
+  echo "  $NAME app"
+  echo ""
+  echo "Note that the 'test' folder is created automatically."
+  }
+
+#######################################
+# Creates Ceedling environment for a given exe
+# Globals:
+#   RAKEFILE
+#   RAKEFILE_TMP
+#   YAML
+#   YAML_TMP
+# Arguments:
+#   directory - executable folder to create environment within. e.g. app
+# Returns:
+#   None
+#######################################
+function create() {
+
+    mkdir -p $1/test
+    cd $1/test
+
+    rm -fR ./vendor
+    rm -fR ./src
+    rm -fR ./build
+
+    mkdir -p int_test
+    mkdir -p scenario_test
+    mkdir -p sw_test
+    mkdir -p unit_test
+    mkdir -p support
+
+    if [ -f $RAKEFILE ]; then
+      mv $RAKEFILE $RAKEFILE_TMP
+    fi
+
+    if [ -f $YAML ]; then
+      mv $YAML $YAML_TMP
+    fi
+
+    cd ..
+    echo Creating Ceedling Environment...
+    ceedling new test > ceedling-create-env.log
+    rm -fR ./test/src
+    rm -fR ./test/test
+
+    cd test
+
+    if [ -f $RAKEFILE_TMP ]; then
+      mv -f $RAKEFILE_TMP $RAKEFILE
+    fi
+
+    if [ -f $YAML_TMP ]; then
+      mv -f $YAML_TMP $YAML
+    fi
+}
+
+# if less than one argument supplied, display usage
+if [ $# -le 0 ]
+then
+  display_usage
+  exit 1
+fi
+
+# check whether user had supplied -h or --help . If yes display usage
+if [[ ( "$*" == "--help") ||  "$*" == "-h" ]]
+then
+  display_usage
+  exit 0
+fi
+
+create $DIRECTORY

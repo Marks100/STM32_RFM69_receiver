@@ -1,0 +1,59 @@
+/*! \file
+*
+*   \brief      <%= @short_name %> SVN revision information generated from .tmpl file using SubWCRev
+*/
+/* =================================== COPYRIGHT NOTICE ============================================
+* The contents of this document are protected under copyright and contain commercially and/or
+* technically confidential information. The content of this document must not be used other than
+* for the purpose for which it was provided nor may it be disclosed or copied (by the authorised
+* recipient or otherwise) without the prior written consent of an authorised officer of Sensata
+*
+*   Copyright <%= Time.now.year %> Sensata Technologies.
+*
+***************************************************************************************************/
+
+#ifndef <%= @short_name %>_SVN_REV_H
+#define <%= @short_name %>_SVN_REV_H
+
+/***************************************************************************************************
+**                      Include Section                                                           **
+***************************************************************************************************/
+#include "<%= @short_name %>_config.h"
+
+/***************************************************************************************************
+**                      SVN revisions Section                                                     **
+***************************************************************************************************/
+/* Current Module SVN revision */
+#define <%= @short_name %>_SVN_REVISION            ($WCREV$ul)
+
+/* $WCMODS?Module is locally modified - WARNING!:Module is NOT locally modified - OK$ */
+#define <%= @short_name %>_SVN_LOCALLY_MODIFIED    $WCMODS?(1u):(0u)$
+
+/* $WCMIXED?Module is mixed, perform SVN update on module to fix - WARNING!:Module is NOT mixed - OK$ */
+#define <%= @short_name %>_SVN_MIXED               $WCMIXED?(1u):(0u)$
+
+/* Other SVN Strings */
+#define <%= @short_name %>_SVN_URL                 "$WCURL$"
+#define <%= @short_name %>_SVN_DATE                "$WCDATE$"
+#define <%= @short_name %>_SVN_RANGE               "$WCRANGE$"
+
+/***************************************************************************************************
+**                      Version Checks                                                            **
+***************************************************************************************************/
+
+// Check that <%= @short_name %> folder matches the expected version
+#if( <%= @short_name %>_SVN_REVISION != <%= @short_name %>_EXPECTED_SVN_REVISION )
+    #error "<%= @short_name %> Module SVN folder revision does not match expected revision, check correct SVN versions have been checked out"
+#endif // #if( <%= @short_name %>_SVN_REVISION != <%= @short_name %>_EXPECTED_SVN_REVISION )
+
+// Check that SVN folder is NOT partially updated
+#if( <%= @short_name %>_SVN_MIXED == 1u )
+    #error "<%= @short_name %> Mixed SVN Module versions, please do a SVN update on Module"
+#endif // #if( <%= @short_name %>_SVN_MIXED == 1u )
+
+// Check correct version of config file is being used
+#if( <%= @short_name %>_CONFIG_VERSION != 1u )
+    #error "<%= @short_name %> Incorrect <%= @short_name %>_config.h file version being used, please update to latest format in <%= @short_name %>_config_template.h"
+#endif // #if( <%= @short_name %>_CONFIG_VERSION == 1u )
+
+#endif /* #ifndef <%= @short_name %>_SVN_REV_H */

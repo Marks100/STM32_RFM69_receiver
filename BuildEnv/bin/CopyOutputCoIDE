@@ -1,0 +1,7 @@
+#!/bin/sh
+
+mkdir -p $PTLD/build_output/$1/object_files/
+cp -av $PTLD/build_output/$1/Debug/bin/. $PTLD/build_output/$1/
+cp -av $PTLD/build_output/$1/Debug/obj/. $PTLD/build_output/$1/object_files/
+
+

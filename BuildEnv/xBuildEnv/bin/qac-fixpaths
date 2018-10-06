@@ -1,0 +1,190 @@
+#!/usr/bin/env ruby
+
+require 'docopt'
+require 'logger'
+require 'pathname'
+
+# Grab just the filename for convenience
+NAME = File.basename($PROGRAM_NAME)
+
+# Project Level Directory
+PTLD = File.expand_path(ENV['PTLD'])
+TTLD = File.expand_path(ENV['TTLD'])
+
+# Version information string
+VERSION_NUM = '1.1'.freeze
+VERSION = <<END_VERSION.freeze
+################################################################################
+#  #{NAME} #{VERSION_NUM}
+#  Updates any QAC projects with corrected paths
+#  Copyright (C) 2016 Sensata Technologies.
+################################################################################
+END_VERSION
+
+# Build the options!  Notice that #{VERSION} will include a newline at end
+DOC_OPT = <<DOCOPT.freeze
+#{VERSION}
+Usage:
+  #{NAME}
+  #{NAME} -h | --help
+
+Options:
+  --version                 Show version info.
+  -h --help                 Show this screen.
+DOCOPT
+
+# ***************************************************************************************************
+#   \brief          Main Program
+# ***************************************************************************************************
+# Command Line Support ###############################
+if $PROGRAM_NAME == __FILE__
+
+  # Extract options!
+  options = {}
+  begin
+    options = Docopt.docopt(DOC_OPT)
+  rescue Docopt::Exit => e
+    puts e.message
+    exit
+  end
+
+  logger = Logger.new($stdout).tap do |log|
+    log.progname = NAME.to_s
+  end
+
+  # simplify logger output format
+  logger.formatter = proc do |severity, datetime, progname, msg|
+   "#{severity}: #{msg}\n"
+  end
+
+  logger.level = Logger::INFO
+  logger.datetime_format = '%Y-%m-%d %H:%M:%S'
+
+  # Sanity check environment
+  unless ENV['PTLD']
+    @logger.error "This program is designed to be run inside BuildEnv"
+    exit 1
+  end
+
+  # search for any QAC files
+  qac_projects = Dir.glob('**/prqaproject.xml')
+  logger.debug "Found #{qac_projects.join(' ')}"
+
+  # for each project replace fake root & update hard coded Tools path
+  qac_projects.each do |project|
+    # Read
+    proj = File.read(project)
+
+    # work out relative path of PTLD from the location of the project file
+    # don't use APP or FBL as some daft projects include files across these components
+    # Remember that the prqaproject.xml lives inside a prqa folder but the containing folder
+    # is considered the project location in QAC
+    ptld_pathname = Pathname.new( PTLD )
+    proj_pathname = Pathname.new( File.expand_path( project ) + File::SEPARATOR + '..' )
+
+    relative = ptld_pathname.relative_path_from proj_pathname
+
+    logger.info "Expecting fakeroot to be relative path (PTLD from prqa): #{relative}"
+
+    # Determine current fakeroot
+    proj =~ /<fakeroot name="(.*)"\/>/
+    cur_fake_root = $1
+    logger.debug "Current fakeroot is: #{cur_fake_root}"
+
+    # Eevrything looks good here?
+    next if cur_fake_root == relative.to_s
+
+    # Modify
+    logger.info "Attempting to auto-fix your project file."
+    logger.warn "If things look broken you should synchronise your project again via GUI or 'make qacsync'"
+
+    proj.gsub!(/<fakeroot name=.*>/, "<fakeroot name=\"#{relative}\"/>")
+    proj.gsub!(/[a-zA-Z]:[\\\/]SVN_source[\\\/]Tools[\\\/]/, "#{TTLD}/")
+
+    new_lines = []
+    proj.each_line do |line|
+
+      # If we recognise the 'src', try making a full absolute path from this path
+      # and current fakeroot then making it relative to PTLD which is our new fakeroot
+      if line =~ /="([^\s]*src[\\\/].*)"/
+
+        pre_match  = $` + '="'
+        post_match = '"' + $'
+
+        path = $1
+
+
+        # try to append to current fakeroot unless already looks absolute
+        unless line =~ /"[a-zA-Z]:[\\\/]/
+          # Workaround for default projects which pick up the location of the project file itself
+          cur_fake_root.gsub!(/tool_cfg.*/,"")
+          path = cur_fake_root + File::SEPARATOR + path
+        end
+
+
+        full_path_name = Pathname.new( path ).cleanpath
+        new_path_name  = ""
+
+        logger.debug "Trying to fix-up path #{full_path_name}"
+
+        full_path_name.descend do |pn|
+
+          if pn.basename.to_s.downcase == 'src'
+            assumed_ptld = pn.parent.parent
+            new_path_name = full_path_name.relative_path_from(assumed_ptld).to_s
+            break
+          end
+        end
+        new_lines << pre_match + new_path_name + post_match
+
+      else
+        new_lines << line
+      end
+
+    end
+
+    # Write
+    File.open(project, 'w') do |file|
+      new_lines.each do |ln|
+        file.puts ln
+      end
+    end
+
+    logger.info "#{project}, updated"
+  end
+
+  # search for any QAC acf files
+  qac_acf_files = Dir.glob('**/*\.acf')
+  logger.debug "Found #{qac_acf_files.join(' ')}"
+
+  # for each acf file found, convert any argument which has APP in its path to use the corrected path
+  # also correct the path of any SVN_source/Tools paths
+  qac_acf_files.each do |acf_file|
+    # Read
+    acf = File.read(acf_file)
+
+    # Modify if needed
+    if acf =~ /<option argument="([a-zA-Z]:[\\\/].*src[\\\/]).*"/
+
+      # Guessing that the PTLD lives two directores up from src e.g. $PTLD/APP/src
+      src_pathname = Pathname.new( $1 )
+      guessed_ptld_pathname = src_pathname.parent.parent
+
+      logger.info "#{acf_file}, fixing hard coded paths with new guessed PTLD: #{guessed_ptld_pathname}"
+
+      relative = src_pathname.relative_path_from guessed_ptld_pathname
+
+      acf.gsub!($1, "$PTLD/#{relative.to_s}/")
+
+      acf.gsub!(/[a-zA-Z]:[\\\/]SVN_source[\\\/]Tools/, "$TTLD")
+
+      # Write
+      File.open(acf_file, 'w') { |file| file.puts acf }
+
+      logger.info "#{acf_file}, updated"
+
+    end
+
+  end
+
+end

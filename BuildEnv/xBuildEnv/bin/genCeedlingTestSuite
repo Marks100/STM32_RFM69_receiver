@@ -1,0 +1,364 @@
+#!/usr/bin/env ruby
+
+# Add to require search path
+$: << "/SVN_source/Tools/RubyScripts"
+$: << "#{ENV["PBCD"]}xBuildEnv/bin"
+
+require 'docopt'
+require 'erb'
+require 'set'
+require 'csv'
+
+require 'gherkin/parser/parser'
+require 'gherkin/formatter/json_formatter'
+require 'stringio'
+require 'multi_json'
+
+require 'fileutils'
+require 'sitsutils'
+
+# Grab just the filename for convenience
+NAME = File.basename($0)
+PTLD = File.expand_path(ENV['PTLD'])
+RX_ABS_PATH = /[A-Za-z]:[\/\\]/
+
+# Version information string
+VERSION_NUM = "1.0"
+VERSION = <<END_VERSION
+########################################################################################
+#  #{NAME} #{VERSION_NUM}
+#  Generates a Ceedling test suite from a User Story speced in a Gherkin .feature format
+#  Copyright (C) 2015 Sensata Technologies.
+########################################################################################
+END_VERSION
+
+# Build the options!  Notice that #{VERSION} will include a newline at end
+DOC_OPT = <<DOCOPT
+#{VERSION}
+Usage:
+  #{NAME} 
+  #{NAME} file <Gherkin.feature>
+  #{NAME} sits <StoryId>
+  #{NAME} -h | --help
+  #{NAME} --version
+
+Options:
+  --version                 Show version info.
+  -h --help                 Show this screen.
+DOCOPT
+
+# create a new string method to camel case any given string
+class String
+  def camelize
+    temp = split('_').map {|w| w.capitalize}.join
+    temp = temp.split(' ').map {|w| w.capitalize}.join
+  end
+
+  # todo convert >= <= etc to words
+  def strip_punctuation
+    gsub(/[^a-z0-9\s]/i, '')
+  end
+end
+
+# extend SitsIssue class to allow generfation of Gherkin files
+class SitsIssue
+  def gen_gherkin_feature_file
+     template_file = File.open("#{File.dirname(__FILE__)}/templates/GherkinTemplate.feature.erb", 'r').read
+     erb = ERB.new(template_file)
+     gherkin_feature_filename = "features/US_#{@id}_#{@summary.strip_punctuation.camelize}.feature"
+     File.open(gherkin_feature_filename, 'w+') { |file| file.write(erb.result(binding)) }
+     puts "Gherkin Feature File output to: #{gherkin_feature_filename}"
+     gherkin_feature_filename
+  end
+end
+
+class Feature
+  attr_reader :name, :line, :description, :id, :background_steps, :scenario_outlines
+  def initialize(name, line, description, id)
+    @name = name
+    @line = line
+    @description = description
+    @id = id
+    @background_steps = []
+    @scenario_outlines = []
+  end
+
+  def to_s
+    string = "Name: " + @name + ", description: " + @description + "id: " + @id
+    @scenario_outlines.each do |outline|
+      string = string + outline.to_s + ", "
+    end
+  end
+end
+
+class ScenarioOutline
+  attr_reader :name, :line, :description, :id, :steps, :examples
+  def initialize(name, line, description, id)
+    @name = name
+    @line = line
+    @description = description
+    @id = id
+    @steps = []
+    @examples = []
+  end
+
+  def to_s
+    string = "Name: " + @name + ", description: " + @description + "id: " + @id
+    @steps.each do |step|
+      string = string + step.to_s + ", "
+    end
+    string
+  end
+end
+
+class Step
+  attr_reader :name, :line, :keyword
+  def initialize(name, line, keyword)
+    @name = name
+    @line = line
+    @keyword = keyword
+  end
+
+  def to_s
+     @name
+  end
+end
+
+class Example
+  attr_reader :name, :description, :id, :table
+  def initialize(name, description, id)
+    @name = name
+    @description = description
+    @id = id
+
+    # table will be made up of serveral rows
+    @table = []
+  end
+
+  def to_s
+     @name
+  end
+end
+
+class TableRow
+  attr_reader :data
+  def initialize
+    @data = []
+  end
+
+  def to_s
+     @name
+  end
+end
+
+ def gen_test_suite( feature_name )
+     template_file = File.open("#{File.dirname(__FILE__)}/templates/CeedlingTestSuiteTemplate.c.erb", 'r').read
+     erb = ERB.new(template_file)
+     test_suite_filename = "test_#{feature_name}.c"
+     File.open(test_suite_filename, 'w+') { |file| file.write(erb.result(binding)) }
+     puts "Test Suite output to: #{test_suite_filename}"
+ end
+
+def read_gherkin_feature_file(source)
+  @io = StringIO.new
+  formatter = Gherkin::Formatter::JSONFormatter.new(@io)
+  parser = Gherkin::Parser::Parser.new(formatter)
+
+  #sources = ["features/example.feature"]
+  #sources.each do |s|
+    #path = File.expand_path(File.dirname(__FILE__) + '/../' + s)
+  #end
+  begin
+    parser.parse(IO.read(source), '', 0)
+  rescue => e
+    puts e.message
+    puts "failed to parse Gherkin feature file."
+    puts "For more info on format see: http://docs.behat.org/en/latest/guides/1.gherkin.html"
+    exit 1
+  end
+
+
+  formatter.done
+  #puts @io.string
+  @json_obj = MultiJson.load(@io.string)
+end
+
+def output_feature
+  json_obj = @json_obj
+  #puts json_obj
+  puts json_obj[0]["keyword"]
+  puts "Feature name: " + json_obj[0]["name"]
+  puts "Description: " + json_obj[0]["description"]
+  puts "Id: " + json_obj[0]["id"]
+  puts "uri: " + json_obj[0]["uri"]
+  puts ""
+
+
+  puts "elements: " + json_obj[0]["elements"][0]["keyword"]
+
+  # for each scenario
+  json_obj[0]["elements"].each do |scenario|
+    puts scenario["keyword"]
+    puts scenario["name"]
+    puts ""
+
+    puts "Steps:"
+
+    # for each step
+    scenario["steps"].each do |step|
+      print step["keyword"]
+      puts step["name"]
+    end
+
+    puts ""
+
+    # check for examples
+    unless scenario["examples"].nil? 
+      # for each example
+      scenario["examples"].each do |example|
+        print example["keyword"]
+        puts example["name"]
+
+        # for each row
+        example["rows"].each do |row|
+          puts "| " + row["cells"][0] + " | " + row["cells"][1] + " | " + row["cells"][2] + " |"
+        end
+      end
+    end
+
+  end
+end
+
+def pop_feature( json_obj )
+  @feature = Feature.new( json_obj[0]["name"], json_obj[0]["line"], json_obj[0]["description"], json_obj[0]["id"])
+
+  # for each scenario
+  json_obj[0]["elements"].each do |scenario|
+    if scenario["keyword"] == "Background"
+
+      # for each step
+      scenario["steps"].each do |step|
+        # create new test step
+        new_step = Step.new( step["name"], step["line"], step["keyword"] )
+
+        # add step to background
+        @feature.background_steps << new_step
+      end
+
+    end
+
+    # check that it's a scenario because it could also be a background
+    if ( scenario["keyword"] == "Scenario Outline" ) || ( scenario["keyword"] == "Scenario" )
+      scen_outline = ScenarioOutline.new( scenario["name"], scenario["line"], scenario["description"], scenario["id"], )
+
+      # for each step
+      scenario["steps"].each do |step|
+        # create new test step
+        new_step = Step.new( step["name"], step["line"], step["keyword"] )
+
+        # add step to scenario
+        scen_outline.steps << new_step
+      end
+
+      unless scenario["examples"].nil? 
+        # for each example
+        scenario["examples"].each do |example|
+          # create new example
+          new_example = Example.new( example["name"], example["description"], example["id"])
+
+          example["rows"].each do |row|
+            new_row = TableRow.new
+            row["cells"].each do |cell|
+              new_row.data << cell
+            end
+            new_example.table << new_row
+          end
+
+          # add example to scenario
+          scen_outline.examples << new_example
+        end
+      end
+
+        # add scenario to feature
+        @feature.scenario_outlines << scen_outline
+    end
+  end
+end
+
+#***************************************************************************************************
+#   \brief          Main Program
+#***************************************************************************************************
+# Command Line Support ###############################
+if ($0 == __FILE__)
+
+  # Extract options!
+  options = {}
+  begin
+    options = Docopt::docopt(DOC_OPT)
+  rescue Docopt::Exit => e
+    puts e.message
+    exit
+  end
+
+  file_method = options['file']
+  feature_file = options['<Gherkin.feature>']
+
+  FileUtils.mkdir_p('features')
+
+  # if feature file is not specified then create a new one based on template
+  if ( options['file'] == false ) && ( options['sits'] == false )
+    template_file = "#{File.dirname(__FILE__)}/templates/GherkinTemplate.feature"
+    puts "What is the Test suite name?"
+    feature_name = gets.chomp
+
+    feature_file = "features/#{feature_name}.feature"
+    puts "creating #{feature_file}"
+    FileUtils.cp(template_file, feature_file)
+
+    puts "Starting test editor with Gherkin template..."
+    puts "Please edit, save and then exit"
+
+    # todo work out how to start user's prefered editor, e.g. notepad++ or sublime
+    `notepad #{feature_file}`
+
+  elsif ( options['file'] == true )
+    feature_name = File.basename(feature_file, ".*")
+
+  elsif ( options['sits'] == true )
+    # access SITS and create a feature file from user story
+
+    begin
+      @sits_issue = SitsIssue.new( options["<StoryId>"] )
+      @sits_issue.gen_gherkin_feature_file
+    rescue Exception => e
+      puts e.message
+      exit 1
+    end
+    
+    #puts @sits_issue.to_s
+
+    feature_name = "US_#{@sits_issue.id}_#{@sits_issue.summary.strip_punctuation.camelize}"
+    feature_file = "features/#{feature_name}.feature"
+
+
+    puts "Starting test editor with generated Gherkin feature file..."
+    puts "Please review, edit (if required), save and then exit"
+
+    # todo work out how to start user's prefered editor, e.g. notepad++ or sublime
+    `notepad #{feature_file}`
+
+  else
+    puts "Unknown options"
+    exit 1
+  end
+
+  # read feature file
+  read_gherkin_feature_file(feature_file)
+
+  # populate internal classes from gherkin file
+  pop_feature( @json_obj )
+
+  # generate test suite
+  gen_test_suite( feature_name )
+
+end

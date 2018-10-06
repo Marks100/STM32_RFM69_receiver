@@ -1,0 +1,138 @@
+#!/usr/bin/env ruby
+
+# Add to require search path
+$: << "/SVN_source/Tools/RubyScripts"
+
+require 'docopt'
+require 'erb'
+
+# Grab just the filename for convenience
+NAME = File.basename($0)
+PTLD = File.expand_path(ENV['PTLD'])
+RX_ABS_PATH = /[A-Za-z]:[\/\\]/
+
+# Version information string
+VERSION_NUM = "1.1.1.RC"
+VERSION = <<END_VERSION
+########################################################################
+#  #{NAME} #{VERSION_NUM}
+#  Generates a C Module using Standard Templates
+#  Copyright (C) 2016 Sensata Technologies.
+########################################################################
+END_VERSION
+
+# Build the options!  Notice that #{VERSION} will include a newline at end
+DOC_OPT = <<DOCOPT
+#{VERSION}
+Usage:
+  #{NAME}
+  #{NAME} [options] <ModuleShortName>
+  #{NAME} -h | --help
+  #{NAME} --version
+
+Options:
+  -s --sparse   Sparse template without examples.
+  -c --common   Common Module.
+  -h --help     Show this screen.
+  -v --version  Show version.
+DOCOPT
+
+
+class CModule
+  attr_reader :full_name, :short_name, :description, :sparse, :common
+  def initialize(full_name, short_name, description, sparse, common)
+    @full_name = full_name
+    @short_name = short_name
+    @description = description
+    @sparse = sparse
+    @common = common
+  end
+
+ def gen_cmodule
+     puts "\nGenerating..."
+
+     c_template_file = File.open("#{File.dirname(__FILE__)}/templates/CSourceCodeTemplate.c.erb", 'r').read
+     erb = ERB.new(c_template_file)
+     c_filename = "#{@short_name}.c"
+     File.open(c_filename, 'w+') { |file| file.write(erb.result(binding)) }
+     puts "#{c_filename}"
+
+     pub_header_template_file = File.open("#{File.dirname(__FILE__)}/templates/CPublicHeaderTemplate.c.erb", 'r').read
+     erb = ERB.new(pub_header_template_file)
+     pub_filename = "#{@short_name}.h"
+     File.open(pub_filename, 'w+') { |file| file.write(erb.result(binding)) }
+     puts "#{pub_filename}"
+
+     pri_header_template_file = File.open("#{File.dirname(__FILE__)}/templates/CPrivateHeaderTemplate.c.erb", 'r').read
+     erb = ERB.new(pri_header_template_file)
+     pri_filename = "#{@short_name}_pri.h"
+     File.open(pri_filename, 'w+') { |file| file.write(erb.result(binding)) }
+     puts "#{pri_filename}"
+
+     # generate additional common module files if required
+     if @common == true
+       svn_rev_template_file = File.open("#{File.dirname(__FILE__)}/templates/CommonModuleSvnRevTemplate.tmpl.erb", 'r').read
+       erb = ERB.new(svn_rev_template_file)
+       svn_rev_filename = "#{@short_name}_svn_rev.tmpl"
+       File.open(svn_rev_filename, 'w+') { |file| file.write(erb.result(binding)) }
+       puts "#{svn_rev_filename}"
+
+       common_module_config_template_file = File.open("#{File.dirname(__FILE__)}/templates/CommonModuleConfigTemplate.h.erb", 'r').read
+       erb = ERB.new(common_module_config_template_file)
+       common_module_template_filename = "#{@short_name}_config_template.h"
+       File.open(common_module_template_filename, 'w+') { |file| file.write(erb.result(binding)) }
+       puts "#{common_module_template_filename}"
+     end
+
+ end
+end
+
+max_module_short_name_length = 10
+
+#***************************************************************************************************
+#   \brief          Main Program
+#***************************************************************************************************
+# Command Line Support ###############################
+if ($0 == __FILE__)
+
+  # Extract options!
+  options = {}
+  begin
+    options = Docopt::docopt(DOC_OPT)
+  rescue Docopt::Exit => e
+    puts e.message
+    exit
+  end
+
+  #puts options
+
+  # get options passed in via command line
+  short_name = options['<ModuleShortName>']
+
+  if short_name.nil?
+    begin
+      puts "What is the Module's Short Name (max #{max_module_short_name_length} chars)?"
+      short_name = $stdin.gets.chomp.upcase
+    end while short_name.length > max_module_short_name_length
+  else
+    if short_name.length > max_module_short_name_length
+      puts "Error: Module's Short Name exceeds max of #{max_module_short_name_length} chars"
+      exit 1
+    end
+    short_name = short_name.upcase
+  end
+
+  # prompt user for input if options has not been passed in
+  #if full_name.nil?
+    puts "What is the Module's Full Name?"
+    full_name = $stdin.gets.chomp
+  #end
+
+  #if description.nil?
+    puts "\nWhat is the Module's Description?"
+    description = $stdin.gets.chomp
+  #end
+
+  cmodule = CModule.new( full_name, short_name, description, options['--sparse'], options['--common'] )
+  cmodule.gen_cmodule
+end

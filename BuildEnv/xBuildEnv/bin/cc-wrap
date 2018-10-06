@@ -1,0 +1,122 @@
+#!/usr/bin/env ruby
+
+# A utility for translating embedded compiler output to gcc like warning syntax
+#
+# Examples:
+#
+# $ cc-wrap compiler_output.log
+# $ cat compiler_output.log | cc-wrap
+# $ cxpp -c main.c | cc-wrap
+#
+
+require 'optparse'
+
+$be_verbose = false
+
+# Debug Trace function
+def trace( line )
+  pout( line ) if $be_verbose
+end
+
+# Convenience for rescueing in the case that the output pipe is broken
+def pout( output_line )
+  begin
+    $stdout.puts output_line
+  rescue Errno::EPIPE
+    exit(74)
+  end
+end
+
+
+OptionParser.new do |options|
+  # This banner is the first line of your help documentation.
+  options.set_banner "Usage: cc-wrap [options] [files]\n" \
+    "Translate embedded compiler output to gcc format."
+
+  # Separator just adds a new line with the specified text.
+  options.separator ""
+  options.separator "Specific options:"
+
+  options.on("-v, --verbose", "Produce Verbose debugging output") do |verbose|
+    $be_verbose = verbose
+  end
+
+  options.on_tail("-h", "--help", "This is it!") do
+    $stderr.puts options
+    exit 1
+  end
+end.parse!
+
+fname       = ""
+line_num    = ""
+col         = "1"
+msg         = ""
+extra_line  = nil
+compiler    = 'Unknown'
+
+# Keep reading lines of input as long as they're coming.
+while input = ARGF.gets
+  input.each_line do |line|
+
+    # Which compiler have we detected - begin Unknown
+    case compiler
+      when 'Unknown'
+
+        case line
+          # Renesas Compiler
+            when /([\]\[{}\(\) \t#%$~[:alnum:]&_:+\/.-]+)\(([0-9]+)\) : ([A-Z0-9]+) (warning|error) ([A-Z0-9]+):(.*)/
+            trace "MATCHED Renesas"
+            pout( "#{$1}:#{$2}: #{$4}: #{$3} #{$5}:#{$6}" )
+
+          # Windriver compiler error/warning
+          when /"([\]\[{}\(\) \t#%$~[:alnum:]&_:+\/.-]+)", line ([0-9]+): (warning|error) (\(dcc:[0-9]+\):.*)/
+
+            trace "MATCHED Windriver"
+            pout( "#{$1}:#{$2}: #{$3}: #{$4}" )
+
+          # Greenhills compiler error/warning
+          when /"([\]\[{}\(\) \t#%$~[:alnum:]&_:+\/.-]+)", line ([0-9]+): (warning|error) (#[0-9A-Z-]+:.*)/
+            fname       = $1
+            line_num    = $2
+            msg         = "#{$3}: #{$4}"
+            extra_line  = nil
+            compiler    = 'Greenhills'
+
+            trace "MATCHED Greenhills"
+
+          # License error
+          when /No licenses available/
+            pout( "Error: No licenses available" )
+            exit 1 # Allows makefile to exit early
+          else
+            trace "Outputting original line:"
+            pout line
+          end
+
+      when 'Greenhills'
+
+        # Grab the next line as it is part of the message
+        extra_line = line.lstrip unless extra_line
+
+        # Check for a line with a caret only - count where it is for column number
+        if line =~ /^(\s*)\^(\s*)$/
+          col      = $1.length
+          compiler = 'Unknown'
+
+          pout( "#{fname}:#{line_num}:#{col}: #{msg} #{extra_line}" )
+
+          trace "END Greenhills"
+        else
+          trace "NO MATCH: #{line}"
+        end
+
+      # default case
+      else
+        trace "OOPS #{line}"
+        pout( line )
+
+      end # End compiler switch
+
+  end
+end
+

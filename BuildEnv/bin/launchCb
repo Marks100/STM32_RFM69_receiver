@@ -1,0 +1,3 @@
+#!/bin/bash
+
+cb $PTLD/Workspace/STM32_interface.cbp

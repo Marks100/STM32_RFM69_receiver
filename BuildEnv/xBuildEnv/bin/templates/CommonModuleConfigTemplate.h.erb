@@ -1,0 +1,44 @@
+#error "Do not try and compile this, this is only the template file!!!, please copy into Project specific dir and remove this line"
+/*! \file
+*
+*   \brief      <%= @short_name %> Configuration header
+*/
+/* =================================== COPYRIGHT NOTICE ============================================
+* The contents of this document are protected under copyright and contain commercially and/or
+* technically confidential information. The content of this document must not be used other than
+* for the purpose for which it was provided nor may it be disclosed or copied (by the authorised
+* recipient or otherwise) without the prior written consent of an authorised officer of Sensata
+*
+*   Copyright <%= Time.now.year %> Sensata Technologies.
+*
+***************************************************************************************************/
+
+#ifndef <%= @short_name %>_CONFIG_H
+#define <%= @short_name %>_CONFIG_H
+
+/***************************************************************************************************
+**                      Version Control defines                                                   **
+***************************************************************************************************/
+
+/* If update of <%= @short_name %>_CONFIG_VERSION is required then ensure that any changes to
+   <%= @short_name %>_config_template.h are merged into this configuration file */
+#define <%= @short_name %>_CONFIG_VERSION      ( 1u )
+
+/* The revision of the HAL common module you wish to use */
+#define <%= @short_name %>_EXPECTED_SVN_REVISION  #error "Specify the SVN version you expect to be using!"
+
+
+/***************************************************************************************************
+**                      Include Section                                                           **
+***************************************************************************************************/
+#include "COMPILER_defs.h"
+#include "STDC.h"
+
+
+/*!*************************************************************************************************
+*   \brief          Description of <%= @short_name %>_FEATURE_A
+*   Explanation of <%= @short_name %>_FEATURE_A should be used
+***************************************************************************************************/
+#define <%= @short_name %>_FEATURE_A    ( 0u )
+
+#endif // #ifndef <%= @short_name %>_CONFIG_H
