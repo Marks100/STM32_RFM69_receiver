@@ -41,7 +41,6 @@
 #include "NVM.h"
 #include "main.h"
 #include "HAL_UART.h"
-#include "RFM69.h"
 
 
 extern NVM_info_st NVM_info_s;
@@ -462,7 +461,7 @@ void SERIAL_msg_handler( void )
 					STDC_memset( SERIAL_tx_buf_s, 0x20, sizeof( SERIAL_tx_buf_s ) );
 
 					/* Fire down a config of registers */
-					RFM69_set_configuration( RFM69_433Mhz_OOK );
+					RFM69_set_configuration( RFM69_433_FSK_122KBPS_CONFIG );
 
 					u32_t freq;
 					freq = RFM69_read_rf_carrier_freq();
@@ -474,13 +473,13 @@ void SERIAL_msg_handler( void )
 					SERIAL_Send_data( SERIAL_tx_buf_s );
 					STDC_memset( SERIAL_tx_buf_s, 0x20, sizeof( SERIAL_tx_buf_s ) );
 
-					u8_t read_data[79];
-					RFM69_register_data_st write_data[79];
+					u8_t read_data[85];
+					RFM69_register_data_st write_data[85];
 
 					RFM69_read_registers( READ_FROM_CHIP_BURST_MODE, REGOPMODE, read_data, sizeof( read_data ) );
-					RFM69_get_configuration( RFM69_433Mhz_OOK, &write_data );
+					RFM69_get_configuration( RFM69_433_FSK_122KBPS_CONFIG, &write_data );
 
-					for( i = 0u; i < 79; i++ )
+					for( i = 0u; i < 85; i++ )
 					{
 						sprintf( SERIAL_tx_buf_s, "\r\nReg %02d is write:%02X read:%02X", write_data[i].RFM69_register, write_data[i].register_data, read_data[i] );
 						SERIAL_Send_data( SERIAL_tx_buf_s );
@@ -495,10 +494,11 @@ void SERIAL_msg_handler( void )
 				u32_t cnt;
 				u32_t time;
 				f32_t percent;
+				s8_t rssi;
 
 				cnt = RFM69_get_received_packet_cnt();
 				time = HAL_TIM_get_time();
-
+				rssi = RFM69_get_last_received_RSSI();
 				percent = ( ( (f32_t)cnt / (f32_t)time ) * 100.0f );
 
 				sprintf( SERIAL_tx_buf_s, "\r\nCurrent received packet count:\t\t\t%d", cnt );
@@ -510,6 +510,10 @@ void SERIAL_msg_handler( void )
 				STDC_memset( SERIAL_tx_buf_s, 0x20, sizeof( SERIAL_tx_buf_s ) );
 
 				sprintf( SERIAL_tx_buf_s, "\r\nNo of missed frames:\t\t\t\t%d", ( time - cnt ) );
+				SERIAL_Send_data( SERIAL_tx_buf_s );
+				STDC_memset( SERIAL_tx_buf_s, 0x20, sizeof( SERIAL_tx_buf_s ) );
+
+				sprintf( SERIAL_tx_buf_s, "\r\nLast received frame RSSI:\t\t\t%d", rssi );
 				SERIAL_Send_data( SERIAL_tx_buf_s );
 				STDC_memset( SERIAL_tx_buf_s, 0x20, sizeof( SERIAL_tx_buf_s ) );
 
@@ -590,10 +594,11 @@ void SERIAL_msg_handler( void )
 			u32_t cnt;
 			u32_t time;
 			f32_t percent;
+			s8_t rssi;
 
 			cnt = RFM69_get_received_packet_cnt();
 			time = HAL_TIM_get_time();
-
+			rssi = RFM69_get_last_received_RSSI();
 			percent = ( ( (f32_t)cnt / (f32_t)time ) * 100.0f );
 
 			sprintf( SERIAL_tx_buf_s, "\r\nCurrent received packet count:\t\t\t%d", cnt );
@@ -605,6 +610,10 @@ void SERIAL_msg_handler( void )
 			STDC_memset( SERIAL_tx_buf_s, 0x20, sizeof( SERIAL_tx_buf_s ) );
 
 			sprintf( SERIAL_tx_buf_s, "\r\nNo of missed frames:\t\t\t\t%d", ( time - cnt ) );
+			SERIAL_Send_data( SERIAL_tx_buf_s );
+			STDC_memset( SERIAL_tx_buf_s, 0x20, sizeof( SERIAL_tx_buf_s ) );
+
+			sprintf( SERIAL_tx_buf_s, "\r\nLast received frame RSSI:\t\t\t%d", rssi );
 			SERIAL_Send_data( SERIAL_tx_buf_s );
 			STDC_memset( SERIAL_tx_buf_s, 0x20, sizeof( SERIAL_tx_buf_s ) );
 

@@ -54,6 +54,7 @@ false_true_et RFM69_packet_received_s;
 u8_t  RFM69_tx_power_level_s;
 u32_t RFM69_received_packet_cnt_s;
 f32_t RFM69_packet_reception_percent_s;
+s8_t RFM69_last_rssi_s;
 
 
 /***************************************************************************************************
@@ -76,6 +77,7 @@ void RFM69_init( void )
 	RFM69_packet_received_s = FALSE;
 
 	RFM69_packet_reception_percent_s = 0.0f;
+	RFM69_last_rssi_s = -127;
 }
 
 
@@ -120,7 +122,7 @@ void RFM69_setup_receive_mode( void )
 	if( RFM69_read_reserved_registers() == PASS )
 	{
 		/* Fire down a config of registers */
-		RFM69_set_configuration( RFM69_DEFAULT_CONFIG );
+		RFM69_set_configuration( RFM69_433_FSK_122KBPS_CONFIG );
 
 		RFM69_set_PA_level( RFM69_tx_power_level_s );
 
@@ -170,12 +172,15 @@ void RFM69_receive_frame( void )
 
 	if( RFM69_packet_received_s == TRUE )
 	{
+		/* Reset the flag */
 		RFM69_packet_received_s = FALSE;
 
+		/* Grab the current value of RSSi as quickly as possible */
+		RFM69_last_rssi_s = RFM69_read_RSSI();
+
+		/* Set to standby mode and read the FIFO for the RF data */
 		RFM69_set_operating_mode( RFM69_STANDBY_MODE );
-
 		RFM69_read_FIFO_register( read_data );
-
 		RFM69_set_operating_mode( RFM69_RECEIVE_MODE );
 
 		if( RFM69_received_packet_cnt_s == 0u )
@@ -225,11 +230,12 @@ pass_fail_et RFM69_set_configuration( RFM69_static_configuration_et config )
     else
     {
         /* Config is OK */
+    	u8_t len;
+    	len = RFM69_config_c[ config ].length;
 
 #if(MULTI_SPI_WRITE_CONFIG==0)
 
         u8_t i;
-        u8_t len = RFM69_433Mhz_CONFIGURATION_SIZE;
 
         for( i = 0u; i < len; i++ )
         {
@@ -244,7 +250,7 @@ pass_fail_et RFM69_set_configuration( RFM69_static_configuration_et config )
         }
 
 #else
-        if( RFM69_write_registers( WRITE_TO_CHIP_BURST_MODE_CONF, RFM69_config_c[config].buffer_p[0].RFM69_register, &RFM69_config_c[config].buffer_p[0].register_data, RFM69_433Mhz_CONFIGURATION_SIZE  ) == FAIL )
+        if( RFM69_write_registers( WRITE_TO_CHIP_BURST_MODE_CONF, RFM69_config_c[config].buffer_p[0].RFM69_register, &RFM69_config_c[config].buffer_p[0].register_data, len  ) == FAIL )
 		{
 			/* Configuration failed :( */
 			STDC_basic_assert();
@@ -277,7 +283,7 @@ void RFM69_get_configuration( RFM69_static_configuration_et config, RFM69_regist
 {
     u8_t i,j = 0;
 
-    for(  i = 0; i < RFM69_433Mhz_CONFIGURATION_SIZE; i++ )
+    for(  i = 0; i < RFM69_config_c[ config ].length; i++ )
     {
     	data_p[i].RFM69_register = RFM69_config_c[config].buffer_p[i].RFM69_register;
     	data_p[i].register_data  = RFM69_config_c[config].buffer_p[i].register_data;
@@ -561,42 +567,32 @@ u8_t RFM69_read_temp( void )
 *
 *   \author         MS
 *
-*   \return         result - pass or fail
+*   \return         result - rssi in dBm
 *
 *******************************************************************************
 */
-u8_t RFM69_read_RSSI( void )
+u16_t RFM69_read_RSSI( void )
 {
  	u8_t register_val;
+ 	s8_t rssi;
 
- 	/* Read back the current register status */
-	RFM69_read_registers( READ_FROM_CHIP, REGOPMODE, &register_val, 1 );
+ 	/* Trigger the RSSI measurement */
+ 	RFM69_trigger_RSSi_measurement();
 
-	if( register_val != RFM69_STANDBY_MODE )
-    {
-        /* NEED to be in standby mode before this can be done */
-        STDC_basic_assert();
-    }
-    else
-    {
-        register_val = 0u;
+ 	/* Now Read back the current value in the RSSi register  */
+	RFM69_read_registers( READ_FROM_CHIP, REGRSSIVALUE, &register_val, 1 );
 
-        /* start the temperature measurement */
-        register_val |= ( TEMP_MEASURE_START );
+	rssi = ( register_val / 2 );
 
-        /* delay at least 100us before reading the register */
-        delay_ms(1);
-
-        /* Read the temperature measurement */
-        RFM69_read_registers( READ_FROM_CHIP, REGTEMP2, &register_val, 1 );
-    }
+	/* Make the number negative */
+	rssi * -1;
 
     return( register_val );
 }
 
 
 
-u8_t RFM69_read_RSSi_measurement( void )
+u8_t RFM69_trigger_RSSi_measurement( void )
 {
     u8_t register_val = 0u;
     false_true_et status = FALSE;
@@ -604,8 +600,15 @@ u8_t RFM69_read_RSSi_measurement( void )
     /* Trigger the RSSI measurement */
     register_val |= ( RSSI_START );
 
-    RFM69_read_registers( READ_FROM_CHIP, REGRSSIVALUE, &register_val, 1 );
-    status = TRUE;
+    RFM69_write_registers( WRITE_TO_CHIP, REGRSSICONFIG, &register_val, 1 );
+
+    register_val = 0u;
+
+    /* Now wait for the RSSI read to be completed */
+    while( ( register_val & RF_RSSI_DONE ) != RF_RSSI_DONE )
+    {
+    	 RFM69_read_registers( READ_FROM_CHIP, REGRSSICONFIG, &register_val, 1 );
+    }
 
     return ( status );
 }
@@ -1167,21 +1170,6 @@ false_true_et RFM69_set_DIO_mapping( u8_t pin, RFM69_DIO_map_mode_et mode )
 
 
 
-false_true_et RFM69_trigger_RSSi_measurement( void )
-{
-    u8_t register_val = 0u;
-    false_true_et status = FALSE;
-
-    /* Trigger the RSSI measurement */
-    register_val |= ( RSSI_START );
-
-    RFM69_write_registers( WRITE_TO_CHIP, REGRSSICONFIG, &register_val, 1 );
-    status = TRUE;
-
-    return ( status );
-}
-
-
 
 false_true_et RFM69_write_to_FIFO( u8_t* buffer, u8_t len )
 {
@@ -1257,6 +1245,11 @@ f32_t RFM69_get_packet_reception_percent( void )
 	return( RFM69_packet_reception_percent_s );
 }
 
+
+s8_t RFM69_get_last_received_RSSI( void )
+{
+	return ( RFM69_last_rssi_s );
+}
 
 
 /*!

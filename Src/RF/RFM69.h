@@ -1149,9 +1149,7 @@ typedef enum
 
 typedef enum
 {
-    RFM69_DEFAULT_CONFIG,      //! Amplitude Shift Key 915MHz
-    RFM69_433Mhz_OOK,          //! OOk 433Mhz
-	RFM69_TEST,
+    RFM69_433_FSK_122KBPS_CONFIG,      //! Amplitude Shift Key 915MHz
     RFM69_CFG_MAX
 } RFM69_static_configuration_et;
 
@@ -1293,11 +1291,13 @@ false_true_et RFM69_set_encryption_key( u8_t* key, false_true_et state );
 false_true_et RFM69_set_DIO_mapping( u8_t pin, RFM69_DIO_map_mode_et mode );
 false_true_et RFM69_write_to_FIFO( u8_t* buffer, u8_t len );
 false_true_et RFM69_Send_frame( u8_t* buffer, u8_t len, u8_t rx_node_address );
+u16_t RFM69_read_RSSI( void );
 void  RFM69_update_packet_sent( false_true_et state );
 void  RFM69_update_packet_received( false_true_et state );
 u32_t RFM69_get_received_packet_cnt( void );
-void RFM69_update_packet_reception_percent( u16_t secs );
+void  RFM69_update_packet_reception_percent( u16_t secs );
 f32_t RFM69_get_packet_reception_percent( void );
+s8_t  RFM69_get_last_received_RSSI( void );
 
 
 /* Reads */
