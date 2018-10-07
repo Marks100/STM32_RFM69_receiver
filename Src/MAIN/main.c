@@ -16,16 +16,20 @@
 #include "HAL_SPI.h"
 #include "HAL_I2C.h"
 #include "HAL_UART.h"
+#include "HAL_TIM.h"
 #include "RFM69.h"
 #include "main.h"
 
 
-u16_t delay_timer = 0u;
-u32_t ctr = 0u;
+u16_t delay_timer;
+u32_t ctr;
+u16_t debug_timer_s;
 
 int main(void)
 {
 	ctr = 0;
+	delay_timer = 0u;
+	debug_timer_s = 0u;
 
 	RCC_DeInit();
 	SystemInit();
@@ -40,9 +44,13 @@ int main(void)
 	HAL_I2C_init();
 	HAL_SPI_init();
 	NVM_init();
+	HAL_TIM_1_init();
 
 	/* Initialise the RFM69 variables */
 	RFM69_init();
+
+	/* Init the systick timer */
+	MAIN_SYSTICK_init();
 
 	if( debug_mode == ENABLE )
 	{
@@ -71,6 +79,17 @@ int main(void)
 void SysTick_Handler( void )
 {
 	delay_timer--;
+
+	debug_timer_s += 1u;
+
+	if( debug_timer_s >= 1000u )
+	{
+		/* reset the task timer */
+		debug_timer_s = 0u;
+
+		/* Trigger the stream */
+		SERIAL_trigger_stream_output();
+	}
 }
 
 
@@ -88,7 +107,7 @@ void MAIN_SYSTICK_init( void )
 	SysTick_CLKSourceConfig( SysTick_CLKSource_HCLK );
 
 	/* Trigger an interrupt every 1ms */
-	SysTick_Config(72000);
+	SysTick_Config(36000);
 }
 
 

@@ -37,6 +37,7 @@
 #include "STDC.h"
 #include "COMPILER_defs.h"
 #include "HAL_I2C.h"
+#include "HAL_TIM.h"
 #include "NVM.h"
 #include "main.h"
 #include "HAL_UART.h"
@@ -80,12 +81,13 @@ STATIC const u8_t SERIAL_invalid_cmd_message_s[] =
 
 
 
-STATIC char SERIAL_cr_received_s = FALSE;
+STATIC false_true_et SERIAL_cr_received_s;
 STATIC char SERIAL_rx_buf_idx_s;
 STATIC char SERIAL_rx_buf_char_s;
 STATIC char SERIAL_rx_buf_s[RX_BUF_SIZE] = {'\0'};
 STATIC char SERIAL_tx_buf_s[TX_BUF_SIZE] = {'\0'};
-STATIC false_true_et SERIAL_stream_mode_s = FALSE;
+STATIC false_true_et SERIAL_stream_mode_s;
+STATIC false_true_et SERIAL_stream_triggered_s;
 
 
 /***************************************************************************************************
@@ -180,6 +182,7 @@ void SERIAL_init( void )
 	SERIAL_rx_buf_char_s = 0u;
 	STDC_memset( SERIAL_rx_buf_s, '\0', sizeof( SERIAL_rx_buf_s ) );
 	STDC_memset( SERIAL_tx_buf_s, '\0', sizeof( SERIAL_rx_buf_s ) );
+	SERIAL_stream_triggered_s = FALSE;
 
 	/* Finally send the welcome message */
 	SERIAL_Send_data( SERIAL_welcome_message_s );
@@ -189,10 +192,10 @@ void SERIAL_init( void )
 
 void SERIAL_msg_handler( void )
 {
-	if (SERIAL_cr_received_s == 1)
+	if (SERIAL_cr_received_s == TRUE)
 	{
 		// Reset CR Flag
-		SERIAL_cr_received_s = 0;
+		SERIAL_cr_received_s = FALSE;
 
 		if( strncmp(strlwr(SERIAL_rx_buf_s), "help\r", 5) == 0)
 		{
@@ -244,12 +247,12 @@ void SERIAL_msg_handler( void )
 			char *result = strstr(SERIAL_rx_buf_s, "stream") + 7;
 			if( ( *result == '0' ) || ( strstr((char*)result, "off") != 0 ) )
 			{
-				SERIAL_stream_mode_s = 0;
+				SERIAL_stream_mode_s = FALSE;
 				SERIAL_Send_data("\r\nStream mode turned off\r\n\r\n");
 			}
 			else if( ( * result == '1' ) || ( strstr(result, "on") != 0 ) )
 			{
-				SERIAL_stream_mode_s = 1;
+				SERIAL_stream_mode_s = TRUE;
 				SERIAL_Send_data("\r\nStream mode turned on\r\n\r\n");
 			}
 			else
@@ -487,6 +490,29 @@ void SERIAL_msg_handler( void )
 					SERIAL_Send_data( SERIAL_tx_buf_s );
 				}
 			}
+			else if(( strstr(sub_string, "stats") != 0 ) )
+			{
+				u32_t cnt;
+				u32_t time;
+				f32_t percent;
+
+				cnt = RFM69_get_received_packet_cnt();
+				time = HAL_TIM_get_time();
+
+				percent = ( ( (f32_t)cnt / (f32_t)time ) * 100.0f );
+
+				sprintf( SERIAL_tx_buf_s, "\r\nCurrent received packet count:\t\t\t%d", cnt );
+				SERIAL_Send_data( SERIAL_tx_buf_s );
+				STDC_memset( SERIAL_tx_buf_s, 0x20, sizeof( SERIAL_tx_buf_s ) );
+
+				sprintf( SERIAL_tx_buf_s, "\r\nSeconds elapsed since first frame received:\t%d", time );
+				SERIAL_Send_data( SERIAL_tx_buf_s );
+				STDC_memset( SERIAL_tx_buf_s, 0x20, sizeof( SERIAL_tx_buf_s ) );
+
+				sprintf( SERIAL_tx_buf_s, "\r\nPacket reception status:\t\t\t%d%%\r\n", (u8_t)percent );
+				SERIAL_Send_data( SERIAL_tx_buf_s );
+				STDC_memset( SERIAL_tx_buf_s, 0x20, sizeof( SERIAL_tx_buf_s ) );
+			}
 			else
 			{
 				sprintf( SERIAL_tx_buf_s, "Selection not valid please select \"conf\" or \"tx\"\r\n");
@@ -551,6 +577,34 @@ void SERIAL_msg_handler( void )
 		SERIAL_clear_RXBuffer();
 		SERIAL_clear_TXBuffer();
 	}
+	else if( SERIAL_stream_mode_s == TRUE )
+	{
+		if( SERIAL_stream_triggered_s == TRUE )
+		{
+			SERIAL_stream_triggered_s = FALSE;
+
+			u32_t cnt;
+			u32_t time;
+			f32_t percent;
+
+			cnt = RFM69_get_received_packet_cnt();
+			time = HAL_TIM_get_time();
+
+			percent = ( ( (f32_t)cnt / (f32_t)time ) * 100.0f );
+
+			sprintf( SERIAL_tx_buf_s, "\r\nCurrent received packet count:\t\t\t%d", cnt );
+			SERIAL_Send_data( SERIAL_tx_buf_s );
+			STDC_memset( SERIAL_tx_buf_s, 0x20, sizeof( SERIAL_tx_buf_s ) );
+
+			sprintf( SERIAL_tx_buf_s, "\r\nSeconds elapsed since first frame received:\t%d", time );
+			SERIAL_Send_data( SERIAL_tx_buf_s );
+			STDC_memset( SERIAL_tx_buf_s, 0x20, sizeof( SERIAL_tx_buf_s ) );
+
+			sprintf( SERIAL_tx_buf_s, "\r\nPacket reception status:\t\t\t%d%%\r\n", (u8_t)percent );
+			SERIAL_Send_data( SERIAL_tx_buf_s );
+			STDC_memset( SERIAL_tx_buf_s, 0x20, sizeof( SERIAL_tx_buf_s ) );
+		}
+	}
 }
 
 
@@ -602,6 +656,11 @@ void SERIAL_clear_TXBuffer(void)
 
 
 
+
+void SERIAL_trigger_stream_output( void )
+{
+	SERIAL_stream_triggered_s = TRUE;
+}
 
 
 //

@@ -22,6 +22,7 @@
     typedef signed char     s8_t;       //!< signed 8bit type
     typedef signed short    s16_t;      //!< signed 16bit type
     typedef signed long     s32_t;      //!< signed 32bit type
+    typedef float			f32_t;		//!< float 32bit type
 
     /* Compiler specific for assembly */
     #define ASM(x)    _asm(x)

@@ -27,6 +27,7 @@
 #include "COMPILER_defs.h"
 #include "HAL_BRD.h"
 #include "HAL_SPI.h"
+#include "HAL_TIM.h"
 #include "main.h"
 #include "nvm.h"
 #include "RFM69.h"
@@ -48,10 +49,11 @@ STATIC u8_t send_data[RFM69_MAX_PAYLOAD_LEN] =
     52,53,54,55,56,57,58,59,60,61
 };
 
-false_true_et RFM69_packet_sent_s = FALSE;
-false_true_et RFM69_packet_received_s = FALSE;
-u8_t RFM69_tx_power_level_s;
-
+false_true_et RFM69_packet_sent_s;
+false_true_et RFM69_packet_received_s;
+u8_t  RFM69_tx_power_level_s;
+u32_t RFM69_received_packet_cnt_s;
+f32_t RFM69_packet_reception_percent_s;
 
 
 /***************************************************************************************************
@@ -68,6 +70,12 @@ u8_t RFM69_tx_power_level_s;
 void RFM69_init( void )
 {
 	RFM69_tx_power_level_s = NVM_info_s.NVM_generic_data_blk_s.tx_power_level;
+	RFM69_received_packet_cnt_s = 0u;
+
+	RFM69_packet_sent_s = FALSE;
+	RFM69_packet_received_s = FALSE;
+
+	RFM69_packet_reception_percent_s = 0.0f;
 }
 
 
@@ -87,8 +95,6 @@ void RFM69_init( void )
 void RFM69_setup_receive_mode( void )
 {
 	u8_t read_data[50];
-	RFM69_packet_sent_s = FALSE;
-	RFM69_packet_received_s = FALSE;
 
 	/* power up the RF chip */
 	RFM69_set_enable_pin_state( HIGH );
@@ -171,14 +177,21 @@ void RFM69_receive_frame( void )
 		RFM69_read_FIFO_register( read_data );
 
 		RFM69_set_operating_mode( RFM69_RECEIVE_MODE );
+
+		if( RFM69_received_packet_cnt_s == 0u )
+		{
+			/* Increment the packet count */
+			RFM69_received_packet_cnt_s ++;
+
+			/* Start the timer to keep track of reception count */
+			HAL_TIM_1_start();
+		}
+		else
+		{
+			/* Increment the packet count */
+			RFM69_received_packet_cnt_s ++;
+		}
 	}
-
-	//RFM69_read_registers( READ_FROM_CHIP, REGIRQFLAGS2, &register_val, 1 );
-
-	//if( ( register_val & RF_IRQFLAGS2_PAYLOADREADY ) == RF_IRQFLAGS2_PAYLOADREADY )
-	//{
-
-	//}
 }
 
 
@@ -1231,6 +1244,18 @@ void RFM69_update_packet_received( false_true_et state )
 	RFM69_packet_received_s = state;
 }
 
+
+u32_t RFM69_get_received_packet_cnt( void )
+{
+	return( RFM69_received_packet_cnt_s );
+}
+
+
+
+f32_t RFM69_get_packet_reception_percent( void )
+{
+	return( RFM69_packet_reception_percent_s );
+}
 
 
 

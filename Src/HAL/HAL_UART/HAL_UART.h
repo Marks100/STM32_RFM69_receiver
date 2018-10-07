@@ -43,6 +43,7 @@ void SERIAL_Send_data(const char *pucBuffer);
 void SERIAL_clear_RXBuffer(void);
 void SERIAL_clear_TXBuffer(void);
 void SERIAL_msg_handler( void );
+void SERIAL_trigger_stream_output( void );
 
 
 
