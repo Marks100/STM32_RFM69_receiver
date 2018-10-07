@@ -176,7 +176,7 @@ void SERIAL_init( void )
 		USART2 receive data register is not empty */
 	USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
 
-	SERIAL_stream_mode_s = FALSE;
+	SERIAL_stream_mode_s = TRUE;
 	SERIAL_cr_received_s = FALSE;
 	SERIAL_rx_buf_idx_s = 0u;
 	SERIAL_rx_buf_char_s = 0u;
@@ -509,6 +509,10 @@ void SERIAL_msg_handler( void )
 				SERIAL_Send_data( SERIAL_tx_buf_s );
 				STDC_memset( SERIAL_tx_buf_s, 0x20, sizeof( SERIAL_tx_buf_s ) );
 
+				sprintf( SERIAL_tx_buf_s, "\r\nNo of missed frames:\t\t\t\t%d", ( time - cnt ) );
+				SERIAL_Send_data( SERIAL_tx_buf_s );
+				STDC_memset( SERIAL_tx_buf_s, 0x20, sizeof( SERIAL_tx_buf_s ) );
+
 				sprintf( SERIAL_tx_buf_s, "\r\nPacket reception status:\t\t\t%d%%\r\n", (u8_t)percent );
 				SERIAL_Send_data( SERIAL_tx_buf_s );
 				STDC_memset( SERIAL_tx_buf_s, 0x20, sizeof( SERIAL_tx_buf_s ) );
@@ -597,6 +601,10 @@ void SERIAL_msg_handler( void )
 			STDC_memset( SERIAL_tx_buf_s, 0x20, sizeof( SERIAL_tx_buf_s ) );
 
 			sprintf( SERIAL_tx_buf_s, "\r\nSeconds elapsed since first frame received:\t%d", time );
+			SERIAL_Send_data( SERIAL_tx_buf_s );
+			STDC_memset( SERIAL_tx_buf_s, 0x20, sizeof( SERIAL_tx_buf_s ) );
+
+			sprintf( SERIAL_tx_buf_s, "\r\nNo of missed frames:\t\t\t\t%d", ( time - cnt ) );
 			SERIAL_Send_data( SERIAL_tx_buf_s );
 			STDC_memset( SERIAL_tx_buf_s, 0x20, sizeof( SERIAL_tx_buf_s ) );
 
