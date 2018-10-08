@@ -85,7 +85,7 @@ const RFM69_register_data_st RFM69_FSK_433_122kbs_register_set[] =
     { REGDIOMAPPING2   ,0x07 },         
     { REGIRQFLAGS1     ,0x80 },         
     { REGIRQFLAGS2     ,0x00 },         
-    { REGRSSITHRESH    ,0xE4 },         
+    { REGRSSITHRESH    ,0xFF },
     { REGRXTIMEOUT1    ,0x00 },         
     { REGRXTIMEOUT2    ,0x00 },         
     { REGPREAMBLEMSB   ,0x00 },         

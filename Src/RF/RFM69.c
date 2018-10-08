@@ -605,7 +605,7 @@ u8_t RFM69_trigger_RSSi_measurement( void )
     register_val = 0u;
 
     /* Now wait for the RSSI read to be completed */
-    while( ( register_val & RF_RSSI_DONE ) != RF_RSSI_DONE )
+    while( ( register_val & RF_RSSI_DONE ) == 0x00 )
     {
     	 RFM69_read_registers( READ_FROM_CHIP, REGRSSICONFIG, &register_val, 1 );
     }
