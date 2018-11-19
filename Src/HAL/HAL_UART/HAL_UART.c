@@ -348,20 +348,20 @@ void SERIAL_msg_handler( void )
 		else if( strstr(strlwr(SERIAL_rx_buf_s), "rf" ) != 0)
 		{
 			u8_t val;
-			
+
 			char *sub_string = strstr(SERIAL_rx_buf_s, "rf") + 3;
-			
+
 			if( ( strstr(sub_string, "conf") != 0 ) )
 			{
 				sub_string = strstr(SERIAL_rx_buf_s, "rf") + 8;
-				
+
 				val = atoi(sub_string);
-				
+
 				if( val > MAX_NUM_RF_CONFIGS )
 				{
 					/* Default them to config */
 					val = 0u;
-					
+
 					sprintf( SERIAL_tx_buf_s, "Selection not valid.. config can be between 0..%d\r\n", MAX_NUM_RF_CONFIGS );
 					SERIAL_Send_data( SERIAL_tx_buf_s );
 				}
@@ -520,6 +520,10 @@ void SERIAL_msg_handler( void )
 				sprintf( SERIAL_tx_buf_s, "\r\nPacket reception status:\t\t\t%d%%\r\n", (u8_t)percent );
 				SERIAL_Send_data( SERIAL_tx_buf_s );
 				STDC_memset( SERIAL_tx_buf_s, 0x20, sizeof( SERIAL_tx_buf_s ) );
+
+				sprintf( SERIAL_tx_buf_s, "\r\nRun time in secs since power-up:\t\t\t%d%\r\n", time );
+				SERIAL_Send_data( SERIAL_tx_buf_s );
+				STDC_memset( SERIAL_tx_buf_s, 0x20, sizeof( SERIAL_tx_buf_s ) );
 			}
 			else
 			{
@@ -594,22 +598,24 @@ void SERIAL_msg_handler( void )
 			u32_t cnt;
 			u32_t time;
 			f32_t percent;
-			s8_t rssi;
+			s8_t  rssi;
+			u32_t frame_timestamp;
 
 			cnt = RFM69_get_received_packet_cnt();
 			time = HAL_TIM_get_time();
 			rssi = RFM69_get_last_received_RSSI();
 			percent = ( ( (f32_t)cnt / (f32_t)time ) * 100.0f );
+			frame_timestamp = RFM69_get_receieved_packet_timestamp();
 
 			sprintf( SERIAL_tx_buf_s, "\r\nCurrent received packet count:\t\t\t%d", cnt );
 			SERIAL_Send_data( SERIAL_tx_buf_s );
 			STDC_memset( SERIAL_tx_buf_s, 0x20, sizeof( SERIAL_tx_buf_s ) );
 
-			sprintf( SERIAL_tx_buf_s, "\r\nSeconds elapsed since first frame received:\t%d", time );
+			sprintf( SERIAL_tx_buf_s, "\r\nSeconds elapsed since last frame received:\t%d", time - frame_timestamp );
 			SERIAL_Send_data( SERIAL_tx_buf_s );
 			STDC_memset( SERIAL_tx_buf_s, 0x20, sizeof( SERIAL_tx_buf_s ) );
 
-			sprintf( SERIAL_tx_buf_s, "\r\nNo of missed frames:\t\t\t\t%d", ( time - cnt ) );
+			sprintf( SERIAL_tx_buf_s, "\r\nNo of missed frames:\t\t\t\t%d", ( ( time - frame_timestamp ) - cnt ) );
 			SERIAL_Send_data( SERIAL_tx_buf_s );
 			STDC_memset( SERIAL_tx_buf_s, 0x20, sizeof( SERIAL_tx_buf_s ) );
 
@@ -620,6 +626,10 @@ void SERIAL_msg_handler( void )
 			sprintf( SERIAL_tx_buf_s, "\r\nPacket reception status:\t\t\t%d%%\r\n", (u8_t)percent );
 			SERIAL_Send_data( SERIAL_tx_buf_s );
 			STDC_memset( SERIAL_tx_buf_s, 0x20, sizeof( SERIAL_tx_buf_s ) );
+
+			sprintf( SERIAL_tx_buf_s, "\r\nRun time in secs since power-up:\t\t%d%\r\n", time );
+            SERIAL_Send_data( SERIAL_tx_buf_s );
+            STDC_memset( SERIAL_tx_buf_s, 0x20, sizeof( SERIAL_tx_buf_s ) );
 		}
 	}
 }

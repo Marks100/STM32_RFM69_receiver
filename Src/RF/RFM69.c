@@ -51,10 +51,11 @@ STATIC u8_t send_data[RFM69_MAX_PAYLOAD_LEN] =
 
 false_true_et RFM69_packet_sent_s;
 false_true_et RFM69_packet_received_s;
-u8_t  RFM69_tx_power_level_s;
-u32_t RFM69_received_packet_cnt_s;
-f32_t RFM69_packet_reception_percent_s;
-s8_t RFM69_last_rssi_s;
+u8_t          RFM69_tx_power_level_s;
+u32_t         RFM69_received_packet_cnt_s;
+f32_t         RFM69_packet_reception_percent_s;
+s8_t          RFM69_last_rssi_s;
+u32_t         RFM69_packet_received_timestamp_s;
 
 
 /***************************************************************************************************
@@ -78,6 +79,7 @@ void RFM69_init( void )
 
 	RFM69_packet_reception_percent_s = 0.0f;
 	RFM69_last_rssi_s = -127;
+	RFM69_packet_received_timestamp_s = 0u;
 }
 
 
@@ -183,19 +185,10 @@ void RFM69_receive_frame( void )
 		RFM69_read_FIFO_register( read_data );
 		RFM69_set_operating_mode( RFM69_RECEIVE_MODE );
 
-		if( RFM69_received_packet_cnt_s == 0u )
-		{
-			/* Increment the packet count */
-			RFM69_received_packet_cnt_s ++;
+        /* Increment the packet count */
+        RFM69_received_packet_cnt_s ++;
 
-			/* Start the timer to keep track of reception count */
-			HAL_TIM_1_start();
-		}
-		else
-		{
-			/* Increment the packet count */
-			RFM69_received_packet_cnt_s ++;
-		}
+        RFM69_timestamp_receieved_packet();
 	}
 }
 
@@ -1081,7 +1074,7 @@ false_true_et RFM69_set_own_node_address( u8_t address )
 {
 	u8_t register_val;
 	false_true_et status = TRUE;
-	
+
 	/* Write down the node address */
 	RFM69_write_registers( WRITE_TO_CHIP, REGNODEADRS, &register_val, 1  );
 
@@ -1249,6 +1242,16 @@ f32_t RFM69_get_packet_reception_percent( void )
 s8_t RFM69_get_last_received_RSSI( void )
 {
 	return ( RFM69_last_rssi_s );
+}
+
+void RFM69_timestamp_receieved_packet( void )
+{
+    RFM69_packet_received_timestamp_s = HAL_TIM_get_time();
+}
+
+u32_t RFM69_get_receieved_packet_timestamp( void )
+{
+    return ( RFM69_packet_received_timestamp_s );
 }
 
 

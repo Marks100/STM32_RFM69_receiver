@@ -27,7 +27,7 @@ u16_t debug_timer_s;
 
 int main(void)
 {
-	ctr = 0;
+ 	ctr = 0;
 	delay_timer = 0u;
 	debug_timer_s = 0u;
 
@@ -45,6 +45,8 @@ int main(void)
 	HAL_SPI_init();
 	NVM_init();
 	HAL_TIM_1_init();
+    /* Start the timer to keep track of reception count */
+	HAL_TIM_1_start();
 
 	/* Initialise the RFM69 variables */
 	RFM69_init();
@@ -107,7 +109,7 @@ void MAIN_SYSTICK_init( void )
 	SysTick_CLKSourceConfig( SysTick_CLKSource_HCLK );
 
 	/* Trigger an interrupt every 1ms */
-	SysTick_Config(36000);
+	SysTick_Config(72000);
 }
 
 

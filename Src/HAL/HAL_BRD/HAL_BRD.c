@@ -39,7 +39,7 @@ void HAL_BRD_init( void )
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
 
-	/* small delay to allow the button tp settle */
+	/* small delay to allow the button to settle */
 	delay_us(500);
 
 	debug_mode = HAL_BRD_read_debug_pin();
