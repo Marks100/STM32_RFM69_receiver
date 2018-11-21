@@ -197,13 +197,21 @@ u32_t HAL_TIM_get_time( void )
 }
 
 
+
+void HAL_TIM_increment_secs( void )
+{
+	if( HAL_TIM_seconds_ctr_s < U32_T_MAX )
+    {
+        HAL_TIM_seconds_ctr_s ++;
+    }
+}
+
+
 void TIM1_UP_IRQHandler( void )
 {
     if( TIM_GetITStatus( TIM1, TIM_IT_Update ) )
 	{
     	TIM_ClearITPendingBit( TIM1, TIM_IT_Update );
-
-    	HAL_TIM_seconds_ctr_s += 1;
 	}
 }
 

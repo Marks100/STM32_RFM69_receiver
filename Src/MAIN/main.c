@@ -17,6 +17,7 @@
 #include "HAL_I2C.h"
 #include "HAL_UART.h"
 #include "HAL_TIM.h"
+#include "MODE_MGR.h"
 #include "RFM69.h"
 #include "main.h"
 
@@ -51,6 +52,8 @@ int main(void)
 	/* Initialise the RFM69 variables */
 	RFM69_init();
 
+	MODE_MGR_init();
+
 	/* Init the systick timer */
 	MAIN_SYSTICK_init();
 
@@ -68,9 +71,6 @@ int main(void)
 
 	while (1)
 	{
-		/* Handle the serial messages */
-		SERIAL_msg_handler();
-		RFM69_receive_frame();
 	}
 }
 
@@ -84,13 +84,14 @@ void SysTick_Handler( void )
 
 	debug_timer_s += 1u;
 
-	if( debug_timer_s >= 1000u )
+	if( debug_timer_s >= MODE_MGR_TICK_RATE_MSECS )
 	{
 		/* reset the task timer */
 		debug_timer_s = 0u;
 
-		/* Trigger the stream */
-		SERIAL_trigger_stream_output();
+		MODE_MGR_20ms_tick();
+
+		HAL_BRD_Toggle_led();
 	}
 }
 

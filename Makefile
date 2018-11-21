@@ -65,6 +65,7 @@ SRCS := \
 	Src/HAL/HAL_UART/HAL_UART.c \
 	Src/HAL/HAL_I2C/HAL_I2C.c \
 	Src/MAIN/main.c \
+	Src/MODE_MGR/MODE_MGR.c \
 	Src/NVM/NVM.c \
 	Src/RF/RFM69.c \
 	Src/VERSIONS/VERSIONS.c \
@@ -133,6 +134,7 @@ INCLUDES := \
 		-I Src/HAL/HAL_I2C \
 		-I Src/HAL/HAL_SPI \
 		-I Src/HAL/HAL_TIM \
+		-I Src/MODE_MGR \
 		-I Src/RF \
 		-I Src/LED \
 		-I Src/SERIAL \
