@@ -186,6 +186,10 @@
 			<Option target="all" />
 			<Option target="memory_stats" />
 		</Unit>
+		<Unit filename="../Src/MODE_MGR/MODE_MGR.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../Src/MODE_MGR/MODE_MGR.h" />
 		<Unit filename="../Src/NVM/NVM.c">
 			<Option compilerVar="CC" />
 			<Option target="all" />

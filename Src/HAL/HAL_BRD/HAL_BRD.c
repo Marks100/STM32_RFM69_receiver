@@ -389,7 +389,43 @@ disable_enable_et HAL_BRD_read_debug_pin( void )
 
 
 
+/*!
+****************************************************************************************************
+*
+*   \brief         Reads the state of the slider pin
+*
+*   \author        MS
+*
+*   \return        low_high_et state of the pin
+*
+***************************************************************************************************/
+low_high_et HAL_BRD_read_selector_switch_pin( HAL_BRD_switch_slider_et slider )
+{
+    low_high_et state = LOW;
 
+    switch ( slider )
+    {
+        case SLIDER_1:
+            state = HAL_BRD_Read_Pin_state( GPIOB, GPIO_Pin_12 );
+        break;
+
+        case SLIDER_2:
+            state = HAL_BRD_Read_Pin_state( GPIOB, GPIO_Pin_13 );
+        break;
+
+        case SLIDER_3:
+            state = HAL_BRD_Read_Pin_state( GPIOB, GPIO_Pin_14 );
+        break;
+
+        case SLIDER_4:
+            state = HAL_BRD_Read_Pin_state( GPIOB, GPIO_Pin_15 );
+        break;
+
+        default:
+            break;
+    }
+    return ( state );
+}
 
 
 /*!

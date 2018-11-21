@@ -9,9 +9,10 @@
 #include "HAL_TIM.h"
 
 
-STATIC false_true_et 		   MODE_MGR_system_init;
+STATIC false_true_et 		   MODE_MGR_system_init_s;
 STATIC u32_t 			       MODE_MGR_tick_timer_msecs_s;
 STATIC MODE_MGR_mode_et        MODE_MGR_mode_s;
+STATIC u8_t                    MODE_MGR_selector_switch_state_s;
 
 extern NVM_info_st NVM_info_s;
 
@@ -22,7 +23,8 @@ void MODE_MGR_init( void )
 {
 	MODE_MGR_tick_timer_msecs_s = MODE_MGR_TICK_RATE_MSECS;
 	MODE_MGR_mode_s = MODE_MGR_MODE_NORMAL;
-	MODE_MGR_system_init = FALSE;
+	MODE_MGR_system_init_s = FALSE;
+	MODE_MGR_selector_switch_state_s = 0u;
 }
 
 
@@ -71,6 +73,7 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 60u:
+            MODE_MGR_analyse_switches();
         	break;
 
         case 80u:
@@ -91,6 +94,7 @@ void MODE_MGR_action_schedule_normal( void )
 
         case 160u:
             RFM69_receive_frame();
+            MODE_MGR_analyse_switches();
         	break;
 
         case 180u:
@@ -110,6 +114,7 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 260u:
+            MODE_MGR_analyse_switches();
         	break;
 
         case 280u:
@@ -130,6 +135,7 @@ void MODE_MGR_action_schedule_normal( void )
 
         case 360u:
             RFM69_receive_frame();
+            MODE_MGR_analyse_switches();
         	break;
 
         case 380u:
@@ -149,6 +155,7 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 460u:
+            MODE_MGR_analyse_switches();
         	break;
 
         case 480u:
@@ -169,6 +176,7 @@ void MODE_MGR_action_schedule_normal( void )
 
         case 560u:
             RFM69_receive_frame();
+            MODE_MGR_analyse_switches();
         	break;
 
         case 580u:
@@ -188,6 +196,7 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 660u:
+            MODE_MGR_analyse_switches();
         	break;
 
         case 680u:
@@ -208,6 +217,7 @@ void MODE_MGR_action_schedule_normal( void )
 
         case 760u:
             RFM69_receive_frame();
+            MODE_MGR_analyse_switches();
         	break;
 
         case 780u:
@@ -227,7 +237,7 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 860u:
-
+            MODE_MGR_analyse_switches();
         	break;
 
         case 880u:
@@ -248,6 +258,7 @@ void MODE_MGR_action_schedule_normal( void )
 
         case 960u:
             RFM69_receive_frame();
+            MODE_MGR_analyse_switches();
         	break;
 
         case 980u:
@@ -308,6 +319,32 @@ void MODE_MGR_change_mode( void )
 
 
 
+void MODE_MGR_analyse_switches( void )
+{
+    u8_t i;
+    u8_t slider_mask = 0;
+
+    /* Loop through all the positions and analyse them */
+    for( i = SLIDER_1; i < SLIDER_4; i ++ )
+    {
+        slider_mask |= ( HAL_BRD_read_selector_switch_pin( (HAL_BRD_switch_slider_et)i ) << i );
+    }
+
+    if( ( MODE_MGR_selector_switch_state_s & SELECTOR_MODE_BIT_MASK ) != ( slider_mask & SELECTOR_MODE_BIT_MASK ) )
+    {
+        /* selector switch positions have changed */
+        MODE_MGR_selector_switch_state_s = slider_mask;
+
+        //MODE_MGR_action_selector_switch_changes( MODE_MGR_selector_switch_state_s );
+    }
+    else
+    {
+        /* Switches have not been adjusted */
+    }
+}
+
+
+
 
 
 /*!
@@ -322,7 +359,7 @@ void MODE_MGR_change_mode( void )
 ***************************************************************************************************/
 void MODE_MGR_set_system_init_status( false_true_et state )
 {
-	MODE_MGR_system_init = state;
+	MODE_MGR_system_init_s = state;
 }
 
 

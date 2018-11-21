@@ -17,7 +17,7 @@
 **                              Defines                                                           **
 ***************************************************************************************************/
 /* None */
-
+#define SELECTOR_MODE_BIT_MASK ( 0x0F )
 
 
 /***************************************************************************************************
@@ -30,6 +30,14 @@
 **                              Data Types and Enums                                              **
 ***************************************************************************************************/
 /* None */
+
+typedef enum
+{
+    SLIDER_1 = 0u,
+    SLIDER_2,
+    SLIDER_3,
+    SLIDER_4
+} HAL_BRD_switch_slider_et;
 
 
 
@@ -55,6 +63,7 @@ void HAL_BRD_set_LED( off_on_et state );
 void HAL_BRD_RFM69_set_enable_Pin_state( low_high_et state );
 void HAL_BRD_RFM69_set_reset_Pin_state( low_high_et state );
 void HAL_BRD_RFM69_spi_slave_select( low_high_et state );
+low_high_et HAL_BRD_read_selector_switch_pin( HAL_BRD_switch_slider_et slider );
 
 false_true_et HAL_BRD_get_rtc_trigger_status( void );
 void HAL_BRD_set_rtc_trigger_status( false_true_et state );
