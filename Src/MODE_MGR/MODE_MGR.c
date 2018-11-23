@@ -13,7 +13,7 @@ STATIC false_true_et 		   MODE_MGR_system_init_s;
 STATIC u32_t 			       MODE_MGR_tick_timer_msecs_s;
 STATIC MODE_MGR_mode_et        MODE_MGR_mode_s;
 STATIC u8_t                    MODE_MGR_selector_switch_state_s;
-
+STATIC u8_t                    MODE_MGR_debounce_ctr_s;
 extern NVM_info_st NVM_info_s;
 
 
@@ -25,6 +25,7 @@ void MODE_MGR_init( void )
 	MODE_MGR_mode_s = MODE_MGR_MODE_NORMAL;
 	MODE_MGR_system_init_s = FALSE;
 	MODE_MGR_selector_switch_state_s = 0u;
+	MODE_MGR_debounce_ctr_s = 0xFF;
 }
 
 
@@ -325,7 +326,7 @@ void MODE_MGR_analyse_switches( void )
     u8_t slider_mask = 0;
 
     /* Loop through all the positions and analyse them */
-    for( i = SLIDER_1; i < SLIDER_4; i ++ )
+    for( i = SLIDER_1; i < SLIDER_MAX; i ++ )
     {
         slider_mask |= ( HAL_BRD_read_selector_switch_pin( (HAL_BRD_switch_slider_et)i ) << i );
     }
@@ -335,11 +336,39 @@ void MODE_MGR_analyse_switches( void )
         /* selector switch positions have changed */
         MODE_MGR_selector_switch_state_s = slider_mask;
 
-        //MODE_MGR_action_selector_switch_changes( MODE_MGR_selector_switch_state_s );
+        MODE_MGR_debounce_ctr_s = 0u;
     }
-    else
+
+    /* Rudementary debounce mechanism */
+    if( MODE_MGR_debounce_ctr_s != 0xFF )
     {
-        /* Switches have not been adjusted */
+        if( MODE_MGR_debounce_ctr_s >= 4 )
+        {
+            MODE_MGR_debounce_ctr_s = 0xFF;
+
+            MODE_MGR_action_selector_switch_changes( MODE_MGR_selector_switch_state_s );
+        }
+        else
+        {
+        	MODE_MGR_debounce_ctr_s ++;
+        }
+    }
+}
+
+
+
+
+void MODE_MGR_action_selector_switch_changes( u8_t MODE_MGR_selector_switch_state_s )
+{
+    switch( MODE_MGR_selector_switch_state_s )
+    {
+        case COMMAND_1:
+            HAL_BRD_toggle_debug_pin();
+            break;
+
+        default:
+            HAL_BRD_toggle_debug_pin();
+            break;
     }
 }
 

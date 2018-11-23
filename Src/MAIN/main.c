@@ -91,7 +91,7 @@ void SysTick_Handler( void )
 
 		MODE_MGR_20ms_tick();
 
-		HAL_BRD_Toggle_led();
+		HAL_BRD_toggle_led();
 	}
 }
 

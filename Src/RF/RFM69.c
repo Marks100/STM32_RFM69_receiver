@@ -1283,11 +1283,11 @@ void RFM69_reset( void )
 
 void RFM69_set_reset_pin_state( low_high_et state )
 {
-    HAL_BRD_RFM69_set_reset_Pin_state( state );
+    HAL_BRD_RFM69_set_reset_pin_state( state );
 }
 
 
 void RFM69_set_enable_pin_state( low_high_et state )
 {
-    HAL_BRD_RFM69_set_enable_Pin_state( state );
+    HAL_BRD_RFM69_set_enable_pin_state( state );
 }
