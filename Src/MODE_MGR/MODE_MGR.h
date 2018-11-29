@@ -35,6 +35,7 @@ typedef enum
 void MODE_MGR_init( void );
 void MODE_MGR_20ms_tick( void );
 void MODE_MGR_action_schedule_normal( void );
+void MODE_MGR_analyse_switches( void );
 void MODE_MGR_change_mode( void );
 void MODE_MGR_handle_settings( void );
 MODE_MGR_mode_et MODE_MGR_get_mode( void );

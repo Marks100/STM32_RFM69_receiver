@@ -7,6 +7,8 @@
 #include "HAL_ADC.h"
 #include "HAL_BRD.h"
 #include "HAL_TIM.h"
+#include "RFM69.h"
+#include "HAL_UART.h"
 
 
 STATIC false_true_et 		   MODE_MGR_system_init_s;

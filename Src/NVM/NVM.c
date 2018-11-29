@@ -303,12 +303,12 @@ false_true_et NVM_write_segment ( void )
 	FLASH_ClearFlag(FLASH_FLAG_EOP | FLASH_FLAG_PGERR | FLASH_FLAG_WRPRTERR);
 
 	/* set the structure back to 0 prior to reading the memory ( just a test ) */
-	memset(pointer_struct_p, 0x00, sizeof (NVM_info_s ));
+	STDC_memset(pointer_struct_p, 0x00, sizeof (NVM_info_s ));
 
 	address = NVM_FLASH_PTR_START_ADDR;
 
 	/* Now read the memory back, starting at the memory register start address */
-	memcpy( pointer_struct_p, address, sizeof (NVM_info_st) );
+	STDC_memcpy( pointer_struct_p, address, sizeof (NVM_info_st) );
 
 #else
 

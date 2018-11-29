@@ -49,6 +49,7 @@ STATIC u8_t send_data[RFM69_MAX_PAYLOAD_LEN] =
     52,53,54,55,56,57,58,59,60,61
 };
 
+false_true_et RFM69_init_s;
 false_true_et RFM69_packet_sent_s;
 false_true_et RFM69_packet_received_s;
 u8_t          RFM69_tx_power_level_s;
@@ -124,7 +125,7 @@ void RFM69_setup_receive_mode( void )
 	if( RFM69_read_reserved_registers() == PASS )
 	{
 		/* Fire down a config of registers */
-		RFM69_set_configuration( RFM69_433_FSK_122KBPS_CONFIG );
+		RFM69_set_configuration( NVM_info_s.NVM_generic_data_blk_s.tx_power_level );
 
 		RFM69_set_PA_level( RFM69_tx_power_level_s );
 
@@ -178,7 +179,7 @@ void RFM69_receive_frame( void )
 		RFM69_packet_received_s = FALSE;
 
 		/* Grab the current value of RSSi as quickly as possible */
-		RFM69_last_rssi_s = RFM69_read_RSSI();
+		//RFM69_last_rssi_s = RFM69_read_RSSI();
 
 		/* Set to standby mode and read the FIFO for the RF data */
 		RFM69_set_operating_mode( RFM69_STANDBY_MODE );
@@ -250,6 +251,17 @@ pass_fail_et RFM69_set_configuration( RFM69_static_configuration_et config )
 
 			returnType = FAIL;
 		}
+
+		u8_t val = 0x30;
+
+		/* This register sits out on its own but the datasheet says to set it to this value so i will comply with the law */
+		if( RFM69_write_registers( WRITE_TO_CHIP, REGTESTDAGC, &val, 1 ) == FAIL )
+        {
+            /* Configuration failed :( */
+			STDC_basic_assert();
+
+			returnType = FAIL;
+        }
 
 #endif
     }
@@ -673,7 +685,7 @@ false_true_et RFM69_set_clock_out( disable_enable_et state )
     register_val &= ~BIT_MASK_3_BIT;
 
     /* This disables the CLK_OUT */
- 	if( state == DISABLE )
+ 	if( state == DISABLE_ )
     {
         register_val |= CLK_OUT_OFF;
     }
@@ -1175,10 +1187,11 @@ false_true_et RFM69_write_to_FIFO( u8_t* buffer, u8_t len )
 
 
 
-false_true_et RFM69_Send_frame( u8_t* buffer, u8_t len, u8_t rx_node_address )
+false_true_et RFM69_send_frame( u8_t* buffer, u8_t len, u8_t rx_node_address )
 {
     false_true_et status = FALSE;
     u8_t tx_buffer[RFM69_MAX_PAYLOAD_LEN];
+	u16_t timeout = 0u;
     u8_t test_buffer[RFM69_MAX_DATA_LEN];
 
     /* Set to standby */
@@ -1201,9 +1214,19 @@ false_true_et RFM69_Send_frame( u8_t* buffer, u8_t len, u8_t rx_node_address )
     RFM69_set_operating_mode( RFM69_TRANSMIT_MODE );
 
     /* The packet is now being sent */
-    while( RFM69_packet_sent_s == FALSE )
+    while( ( RFM69_packet_sent_s == FALSE ) && ( timeout < RFM69_TIMEOUT ) )
     {
-    	//TODO : timeout
+    	/* WE NEED TO HAVE A TIMEOUT HERE JUST SO THE WHOLE OPERATION DOESNT STOP BECAUSE
+    	A FRAME DIDNT GET SENT */
+    	delay_us( 100 );
+
+    	/* increment the timeout */
+    	timeout ++;
+    }
+
+    if( timeout == RFM69_TIMEOUT )
+    {
+        STDC_basic_assert();
     }
 
     /* Set to standby again */
@@ -1269,13 +1292,8 @@ u32_t RFM69_get_receieved_packet_timestamp( void )
 ***************************************************************************************************/
 void RFM69_reset( void )
 {
-	RFM69_set_reset_pin_state( HIGH );
-
-	delay_us(1000);
-
-	RFM69_set_reset_pin_state( LOW );
-
-	delay_us(1000);
+	/* Reset the init status */
+	RFM69_init_s = FALSE;
 }
 
 

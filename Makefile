@@ -23,9 +23,6 @@ STM32_MEM_OUTPUT_FILE := memory_analysis.txt
 RELEASE_PACKAGE_NAME :=  Release_package
 STM32_MEM_OUTPUT_FILE := memory_analysis.txt
 
-#MAJOR_SW = `awk '/MAJOR_SW/ { print $$3 }' Src/VERSIONS/VERSIONS.h`
-#MINOR_SW = `awk '/MINOR_SW/ { print $$3 }' Src/VERSIONS/VERSIONS.h`
-
 MAJOR_SW = `awk '/VERSION_MAJOR/ { print $$4+0 }' Src/autoversion.h`
 MINOR_SW = `awk '/VERSION_PATCH/ { print $$4+0 }' Src/autoversion.h`
 VERIFICATION_SW = `awk '/VERSION_VERIFICATION/ { print $$4+0 }' Src/autoversion.h`

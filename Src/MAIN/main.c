@@ -18,6 +18,7 @@
 #include "HAL_UART.h"
 #include "HAL_TIM.h"
 #include "MODE_MGR.h"
+#include "nvm.h"
 #include "RFM69.h"
 #include "main.h"
 

@@ -119,8 +119,8 @@
     <File name="stm_lib/inc/misc.h" path="stm_lib/inc/misc.h" type="1"/>
     <File name="Src/MODE_MGR/MODE_MGR.h" path="../Src/MODE_MGR/MODE_MGR.h" type="1"/>
     <File name="cmsis/core_cmInstr.h" path="cmsis/core_cmInstr.h" type="1"/>
-    <File name="Src/HAL/HAL_TIM/HAL_TIM.h" path="../Src/HAL/HAL_TIM/HAL_TIM.h" type="1"/>
     <File name="Src/COMMON_MODULES/xINC/SELMATH" path="" type="2"/>
+    <File name="Src/HAL/HAL_TIM/HAL_TIM.h" path="../Src/HAL/HAL_TIM/HAL_TIM.h" type="1"/>
     <File name="Src/RF/RFM69_Registers.h" path="../Src/RF/RFM69_Registers.h" type="1"/>
     <File name="stm_lib/src/stm32f10x_rcc.c" path="stm_lib/src/stm32f10x_rcc.c" type="1"/>
     <File name="stm_lib/src/stm32f10x_flash.o" path="stm_lib/src/stm32f10x_flash.o" type="1"/>
@@ -131,8 +131,8 @@
     <File name="Src/COMMON_MODULES/xLIBS/CHKSUM/CHKSUM.o" path="../Src/COMMON_MODULES/xLIBS/CHKSUM/CHKSUM.o" type="1"/>
     <File name="Src/HAL" path="" type="2"/>
     <File name="Src/COMMON_MODULES/xINC/STDC/STDC.c" path="../Src/COMMON_MODULES/xINC/STDC/STDC.c" type="1"/>
-    <File name="stm_lib/src" path="" type="2"/>
     <File name="Src/RF/RFM69.c" path="../Src/RF/RFM69.c" type="1"/>
+    <File name="stm_lib/src" path="" type="2"/>
     <File name="cmsis" path="" type="2"/>
     <File name="stm_lib" path="" type="2"/>
     <File name="Src/NVM/NVM.h" path="../Src/NVM/NVM.h" type="1"/>
@@ -151,9 +151,9 @@
     <File name="Src/HAL/HAL_UART" path="" type="2"/>
     <File name="cmsis_boot" path="" type="2"/>
     <File name="Src/HAL/HAL_BRD/HAL_BRD.c" path="../Src/HAL/HAL_BRD/HAL_BRD.c" type="1"/>
-    <File name="Src/HAL/HAL_SPI/HAL_SPI.c" path="../Src/HAL/HAL_SPI/HAL_SPI.c" type="1"/>
     <File name="stm_lib/src/stm32f10x_bkp.o" path="stm_lib/src/stm32f10x_bkp.o" type="1"/>
     <File name="Src/PROJ_CONFIG/STDC_A_config.h" path="../Src/PROJ_CONFIG/STDC_A_config.h" type="1"/>
+    <File name="Src/HAL/HAL_SPI/HAL_SPI.c" path="../Src/HAL/HAL_SPI/HAL_SPI.c" type="1"/>
     <File name="Src/HAL/HAL_ADC/HAL_ADC.o" path="../Src/HAL/HAL_ADC/HAL_ADC.o" type="1"/>
     <File name="Src/COMMON_MODULES/xINC/TPMS_types.h" path="../Src/COMMON_MODULES/xINC/TPMS_types.h" type="1"/>
     <File name="stm_lib/src/stm32f10x_tim.c" path="stm_lib/src/stm32f10x_tim.c" type="1"/>
@@ -162,15 +162,15 @@
     <File name="Src/COMMON_MODULES/xINC/STDC/STDC.h" path="../Src/COMMON_MODULES/xINC/STDC/STDC.h" type="1"/>
     <File name="stm_lib/src/stm32f10x_spi.c" path="stm_lib/src/stm32f10x_spi.c" type="1"/>
     <File name="stm_lib/src/stm32f10x_crc.o" path="stm_lib/src/stm32f10x_crc.o" type="1"/>
-    <File name="Src/PROJ_CONFIG/STDC_config.h" path="../Src/PROJ_CONFIG/STDC_config.h" type="1"/>
     <File name="Src/COMMON_MODULES/xLIBS/CHKSUM/CHKSUM.h" path="../Src/COMMON_MODULES/xLIBS/CHKSUM/CHKSUM.h" type="1"/>
     <File name="Src/COMMON_MODULES/xINC/SELMATH/SELMATH.c" path="../Src/COMMON_MODULES/xINC/SELMATH/SELMATH.c" type="1"/>
+    <File name="Src/PROJ_CONFIG/STDC_config.h" path="../Src/PROJ_CONFIG/STDC_config.h" type="1"/>
     <File name="Src/COMMON_MODULES/xLIBS/CHKSUM" path="" type="2"/>
     <File name="stm_lib/src/stm32f10x_rcc.o" path="stm_lib/src/stm32f10x_rcc.o" type="1"/>
     <File name="Src/MODE_MGR/MODE_MGR.c" path="../Src/MODE_MGR/MODE_MGR.c" type="1"/>
     <File name="Src/COMMON_MODULES/xINC/STDC/STDC.o" path="../Src/COMMON_MODULES/xINC/STDC/STDC.o" type="1"/>
-    <File name="Src/MODE_MGR" path="" type="2"/>
     <File name="Src/COMMON_MODULES/xLIBS/CHKSUM/CHKSUM.c" path="../Src/COMMON_MODULES/xLIBS/CHKSUM/CHKSUM.c" type="1"/>
+    <File name="Src/MODE_MGR" path="" type="2"/>
     <File name="Src/NVM/NVM.o" path="../Src/NVM/NVM.o" type="1"/>
     <File name="Src/HAL/HAL_UART/HAL_UART.o" path="../Src/HAL/HAL_UART/HAL_UART.o" type="1"/>
     <File name="stm_lib/src/stm32f10x_exti.o" path="stm_lib/src/stm32f10x_exti.o" type="1"/>
@@ -186,9 +186,9 @@
     <File name="Src/COMMON_MODULES/xINC/SELMATH/SELMATH.h" path="../Src/COMMON_MODULES/xINC/SELMATH/SELMATH.h" type="1"/>
     <File name="cmsis_boot/startup/startup_stm32f10x_md.o" path="cmsis_boot/startup/startup_stm32f10x_md.o" type="1"/>
     <File name="cmsis/core_cm3.h" path="cmsis/core_cm3.h" type="1"/>
-    <File name="Src/HAL/HAL_ADC/HAL_ADC.h" path="../Src/HAL/HAL_ADC/HAL_ADC.h" type="1"/>
     <File name="stm_lib/src/stm32f10x_exti.c" path="stm_lib/src/stm32f10x_exti.c" type="1"/>
     <File name="Src/HAL/HAL_I2C/HAL_I2C.o" path="../Src/HAL/HAL_I2C/HAL_I2C.o" type="1"/>
+    <File name="Src/HAL/HAL_ADC/HAL_ADC.h" path="../Src/HAL/HAL_ADC/HAL_ADC.h" type="1"/>
     <File name="Src/PROJ_CONFIG" path="" type="2"/>
     <File name="Src/COMMON_MODULES/xINC/COMPILER_defs.h" path="../Src/COMMON_MODULES/xINC/COMPILER_defs.h" type="1"/>
     <File name="Src/HAL/HAL_UART/HAL_UART.c" path="../Src/HAL/HAL_UART/HAL_UART.c" type="1"/>

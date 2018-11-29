@@ -5,6 +5,8 @@
 #include "misc.h"
 
 #include "HAL_BRD.h"
+#include "main.h"
+#include "RFM69.h"
 
 false_true_et HAL_BRD_rtc_triggered_s;
 false_true_et debug_mode;
@@ -250,7 +252,7 @@ void HAL_BRD_toggle_pin_state(  GPIO_TypeDef * port, u16_t pin )
 ***************************************************************************************************/
 void HAL_BRD_set_batt_monitor_state( disable_enable_et state )
 {
-	if( state == ENABLE )
+	if( state == ENABLE_ )
 	{
 		//HAL_BRD_Set_Pin_state();
 	}
@@ -479,7 +481,7 @@ low_high_et HAL_BRD_read_selector_switch_pin( HAL_BRD_switch_slider_et slider )
 ***************************************************************************************************/
 void HAL_BRD_toggle_heartbeat_pin(  void )
 {
-    HAL_BRD_Toggle_Pin_state( GPIOB, GPIO_Pin_11 );
+    HAL_BRD_toggle_pin_state( GPIOB, GPIO_Pin_11 );
 }
 
 
