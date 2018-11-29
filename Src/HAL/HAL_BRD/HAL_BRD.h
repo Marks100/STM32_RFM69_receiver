@@ -9,8 +9,12 @@
 #include "C_defs.h"
 #include "COMPILER_defs.h"
 
-#include "stm32f10x_gpio.h"
-#include "stm32f10x_rcc.h"
+#if(UNIT_TEST == 0)
+    #include "stm32f10x_gpio.h"
+    #include "stm32f10x_rcc.h"
+#else
+    #include "STM32_stubs.h"
+#endif
 
 
 /***************************************************************************************************

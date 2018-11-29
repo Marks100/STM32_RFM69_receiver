@@ -9,7 +9,7 @@
 		<Option compiler="gcc" />
 		<Build>
 			<Target title="all">
-				<Option output="STM32_RFM69_receiver" prefix_auto="1" extension_auto="1" />
+				<Option output="STM32_RFM69_receiver.exe" prefix_auto="1" extension_auto="0" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<MakeCommands>
@@ -43,6 +43,36 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Option use_console_runner="0" />
+			</Target>
+			<Target title="test_all">
+				<Option output="STM32_RFM69_receiver" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="../test/build/test/out/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option use_console_runner="0" />
+				<MakeCommands>
+					<Build command="$make -f $makefile $target" />
+					<CompileFile command="" />
+					<Clean command="" />
+					<DistClean command="$make -f $makefile distclean$target" />
+					<AskRebuildNeeded command="" />
+					<SilentBuild command="$make -f $makefile $target &gt; $(CMD_NULL)" />
+				</MakeCommands>
+			</Target>
+			<Target title="test_specific">
+				<Option output="../test/build/test/out/$(ACTIVE_EDITOR_STEM).exe" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="../test/build/test/out" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option use_console_runner="0" />
+				<MakeCommands>
+					<Build command="$make -f $makefile $(ACTIVE_EDITOR_STEM).test" />
+					<CompileFile command="" />
+					<Clean command="" />
+					<DistClean command="$make -f $makefile distclean$target" />
+					<AskRebuildNeeded command="" />
+					<SilentBuild command="$make -f $makefile $(ACTIVE_EDITOR_STEM).test &gt; $(CMD_NULL)" />
+				</MakeCommands>
 			</Target>
 		</Build>
 		<Compiler>
@@ -188,8 +218,19 @@
 		</Unit>
 		<Unit filename="../Src/MODE_MGR/MODE_MGR.c">
 			<Option compilerVar="CC" />
+			<Option target="all" />
+			<Option target="memory_stats" />
+			<Option target="package" />
+			<Option target="total_clean" />
+			<Option target="build_clean" />
 		</Unit>
-		<Unit filename="../Src/MODE_MGR/MODE_MGR.h" />
+		<Unit filename="../Src/MODE_MGR/MODE_MGR.h">
+			<Option target="all" />
+			<Option target="memory_stats" />
+			<Option target="package" />
+			<Option target="total_clean" />
+			<Option target="build_clean" />
+		</Unit>
 		<Unit filename="../Src/NVM/NVM.c">
 			<Option compilerVar="CC" />
 			<Option target="all" />
@@ -244,6 +285,15 @@
 		<Unit filename="../Src/autoversion.h">
 			<Option target="all" />
 			<Option target="memory_stats" />
+		</Unit>
+		<Unit filename="../test/unit_test/test_MODE_MGR.c">
+			<Option compilerVar="CC" />
+			<Option target="all" />
+			<Option target="memory_stats" />
+			<Option target="package" />
+			<Option target="total_clean" />
+			<Option target="build_clean" />
+			<Option target="test_all" />
 		</Unit>
 		<Extensions>
 			<code_completion />

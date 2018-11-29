@@ -74,7 +74,7 @@ STATIC const u8_t SERIAL_help_promt_s[] =
 		"nvm:	 prints the current NVM data\r\n\r\n";
 
 STATIC const u8_t SERIAL_welcome_message_s[] =
-		"\r\nHello.\r\nDebug Console is ready, Type 'help' for a list of commands\r\n"
+		"\r\n\r\nHello.\r\nDebug Console is ready, Type 'help' for a list of commands\r\n"
 		"All commands are case 'insensitive'\r\n"
 		"/*********************************************************\r\n\r\n";
 
@@ -94,6 +94,8 @@ STATIC char SERIAL_rx_buf_s[RX_BUF_SIZE] = {'\0'};
 STATIC char SERIAL_tx_buf_s[TX_BUF_SIZE] = {'\0'};
 STATIC false_true_et SERIAL_stream_mode_s;
 STATIC false_true_et SERIAL_stream_triggered_s;
+
+STATIC u32_t SERIAL_max_missed_frames_s;
 
 
 /***************************************************************************************************
@@ -189,6 +191,8 @@ void SERIAL_init( void )
 	STDC_memset( SERIAL_rx_buf_s, '\0', sizeof( SERIAL_rx_buf_s ) );
 	STDC_memset( SERIAL_tx_buf_s, '\0', sizeof( SERIAL_rx_buf_s ) );
 	SERIAL_stream_triggered_s = FALSE;
+
+	SERIAL_max_missed_frames_s = 0u;
 
 	/* Finally send the welcome message */
 	SERIAL_Send_data( SERIAL_welcome_message_s );
@@ -753,7 +757,15 @@ void SERIAL_msg_handler( void )
 			SERIAL_Send_data( SERIAL_tx_buf_s );
 			STDC_memset( SERIAL_tx_buf_s, 0x20, sizeof( SERIAL_tx_buf_s ) );
 
-			sprintf( SERIAL_tx_buf_s, "\r\nNo of missed frames:\t\t\t\t%d", ( ( time - frame_timestamp ) - cnt ) );
+			sprintf( SERIAL_tx_buf_s, "\r\nNo of missed frames:\t\t\t\t%d", ( time - cnt ) );
+			SERIAL_Send_data( SERIAL_tx_buf_s );
+			STDC_memset( SERIAL_tx_buf_s, 0x20, sizeof( SERIAL_tx_buf_s ) );
+
+			if( (time - frame_timestamp ) > SERIAL_max_missed_frames_s )
+            {
+                SERIAL_max_missed_frames_s = ( time - cnt );
+            }
+            sprintf( SERIAL_tx_buf_s, "\r\nMax missed frames in a row:\t\t\t%d", SERIAL_max_missed_frames_s );
 			SERIAL_Send_data( SERIAL_tx_buf_s );
 			STDC_memset( SERIAL_tx_buf_s, 0x20, sizeof( SERIAL_tx_buf_s ) );
 

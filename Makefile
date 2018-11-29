@@ -185,14 +185,19 @@ test/vendor:
 	@$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@  2>&1 | tee -a $(STM32_COMPILER_OUTPUT)
 
 
+%.test: test/vendor
+	@$(eval TEST_FILE := $(subst .test,.c,$@))
+	@echo $(TEST_FILE)
+	cd test && rake test:$(TEST_FILE)
+
 
 .PHONY: test_all
 test_all: test/vendor
 	cd test && rake test:all
 	@mkdir -p CodeCoverage/{Test_Report,LCOV,GCOV}
-	@mv $(CEEDLING_TEST_XML_TEST_REPORT_ORIGIN)report.xml $(CEEDLING_TEST_XML_TEST_REPORT_DEST)
-	@ceedling-gen-report $(CEEDLING_TEST_XML_TEST_REPORT_DEST)report.xml $(CEEDLING_TEST_XML_TEST_REPORT_DEST)SoftwareCeedlingTestReport.html
-	@$(call check_test_result)
+	#@mv $(CEEDLING_TEST_XML_TEST_REPORT_ORIGIN)report.xml $(CEEDLING_TEST_XML_TEST_REPORT_DEST)
+	#@ceedling-gen-report $(CEEDLING_TEST_XML_TEST_REPORT_DEST)report.xml $(CEEDLING_TEST_XML_TEST_REPORT_DEST)SoftwareCeedlingTestReport.html
+	#@$(call check_test_result)
 
 
 .PHONY: test_all_with_coverage
