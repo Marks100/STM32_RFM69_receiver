@@ -50,41 +50,14 @@ $(GCOV_OUTPUT_DIR)/*helper*     \
 # location of autoversion header
 AUTOVERS_HEADER := Src/autoversion.h
 
+#Find all the source file in the given directories
+SRCS := $(shell find Src/ Workspace -type f -name '*.c')
 
-SRCS := \
-	Src/COMMON_MODULES/xINC/SELMATH/SELMATH.c \
-	Src/COMMON_MODULES/xINC/STDC/STDC.c \
-	Src/COMMON_MODULES/xLIBS/CHKSUM/CHKSUM.c \
-	Src/HAL/HAL_ADC/HAL_ADC.c \
-	Src/HAL/HAL_SPI/HAL_SPI.c \
-	Src/HAL/HAL_BRD/HAL_BRD.c \
-	Src/HAL/HAL_TIM/HAL_TIM.c \
-	Src/HAL/HAL_UART/HAL_UART.c \
-	Src/HAL/HAL_I2C/HAL_I2C.c \
-	Src/MAIN/main.c \
-	Src/MODE_MGR/MODE_MGR.c \
-	Src/NVM/NVM.c \
-	Src/RF/RFM69.c \
-	Src/VERSIONS/VERSIONS.c \
-	Workspace/cmsis_boot/system_stm32f10x.c \
-	Workspace/cmsis_boot/startup/startup_stm32f10x_md.c \
-	Workspace/stm_lib/src/stm32f10x_adc.c \
-	Workspace/stm_lib/src/stm32f10x_exti.c \
-	Workspace/stm_lib/src/stm32f10x_flash.c \
-	Workspace/stm_lib/src/stm32f10x_gpio.c \
-	Workspace/stm_lib/src/stm32f10x_pwr.c \
-	Workspace/stm_lib/src/stm32f10x_rcc.c \
-	Workspace/stm_lib/src/stm32f10x_spi.c \
-	Workspace/stm_lib/src/stm32f10x_bkp.c \
-	Workspace/stm_lib/src/stm32f10x_tim.c \
-	Workspace/stm_lib/src/stm32f10x_crc.c \
-	Workspace/stm_lib/src/stm32f10x_usart.c \
-	Workspace/stm_lib/src/stm32f10x_i2c.c \
-	Workspace/stm_lib/src/misc.c \
-	Workspace/stdio/printf.c \
-
-
+#Transform the list of c files into a list of object files
 OBJS := $(SRCS:.c=.o)
+
+#add the "-I" to all folders found by the find command :)
+INCLUDES := $(addprefix -I ,$(shell find Src/ Workspace/ -type d))
 
 
 CFLAGS :=  \
@@ -113,39 +86,6 @@ LDFLAGS := \
 		-Wl,-T$(BUILD_SUPPORT)/arm-gcc-link.ld -g -o $(GCC_ARM_OUT_DIR)/$(PROJECT_NAME).elf \
 
 
-
-
-
-INCLUDES := \
-		-I Src/ \
-		-I Src/COMMON_MODULES\xINC \
-		-I Src/BUTTON_MANAGER \
-		-I Src/COMMON_MODULES \
-		-I Src/COMMON_MODULES/xINC \
-		-I Src/COMMON_MODULES/xINC/SELMATH \
-		-I Src/COMMON_MODULES/xINC/STDC \
-		-I Src/COMMON_MODULES/xLIBS/CHKSUM \
-		-I Src/HAL/HAL_ADC \
-		-I Src/HAL/HAL_BRD \
-		-I Src/HAL/HAL_UART \
-		-I Src/HAL/HAL_I2C \
-		-I Src/HAL/HAL_SPI \
-		-I Src/HAL/HAL_TIM \
-		-I Src/MODE_MGR \
-		-I Src/RF \
-		-I Src/LED \
-		-I Src/SERIAL \
-		-I Src/MAIN \
-		-I Src/NVM \
-		-I Src/PROJ_CONFIG \
-		-I Src/RF \
-		-I Workspace/stm_lib/inc \
-		-I Workspace/cmsis_boot \
-		-I Workspace/cmsis_boot/startup \
-		-I Workspace/cmsis \
-		-I Workspace/stdio
-
-
 .PHONY: all
 all: GCC_ARM
 
@@ -168,6 +108,12 @@ GCC_ARM: build_clean $(AUTOVERS_HEADER) $(OBJS)
 	@echo "Build Succesfully Completed..."
 
 
+%.o: %.c
+	@echo "Compiling $<"
+	@$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@  2>&1 | tee -a $(STM32_COMPILER_OUTPUT)
+
+
+
 # Creates Ceedling environment if it does not exist
 test/vendor:
 	@createCeedlingEnv
@@ -177,18 +123,8 @@ test/vendor:
 	echo $^
 	@$(eval TEST_FILE := $(subst .test,.c,$@))
 	@echo Testing $(TEST_FILE)...
-	#cd test && rake test:$(TEST_FILE)
-
-
-%.o: %.c
-	@echo "Compiling $<"
-	@$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@  2>&1 | tee -a $(STM32_COMPILER_OUTPUT)
-
-
-%.test: test/vendor
-	@$(eval TEST_FILE := $(subst .test,.c,$@))
-	@echo $(TEST_FILE)
 	cd test && rake test:$(TEST_FILE)
+
 
 
 .PHONY: test_all
@@ -264,14 +200,14 @@ total_clean: build_clean
 	@echo Clean Complete..
 
 
-
 .PHONY: build_clean
 build_clean:
 	@echo cleaning up old build objects..... Please wait.
-	@find ../ -type f -name '*THE_RAIN*' -print0 | xargs -0 rm -f
-	@find . -type f -name '*.o*' -print0 | xargs -0 rm -f
+	@find -type f -name '*.bak' -print0 | xargs -0 rm -f
+	@find -type f -name '*THE_RAIN*' -print0 | xargs -0 rm -f
+	@find -type f -name '*.o*' -print0 | xargs -0 rm -f
 	@- rm -fr $(GCC_ARM_OUT_DIR)
-	@-rm -f $(AUTOVERS_HEADER)
+	@- rm -f $(AUTOVERS_HEADER)
 	@echo Build cleaned..
 
 
