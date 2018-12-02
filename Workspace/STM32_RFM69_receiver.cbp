@@ -26,7 +26,7 @@
 				<Option type="0" />
 				<Option compiler="gcc" />
 			</Target>
-			<Target title="package">
+			<Target title="release_package">
 				<Option output="STM32_RFM69_receiver" prefix_auto="1" extension_auto="1" />
 				<Option type="1" />
 				<Option compiler="gcc" />
@@ -220,14 +220,14 @@
 			<Option compilerVar="CC" />
 			<Option target="all" />
 			<Option target="memory_stats" />
-			<Option target="package" />
+			<Option target="release_package" />
 			<Option target="total_clean" />
 			<Option target="build_clean" />
 		</Unit>
 		<Unit filename="../Src/MODE_MGR/MODE_MGR.h">
 			<Option target="all" />
 			<Option target="memory_stats" />
-			<Option target="package" />
+			<Option target="release_package" />
 			<Option target="total_clean" />
 			<Option target="build_clean" />
 		</Unit>
@@ -290,7 +290,7 @@
 			<Option compilerVar="CC" />
 			<Option target="all" />
 			<Option target="memory_stats" />
-			<Option target="package" />
+			<Option target="release_package" />
 			<Option target="total_clean" />
 			<Option target="build_clean" />
 			<Option target="test_all" />
