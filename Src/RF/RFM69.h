@@ -1268,7 +1268,7 @@ typedef struct
 **                              Function Prototypes                                               **
 ***************************************************************************************************/
 void          RFM69_init( void );
-void          RFM69_setup_receive_mode( void ); 
+void          RFM69_setup_receive_mode( void );
 pass_fail_et  RFM69_read_registers( RFM69_instruction_et instruction, RFM69_registers_et address, u8_t read_data[], u8_t num_bytes );
 pass_fail_et  RFM69_write_registers( RFM69_instruction_et instruction, RFM69_registers_et address, u8_t write_data[], u8_t num_bytes );
 pass_fail_et  RFM69_set_configuration( RFM69_static_configuration_et config );
@@ -1303,6 +1303,7 @@ f32_t RFM69_get_packet_reception_percent( void );
 s8_t  RFM69_get_last_received_RSSI( void );
 void  RFM69_timestamp_receieved_packet( void );
 u32_t RFM69_get_receieved_packet_timestamp( void );
+void RFM69_receive_frame( void );
 
 
 /* Reads */

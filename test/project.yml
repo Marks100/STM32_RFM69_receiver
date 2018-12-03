@@ -62,10 +62,70 @@
 # As [:tools] is blank, gcc will be used (so long as it's in your system path)
 # See documentation to configure a given toolchain for use
 
+:tools:
+  :test_compiler:
+     :executable: gcc                                                   # exists in system search path
+     :name: 'gcc compiler'
+     :arguments:
+        - -I"$": COLLECTION_PATHS_TEST_TOOLCHAIN_INCLUDE                # expands to -I search paths
+        - -I"$": COLLECTION_PATHS_TEST_SUPPORT_SOURCE_INCLUDE_VENDOR    # expands to -I search paths
+        - -D$: COLLECTION_DEFINES_TEST_AND_VENDOR                       # expands to all -D defined symbols
+        - -c ${1}                                                       # source code input file (Ruby method call param list sub)
+        - -o ${2}                                                       # object file output (Ruby method call param list sub)
+        - -std=c99                                                      # Use C99 C language dialect
+        - -g                                                            # Produce debugging information in the operating system's native format
+        - -Wall                                                         # This enables all the warnings about constructions that some users consider questionable
+        - -Wextra                                                       # This enables some extra warning flags that are not enabled by -Wall
+        - -Werror=implicit-function-declaration                         # Give a error whenever a function is used before being declared
+        - -Wno-unknown-pragmas                                          # No warnings when a #pragma directive is encountered that is not understood by GCC
+        - -Wno-main                                                     # No warnings if the type of main is suspicious
+        - -fshort-enums                                                 # Allocate to an enum type only as many bytes as it needs for the declared range of possible values
+        - -fpack-struct=1                                               # pack structure members to a maximum of 1 byte alignment
+        - -fstack-usage                                                 # generate an extra file .su that specifies the maximum amount of stack used, on a per-function basis
+  :gcov_compiler:
+     :executable: gcc                                                   # exists in system search path
+     :name: 'gcc compiler'
+     :arguments:
+        - -I"$": COLLECTION_PATHS_TEST_TOOLCHAIN_INCLUDE                # expands to -I search paths
+        - -I"$": COLLECTION_PATHS_TEST_SUPPORT_SOURCE_INCLUDE_VENDOR    # expands to -I search paths
+        - -D$: COLLECTION_DEFINES_TEST_AND_VENDOR                       # expands to all -D defined symbols
+        - -c ${1}                                                       # source code input file (Ruby method call param list sub)
+        - -o ${2}                                                       # object file output (Ruby method call param list sub)
+        - -std=c99                                                      # Use C99 C language dialect
+        - -g                                                            # Produce debugging information in the operating system's native format
+        - -Wall                                                         # This enables all the warnings about constructions that some users consider questionable
+        - -Wextra                                                       # This enables some extra warning flags that are not enabled by -Wall
+        - -Werror=implicit-function-declaration                         # Give a error whenever a function is used before being declared
+        - -Wno-unknown-pragmas                                          # No warnings when a #pragma directive is encountered that is not understood by GCC
+        - -Wno-main                                                     # No warnings if the type of main is suspicious
+        - -fshort-enums                                                 # Allocate to an enum type only as many bytes as it needs for the declared range of possible values
+        - -fpack-struct=1                                               # pack structure members to a maximum of 1 byte alignment
+        - -fstack-usage                                                 # generate an extra file .su that specifies the maximum amount of stack used, on a per-function basis
+        - -fprofile-arcs                                                # Add code so that program flow arcs are instrumented
+        - -ftest-coverage                                               # Produce a notes file that the gcov code-coverage utility can use to show program coverage.
+  :test_linker:
+    :executable: gcc
+    :name: 'gcc linker'
+    :arguments:
+      - ${1}
+      - -Wl,--allow-multiple-definition
+      - -o ${2}
+#      - -pg                            # For GPROF
+  :gcov_linker:
+    :executable: gcc
+    :arguments:
+      - -fprofile-arcs
+      - -ftest-coverage
+      - -Wl,--allow-multiple-definition
+      - ${1}
+      - -o ${2}
+
 :plugins:
   :load_paths:
     - vendor/ceedling/plugins
   :enabled:
+    - gcov
+    - stdout_ide_tests_report
+    - xml_tests_report
     - stdout_pretty_tests_report
     - module_generator
-...
