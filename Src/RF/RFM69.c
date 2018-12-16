@@ -49,14 +49,15 @@ STATIC u8_t send_data[RFM69_MAX_PAYLOAD_LEN] =
     52,53,54,55,56,57,58,59,60,61
 };
 
-false_true_et RFM69_init_s;
-false_true_et RFM69_packet_sent_s;
-false_true_et RFM69_packet_received_s;
-u8_t          RFM69_tx_power_level_s;
-u32_t         RFM69_received_packet_cnt_s;
-f32_t         RFM69_packet_reception_percent_s;
-s8_t          RFM69_last_rssi_s;
-u32_t         RFM69_packet_received_timestamp_s;
+false_true_et  RFM69_init_s;
+false_true_et  RFM69_packet_sent_s;
+false_true_et  RFM69_packet_received_s;
+u8_t           RFM69_tx_power_level_s;
+u32_t          RFM69_received_packet_cnt_s;
+f32_t          RFM69_packet_reception_percent_s;
+s8_t           RFM69_last_rssi_s;
+u32_t          RFM69_packet_received_timestamp_s;
+RFM69_state_et RFM69_state_s;
 
 
 /***************************************************************************************************
@@ -72,6 +73,7 @@ u32_t         RFM69_packet_received_timestamp_s;
 
 void RFM69_init( void )
 {
+    RFM69_state_s =
 	RFM69_tx_power_level_s = NVM_info_s.NVM_generic_data_blk_s.tx_power_level;
 	RFM69_received_packet_cnt_s = 0u;
 
@@ -81,6 +83,42 @@ void RFM69_init( void )
 	RFM69_packet_reception_percent_s = 0.0f;
 	RFM69_last_rssi_s = -127;
 	RFM69_packet_received_timestamp_s = 0u;
+}
+
+
+
+void RFM69_tick( void )
+{
+    switch( RFM69_state_s )
+    {
+        case RFM69_MGR_INITIALISING:
+            RFM69_state_s = RFM69_MGR_RX_MODE;
+            break;
+        break;
+
+        case RFM69_MGR_SETUP_TX_MODE:
+            RFM69_setup_receive_mode();
+            RFM69_state_s = RFM69_MGR_RX_MODE;
+        break;
+
+        case RFM69_MGR_TX_MODE:
+        break;
+        case RFM69_MGR_SETUP_RX_MODE:
+        break;
+
+        case RFM69_MGR_RX_MODE:
+            RFM69_receive_frame();
+        break;
+
+        case RFM69_MGR_SLEEP_MODE:
+        break;
+
+        case RFM69_MGR_IDLE:
+        break;
+
+        case RFM69_MGR_RF_RESET:
+        break;
+    }
 }
 
 

@@ -53,10 +53,10 @@ int main(void)
 	/* Initialise the RFM69 variables */
 	RFM69_init();
 
-	MODE_MGR_init();
+	/* Initialise the NRF24 variables */
+	NRF24_init();
 
-	/* Init the systick timer */
-	MAIN_SYSTICK_init();
+	MODE_MGR_init();
 
 	if( debug_mode == ENABLE )
 	{
@@ -68,7 +68,8 @@ int main(void)
 		RFM69_set_reset_pin_state( LOW );
 	}
 
-	RFM69_setup_receive_mode();
+	/* Init the systick timer */
+	MAIN_SYSTICK_init();
 
 	while (1)
 	{

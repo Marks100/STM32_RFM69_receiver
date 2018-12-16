@@ -296,6 +296,29 @@ void HAL_BRD_RFM69_set_enable_pin_state( low_high_et state )
 /*!
 ****************************************************************************************************
 *
+*   \brief         SETS the rf enable pin
+*
+*   \author        MS
+*
+*   \return        None
+*
+***************************************************************************************************/
+void HAL_BRD_NRF24_set_cs_pin_state( low_high_et state )
+{
+	if( state == HIGH )
+	{
+		//HAL_BRD_Set_Pin_state();
+	}
+	else
+	{
+		//HAL_BRD_Set_Pin_state();
+	}
+}
+
+
+/*!
+****************************************************************************************************
+*
 *   \brief         SETS the rf RST pin
 *
 *   \author        MS
@@ -337,6 +360,29 @@ void HAL_BRD_RFM69_spi_slave_select( low_high_et state )
 	else
 	{
 		HAL_BRD_set_pin_state( GPIOB, GPIO_Pin_1, LOW );
+	}
+}
+
+
+/*!
+****************************************************************************************************
+*
+*   \brief         SETS the SPI chip select pin for the RF module
+*
+*   \author        MS
+*
+*   \return        None
+*
+***************************************************************************************************/
+void HAL_BRD_NRF24_spi_slave_select( low_high_et state )
+{
+	if( state == HIGH )
+	{
+		//HAL_BRD_set_pin_state( GPIOB, GPIO_Pin_1, HIGH );
+	}
+	else
+	{
+		//HAL_BRD_set_pin_state( GPIOB, GPIO_Pin_1, LOW );
 	}
 }
 

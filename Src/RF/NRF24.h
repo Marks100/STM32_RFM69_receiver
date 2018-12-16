@@ -92,6 +92,8 @@
 #define RF_PWR_LOW  1
 #define RF_PWR_HIGH 2
 
+#define NRF24_WRITE_BIT 0x20
+
 
 
 /***************************************************************************************************
@@ -109,12 +111,12 @@ typedef enum
 {
     NRF24_POWERING_UP  = 0,
     NRF24_INITIALISING,
-    NRF24_RUNNING,
     NRF24_SETUP_TX_MODE,
     NRF24_TX_MODE,
     NRF24_SETUP_RX_MODE,
     NRF24_RX_MODE,
-    NRF24_IDLE,
+    NRF24_STANDBY,
+    NRF24_POWER_DOWN,
 } NRF24_state_et;
 
 
@@ -197,6 +199,26 @@ typedef enum
   RF24_CRC_16
 } NRF24_crclength_et;
 
+typedef enum
+{
+    NRF24_DEFAULT_CONFIG,
+    NRF24_CFG_MAX
+} NRF24_static_configuration_et;
+
+
+typedef struct
+{
+   NRF24_registers_et NRF24_register;
+   u8_t register_data;
+} NRF24_register_data_st;
+
+
+typedef struct
+{
+    NRF24_register_data_st* buffer_p; //! pointer to configuration
+    u16_t length;                      //! length of configuration
+} NRF24_static_configuration_st;
+
 
 
 
@@ -211,7 +233,8 @@ typedef enum
 **                              Function Prototypes                                               **
 ***************************************************************************************************/
 void                 NRF24_init( void );
-void                 NRF24_20ms_tick( void );
+void                 NRF24_tick( void );
+pass_fail_et         NRF24_set_configuration( NRF24_static_configuration_et config );
 pass_fail_et         NRF24_read_registers( NRF24_instruction_et instruction, NRF24_registers_et address, u8_t read_data[], u8_t num_bytes );
 pass_fail_et         NRF24_write_registers( NRF24_instruction_et instruction, NRF24_registers_et address, u8_t write_data[], u8_t num_bytes );
 pass_fail_et         NRF24_set_power_mode( disable_enable_et state );
@@ -234,6 +257,10 @@ pass_fail_et         NRF24_set_dynamic_payloads( disable_enable_et state );
 pass_fail_et         NRF24_read_all_registers( void );
 void                 NRF24_setup_payload( u8_t* data_p, u8_t len );
 NRF24_state_et       NRF24_get_mode_status( void );
+void                 NRF24_spi_slave_select( low_high_et state );
+void                 NRF24_ce_select( low_high_et state );
+
+
 
 #endif /* RF_H multiple inclusion guard */
 

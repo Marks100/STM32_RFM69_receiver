@@ -1134,9 +1134,7 @@ typedef enum
 
 typedef enum
 {
-    RFM69_MGR_POWERING_UP  = 0,
-    RFM69_MGR_INITIALISING,
-    RFM69_MGR_RUNNING,
+    RFM69_MGR_INITIALISING = 0u,
     RFM69_MGR_SETUP_TX_MODE,
     RFM69_MGR_TX_MODE,
     RFM69_MGR_SETUP_RX_MODE,
@@ -1268,6 +1266,7 @@ typedef struct
 **                              Function Prototypes                                               **
 ***************************************************************************************************/
 void          RFM69_init( void );
+void          RFM69_tick( void );
 void          RFM69_setup_receive_mode( void );
 pass_fail_et  RFM69_read_registers( RFM69_instruction_et instruction, RFM69_registers_et address, u8_t read_data[], u8_t num_bytes );
 pass_fail_et  RFM69_write_registers( RFM69_instruction_et instruction, RFM69_registers_et address, u8_t write_data[], u8_t num_bytes );

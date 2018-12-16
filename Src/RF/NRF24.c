@@ -25,7 +25,7 @@
 #include "STDC.h"
 #include "COMPILER_defs.h"
 #include "HAL_BRD.h"
-//#include "HAL_SPI.h"
+#include "HAL_SPI.h"
 #include "NRF24.h"
 #include "NRF24_Registers.h"
 
@@ -74,6 +74,8 @@ void NRF24_init( void )
 	/* Set up the state to initialise the module in the 1 sec tick */
 	NRF24_state_s = NRF24_POWERING_UP;
 	NRF24_cycle_counter_s = 0u;
+	NRF24_status_register_s = 0u;
+	NRF24_fifo_status_s = 0u;
 	u8_t i = 0u;
 
 	 /* Go through the elements and reset them to 0xFF */
@@ -83,6 +85,57 @@ void NRF24_init( void )
     }
     STDC_memset( &NRF24_rx_rf_payload_s, 0xFF, sizeof(NRF24_rx_rf_payload_s) );
 }
+
+
+
+
+/*!
+****************************************************************************************************
+*
+*   \brief         Initialise all the RF registers
+*
+*   \author        MS
+*
+*   \return        none
+*
+*   \note
+*
+***************************************************************************************************/
+pass_fail_et NRF24_set_configuration( NRF24_static_configuration_et config )
+{
+    pass_fail_et returnType = PASS;
+
+    if( config >= NRF24_CFG_MAX )
+    {
+        // invalid configuration
+        STDC_basic_assert();
+    }
+    else
+    {
+        /* Config is OK */
+    	u8_t len;
+    	len = NRF24_config_c[ config ].length;
+
+        u8_t i;
+
+        for( i = 0u; i < len; i++ )
+        {
+            // write to all registers defined in lookup table for configuration to RFM69 chip
+            if( NRF24_write_registers( W_REGISTER, NRF24_config_c[config].buffer_p[i].NRF24_register, &NRF24_config_c[config].buffer_p[i].register_data, 1 ) == FAIL )
+            {
+                /* Configuration failed :( */
+                STDC_basic_assert();
+
+                returnType = FAIL;
+            }
+        }
+    }
+
+    return ( returnType );
+}
+
+
+
 
 
 
@@ -165,7 +218,7 @@ pass_fail_et NRF24_read_registers( NRF24_instruction_et instruction, NRF24_regis
     /* Instruction and address looks good so carry out the read */
 
     /* pull NCS / Slave Select line low */
-    HAL_BRD_spi_slave_select( LOW );
+    NRF24_spi_slave_select( LOW );
 
     if( ( instruction == R_RX_PAYLOAD ) || ( instruction == R_RX_PL_WID ) )
     {
@@ -186,7 +239,7 @@ pass_fail_et NRF24_read_registers( NRF24_instruction_et instruction, NRF24_regis
     }
 
     /* pull NCS / Slave Select line high */
-    HAL_BRD_spi_slave_select( HIGH );
+    NRF24_spi_slave_select( HIGH );
 
     return( result );
 }
@@ -222,13 +275,13 @@ pass_fail_et NRF24_write_registers( NRF24_instruction_et instruction, NRF24_regi
     u8_t modified_address;
 
     /* pull NCS / Slave Select line low */
-    HAL_BRD_spi_slave_select( LOW );
+    NRF24_spi_slave_select( LOW );
 
     /* Check if this is a register write */
     if( instruction == W_REGISTER )
     {
         /* Now we need to modify the address with the "write" bit set */
-        modified_address = address | 0x20;
+        modified_address = address | NRF24_WRITE_BIT;
 
         /* Send register address */
         HAL_SPI_write_and_read_data( modified_address );
@@ -252,13 +305,13 @@ pass_fail_et NRF24_write_registers( NRF24_instruction_et instruction, NRF24_regi
     }
 
      /* release NCS / Slave Select line high */
-    HAL_BRD_spi_slave_select( HIGH );
+    NRF24_spi_slave_select( HIGH );
 
     if( ( instruction == W_REGISTER ) && ( address != STATUS ) )
     {
         /* Now read back the register to ensure it was written succesfully,
         NOTE!! We can only read back the registers that we can write data to */
-        RF_read_registers( R_REGISTER, address, read_back_register, num_bytes );
+        NRF24_read_registers( R_REGISTER, address, read_back_register, num_bytes );
 
         /* compare actual values with expected values */
         if( STDC_memcompare( read_back_register, write_data, num_bytes ) == FALSE )
@@ -376,7 +429,8 @@ pass_fail_et NRF24_set_channel( u8_t channel )
 */
 pass_fail_et NRF24_flush_tx( void )
 {
-	NRF24_write_registers( FLUSH_TX, ADDRESS_NOP, (u8_t*)NOP, 1 );
+    u8_t data = NOP;
+	NRF24_write_registers( FLUSH_TX, ADDRESS_NOP, &data, 1 );
 
     return ( PASS );
 }
@@ -396,7 +450,8 @@ pass_fail_et NRF24_flush_tx( void )
 */
 pass_fail_et NRF24_flush_rx( void )
 {
-	NRF24_write_registers( FLUSH_RX, ADDRESS_NOP, (u8_t*)NOP, 1 );
+    u8_t data = NOP;
+	NRF24_write_registers( FLUSH_RX, ADDRESS_NOP, &data, 1 );
 
     return ( PASS );
 }
@@ -420,7 +475,7 @@ u8_t NRF24_get_DPL_size(void)
     u8_t packet_size = 0u;
 
     /* Read back the current register status, modify it and then rewrite it back down */
-    RF_read_registers( R_RX_PL_WID, ADDRESS_NOP, &packet_size, 1 );
+    NRF24_read_registers( R_RX_PL_WID, ADDRESS_NOP, &packet_size, 1 );
 
     return ( packet_size );
 }
@@ -678,7 +733,7 @@ pass_fail_et NRF24_send_payload( u8_t* buffer, u8_t len )
     }
 
       /* pull NCS / Slave Select line low */
-      HAL_BRD_spi_slave_select( LOW );
+      NRF24_spi_slave_select( LOW );
 
       /* Send register address */
       HAL_SPI_write_and_read_data( W_TX_PAYLOAD );
@@ -700,25 +755,29 @@ pass_fail_et NRF24_send_payload( u8_t* buffer, u8_t len )
       }
 
     /* release NCS / Slave Select line high */
-    HAL_BRD_spi_slave_select( HIGH );
+    NRF24_spi_slave_select( HIGH );
 
     u16_t delay = 150;
 	while( delay-- != 0u )
 	{
+	    #if(UNIT_TEST!=1)
 		asm ("nop");
+		#endif
 	}
 
     /* toggle the CE pin to complete the RF transfer */
-    HAL_BRD_RF_chip_enable_select(HIGH);
+    NRF24_spi_slave_select(HIGH);
 
     /* hack a little delay in here */
     delay = 100;
     while( delay-- != 0u )
     {
+        #if(UNIT_TEST!=1)
         asm ("nop");
+        #endif
     }
 
-    HAL_BRD_RF_chip_enable_select(LOW);
+    NRF24_spi_slave_select(LOW);
 
     return ( PASS );
 }
@@ -763,7 +822,7 @@ pass_fail_et NRF24_get_payload( u8_t* buffer )
     }
 
     /* pull NCS / Slave Select line low */
-    HAL_BRD_spi_slave_select( LOW );
+    NRF24_spi_slave_select( LOW );
 
     /* Send register address */
     HAL_SPI_write_and_read_data( R_RX_PAYLOAD );
@@ -776,7 +835,7 @@ pass_fail_et NRF24_get_payload( u8_t* buffer )
     }
 
      /* release NCS / Slave Select line high */
-    HAL_BRD_spi_slave_select( HIGH );
+    NRF24_spi_slave_select( HIGH );
 
     return ( PASS );
 }
@@ -812,7 +871,7 @@ pass_fail_et NRF24_set_dynamic_payloads( disable_enable_et state )
       NRF24_toggle_features_register();
     }
 
-    if( RF_write_registers( W_REGISTER, FEATURE, (u8_t*)&register_val, 1 ) == PASS )
+    if( NRF24_write_registers( W_REGISTER, FEATURE, (u8_t*)&register_val, 1 ) == PASS )
     {
         /* Passed this time :) */
         return_val = PASS;
@@ -867,25 +926,25 @@ pass_fail_et NRF24_read_all_registers( void )
 	pass_fail_et return_val;
 	u8_t register_data[60];
 
-	RF_read_registers( R_REGISTER, 0, &register_data[0], 1 );
-	RF_read_registers( R_REGISTER, 1, &register_data[1], 1 );
-	RF_read_registers( R_REGISTER, 2, &register_data[2], 1 );
-	RF_read_registers( R_REGISTER, 3, &register_data[3], 1 );
-	RF_read_registers( R_REGISTER, 4, &register_data[4], 1 );
-	RF_read_registers( R_REGISTER, 5, &register_data[5], 1 );
-	RF_read_registers( R_REGISTER, 6, &register_data[6], 1 );
-	RF_read_registers( R_REGISTER, 7, &register_data[7], 1 );
-	RF_read_registers( R_REGISTER, 8, &register_data[8], 1 );
-	RF_read_registers( R_REGISTER, 9, &register_data[9], 1 );
-	RF_read_registers( R_REGISTER, 10, &register_data[10], 5 );
-	RF_read_registers( R_REGISTER, 11, &register_data[15], 5 );
-	RF_read_registers( R_REGISTER, 12, &register_data[20], 1 );
-	RF_read_registers( R_REGISTER, 0x10, &register_data[21], 5 );
-	RF_read_registers( R_REGISTER, 0x11, &register_data[26], 1 );
-	RF_read_registers( R_REGISTER, 0x12, &register_data[27], 1 );
-	RF_read_registers( R_REGISTER, 0x17, &register_data[28], 1 );
-	RF_read_registers( R_REGISTER, 0x1c, &register_data[29], 1 );
-	RF_read_registers( R_REGISTER, 0x1d, &register_data[30], 1 );
+	NRF24_read_registers( R_REGISTER, 0, &register_data[0], 1 );
+	NRF24_read_registers( R_REGISTER, 1, &register_data[1], 1 );
+	NRF24_read_registers( R_REGISTER, 2, &register_data[2], 1 );
+	NRF24_read_registers( R_REGISTER, 3, &register_data[3], 1 );
+	NRF24_read_registers( R_REGISTER, 4, &register_data[4], 1 );
+	NRF24_read_registers( R_REGISTER, 5, &register_data[5], 1 );
+	NRF24_read_registers( R_REGISTER, 6, &register_data[6], 1 );
+	NRF24_read_registers( R_REGISTER, 7, &register_data[7], 1 );
+	NRF24_read_registers( R_REGISTER, 8, &register_data[8], 1 );
+	NRF24_read_registers( R_REGISTER, 9, &register_data[9], 1 );
+	NRF24_read_registers( R_REGISTER, 10, &register_data[10], 5 );
+	NRF24_read_registers( R_REGISTER, 11, &register_data[15], 5 );
+	NRF24_read_registers( R_REGISTER, 12, &register_data[20], 1 );
+	NRF24_read_registers( R_REGISTER, 0x10, &register_data[21], 5 );
+	NRF24_read_registers( R_REGISTER, 0x11, &register_data[26], 1 );
+	NRF24_read_registers( R_REGISTER, 0x12, &register_data[27], 1 );
+	NRF24_read_registers( R_REGISTER, 0x17, &register_data[28], 1 );
+	NRF24_read_registers( R_REGISTER, 0x1c, &register_data[29], 1 );
+	NRF24_read_registers( R_REGISTER, 0x1d, &register_data[30], 1 );
 
 	return ( PASS );
 }
@@ -948,7 +1007,7 @@ void RF_setup_payload( u8_t* data_p, u8_t len )
 *   \note
 *
 ***************************************************************************************************/
-void NRF24_20ms_tick( void )
+void NRF24_tick( void )
 {
     /* Need to make sure that the SPI interface is initialised */
     if( HAL_SPI_get_init_status() == FALSE )
@@ -965,8 +1024,8 @@ void NRF24_20ms_tick( void )
         {
             /* This gives the RF chip time to power up and stabilize before we begin
                writing any of the registers */
-            HAL_BRD_RF_chip_enable_select(LOW);
-            HAL_BRD_spi_slave_select( HIGH );
+            NRF24_ce_select( LOW );
+            NRF24_spi_slave_select( HIGH );
 
             NRF24_state_s = NRF24_INITIALISING;
         }
@@ -975,7 +1034,7 @@ void NRF24_20ms_tick( void )
         case NRF24_INITIALISING:
         {
             /* Setup initial register values */
-            NRF24_setup_default_registers();
+            NRF24_set_configuration( NRF24_DEFAULT_CONFIG );
 
             /* Grab the status of the RF chip */
             NRF24_status_register_s = NRF24_get_nRF_status();
@@ -994,7 +1053,7 @@ void NRF24_20ms_tick( void )
             //RF_set_power_mode( ENABLE_ );
             NRF24_set_tx_rx_mode( TX_ENABLE );
 
-            HAL_BRD_RF_chip_enable_select(HIGH);
+            NRF24_ce_select(HIGH);
 
             /* Flush out the tx and rx buffers */
             NRF24_flush_rx();
@@ -1014,13 +1073,11 @@ void NRF24_20ms_tick( void )
 
         case NRF24_TX_MODE:
         {
-
 			NRF24_cycle_counter_s ++;
 			NRF24_status_register_s = NRF24_get_nRF_status();
 
 			if( ( ( NRF24_status_register_s & 0x20 ) >> 5 ) == 1 )
 			{
-				HAL_BRD_toggle_LED();
 				NRF24_status_register_clr_bit( TX_DS );
 			}
 
@@ -1032,8 +1089,6 @@ void NRF24_20ms_tick( void )
 			STDC_memcpy( &NRF24_tx_rf_payload_s[0][0], "Open Door", 10 );
 
 			NRF24_send_payload( &NRF24_tx_rf_payload_s[0][0], 10 );
-
-
 
 			/* rotate the buffer so that the valid commands fill into the empty position */
 			for( x = 0; x < 3 - 1; x++ )
@@ -1064,7 +1119,7 @@ void NRF24_20ms_tick( void )
 			NRF24_open_write_data_pipe( 1, NRF24_data_pipe_defaut );
 
 			/* The CE pin to has to be HIGH to Receive */
-			HAL_BRD_RF_chip_enable_select(HIGH);
+			NRF24_ce_select(HIGH);
 
 			/* Move onto the RX_MODE state */
 			NRF24_state_s = NRF24_RX_MODE;
@@ -1086,8 +1141,6 @@ void NRF24_20ms_tick( void )
                 NRF24_status_register_clr_bit( RX_DR );
 
                 NRF24_get_payload( NRF24_rx_rf_payload_s );
-
-                HAL_BRD_toggle_LED();
 
                 /* We have received our packet back again, so all is good, Lets turn off
                 the LED and transition back to TX mode */
@@ -1127,6 +1180,19 @@ NRF24_state_et NRF24_get_mode_status( void )
     return ( NRF24_state_s );
 }
 
+
+
+
+void NRF24_spi_slave_select( low_high_et state )
+{
+    HAL_BRD_NRF24_spi_slave_select( state );
+}
+
+
+void NRF24_ce_select( low_high_et state )
+{
+    HAL_BRD_NRF24_set_cs_pin_state( state );
+}
 
 
 
