@@ -34,13 +34,14 @@
 /* Module Identification for STDC_assert functionality */
 #define STDC_MODULE_ID   STDC_MOD_RF
 
-STATIC const u8_t NRF24_data_pipe_defaut[5] = {0xE8, 0xE8, 0xF0, 0xF0, 0xE1};
+STATIC const u8_t NRF24_data_pipe_default_s[5] = {0xE8, 0xE8, 0xF0, 0xF0, 0xE1};
 STATIC const u8_t NRF24_data_pipe_custom[5] = {0xE8, 0xE8, 0xF0, 0xF0, 0xE1};
 
 STATIC NRF24_state_et NRF24_state_s = NRF24_POWERING_UP;
 
 STATIC u8_t  NRF24_rx_rf_payload_s[20];
 STATIC u8_t  NRF24_status_register_s;
+STATIC u8_t  NRF24_register_readback_s[DEFAULT_CONFIGURATION_SIZE];
 STATIC u8_t  NRF24_fifo_status_s;
 STATIC u16_t NRF24_cycle_counter_s;
 STATIC u8_t  NRF24_tx_rf_payload_s[3][32];
@@ -174,9 +175,9 @@ void NRF24_setup_default_registers( void )
     register_val = 0x26;
     NRF24_write_registers( W_REGISTER, RF_SETUP, &register_val, 1 );
 
-    NRF24_write_registers( W_REGISTER, RX_ADDR_P0, (u8_t*)&NRF24_data_pipe_defaut, sizeof(NRF24_data_pipe_defaut) );
+    NRF24_write_registers( W_REGISTER, RX_ADDR_P0, (u8_t*)&NRF24_data_pipe_default_s, sizeof(NRF24_data_pipe_default_s) );
 
-    NRF24_write_registers( W_REGISTER, TX_ADDR, (u8_t*)&NRF24_data_pipe_defaut, sizeof(NRF24_data_pipe_defaut) );
+    NRF24_write_registers( W_REGISTER, TX_ADDR, (u8_t*)&NRF24_data_pipe_default_s, sizeof(NRF24_data_pipe_default_s) );
 
     register_val = 0x20;
     NRF24_write_registers( W_REGISTER, RX_PW_P0, &register_val, 1 );
@@ -921,30 +922,23 @@ pass_fail_et NRF24_toggle_features_register( void )
 *
 *******************************************************************************
 */
-pass_fail_et NRF24_read_all_registers( void )
+pass_fail_et NRF24_read_all_registers( u8_t* data_p )
 {
 	pass_fail_et return_val;
-	u8_t register_data[60];
 
-	NRF24_read_registers( R_REGISTER, 0, &register_data[0], 1 );
-	NRF24_read_registers( R_REGISTER, 1, &register_data[1], 1 );
-	NRF24_read_registers( R_REGISTER, 2, &register_data[2], 1 );
-	NRF24_read_registers( R_REGISTER, 3, &register_data[3], 1 );
-	NRF24_read_registers( R_REGISTER, 4, &register_data[4], 1 );
-	NRF24_read_registers( R_REGISTER, 5, &register_data[5], 1 );
-	NRF24_read_registers( R_REGISTER, 6, &register_data[6], 1 );
-	NRF24_read_registers( R_REGISTER, 7, &register_data[7], 1 );
-	NRF24_read_registers( R_REGISTER, 8, &register_data[8], 1 );
-	NRF24_read_registers( R_REGISTER, 9, &register_data[9], 1 );
-	NRF24_read_registers( R_REGISTER, 10, &register_data[10], 5 );
-	NRF24_read_registers( R_REGISTER, 11, &register_data[15], 5 );
-	NRF24_read_registers( R_REGISTER, 12, &register_data[20], 1 );
-	NRF24_read_registers( R_REGISTER, 0x10, &register_data[21], 5 );
-	NRF24_read_registers( R_REGISTER, 0x11, &register_data[26], 1 );
-	NRF24_read_registers( R_REGISTER, 0x12, &register_data[27], 1 );
-	NRF24_read_registers( R_REGISTER, 0x17, &register_data[28], 1 );
-	NRF24_read_registers( R_REGISTER, 0x1c, &register_data[29], 1 );
-	NRF24_read_registers( R_REGISTER, 0x1d, &register_data[30], 1 );
+    u8_t i;
+
+    for( i = 0u; i < DEFAULT_CONFIGURATION_SIZE; i++ )
+    {
+        // Read all registers
+        if( NRF24_read_registers( R_REGISTER, NRF24_config_c[NRF24_DEFAULT_CONFIG].buffer_p[i].NRF24_register, &data_p[i], 1 ) == FAIL )
+        {
+            /* Configuration failed :( */
+            STDC_basic_assert();
+
+            return_val = FAIL;
+        }
+    }
 
 	return ( PASS );
 }
@@ -1040,7 +1034,7 @@ void NRF24_tick( void )
             NRF24_status_register_s = NRF24_get_nRF_status();
             NRF24_fifo_status_s = NRF24_get_nRF_FIFO_status();
 
-            NRF24_read_all_registers();
+            NRF24_read_all_registers( NRF24_register_readback_s );
 
             /* Setup has completed so now move onto the next state*/
             NRF24_state_s = NRF24_SETUP_RX_MODE;
@@ -1064,7 +1058,7 @@ void NRF24_tick( void )
             NRF24_status_register_clr_bit( TX_DS );
 
             /* open up the data pipe to communicate with the receiver */
-            NRF24_open_write_data_pipe( 1, NRF24_data_pipe_defaut );
+            NRF24_open_write_data_pipe( 1, NRF24_data_pipe_default_s );
 
             /* Move onto the TX_MODE state */
             NRF24_state_s = NRF24_TX_MODE;
@@ -1116,7 +1110,7 @@ void NRF24_tick( void )
 			NRF24_status_register_clr_bit( TX_DS );
 
 			/* open up the data pipe to communicate with the receiver */
-			NRF24_open_write_data_pipe( 1, NRF24_data_pipe_defaut );
+			NRF24_open_write_data_pipe( 1, NRF24_data_pipe_default_s );
 
 			/* The CE pin to has to be HIGH to Receive */
 			NRF24_ce_select(HIGH);
@@ -1149,11 +1143,11 @@ void NRF24_tick( void )
         }
         break;
 
-        case NRF24_IDLE:
-        {
-            /* Put the RF chip into IDLE/LOW POWER mode */
-        }
-        break;
+//        case NRF24_IDLE:
+//        {
+//            /* Put the RF chip into IDLE/LOW POWER mode */
+//        }
+//        break;
 
         default:
         break;
@@ -1191,7 +1185,7 @@ void NRF24_spi_slave_select( low_high_et state )
 
 void NRF24_ce_select( low_high_et state )
 {
-    HAL_BRD_NRF24_set_cs_pin_state( state );
+    HAL_BRD_NRF24_set_ce_pin_state( state );
 }
 
 

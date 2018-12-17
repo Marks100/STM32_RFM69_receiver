@@ -43,15 +43,15 @@
 **                              Exported Globals                                                  **
 ***************************************************************************************************/
 
-
+#define DEFAULT_CONFIGURATION_SIZE      ( 27u )
 
 /* Default register set 433Mhz ( 19200bps ) */
 const NRF24_register_data_st NRF24_default_register_set[] =
 {
     { CONFIG,       0x0E},
 	{ EN_AUTO_ACK,  0x00},
-	{ EN_RXADDR,    0x03},
-    { SETUP_AW,     0x00},
+	{ EN_RXADDR,    0x01},
+    { SETUP_AW,     0x03},
 	{ SETUP_RETR,   0x00},
 	{ RF_CH,        0x6C},
 	{ RF_SETUP,     0x26},
@@ -79,7 +79,7 @@ const NRF24_register_data_st NRF24_default_register_set[] =
 
 
 
-#define DEFAULT_CONFIGURATION_SIZE      ( 27u )
+
 
 const NRF24_static_configuration_st NRF24_config_c[ 1 ] =
 {

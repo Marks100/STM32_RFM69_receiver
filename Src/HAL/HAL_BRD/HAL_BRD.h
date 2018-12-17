@@ -72,7 +72,7 @@ void HAL_BRD_RFM69_set_reset_pin_state( low_high_et state );
 void HAL_BRD_RFM69_spi_slave_select( low_high_et state );
 low_high_et HAL_BRD_read_selector_switch_pin( HAL_BRD_switch_slider_et slider );
 void HAL_BRD_NRF24_spi_slave_select( low_high_et state );
-void HAL_BRD_NRF24_set_cs_pin_state( low_high_et state );
+void HAL_BRD_NRF24_set_ce_pin_state( low_high_et state );
 
 false_true_et HAL_BRD_get_rtc_trigger_status( void );
 void HAL_BRD_set_rtc_trigger_status( false_true_et state );

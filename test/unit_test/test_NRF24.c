@@ -24,7 +24,7 @@
 /*******************************************************************************
  *     Variables
  ******************************************************************************/
-const u8_t NRF24_data_pipe_defaut[5];
+const u8_t NRF24_data_pipe_default[5];
 const u8_t NRF24_data_pipe_custom[5];
 
 NRF24_state_et NRF24_state_s = NRF24_POWERING_UP;
@@ -43,9 +43,7 @@ u8_t HAL_SPI_write_and_read_data( u8_t tx_data );
 false_true_et HAL_SPI_get_init_status( void );
 void HAL_SPI_init( void );
 void HAL_BRD_NRF24_spi_slave_select( low_high_et state );
-void HAL_BRD_NRF24_set_cs_pin_state( low_high_et state );
-
-
+void HAL_BRD_NRF24_set_ce_pin_state( low_high_et state );
 
 
 u8_t address_index_s = 0u;
@@ -107,7 +105,7 @@ void HAL_BRD_NRF24_spi_slave_select( low_high_et state )
 }
 
 
-void HAL_BRD_NRF24_set_cs_pin_state( low_high_et state )
+void HAL_BRD_NRF24_set_ce_pin_state( low_high_et state )
 {
 
 }

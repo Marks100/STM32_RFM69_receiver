@@ -215,7 +215,7 @@ typedef struct
 
 typedef struct
 {
-    NRF24_register_data_st* buffer_p; //! pointer to configuration
+    NRF24_register_data_st* buffer_p;  //! pointer to configuration
     u16_t length;                      //! length of configuration
 } NRF24_static_configuration_st;
 
@@ -254,7 +254,7 @@ pass_fail_et         NRF24_get_payload( u8_t* buffer );
 pass_fail_et         NRF24_toggle_features_register( void );
 pass_fail_et         NRF24_set_dynamic_payloads( disable_enable_et state );
 
-pass_fail_et         NRF24_read_all_registers( void );
+pass_fail_et         NRF24_read_all_registers( u8_t* data_p );
 void                 NRF24_setup_payload( u8_t* data_p, u8_t len );
 NRF24_state_et       NRF24_get_mode_status( void );
 void                 NRF24_spi_slave_select( low_high_et state );
