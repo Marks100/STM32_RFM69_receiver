@@ -26,6 +26,7 @@
 #include "COMPILER_defs.h"
 #include "HAL_BRD.h"
 #include "HAL_SPI.h"
+#include "NVM.h"
 #include "NRF24.h"
 #include "NRF24_Registers.h"
 
@@ -339,27 +340,26 @@ pass_fail_et NRF24_write_registers( NRF24_instruction_et instruction, NRF24_regi
 *
 *******************************************************************************
 */
-pass_fail_et NRF24_set_power_mode( disable_enable_et state )
-{
- 	u8_t register_val;
-
-	/* Read back the current register status, modify it and then rewrite it back down */
-	NRF24_read_registers( R_REGISTER, CONFIG, &register_val, 1 );
-
-	register_val = ( ( register_val & 0xFD ) | ( state << 1 ) );
-
-	NRF24_write_registers( W_REGISTER, CONFIG, &register_val, 1 );
-
-    return( PASS );
-}
-
+//pass_fail_et NRF24_set_power_mode( disable_enable_et state )
+//{
+// 	u8_t register_val;
+//
+//	/* Read back the current register status, modify it and then rewrite it back down */
+//	NRF24_read_registers( R_REGISTER, CONFIG, &register_val, 1 );
+//
+//	register_val = ( ( register_val & 0xFD ) | ( state << 1 ) );
+//
+//	NRF24_write_registers( W_REGISTER, CONFIG, &register_val, 1 );
+//
+//    return( PASS );
+//}
 
 
 
 /*!
 *******************************************************************************
 *
-*   \brief          Sets the chip to tx or rx mode using SPI command ( Register 0 ( CONFIG ) )
+*   \brief          Powers up or down the RF chip by using the SPI command ( Register 0 ( CONFIG ) )
 *
 *   \author         MS
 *
@@ -367,14 +367,41 @@ pass_fail_et NRF24_set_power_mode( disable_enable_et state )
 *
 *******************************************************************************
 */
-pass_fail_et NRF24_set_tx_rx_mode( NRF24_tx_rx_mode_et mode )
+pass_fail_et NRF24_set_low_level_mode( NRF24_low_level_mode_et mode )
 {
  	u8_t register_val;
 
-	/* Read back the current register status, modify it and then rewrite it back down */
+ 	/* Read back the current register status, modify it and then rewrite it back down */
 	NRF24_read_registers( R_REGISTER, CONFIG, &register_val, 1 );
 
-	register_val = ( ( register_val & 0xFE ) | mode );
+ 	/* Power down mode is the only mode that sets the PWR_UP bit low, so by default set it high */
+ 	register_val  |= ( 1 << PWR_UP );
+
+ 	/* RX mode is the only mode thats sets the PRIM RX bit high so lets set it low by default */
+ 	register_val &= ~( 1 << PRIM_RX );
+
+ 	switch( mode )
+ 	{
+        case NRF_POWER_DOWN_MODE:
+            register_val &= ~( 1 << PWR_UP );
+            break;
+
+        case NRF_STANDBY_1_MODE:
+            break;
+
+        case NRF_STANDBY_2_MODE:
+            break;
+
+        case NRF_RX_MODE:
+            register_val |= ( 1 << PRIM_RX );
+            break;
+
+        case NRF_TX_MODE:
+            break;
+
+        default:
+            break;
+ 	}
 
 	NRF24_write_registers( W_REGISTER, CONFIG, &register_val, 1 );
 
@@ -399,17 +426,13 @@ pass_fail_et NRF24_set_channel( u8_t channel )
 {
  	u8_t register_val;
 
-	if( channel > 127 )
+ 	/* The channel does not need to be masked but bit 7 always needs to be 0 */
+	if( channel > NRF_MAX_CHANNEL_SELECTION )
 	{
-	  	channel = 127u;
+	  	channel = NRF_MAX_CHANNEL_SELECTION;
 	}
 
-	/* Read back the current register status, modify it and then rewrite it back down */
-	NRF24_read_registers( R_REGISTER, RF_CH, &register_val, 1 );
-
-	register_val = ( ( register_val & 0x80 ) | ( channel << 7 ) );
-
-	NRF24_write_registers( W_REGISTER, RF_CH, &register_val, 1 );
+	NRF24_write_registers( W_REGISTER, RF_CH, &channel, 1 );
 
     return( PASS );
 }
@@ -497,13 +520,15 @@ u8_t NRF24_get_DPL_size(void)
 */
 pass_fail_et NRF24_set_PA_TX_power( NRF24_power_level_et value)
 {
-    u8_t regiter_val;
+    u8_t register_val;
 
     /* Read back the current register status, modify it and then rewrite it back down */
-    NRF24_read_registers( R_REGISTER, RF_SETUP, &regiter_val, 1 );
+    NRF24_read_registers( R_REGISTER, RF_SETUP, &register_val, 1 );
 
-    regiter_val = ( ( regiter_val & 0xF9 ) | ( value << 1 ) ) ;
-    NRF24_write_registers( W_REGISTER, RF_SETUP, &regiter_val, 1 );
+    register_val &= ~( RF_PWR << 1 ) ;
+    register_val |= ( value << 1 ) ;
+
+    NRF24_write_registers( W_REGISTER, RF_SETUP, &register_val, 1 );
 
     return ( PASS );
 }
@@ -596,37 +621,33 @@ u8_t NRF24_get_nRF_FIFO_status(void)
 */
 pass_fail_et NRF24_set_rf_data_rate( NRF24_air_data_rate_et value )
 {
-    u8_t regiter_val;
+    u8_t register_val;
 
     /* Read back the current register status, modify it and then rewrite it back down */
-    NRF24_read_registers( R_REGISTER, RF_SETUP, &regiter_val, 1 );
+    NRF24_read_registers( R_REGISTER, RF_SETUP, &register_val, 1 );
 
     /* Mask of the data rate */
-    //regiter_val &= ~( ( 1 << RF_DR_LOW ) & ( 1 << RF_DR_HIGH ) ) ;
-    regiter_val &= ~( 0x28 ) ;
+    register_val &= ~( 1 << RF_DR_LOW );
+    register_val &= ~( 1 << RF_DR_HIGH );
 
-    if( value == RF24_250KBPS )
+    switch( value )
     {
-      // Must set the RF_DR_LOW to 1; RF_DR_HIGH (used to be RF_DR) is already 0
-      // Making it '10'.
+        case RF24_250KBPS:
+            register_val |= ( 1 << RF_DR_LOW );
+            break;
 
-      regiter_val = ( regiter_val | ( 1 << RF_DR_LOW ) );
-    }
-    else
-    {
-        // Set 2Mbs, RF_DR (RF_DR_HIGH) is set 1
-        // Making it '01'
-        if ( value == RF24_2MBPS )
-        {
-            regiter_val = ( regiter_val | ( 1 << RF_DR_HIGH ) );
-        }
-        else
-        {
-            /* Register is 0 so its set to 1Mbps */
-        }
+        case RF24_1MBPS:
+            break;
+
+        case RF24_2MBPS:
+            register_val |= ( 1 << RF_DR_HIGH );
+            break;
+
+        default:
+            break;
     }
 
-    NRF24_write_registers( W_REGISTER, RF_SETUP, &regiter_val, 1 );
+    NRF24_write_registers( W_REGISTER, RF_SETUP, &register_val, 1 );
 
     return ( PASS );
 }
@@ -957,7 +978,7 @@ pass_fail_et NRF24_read_all_registers( u8_t* data_p )
 *
 *******************************************************************************
 */
-void RF_setup_payload( u8_t* data_p, u8_t len )
+void NRF24_setup_payload( u8_t* data_p, u8_t len )
 {
     pass_fail_et return_val;
     u8_t i = 0u;
@@ -984,6 +1005,107 @@ void RF_setup_payload( u8_t* data_p, u8_t len )
 
 
 
+
+
+/*!
+*******************************************************************************
+*
+*   \brief          sets up the low level payload to be transmitted
+*
+*   \author         MS
+*
+*   \return
+*
+*******************************************************************************
+*/
+void NRF24_setup_CRC_scheme( disable_enable_et state, NRF24_crclength_et crc_len )
+{
+    u8_t register_val;
+    pass_fail_et return_val;
+
+    if( crc_len > RF24_CRC_16 )
+    {
+        crc_len = RF24_CRC_16;
+    }
+
+    /* Find out the size of the payload setting for the specific pipe */
+    NRF24_read_registers( R_REGISTER, CONFIG, &register_val, 1 );
+
+    /* Clear the CRC enable/disable bit */
+    register_val &= ~( 1 << EN_CRC );
+
+    /* Clear the CRC byte num bit */
+    register_val &= ~( 1 << CRCO );
+
+    register_val |= ( state << EN_CRC );
+    register_val |= ( crc_len << CRCO );
+
+    NRF24_write_registers( W_REGISTER, CONFIG, (u8_t*)&register_val, 1 );
+
+    return ( return_val );
+}
+
+
+
+/*!
+*******************************************************************************
+*
+*   \brief          sets up the constant RF wave
+*
+*   \author         MS
+*
+*   \return
+*
+*******************************************************************************
+*/
+void NRF24_setup_constant_wave( disable_enable_et state )
+{
+    u8_t register_val;
+    pass_fail_et return_val;
+
+    /* Find out the size of the payload setting for the specific pipe */
+    NRF24_read_registers( R_REGISTER, RF_SETUP, &register_val, 1 );
+
+    /* Clear the CRC enable/disable bit */
+    register_val &= ~( 1 << CONT_WAVE );
+
+    register_val |= ( state << CONT_WAVE );
+
+    NRF24_write_registers( W_REGISTER, RF_SETUP, (u8_t*)&register_val, 1 );
+
+    return ( return_val );
+}
+
+
+
+/*!
+*******************************************************************************
+*
+*   \brief          sets up the pll
+*
+*   \author         MS
+*
+*   \return
+*
+*******************************************************************************
+*/
+void NRF24_setup_pll( disable_enable_et state )
+{
+    u8_t register_val;
+    pass_fail_et return_val;
+
+    /* Find out the size of the payload setting for the specific pipe */
+    NRF24_read_registers( R_REGISTER, RF_SETUP, &register_val, 1 );
+
+    /* Clear the CRC enable/disable bit */
+    register_val &= ~( 1 << PLL_LOCK );
+
+    register_val |= ( state << PLL_LOCK );
+
+    NRF24_write_registers( W_REGISTER, RF_SETUP, (u8_t*)&register_val, 1 );
+
+    return ( return_val );
+}
 
 
 
@@ -1027,6 +1149,8 @@ void NRF24_tick( void )
 
         case NRF24_INITIALISING:
         {
+            NRF24_set_low_level_mode( NRF_STANDBY_1_MODE );
+
             /* Setup initial register values */
             NRF24_set_configuration( NRF24_DEFAULT_CONFIG );
 
@@ -1037,15 +1161,14 @@ void NRF24_tick( void )
             NRF24_read_all_registers( NRF24_register_readback_s );
 
             /* Setup has completed so now move onto the next state*/
-            NRF24_state_s = NRF24_SETUP_RX_MODE;
+            NRF24_state_s = NVM_info_s.NVM_generic_data_blk_s.nrf_startup_tx_rx_mode;
         }
         break;
 
-        case NRF24_SETUP_TX_MODE:
+        case NRF24_SETUP_TX:
          {
             /* carry out the necessary steps to transition to TX_MODE */
-            //RF_set_power_mode( ENABLE_ );
-            NRF24_set_tx_rx_mode( TX_ENABLE );
+            NRF24_set_low_level_mode( NRF_TX_MODE );
 
             NRF24_ce_select(HIGH);
 
@@ -1061,11 +1184,10 @@ void NRF24_tick( void )
             NRF24_open_write_data_pipe( 1, NRF24_data_pipe_default_s );
 
             /* Move onto the TX_MODE state */
-            NRF24_state_s = NRF24_TX_MODE;
+            NRF24_state_s = NRF24_TX;
         }
-        break;
 
-        case NRF24_TX_MODE:
+        case NRF24_TX:
         {
 			NRF24_cycle_counter_s ++;
 			NRF24_status_register_s = NRF24_get_nRF_status();
@@ -1096,10 +1218,10 @@ void NRF24_tick( void )
         }
         break;
 
-        case NRF24_SETUP_RX_MODE:
+        case NRF24_SETUP_RX:
         {
         	/* carry out the necessary steps to transition to TX_MODE */
-			NRF24_set_tx_rx_mode( RX_ENABLE );
+			NRF24_set_low_level_mode( NRF_RX_MODE );
 
 			/* Flush out the tx and rx buffers */
 			NRF24_flush_rx();
@@ -1116,11 +1238,10 @@ void NRF24_tick( void )
 			NRF24_ce_select(HIGH);
 
 			/* Move onto the RX_MODE state */
-			NRF24_state_s = NRF24_RX_MODE;
+			NRF24_state_s = NRF24_RX;
         }
-        break;
 
-        case NRF24_RX_MODE:
+        case NRF24_RX:
         {
             /* We are now in Receive mode so lets just wait for a packet to come in */
             /* Eventually might be interrupt driven but for now lets poll */
@@ -1135,19 +1256,29 @@ void NRF24_tick( void )
                 NRF24_status_register_clr_bit( RX_DR );
 
                 NRF24_get_payload( NRF24_rx_rf_payload_s );
-
-                /* We have received our packet back again, so all is good, Lets turn off
-                the LED and transition back to TX mode */
-                //RF_state_s = SETUP_TX_MODE;
             }
         }
         break;
 
-//        case NRF24_IDLE:
-//        {
-//            /* Put the RF chip into IDLE/LOW POWER mode */
-//        }
-//        break;
+        case NRF24_POWER_DOWN:
+            /* Power down the RF chip by setting the low level mode of operation to power down */
+            NRF24_set_low_level_mode( NRF_POWER_DOWN_MODE );
+            break;
+
+        case NRF24_SETUP_CONST_WAVE:
+            /* Set to TX mode */
+            NRF24_set_low_level_mode( NRF_TX_MODE );
+
+            /* Move onto the NRF24_CONST_WAVE state */
+			NRF24_state_s = NRF24_CONST_WAVE;
+            break;
+
+        case NRF24_CONST_WAVE:
+
+            NRF24_setup_constant_wave( ENABLE );
+            NRF24_setup_pll( ENABLE );
+            NRF24_ce_select(HIGH);
+            break;
 
         default:
         break;

@@ -27,9 +27,10 @@
 /***************************************************************************************************
 **                              Includes                                                          **
 ***************************************************************************************************/
-
-#include "stm32f10x_flash.h"
-#include "stm32f10x.h"
+#ifndef UNIT_TEST
+    #include "stm32f10x_flash.h"
+    #include "stm32f10x.h"
+#endif
 
 #include "C_defs.h"
 #include "COMPILER_defs.h"

@@ -48,6 +48,7 @@ const NVM_generic_data_blk_st      NVM_DEFAULT_GENERIC_DATA_BLK_s =
 	RFM69_DEFAULT_TX_POWER_LEVEL,				      		//Tx power level
 	0x55,	    											//TX node ID
 	RFM69_433_DEFAULT_CONFIG,								//rf config
+	NRF24_SETUP_TX
 };
 
 

@@ -4,7 +4,8 @@
 #include "C_defs.h"
 #include "Compiler_defs.h"
 #include "STDC.h"
-
+#include "CHKSUM.h"
+#include "NVM.h"
 
 #include "STM32_stubs.h"
 
@@ -48,6 +49,7 @@ void HAL_BRD_NRF24_set_ce_pin_state( low_high_et state );
 
 u8_t address_index_s = 0u;
 u8_t register_data_s = 0u;
+u8_t return_register_byte = 0xFF;
 
 
 void setUp(void)
@@ -79,12 +81,128 @@ void test_scheduler(void)
 }
 
 
+void test_mode( void )
+{
+    NRF24_set_low_level_mode( NRF_POWER_DOWN_MODE );
+    return_register_byte = 0x00;
+    NRF24_set_low_level_mode( NRF_POWER_DOWN_MODE );
+
+    NRF24_set_low_level_mode( NRF_STANDBY_1_MODE );
+    return_register_byte = 0x00;
+    NRF24_set_low_level_mode( NRF_STANDBY_1_MODE );
+
+    NRF24_set_low_level_mode( NRF_STANDBY_2_MODE );
+    return_register_byte = 0xFF;
+    NRF24_set_low_level_mode( NRF_STANDBY_2_MODE );
+
+    NRF24_set_low_level_mode( NRF_RX_MODE );
+    return_register_byte = 0x00;
+    NRF24_set_low_level_mode( NRF_RX_MODE );
+
+    NRF24_set_low_level_mode( NRF_TX_MODE );
+    return_register_byte = 0xFF;
+    NRF24_set_low_level_mode( NRF_TX_MODE );
+}
+
+
+void test_channel( void )
+{
+    return_register_byte = 0x00;
+    NRF24_set_channel( 0 );
+    NRF24_set_channel( 50 );
+    NRF24_set_channel( 100 );
+    NRF24_set_channel( 125 );
+    NRF24_set_channel( 130 );
+
+    return_register_byte = 0xFF;
+    NRF24_set_channel( 0 );
+    NRF24_set_channel( 50 );
+    NRF24_set_channel( 100 );
+    NRF24_set_channel( 125 );
+    NRF24_set_channel( 130 );
+}
+
+void test_data_rate( void )
+{
+    return_register_byte = 0xFF;
+    NRF24_set_rf_data_rate( RF24_250KBPS );
+    NRF24_set_rf_data_rate( RF24_1MBPS );
+    NRF24_set_rf_data_rate( RF24_2MBPS );
+
+    return_register_byte = 0x00;
+    NRF24_set_rf_data_rate( RF24_250KBPS );
+    NRF24_set_rf_data_rate( RF24_1MBPS );
+    NRF24_set_rf_data_rate( RF24_2MBPS );
+}
+
+
+void test_TX_PA_level( void )
+{
+    return_register_byte = 0xFF;
+    NRF24_set_PA_TX_power( RF_MIN_TX_PWR );
+    NRF24_set_PA_TX_power( RF_MED_1_TX_PWR );
+    NRF24_set_PA_TX_power( RF_MED_2_TX_PWR );
+    NRF24_set_PA_TX_power( RF_MAX_TX_PWR);
+
+    return_register_byte = 0x00;
+    NRF24_set_PA_TX_power( RF_MIN_TX_PWR );
+    NRF24_set_PA_TX_power( RF_MED_1_TX_PWR );
+    NRF24_set_PA_TX_power( RF_MED_2_TX_PWR );
+    NRF24_set_PA_TX_power( RF_MAX_TX_PWR);
+}
+
+
+void test_crc_scheme( void )
+{
+    return_register_byte = 0x00;
+    NRF24_setup_CRC_scheme( ENABLE, RF24_CRC_8 );
+    NRF24_setup_CRC_scheme( ENABLE, RF24_CRC_16 );
+
+    NRF24_setup_CRC_scheme( DISABLE, RF24_CRC_8 );
+    NRF24_setup_CRC_scheme( DISABLE, RF24_CRC_16 );
+
+    return_register_byte = 0xFF;
+    NRF24_setup_CRC_scheme( ENABLE, RF24_CRC_8 );
+    NRF24_setup_CRC_scheme( ENABLE, RF24_CRC_16 );
+
+    NRF24_setup_CRC_scheme( DISABLE, RF24_CRC_8 );
+    NRF24_setup_CRC_scheme( DISABLE, RF24_CRC_16 );
+}
+
+
+void test_cont_wave( void )
+{
+    return_register_byte = 0x00;
+    NRF24_setup_constant_wave( ENABLE );
+    NRF24_setup_constant_wave( DISABLE);
+
+    return_register_byte = 0xFF;
+    NRF24_setup_constant_wave( ENABLE );
+    NRF24_setup_constant_wave( DISABLE);
+}
+
+
+void test_pll( void )
+{
+    return_register_byte = 0x00;
+    NRF24_setup_pll( ENABLE );
+    NRF24_setup_pll( DISABLE);
+
+    return_register_byte = 0xFF;
+    NRF24_setup_pll( ENABLE );
+    NRF24_setup_pll( DISABLE);
+}
+
+
+
 
 
 u8_t HAL_SPI_write_and_read_data( u8_t tx_data )
 {
     register_data_s = tx_data;
     address_index_s ++;
+
+    return ( return_register_byte );
 }
 
 false_true_et HAL_SPI_get_init_status( void )
