@@ -46,9 +46,9 @@ int main(void)
 	HAL_I2C_init();
 	HAL_SPI_init();
 	NVM_init();
-	HAL_TIM_1_init();
+
     /* Start the timer to keep track of reception count */
-	HAL_TIM_1_start();
+	HAL_TIM_1_init();
 
 	/* Initialise the RFM69 variables */
 	RFM69_init();
@@ -92,8 +92,6 @@ void SysTick_Handler( void )
 		debug_timer_s = 0u;
 
 		MODE_MGR_20ms_tick();
-
-		HAL_BRD_toggle_led();
 	}
 }
 

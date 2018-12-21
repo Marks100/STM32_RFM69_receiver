@@ -65,11 +65,12 @@ void MODE_MGR_20ms_tick( void )
 ***************************************************************************************************/
 void MODE_MGR_action_schedule_normal( void )
 {
+    NRF24_tick();
+
     switch( MODE_MGR_tick_timer_msecs_s )
     {
         case 20u:
             SERIAL_msg_handler();
-            NRF24_tick();
         	break;
 
         case 40u:
@@ -78,7 +79,6 @@ void MODE_MGR_action_schedule_normal( void )
 
         case 60u:
             MODE_MGR_analyse_switches();
-            NRF24_tick();
         	break;
 
         case 80u:
@@ -87,7 +87,6 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 100u:
-            NRF24_tick();
         	break;
 
         case 120u:
@@ -96,7 +95,6 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 140u:
-            NRF24_tick();
         	break;
 
         case 160u:
@@ -106,7 +104,6 @@ void MODE_MGR_action_schedule_normal( void )
 
         case 180u:
         	NVM_tick();
-        	NRF24_tick();
         	break;
 
         case 200u:
@@ -115,7 +112,6 @@ void MODE_MGR_action_schedule_normal( void )
 
         case 220u:
             SERIAL_msg_handler();
-            NRF24_tick();
         	break;
 
         case 240u:
@@ -124,7 +120,6 @@ void MODE_MGR_action_schedule_normal( void )
 
         case 260u:
             MODE_MGR_analyse_switches();
-            NRF24_tick();
         	break;
 
         case 280u:
@@ -133,7 +128,6 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 300u:
-            NRF24_tick();
         	break;
 
         case 320u:
@@ -142,7 +136,6 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 340u:
-            NRF24_tick();
         	break;
 
         case 360u:
@@ -152,7 +145,6 @@ void MODE_MGR_action_schedule_normal( void )
 
         case 380u:
         	NVM_tick();
-        	NRF24_tick();
         	break;
 
         case 400u:
@@ -161,7 +153,6 @@ void MODE_MGR_action_schedule_normal( void )
 
         case 420u:
             SERIAL_msg_handler();
-            NRF24_tick();
         	break;
 
         case 440u:
@@ -170,7 +161,6 @@ void MODE_MGR_action_schedule_normal( void )
 
         case 460u:
             MODE_MGR_analyse_switches();
-            NRF24_tick();
         	break;
 
         case 480u:
@@ -179,7 +169,6 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 500u:
-            NRF24_tick();
         	break;
 
         case 520u:

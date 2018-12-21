@@ -36,7 +36,8 @@
 #define STDC_MODULE_ID   STDC_MOD_RF
 
 STATIC const u8_t NRF24_data_pipe_default_s[5] = {0xE8, 0xE8, 0xF0, 0xF0, 0xE1};
-STATIC const u8_t NRF24_data_pipe_custom[5] = {0xE8, 0xE8, 0xF0, 0xF0, 0xE1};
+STATIC const u8_t NRF24_data_pipe_custom_s[5] = {0xE8, 0xE8, 0xF0, 0xF0, 0xE1};
+STATIC const u8_t NRF24_data_pipe_test_s[5];
 
 STATIC NRF24_state_et NRF24_state_s = NRF24_POWERING_UP;
 
@@ -45,7 +46,7 @@ STATIC u8_t  NRF24_status_register_s;
 STATIC u8_t  NRF24_register_readback_s[DEFAULT_CONFIGURATION_SIZE];
 STATIC u8_t  NRF24_fifo_status_s;
 STATIC u16_t NRF24_cycle_counter_s;
-STATIC u8_t  NRF24_tx_rf_payload_s[3][32];
+STATIC u8_t  NRF24_tx_rf_payload_s[32];
 
 
 
@@ -80,12 +81,8 @@ void NRF24_init( void )
 	NRF24_fifo_status_s = 0u;
 	u8_t i = 0u;
 
-	 /* Go through the elements and reset them to 0xFF */
-    for( i = 0; i < 3; i++ )
-    {
-        STDC_memset( &NRF24_tx_rf_payload_s[i][0], 0xFF, 32 );
-    }
-    STDC_memset( &NRF24_rx_rf_payload_s, 0xFF, sizeof(NRF24_rx_rf_payload_s) );
+    STDC_memset( NRF24_tx_rf_payload_s, 0xFF, 32 );
+    STDC_memset( NRF24_rx_rf_payload_s, 0xFF, sizeof(NRF24_rx_rf_payload_s) );
 }
 
 
@@ -189,9 +186,6 @@ void NRF24_setup_default_registers( void )
 
     NRF24_set_rf_data_rate(RF24_250KBPS);
     //RF_set_rf_data_rate( RF24_1MBPS );
-
-    /* set up dynamic payloads */
-    NRF24_set_dynamic_payloads( DISABLE );
 }
 
 
@@ -325,34 +319,6 @@ pass_fail_et NRF24_write_registers( NRF24_instruction_et instruction, NRF24_regi
 
     return( result );
 }
-
-
-
-
-/*!
-*******************************************************************************
-*
-*   \brief          Powers up or down the RF chip by using the SPI command ( Register 0 ( CONFIG ) )
-*
-*   \author         MS
-*
-*   \return         result - pass or fail
-*
-*******************************************************************************
-*/
-//pass_fail_et NRF24_set_power_mode( disable_enable_et state )
-//{
-// 	u8_t register_val;
-//
-//	/* Read back the current register status, modify it and then rewrite it back down */
-//	NRF24_read_registers( R_REGISTER, CONFIG, &register_val, 1 );
-//
-//	register_val = ( ( register_val & 0xFD ) | ( state << 1 ) );
-//
-//	NRF24_write_registers( W_REGISTER, CONFIG, &register_val, 1 );
-//
-//    return( PASS );
-//}
 
 
 
@@ -573,7 +539,7 @@ NRF24_power_level_et NRF24_get_PA_TX_power(void)
 *
 *******************************************************************************
 */
-u8_t NRF24_get_nRF_status(void)
+u8_t NRF24_get_status(void)
 {
     u8_t status = 0;
 
@@ -582,6 +548,59 @@ u8_t NRF24_get_nRF_status(void)
 
     return ( status );
 }
+
+
+
+/*!
+*******************************************************************************
+*
+*   \brief          Grab the current status of the RF chip
+*
+*   \author         MS
+*
+*   \return
+*
+*******************************************************************************
+*/
+low_high_et NRF24_check_status_mask( MRF24_status_masks_et mask, u8_t* data_p )
+{
+    u8_t status;
+    low_high_et returnval = 0u;
+
+    /* firstly grab the status byte */
+    status = NRF24_get_status();
+    *data_p =  status;
+
+    switch( mask )
+    {
+        case RF24_RX_DATA_READY:
+            returnval |= ( ( status & ( 1 << MASK_RX_DR ) ) >> MASK_RX_DR ) ;
+            break;
+
+        case RF24_TX_DATA_SENT:
+            returnval |= ( ( status & ( 1 << MASK_TX_DS ) ) >> MASK_TX_DS );
+            break;
+
+        case RF24_MAX_RETR_REACHED:
+            returnval |= ( ( status & ( 1 << MASK_MAX_RT ) ) >> MASK_MAX_RT );
+            break;
+
+        case RF24_RX_PIPE_DATA_NUM:
+            returnval |= ( ( status & ( 7 << MASK_RX_P_NO ) ) >> MASK_RX_P_NO );
+            returnval = LOW;
+            break;
+
+        case RF24_TX_FIFO_FULL:
+            returnval |= ( ( status & ( 1 << MASK_TX_FULL ) ) >> MASK_TX_FULL);
+            break;
+
+        default:
+            break;
+    }
+
+    return ( returnval );
+}
+
 
 
 
@@ -654,6 +673,113 @@ pass_fail_et NRF24_set_rf_data_rate( NRF24_air_data_rate_et value )
 
 
 
+/*!
+*******************************************************************************
+*
+*   \brief          Sets the auto acknowledgement on a specific data pipe
+*
+*   \author         MS
+*
+*   \return
+*
+*******************************************************************************
+*/
+pass_fail_et NRF24_set_AA_data_pipe( disable_enable_et state, u8_t pipe_num )
+{
+    u8_t register_val;
+
+    if( pipe_num > NRF_MAX_NUM_PIPES )
+    {
+        pipe_num = NRF_MAX_NUM_PIPES;
+    }
+
+    /* Read back the current register status, modify it and then rewrite it back down */
+    NRF24_read_registers( R_REGISTER, EN_AUTO_ACK, &register_val, 1 );
+
+    /* Mask of the bit */
+    register_val &= ~( 1 << pipe_num );
+    register_val |= ( state << pipe_num );
+
+    NRF24_write_registers( W_REGISTER, EN_AUTO_ACK, &register_val, 1 );
+
+    return ( PASS );
+}
+
+
+
+/*!
+*******************************************************************************
+*
+*   \brief          Enables or disables a specific data pipe
+*
+*   \author         MS
+*
+*   \return
+*
+*******************************************************************************
+*/
+pass_fail_et NRF24_enable_data_pipe( disable_enable_et state, u8_t pipe_num )
+{
+    u8_t register_val;
+
+    if( pipe_num > NRF_MAX_NUM_PIPES )
+    {
+        pipe_num = NRF_MAX_NUM_PIPES;
+    }
+
+    /* Read back the current register status, modify it and then rewrite it back down */
+    NRF24_read_registers( R_REGISTER, EN_RXADDR, &register_val, 1 );
+
+    /* Mask of the bit */
+    register_val &= ~( 1 << pipe_num );
+    register_val |= ( state << pipe_num );
+
+    NRF24_write_registers( W_REGISTER, EN_RXADDR, &register_val, 1 );
+
+    return ( PASS );
+}
+
+
+/*!
+*******************************************************************************
+*
+*   \brief          Setup the retransmit time and count
+*
+*   \author         MS
+*
+*   \return
+*
+*******************************************************************************
+*/
+pass_fail_et NRF24_setup_retriese( NRF24_retransmitt_time_et time, u8_t counts )
+{
+    u8_t register_val;
+
+    if( counts > NRF_MAX_NUM_RETRIES )
+    {
+        counts = NRF_MAX_NUM_RETRIES;
+    }
+
+    /* Read back the current register status, modify it and then rewrite it back down */
+    NRF24_read_registers( R_REGISTER, SETUP_RETR, &register_val, 1 );
+
+    /* Mask of the bit */
+    register_val &= ~( 15 << ARD );
+    register_val &= ~( 15 << ARC );
+
+    register_val |= ( time << ARD );
+    register_val |= ( counts << ARC );
+
+    NRF24_write_registers( W_REGISTER, SETUP_RETR, &register_val, 1 );
+
+    return ( PASS );
+}
+
+
+
+
+
+
 
 /*!
 *******************************************************************************
@@ -687,6 +813,38 @@ pass_fail_et NRF24_open_write_data_pipe( u8_t pipe_num, const u8_t* data_pipe_ad
 
     return ( PASS );
 }
+
+
+
+/*!
+*******************************************************************************
+*
+*   \brief          Opens a pipe to communicate over RF link
+*
+*   \author         MS
+*
+*   \return
+*
+*******************************************************************************
+*/
+pass_fail_et NRF24_read_data_pipe( u8_t pipe_num, const u8_t* data_p )
+{
+    u8_t regiter_val;
+
+    /* 6 pipes can be opened, let the user select from 0 - 5 and auto correct their
+    selection if we need to */
+    if( pipe_num > 5 )
+    {
+        pipe_num = 5;
+    }
+
+    /* we will add an offset of "0x0A" onto the pipe number as this is the starting address of
+    the pipe registers and always make the address of the pipe 5 bytes long*/
+    NRF24_read_registers( R_REGISTER, ( NRF24_registers_et)( pipe_num + 0x0A ), (u8_t*)data_p, 5 );
+
+    return ( PASS );
+}
+
 
 
 
@@ -750,7 +908,7 @@ pass_fail_et NRF24_send_payload( u8_t* buffer, u8_t len )
         /* Mask off the size of the payload setting for the specific pipe */
         stuff_buffer_size = ( stuff_buffer_size & 0x3F );
 
-        /* subtract the amount o  f "actual" data that you have from the max payload setting */
+        /* subtract the amount of "actual" data that you have from the max payload setting */
         stuff_buffer_size -= len;
     }
 
@@ -875,34 +1033,37 @@ pass_fail_et NRF24_get_payload( u8_t* buffer )
 *
 *******************************************************************************
 */
-pass_fail_et NRF24_set_dynamic_payloads( disable_enable_et state )
+pass_fail_et NRF24_set_dynamic_payloads( disable_enable_et state, u8_t pipe_num )
 {
     u8_t register_val;
     pass_fail_et return_val;
 
-    /* Find out the size of the payload setting for the specific pipe */
-    NRF24_read_registers( R_REGISTER, FEATURE, &register_val, 1 );
-
-    register_val = ( ( register_val & 0xF8 ) | ( state << EN_DPL ) );
-
-    if( NRF24_write_registers( W_REGISTER, FEATURE, (u8_t*)&register_val, 1 ) == FAIL )
+    if( pipe_num > NRF_MAX_NUM_PIPES )
     {
-        /* The write and read may have failed because the feature register hasnt been enabled yet
-      so lets enable it */
-
-      NRF24_toggle_features_register();
+        pipe_num = NRF_MAX_NUM_PIPES;
     }
 
-    if( NRF24_write_registers( W_REGISTER, FEATURE, (u8_t*)&register_val, 1 ) == PASS )
-    {
-        /* Passed this time :) */
-        return_val = PASS;
-    }
+    /* Firstly set the Dynamic payload bit in the DYNPD register */
+    NRF24_read_registers( R_REGISTER, DYNPD, &register_val, 1 );
 
-     /*Now that we have activated the feature "Dynamic Payload" */
-    register_val = ( register_val | ( 1 << DPL_P5 ) | ( 1 << DPL_P4 ) | ( 1 << DPL_P3 ) | ( 1 << DPL_P2 ) | ( 1 << DPL_P1 ) | ( 1 << DPL_P0 ) );
+    /* This clears the specific DPLD bit */
+    register_val &= ~( 1 << pipe_num );
+    register_val |= ( state << pipe_num );
 
     NRF24_write_registers( W_REGISTER, DYNPD, (u8_t*)&register_val, 1 );
+
+    /* That's the individual pipe dynamic payload bit set, next we need to enable the
+    EN_DPL bit in the feature register */
+
+    /* Read the feature register */
+    NRF24_read_registers( R_REGISTER, FEATURE, &register_val, 1 );
+
+    /* Always enable the dynamic payload bit in the feature register */
+    register_val = ( 0 | ( 1 << EN_DPL ) );
+    NRF24_write_registers( W_REGISTER, FEATURE, (u8_t*)&register_val, 1 );
+
+    /* Read the feature register */
+    NRF24_read_registers( R_REGISTER, FEATURE, &register_val, 1 );
 
     return ( return_val );
 }
@@ -981,26 +1142,9 @@ pass_fail_et NRF24_read_all_registers( u8_t* data_p )
 void NRF24_setup_payload( u8_t* data_p, u8_t len )
 {
     pass_fail_et return_val;
-    u8_t i = 0u;
 
-    /* This is a buffer of 3 so lets find the first free buffer and stick data in it */
-    for( i = 0; i < 3; i++ )
-    {
-        /* Lets assume that if the first element of the array( of x arrays ) is 0xFF that all elements in
-        that particular array are 0xFF */
-        if( NRF24_tx_rf_payload_s[i][0] == 0xFF )
-        {
-            /* We have found a free array so lets fill it */
-            STDC_memcpy( &NRF24_tx_rf_payload_s[i][0], data_p , 32 );
-
-            /* position filled so now break out */
-            break;
-        }
-        else
-        {
-            /* Position is not free to use */
-        }
-    }
+    /* We have found a free array so lets fill it */
+    STDC_memcpy( NRF24_tx_rf_payload_s, data_p , 32 );
 }
 
 
@@ -1108,6 +1252,34 @@ void NRF24_setup_pll( disable_enable_et state )
 }
 
 
+/*!
+*******************************************************************************
+*
+*   \brief          sets up the data pipe address widths
+*
+*   \author         MS
+*
+*   \return
+*
+*******************************************************************************
+*/
+void NRF24_setup_address_widths( NRF24_address_width_et value )
+{
+    u8_t register_val;
+    pass_fail_et return_val;
+
+    NRF24_read_registers( R_REGISTER, SETUP_AW, &register_val, 1 );
+
+    register_val &= ~( 3 << AW );
+
+    register_val |= ( value << AW );
+
+    NRF24_write_registers( W_REGISTER, SETUP_AW, (u8_t*)&register_val, 1 );
+
+    return ( return_val );
+}
+
+
 
 
 
@@ -1154,23 +1326,24 @@ void NRF24_tick( void )
             /* Setup initial register values */
             NRF24_set_configuration( NRF24_DEFAULT_CONFIG );
 
-            /* Grab the status of the RF chip */
-            NRF24_status_register_s = NRF24_get_nRF_status();
-            NRF24_fifo_status_s = NRF24_get_nRF_FIFO_status();
-
             NRF24_read_all_registers( NRF24_register_readback_s );
 
-            /* Setup has completed so now move onto the next state*/
+            /* open up the data pipe to communicate with the receiver */
+            NRF24_open_write_data_pipe( 0, NRF24_data_pipe_default_s );
+            NRF24_read_data_pipe( 0, NRF24_data_pipe_test_s );
+            NRF24_set_dynamic_payloads( ENABLE, 0 );
+
+            /* Setup has completed so now move onto the next state */
             NRF24_state_s = NVM_info_s.NVM_generic_data_blk_s.nrf_startup_tx_rx_mode;
         }
         break;
 
         case NRF24_SETUP_TX:
-         {
+        {
             /* carry out the necessary steps to transition to TX_MODE */
             NRF24_set_low_level_mode( NRF_TX_MODE );
 
-            NRF24_ce_select(HIGH);
+            NRF24_ce_select( HIGH );
 
             /* Flush out the tx and rx buffers */
             NRF24_flush_rx();
@@ -1190,31 +1363,19 @@ void NRF24_tick( void )
         case NRF24_TX:
         {
 			NRF24_cycle_counter_s ++;
-			NRF24_status_register_s = NRF24_get_nRF_status();
 
-			if( ( ( NRF24_status_register_s & 0x20 ) >> 5 ) == 1 )
-			{
-				NRF24_status_register_clr_bit( TX_DS );
-			}
+			if( NRF24_check_status_mask( RF24_TX_DATA_SENT, &NRF24_status_register_s ) == HIGH )
+            {
+                NRF24_status_register_clr_bit( TX_DS );
 
-			NRF24_status_register_s = NRF24_get_nRF_status();
+                HAL_BRD_toggle_led();
+            }
 
-			u8_t x = 0u;
-			u8_t i = 0u;
+            NRF24_setup_payload( "Open Door", 10 );
 
-			STDC_memcpy( &NRF24_tx_rf_payload_s[0][0], "Open Door", 10 );
+			NRF24_send_payload( NRF24_tx_rf_payload_s, 10 );
 
-			NRF24_send_payload( &NRF24_tx_rf_payload_s[0][0], 10 );
-
-			/* rotate the buffer so that the valid commands fill into the empty position */
-			for( x = 0; x < 3 - 1; x++ )
-			{
-				STDC_memcpy( &NRF24_tx_rf_payload_s[x][0], &NRF24_tx_rf_payload_s[x+1][0], 32 );
-			}
-
-			/* We have now actioned one of the commands in the buffer so lets free up that space again */
-			STDC_memset( &NRF24_tx_rf_payload_s[x][0], 0xFF, 32 );
-
+			NRF24_read_all_registers( NRF24_register_readback_s );
         }
         break;
 
@@ -1247,10 +1408,10 @@ void NRF24_tick( void )
             /* Eventually might be interrupt driven but for now lets poll */
 
             /* Grab the status of the RF chip */
-            NRF24_status_register_s = NRF24_get_nRF_status();
+            NRF24_status_register_s = NRF24_get_status();
             NRF24_fifo_status_s = NRF24_get_nRF_FIFO_status();
 
-            if( ( NRF24_status_register_s & 0x40 ) == 0x40 )
+            if( NRF24_check_status_mask( RF24_RX_DATA_READY, &NRF24_status_register_s ) == HIGH )
             {
                 /* we may have received a packet !!!!!!*/
                 NRF24_status_register_clr_bit( RX_DR );
@@ -1259,6 +1420,12 @@ void NRF24_tick( void )
             }
         }
         break;
+
+        case NRF24_STANDBY:
+            /* Power down the RF chip by setting the low level mode of operation to power down */
+            NRF24_set_low_level_mode( NRF_STANDBY_1_MODE );
+            break;
+
 
         case NRF24_POWER_DOWN:
             /* Power down the RF chip by setting the low level mode of operation to power down */
@@ -1274,7 +1441,6 @@ void NRF24_tick( void )
             break;
 
         case NRF24_CONST_WAVE:
-
             NRF24_setup_constant_wave( ENABLE );
             NRF24_setup_pll( ENABLE );
             NRF24_ce_select(HIGH);
@@ -1300,9 +1466,28 @@ void NRF24_tick( void )
 *   \note
 *
 ***************************************************************************************************/
-NRF24_state_et NRF24_get_mode_status( void )
+NRF24_state_et NRF24_get_state( void )
 {
     return ( NRF24_state_s );
+}
+
+
+
+/*!
+****************************************************************************************************
+*
+*   \brief         Sets the NRF state machine state RF Module status
+*
+*   \author        MS
+*
+*   \return        none
+*
+*   \note
+*
+***************************************************************************************************/
+void NRF24_set_state( NRF24_state_et state )
+{
+    NRF24_state_s = state;
 }
 
 

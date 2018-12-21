@@ -194,6 +194,150 @@ void test_pll( void )
 }
 
 
+void test_AA_pipe( void )
+{
+    return_register_byte = 0xFF;
+    NRF24_set_AA_data_pipe( ENABLE, 0 );
+    NRF24_set_AA_data_pipe( ENABLE, 1 );
+    NRF24_set_AA_data_pipe( ENABLE, 2 );
+    NRF24_set_AA_data_pipe( ENABLE, 3 );
+    NRF24_set_AA_data_pipe( ENABLE, 4 );
+    NRF24_set_AA_data_pipe( ENABLE, 5 );
+
+    NRF24_set_AA_data_pipe( DISABLE, 0 );
+    NRF24_set_AA_data_pipe( DISABLE, 1 );
+    NRF24_set_AA_data_pipe( DISABLE, 2 );
+    NRF24_set_AA_data_pipe( DISABLE, 3 );
+    NRF24_set_AA_data_pipe( DISABLE, 4 );
+    NRF24_set_AA_data_pipe( DISABLE, 5 );
+
+    return_register_byte = 0x00;
+    NRF24_set_AA_data_pipe( ENABLE, 0 );
+    NRF24_set_AA_data_pipe( ENABLE, 1 );
+    NRF24_set_AA_data_pipe( ENABLE, 2 );
+    NRF24_set_AA_data_pipe( ENABLE, 3 );
+    NRF24_set_AA_data_pipe( ENABLE, 4 );
+    NRF24_set_AA_data_pipe( ENABLE, 5 );
+
+    NRF24_set_AA_data_pipe( DISABLE, 0 );
+    NRF24_set_AA_data_pipe( DISABLE, 1 );
+    NRF24_set_AA_data_pipe( DISABLE, 2 );
+    NRF24_set_AA_data_pipe( DISABLE, 3 );
+    NRF24_set_AA_data_pipe( DISABLE, 4 );
+    NRF24_set_AA_data_pipe( DISABLE, 5 );
+}
+
+
+void test_enable_pipe( void )
+{
+    return_register_byte = 0xFF;
+    NRF24_set_AA_data_pipe( ENABLE, 0 );
+    NRF24_set_AA_data_pipe( ENABLE, 1 );
+    NRF24_set_AA_data_pipe( ENABLE, 2 );
+    NRF24_set_AA_data_pipe( ENABLE, 3 );
+    NRF24_set_AA_data_pipe( ENABLE, 4 );
+    NRF24_set_AA_data_pipe( ENABLE, 5 );
+
+    NRF24_set_AA_data_pipe( DISABLE, 0 );
+    NRF24_set_AA_data_pipe( DISABLE, 1 );
+    NRF24_set_AA_data_pipe( DISABLE, 2 );
+    NRF24_set_AA_data_pipe( DISABLE, 3 );
+    NRF24_set_AA_data_pipe( DISABLE, 4 );
+    NRF24_set_AA_data_pipe( DISABLE, 5 );
+
+    return_register_byte = 0x00;
+    NRF24_set_AA_data_pipe( ENABLE, 0 );
+    NRF24_set_AA_data_pipe( ENABLE, 1 );
+    NRF24_set_AA_data_pipe( ENABLE, 2 );
+    NRF24_set_AA_data_pipe( ENABLE, 3 );
+    NRF24_set_AA_data_pipe( ENABLE, 4 );
+    NRF24_set_AA_data_pipe( ENABLE, 5 );
+
+    NRF24_set_AA_data_pipe( DISABLE, 0 );
+    NRF24_set_AA_data_pipe( DISABLE, 1 );
+    NRF24_set_AA_data_pipe( DISABLE, 2 );
+    NRF24_set_AA_data_pipe( DISABLE, 3 );
+    NRF24_set_AA_data_pipe( DISABLE, 4 );
+    NRF24_set_AA_data_pipe( DISABLE, 5 );
+}
+
+
+void test_address_widths( void )
+{
+    return_register_byte = 0x00;
+    NRF24_setup_address_widths( ADDRESS_3_BYTES );
+    NRF24_setup_address_widths( ADDRESS_4_BYTES );
+    NRF24_setup_address_widths( ADDRESS_5_BYTES );
+
+    return_register_byte = 0xFF;
+    NRF24_setup_address_widths( ADDRESS_3_BYTES );
+    NRF24_setup_address_widths( ADDRESS_4_BYTES );
+    NRF24_setup_address_widths( ADDRESS_5_BYTES );
+}
+
+
+void test_retries( void )
+{
+    return_register_byte = 0x00;
+    NRF24_setup_retriese( RF24_250_US, 1 );
+    NRF24_setup_retriese( RF24_750_US, 1 );
+    NRF24_setup_retriese( RF24_4000_US, 1 );
+
+    NRF24_setup_retriese( RF24_250_US, 5 );
+    NRF24_setup_retriese( RF24_750_US, 5 );
+    NRF24_setup_retriese( RF24_4000_US, 5 );
+
+    return_register_byte = 0xFF;
+    NRF24_setup_retriese( RF24_250_US, 15 );
+    NRF24_setup_retriese( RF24_750_US, 15 );
+    NRF24_setup_retriese( RF24_4000_US, 15 );
+
+    NRF24_setup_retriese( RF24_250_US, 100 );
+    NRF24_setup_retriese( RF24_750_US, 100 );
+    NRF24_setup_retriese( RF24_4000_US, 105 );
+}
+
+
+void test_status_mask( void )
+{
+    u8_t data;
+    low_high_et state;
+
+    return_register_byte = 0xFF;
+    state = NRF24_check_status_mask( RF24_RX_DATA_READY, &data );
+    state = NRF24_check_status_mask( RF24_TX_DATA_SENT, &data );
+    state = NRF24_check_status_mask( RF24_MAX_RETR_REACHED, &data );
+    state = NRF24_check_status_mask( RF24_RX_PIPE_DATA_NUM, &data );
+    state = NRF24_check_status_mask( RF24_TX_FIFO_FULL, &data );
+
+    return_register_byte = 0x00;
+    state = NRF24_check_status_mask( RF24_RX_DATA_READY, &data );
+    state = NRF24_check_status_mask( RF24_TX_DATA_SENT, &data );
+    state = NRF24_check_status_mask( RF24_MAX_RETR_REACHED, &data );
+    state = NRF24_check_status_mask( RF24_RX_PIPE_DATA_NUM, &data );
+    state = NRF24_check_status_mask( RF24_TX_FIFO_FULL, &data );
+}
+
+void test_dynamic_payloads( void )
+{
+    return_register_byte = 0x00;
+    NRF24_set_dynamic_payloads( ENABLE, 0 );
+    NRF24_set_dynamic_payloads( ENABLE, 3 );
+    NRF24_set_dynamic_payloads( ENABLE, 5 );
+
+    NRF24_set_dynamic_payloads( DISABLE, 0 );
+    NRF24_set_dynamic_payloads( DISABLE, 3 );
+    NRF24_set_dynamic_payloads( DISABLE, 5 );
+
+    return_register_byte = 0xFF;
+    NRF24_set_dynamic_payloads( ENABLE, 0 );
+    NRF24_set_dynamic_payloads( ENABLE, 3 );
+    NRF24_set_dynamic_payloads( ENABLE, 5 );
+
+    NRF24_set_dynamic_payloads( DISABLE, 0 );
+    NRF24_set_dynamic_payloads( DISABLE, 3 );
+    NRF24_set_dynamic_payloads( DISABLE, 5 );
+}
 
 
 
