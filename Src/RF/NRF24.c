@@ -613,6 +613,59 @@ low_high_et NRF24_check_status_mask( MRF24_status_masks_et mask, u8_t* data_p )
 /*!
 *******************************************************************************
 *
+*   \brief          Grab the current fifo of the RF chip
+*
+*   \author         MS
+*
+*   \return
+*
+*******************************************************************************
+*/
+low_high_et NRF24_check_fifo_mask( MRF24_fifo_masks_et mask, u8_t* data_p )
+{
+    u8_t status;
+    low_high_et returnval = 0u;
+
+    /* firstly grab the status byte */
+    status = NRF24_get_FIFO_status();
+    *data_p =  status;
+
+    switch( mask )
+    {
+        case RF24_RX_EMPTY:
+            returnval |= ( ( status & ( 1 << RF24_RX_EMPTY ) ) >> RF24_RX_EMPTY ) ;
+            break;
+
+        case RF24_RX_FULL:
+            returnval |= ( ( status & ( 1 << RF24_RX_FULL ) ) >> RF24_RX_FULL );
+            break;
+
+        case RF24_TX_EMPTY:
+            returnval |= ( ( status & ( 1 << RF24_TX_EMPTY ) ) >> RF24_TX_EMPTY );
+            break;
+
+        case RF24_TX_FULL:
+            returnval |= ( ( status & ( 1 << RF24_TX_FULL ) ) >> RF24_TX_FULL );
+            returnval = LOW;
+            break;
+
+        case RF24_TX_REUSE:
+            returnval |= ( ( status & ( 1 << RF24_TX_REUSE ) ) >> RF24_TX_REUSE);
+            break;
+
+        default:
+            break;
+    }
+
+    return ( returnval );
+
+}
+
+
+
+/*!
+*******************************************************************************
+*
 *   \brief          Grab the current status of the RF chip
 *
 *   \author         MS
@@ -621,7 +674,7 @@ low_high_et NRF24_check_status_mask( MRF24_status_masks_et mask, u8_t* data_p )
 *
 *******************************************************************************
 */
-u8_t NRF24_get_nRF_FIFO_status(void)
+u8_t NRF24_get_FIFO_status(void)
 {
     u8_t status = 0;
 
@@ -673,6 +726,39 @@ pass_fail_et NRF24_set_rf_data_rate( NRF24_air_data_rate_et value )
     }
 
     NRF24_write_registers( W_REGISTER, RF_SETUP, &register_val, 1 );
+
+    return ( PASS );
+}
+
+
+
+
+
+/*!
+*******************************************************************************
+*
+*   \brief          Sets the REUSE TX payload bit
+*
+*   \author         MS
+*
+*   \return
+*
+*******************************************************************************
+*/
+pass_fail_et NRF24_set_reuse_tx_payload( disable_enable_et state )
+{
+    u8_t register_val;
+    register_val = NOP;
+
+    if( state == ENABLE )
+    {
+        NRF24_write_registers( REUSE_TX_PL, ADDRESS_NOP, &register_val, 1u );
+    }
+    else
+    {
+        /* Flush the TX buffer and this will reset the REUSE bit */
+        NRF24_flush_tx();
+    }
 
     return ( PASS );
 }
@@ -985,7 +1071,7 @@ pass_fail_et NRF24_get_payload( u8_t* buffer )
     if DPL is activated */
     NRF24_read_registers( R_REGISTER, FEATURE, &dpl_enabled_check, 1 ) ;
 
-    if( ( dpl_enabled_check & 0x04 ) == ( 1 << EN_DPL ) )
+    if( ( dpl_enabled_check & ( 1 << EN_DPL ) == EN_DPL ) )
     {
         /* Find out the size of the payload setting for the specific pipe */
         NRF24_read_registers( R_RX_PL_WID, ADDRESS_NOP, &buffer_size, 1 );
@@ -1326,6 +1412,8 @@ void NRF24_tick( void )
 
             NRF24_set_PA_TX_power( RF_MAX_TX_PWR );
 
+            NRF24_set_rf_data_rate( RF24_250KBPS );
+
             NRF24_read_all_registers( NRF24_register_readback_s );
 
             /* open up the data pipe to communicate with the receiver */
@@ -1418,7 +1506,7 @@ void NRF24_tick( void )
 
             /* Grab the status of the RF chip */
             NRF24_status_register_s = NRF24_get_status();
-            NRF24_fifo_status_s = NRF24_get_nRF_FIFO_status();
+            NRF24_fifo_status_s = NRF24_get_FIFO_status();
 
             if( NRF24_check_status_mask( RF24_RX_DATA_READY, &NRF24_status_register_s ) == HIGH )
             {

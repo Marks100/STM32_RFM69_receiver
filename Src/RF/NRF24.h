@@ -276,6 +276,15 @@ typedef enum
     RF24_TX_FIFO_FULL
 } MRF24_status_masks_et;
 
+typedef enum
+{
+    RF24_RX_EMPTY = 0u,
+    RF24_RX_FULL,
+    RF24_TX_EMPTY = 4u,
+    RF24_TX_FULL,
+    RF24_TX_REUSE
+} MRF24_fifo_masks_et;
+
 
 
 
@@ -306,17 +315,19 @@ void                 NRF24_setup_CRC_scheme( disable_enable_et state, NRF24_crcl
 void                 NRF24_setup_constant_wave( disable_enable_et state );
 void                 NRF24_setup_pll( disable_enable_et state );
 pass_fail_et         NRF24_open_write_data_pipe( u8_t pipe_num, const u8_t* data_pipe_address );
-u8_t                 NRF24_get_nRF_FIFO_status(void);
+u8_t                 NRF24_get_FIFO_status(void);
 pass_fail_et         NRF24_status_register_clr_bit( u8_t bit_mask );
 pass_fail_et         NRF24_send_payload( u8_t* buffer, u8_t len );
 pass_fail_et         NRF24_get_payload( u8_t* buffer );
 pass_fail_et         NRF24_toggle_features_register( void );
 pass_fail_et         NRF24_set_AA_data_pipe( disable_enable_et state, u8_t pipe_num );
+pass_fail_et         NRF24_set_reuse_tx_payload( disable_enable_et state );
 pass_fail_et         NRF24_set_dynamic_payloads( disable_enable_et state, u8_t pipe_num );
 void                 NRF24_setup_address_widths( NRF24_address_width_et value );
 pass_fail_et         NRF24_enable_data_pipe( disable_enable_et state, u8_t pipe_num );
 pass_fail_et         NRF24_setup_retriese( NRF24_retransmitt_time_et time, u8_t counts );
 low_high_et          NRF24_check_status_mask( MRF24_status_masks_et mask, u8_t* data_p );
+low_high_et          NRF24_check_fifo_mask( MRF24_fifo_masks_et mask, u8_t* data_p );
 pass_fail_et         NRF24_read_data_pipe( u8_t pipe_num, const u8_t* data_p );
 
 pass_fail_et         NRF24_read_all_registers( u8_t* data_p );

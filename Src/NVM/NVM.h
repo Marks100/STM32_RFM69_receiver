@@ -41,7 +41,7 @@ typedef enum
 /**************************************************************************************************/
 typedef enum
 {
-    NVM_VERS_GENERIC_DATA         = 6,
+    NVM_VERS_GENERIC_DATA         = 7,
 } NVM_blk_version_et;
 /***************************************************************************************************
 This is the version number of the NVM block, This needs to be incremented when changing the layout
