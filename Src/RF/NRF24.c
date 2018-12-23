@@ -27,6 +27,7 @@
 #include "HAL_BRD.h"
 #include "HAL_SPI.h"
 #include "NVM.h"
+#include "main.h"
 #include "NRF24.h"
 #include "NRF24_Registers.h"
 
@@ -35,18 +36,23 @@
 /* Module Identification for STDC_assert functionality */
 #define STDC_MODULE_ID   STDC_MOD_RF
 
-STATIC const u8_t NRF24_data_pipe_default_s[5] = {0xE8, 0xE8, 0xF0, 0xF0, 0xE1};
-STATIC const u8_t NRF24_data_pipe_custom_s[5] = {0xE8, 0xE8, 0xF0, 0xF0, 0xE1};
+/* ^ different data pipes that can be used :) */
+STATIC const u8_t NRF24_data_pipe_default_s [5] = {0xAA, 0xBB, 0xCC, 0xDD, 0xEE};
+STATIC const u8_t NRF24_data_pipe_custom_s_1[5] = {0xBB, 0xCC, 0xDD, 0xEE, 0xFF};
+STATIC const u8_t NRF24_data_pipe_custom_s_2[5] = {0xBB, 0xCC, 0xDD, 0xEE, 0xAA};
+STATIC const u8_t NRF24_data_pipe_custom_s_3[5] = {0xBB, 0xCC, 0xDD, 0xEE, 0xBB};
+STATIC const u8_t NRF24_data_pipe_custom_s_4[5] = {0xBB, 0xCC, 0xDD, 0xEE, 0xCC};
+STATIC const u8_t NRF24_data_pipe_custom_s_5[5] = {0xBB, 0xCC, 0xDD, 0xEE, 0xDD};
 STATIC const u8_t NRF24_data_pipe_test_s[5];
 
 STATIC NRF24_state_et NRF24_state_s = NRF24_POWERING_UP;
 
-STATIC u8_t  NRF24_rx_rf_payload_s[20];
+STATIC u8_t  NRF24_rx_rf_payload_s[NRF_MAX_PAYLOAD_SIZE];
 STATIC u8_t  NRF24_status_register_s;
 STATIC u8_t  NRF24_register_readback_s[DEFAULT_CONFIGURATION_SIZE];
 STATIC u8_t  NRF24_fifo_status_s;
 STATIC u16_t NRF24_cycle_counter_s;
-STATIC u8_t  NRF24_tx_rf_payload_s[32];
+STATIC u8_t  NRF24_tx_rf_payload_s[NRF_MAX_PAYLOAD_SIZE];
 
 
 
@@ -799,14 +805,14 @@ pass_fail_et NRF24_open_write_data_pipe( u8_t pipe_num, const u8_t* data_pipe_ad
 
     /* 6 pipes can be opened, let the user select from 0 - 5 and auto correct their
     selection if we need to */
-    if( pipe_num > 5 )
+    if( pipe_num > NRF_MAX_NUM_PIPES )
     {
-        pipe_num = 5;
+        pipe_num = NRF_MAX_NUM_PIPES;
     }
 
     /* we will add an offset of "0x0A" onto the pipe number as this is the starting address of
     the pipe registers and always make the address of the pipe 5 bytes long*/
-    NRF24_write_registers( W_REGISTER, ( NRF24_registers_et)( pipe_num + 0x0A ), (u8_t*)data_pipe_address, 5 );
+    NRF24_write_registers( W_REGISTER, ( NRF24_registers_et)( pipe_num + NRF_DATA_PIPE_OFFSET ), (u8_t*)data_pipe_address, 5 );
 
     NRF24_write_registers( W_REGISTER, TX_ADDR, (u8_t*)data_pipe_address, 5 );
     NRF24_write_registers( W_REGISTER, ( RX_PW_P0 + pipe_num ) , &payload_size, 1 );
@@ -937,25 +943,17 @@ pass_fail_et NRF24_send_payload( u8_t* buffer, u8_t len )
     /* release NCS / Slave Select line high */
     NRF24_spi_slave_select( HIGH );
 
-    u16_t delay = 150;
-	while( delay-- != 0u )
-	{
-	    #if(UNIT_TEST!=1)
-		asm ("nop");
-		#endif
-	}
+    #if(UNIT_TEST!=1)
+    delay_us(100);
+    #endif
 
     /* toggle the CE pin to complete the RF transfer */
     NRF24_spi_slave_select(HIGH);
 
     /* hack a little delay in here */
-    delay = 100;
-    while( delay-- != 0u )
-    {
-        #if(UNIT_TEST!=1)
-        asm ("nop");
-        #endif
-    }
+    #if(UNIT_TEST!=1)
+    delay_us(100);
+    #endif
 
     NRF24_spi_slave_select(LOW);
 
@@ -1326,6 +1324,8 @@ void NRF24_tick( void )
             /* Setup initial register values */
             NRF24_set_configuration( NRF24_DEFAULT_CONFIG );
 
+            NRF24_set_PA_TX_power( RF_MAX_TX_PWR );
+
             NRF24_read_all_registers( NRF24_register_readback_s );
 
             /* open up the data pipe to communicate with the receiver */
@@ -1362,18 +1362,27 @@ void NRF24_tick( void )
 
         case NRF24_TX:
         {
-			NRF24_cycle_counter_s ++;
-
 			if( NRF24_check_status_mask( RF24_TX_DATA_SENT, &NRF24_status_register_s ) == HIGH )
             {
                 NRF24_status_register_clr_bit( TX_DS );
 
                 HAL_BRD_toggle_led();
+
+                 //NRF24_state_s = NRF24_POWER_DOWN;
             }
 
-            NRF24_setup_payload( "Open Door", 10 );
+            if( NRF24_cycle_counter_s > 10 )
+            {
+                NRF24_cycle_counter_s = 0u;
 
-			NRF24_send_payload( NRF24_tx_rf_payload_s, 10 );
+                NRF24_setup_payload( "Open Door", 10 );
+
+                NRF24_send_payload( NRF24_tx_rf_payload_s, 10 );
+            }
+            else
+            {
+                NRF24_cycle_counter_s ++;
+            }
 
 			NRF24_read_all_registers( NRF24_register_readback_s );
         }
@@ -1417,6 +1426,8 @@ void NRF24_tick( void )
                 NRF24_status_register_clr_bit( RX_DR );
 
                 NRF24_get_payload( NRF24_rx_rf_payload_s );
+
+                HAL_BRD_toggle_led();
             }
         }
         break;

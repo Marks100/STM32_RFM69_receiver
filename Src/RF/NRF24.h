@@ -99,6 +99,8 @@
 #define NRF_MAX_CHANNEL_SELECTION   126u
 #define NRF_MAX_NUM_PIPES           5u
 #define NRF_MAX_NUM_RETRIES         15u
+#define NRF_DATA_PIPE_OFFSET        10u
+#define NRF_MAX_PAYLOAD_SIZE        32u
 
 
 
