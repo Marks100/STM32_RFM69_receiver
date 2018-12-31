@@ -97,6 +97,7 @@
 
 #define NRF24_WRITE_BIT             0x20
 #define NRF_MAX_CHANNEL_SELECTION   126u
+#define NRF_DEF_CHANNEL_SELECTION   108u
 #define NRF_MAX_NUM_PIPES           5u
 #define NRF_MAX_NUM_RETRIES         15u
 #define NRF_DATA_PIPE_OFFSET        10u
@@ -177,18 +178,19 @@ typedef enum
 typedef enum
 {
     /* Instruction Mnemonics */
-    R_REGISTER    = 0x00,
-    W_REGISTER    = 0x20,
-    REGISTER_MASK = 0x1F,
-    ACTIVATE      = 0x50,
-    R_RX_PL_WID   = 0x60,
-    R_RX_PAYLOAD  = 0x61,
-    W_TX_PAYLOAD  = 0xA0,
-    W_ACK_PAYLOAD = 0xA8,
-    FLUSH_TX      = 0xE1,
-    FLUSH_RX      = 0xE2,
-    REUSE_TX_PL   = 0xE3,
-    NOP           = 0xFF
+    R_REGISTER          = 0x00,
+    W_REGISTER          = 0x20,
+    REGISTER_MASK       = 0x1F,
+    ACTIVATE            = 0x50,
+    R_RX_PL_WID         = 0x60,
+    R_RX_PAYLOAD        = 0x61,
+    W_TX_PAYLOAD        = 0xA0,
+    W_ACK_PAYLOAD       = 0xA8,
+    FLUSH_TX            = 0xE1,
+    FLUSH_RX            = 0xE2,
+    REUSE_TX_PL         = 0xE3,
+    W_TX_PAYLOAD_NO_ACK = 0xB0,
+    NOP                 = 0xFF
 } NRF24_instruction_et;
 
 
@@ -325,10 +327,12 @@ pass_fail_et         NRF24_set_reuse_tx_payload( disable_enable_et state );
 pass_fail_et         NRF24_set_dynamic_payloads( disable_enable_et state, u8_t pipe_num );
 void                 NRF24_setup_address_widths( NRF24_address_width_et value );
 pass_fail_et         NRF24_enable_data_pipe( disable_enable_et state, u8_t pipe_num );
-pass_fail_et         NRF24_setup_retriese( NRF24_retransmitt_time_et time, u8_t counts );
+pass_fail_et         NRF24_setup_retries( NRF24_retransmitt_time_et time, u8_t counts );
 low_high_et          NRF24_check_status_mask( MRF24_status_masks_et mask, u8_t* data_p );
 low_high_et          NRF24_check_fifo_mask( MRF24_fifo_masks_et mask, u8_t* data_p );
 pass_fail_et         NRF24_read_data_pipe( u8_t pipe_num, const u8_t* data_p );
+u8_t 				 NRF24_get_retry_count( void );
+pass_fail_et 		 NRF24_setup_dynamic_ack( disable_enable_et state );
 
 pass_fail_et         NRF24_read_all_registers( u8_t* data_p );
 void                 NRF24_setup_payload( u8_t* data_p, u8_t len );

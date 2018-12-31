@@ -52,6 +52,7 @@ STATIC u8_t  NRF24_status_register_s;
 STATIC u8_t  NRF24_register_readback_s[DEFAULT_CONFIGURATION_SIZE];
 STATIC u8_t  NRF24_fifo_status_s;
 STATIC u16_t NRF24_cycle_counter_s;
+STATIC u8_t  NRF24_retry_counter_s;
 STATIC u8_t  NRF24_tx_rf_payload_s[NRF_MAX_PAYLOAD_SIZE];
 
 
@@ -85,6 +86,8 @@ void NRF24_init( void )
 	NRF24_cycle_counter_s = 0u;
 	NRF24_status_register_s = 0u;
 	NRF24_fifo_status_s = 0u;
+    NRF24_retry_counter_s = 0u;
+
 	u8_t i = 0u;
 
     STDC_memset( NRF24_tx_rf_payload_s, 0xFF, 32 );
@@ -843,7 +846,7 @@ pass_fail_et NRF24_enable_data_pipe( disable_enable_et state, u8_t pipe_num )
 *
 *******************************************************************************
 */
-pass_fail_et NRF24_setup_retriese( NRF24_retransmitt_time_et time, u8_t counts )
+pass_fail_et NRF24_setup_retries( NRF24_retransmitt_time_et time, u8_t counts )
 {
     u8_t register_val;
 
@@ -856,8 +859,8 @@ pass_fail_et NRF24_setup_retriese( NRF24_retransmitt_time_et time, u8_t counts )
     NRF24_read_registers( R_REGISTER, SETUP_RETR, &register_val, 1 );
 
     /* Mask of the bit */
-    register_val &= ~( 15 << ARD );
-    register_val &= ~( 15 << ARC );
+    register_val &= ~( 15u << ARD );
+    register_val &= ~( 15u << ARC );
 
     register_val |= ( time << ARD );
     register_val |= ( counts << ARC );
@@ -1365,6 +1368,63 @@ void NRF24_setup_address_widths( NRF24_address_width_et value )
 
 
 
+/*!
+*******************************************************************************
+*
+*   \brief          Gets the number of retries that took place before an
+*                   ACK was received for a TX
+*
+*   \author         MS
+*
+*   \return
+*
+*******************************************************************************
+*/
+u8_t NRF24_get_retry_count( void )
+{
+    u8_t register_val;
+
+    NRF24_read_registers( R_REGISTER, OBSERVE_TX, &register_val, 1 );
+
+    register_val &= ( 0x0Fu << ARC_CNT );
+
+    return ( register_val );
+}
+
+
+
+
+/*!
+*******************************************************************************
+*
+*   \brief          Enables dynamic acks
+*
+*   \author         MS
+*
+*   \return
+*
+*******************************************************************************
+*/
+pass_fail_et NRF24_setup_dynamic_ack( disable_enable_et state )
+{
+    u8_t register_val;
+    pass_fail_et return_val;
+
+    /* Read the feature register */
+    NRF24_read_registers( R_REGISTER, FEATURE, &register_val, 1 );
+
+    /* Always enable the dynamic payload bit in the feature register */
+    register_val &= ~( 1u << EN_DYN_ACK );
+    register_val |= ( state << EN_DYN_ACK );
+    NRF24_write_registers( W_REGISTER, FEATURE, (u8_t*)&register_val, 1 );
+
+    return ( return_val );
+}
+
+
+
+
+
 
 
 /*!
@@ -1421,8 +1481,14 @@ void NRF24_tick( void )
             NRF24_read_data_pipe( 0, NRF24_data_pipe_test_s );
             NRF24_set_dynamic_payloads( ENABLE, 0 );
 
+            NRF24_setup_dynamic_ack( ENABLE );
+
+            NRF24_set_AA_data_pipe( ENABLE, 0 );
+
+            NRF24_setup_retries( RF24_2000_US, 5u );
+
             /* Setup has completed so now move onto the next state */
-            NRF24_state_s = NRF24_SETUP_RX;
+            NRF24_state_s = NRF24_SETUP_TX;
 
             //NRF24_state_s = NVM_info_s.NVM_generic_data_blk_s.nrf_startup_tx_rx_mode;
         }
@@ -1443,8 +1509,6 @@ void NRF24_tick( void )
             NRF24_status_register_clr_bit( TX_DS );
             NRF24_status_register_clr_bit( TX_DS );
 
-            /* open up the data pipe to communicate with the receiver */
-            NRF24_open_write_data_pipe( 1, NRF24_data_pipe_default_s );
 
             /* Move onto the TX_MODE state */
             NRF24_state_s = NRF24_TX;
@@ -1491,9 +1555,6 @@ void NRF24_tick( void )
 			NRF24_status_register_clr_bit( TX_DS );
 			NRF24_status_register_clr_bit( TX_DS );
 
-			/* open up the data pipe to communicate with the receiver */
-			NRF24_open_write_data_pipe( 1, NRF24_data_pipe_default_s );
-
 			/* The CE pin to has to be HIGH to Receive */
 			NRF24_ce_select(HIGH);
 
@@ -1517,7 +1578,11 @@ void NRF24_tick( void )
 
                 NRF24_get_payload( NRF24_rx_rf_payload_s );
 
-                HAL_BRD_toggle_led();
+                if( ( STDC_memcompare( NRF24_rx_rf_payload_s, "Open Door", 10) ) == TRUE )
+                {
+                    HAL_BRD_toggle_led();
+                    STDC_memset( NRF24_rx_rf_payload_s, 0x00, sizeof( NRF24_rx_rf_payload_s ) );
+                }
             }
         }
         break;
@@ -1544,6 +1609,8 @@ void NRF24_tick( void )
         case NRF24_CONST_WAVE:
             NRF24_setup_constant_wave( ENABLE );
             NRF24_setup_pll( ENABLE );
+            NRF24_set_PA_TX_power( RF_MAX_TX_PWR );
+            NRF24_set_channel( NRF_DEF_CHANNEL_SELECTION );
             NRF24_ce_select(HIGH);
             break;
 
