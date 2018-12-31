@@ -1034,14 +1034,14 @@ pass_fail_et NRF24_send_payload( u8_t* buffer, u8_t len )
     #endif
 
     /* toggle the CE pin to complete the RF transfer */
-    NRF24_spi_slave_select(HIGH);
+    NRF24_ce_select(HIGH);
 
     /* hack a little delay in here */
     #if(UNIT_TEST!=1)
     delay_us(100);
     #endif
 
-    NRF24_spi_slave_select(LOW);
+    NRF24_ce_select(LOW);
 
     return ( PASS );
 }
@@ -1422,7 +1422,9 @@ void NRF24_tick( void )
             NRF24_set_dynamic_payloads( ENABLE, 0 );
 
             /* Setup has completed so now move onto the next state */
-            NRF24_state_s = NVM_info_s.NVM_generic_data_blk_s.nrf_startup_tx_rx_mode;
+            NRF24_state_s = NRF24_SETUP_TX;
+
+            //NRF24_state_s = NVM_info_s.NVM_generic_data_blk_s.nrf_startup_tx_rx_mode;
         }
         break;
 
@@ -1431,7 +1433,7 @@ void NRF24_tick( void )
             /* carry out the necessary steps to transition to TX_MODE */
             NRF24_set_low_level_mode( NRF_TX_MODE );
 
-            NRF24_ce_select( HIGH );
+            NRF24_ce_select( LOW );
 
             /* Flush out the tx and rx buffers */
             NRF24_flush_rx();
