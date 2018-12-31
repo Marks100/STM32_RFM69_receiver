@@ -1071,7 +1071,7 @@ pass_fail_et NRF24_get_payload( u8_t* buffer )
     if DPL is activated */
     NRF24_read_registers( R_REGISTER, FEATURE, &dpl_enabled_check, 1 ) ;
 
-    if( ( dpl_enabled_check & ( 1 << EN_DPL ) == EN_DPL ) )
+    if( ( dpl_enabled_check & ( 1 << EN_DPL ) ) == ( 1 << EN_DPL ) )
     {
         /* Find out the size of the payload setting for the specific pipe */
         NRF24_read_registers( R_RX_PL_WID, ADDRESS_NOP, &buffer_size, 1 );
@@ -1422,7 +1422,7 @@ void NRF24_tick( void )
             NRF24_set_dynamic_payloads( ENABLE, 0 );
 
             /* Setup has completed so now move onto the next state */
-            NRF24_state_s = NRF24_SETUP_TX;
+            NRF24_state_s = NRF24_SETUP_RX;
 
             //NRF24_state_s = NVM_info_s.NVM_generic_data_blk_s.nrf_startup_tx_rx_mode;
         }
