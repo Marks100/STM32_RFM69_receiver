@@ -987,6 +987,9 @@ pass_fail_et NRF24_send_payload( u8_t* buffer, u8_t len )
     u8_t dpl_enabled_check;
     disable_enable_et dpl_enabled = DISABLE_;
 
+    /* Clear the max retry bit before sending any further data */
+    NRF24_status_register_clr_bit( MAX_RT );
+
     /* Is the payload dynamic or static?, Find out by reading the FEATURE register to check
     if DPL is activated */
     NRF24_read_registers( R_REGISTER, FEATURE, &dpl_enabled_check, 1 ) ;
@@ -1521,8 +1524,13 @@ void NRF24_tick( void )
                 NRF24_status_register_clr_bit( TX_DS );
 
                 HAL_BRD_toggle_led();
+            }
+            else if( NRF24_check_status_mask( RF24_MAX_RETR_REACHED, &NRF24_status_register_s ) == HIGH )
+            {
+                /* Clear the max retry bit before sending any further data */
+                NRF24_status_register_clr_bit( MAX_RT );
 
-                 //NRF24_state_s = NRF24_POWER_DOWN;
+                HAL_BRD_toggle_debug_pin();
             }
 
             if( NRF24_cycle_counter_s > 10 )
