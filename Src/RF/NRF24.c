@@ -47,13 +47,11 @@ STATIC const u8_t NRF24_data_pipe_test_s[5];
 
 STATIC NRF24_state_et NRF24_state_s = NRF24_POWERING_UP;
 
-STATIC u8_t  NRF24_rx_rf_payload_s[NRF_MAX_PAYLOAD_SIZE];
 STATIC u8_t  NRF24_status_register_s;
 STATIC u8_t  NRF24_register_readback_s[DEFAULT_CONFIGURATION_SIZE];
 STATIC u8_t  NRF24_fifo_status_s;
 STATIC u16_t NRF24_cycle_counter_s;
-STATIC u8_t  NRF24_retry_counter_s;
-STATIC u8_t  NRF24_tx_rf_payload_s[NRF_MAX_PAYLOAD_SIZE];
+STATIC NRF24_tx_rx_payload_info_st NRF24_tx_rx_payload_info_s;
 
 
 
@@ -86,12 +84,8 @@ void NRF24_init( void )
 	NRF24_cycle_counter_s = 0u;
 	NRF24_status_register_s = 0u;
 	NRF24_fifo_status_s = 0u;
-    NRF24_retry_counter_s = 0u;
 
-	u8_t i = 0u;
-
-    STDC_memset( NRF24_tx_rf_payload_s, 0xFF, 32 );
-    STDC_memset( NRF24_rx_rf_payload_s, 0xFF, sizeof(NRF24_rx_rf_payload_s) );
+    STDC_memset( &NRF24_tx_rx_payload_info_s, 0x00, sizeof( NRF24_tx_rx_payload_info_s ) );
 }
 
 
@@ -140,61 +134,6 @@ pass_fail_et NRF24_set_configuration( NRF24_static_configuration_et config )
     }
 
     return ( returnType );
-}
-
-
-
-
-
-
-/*!
-****************************************************************************************************
-*
-*   \brief         Initialise all the RF registers
-*
-*   \author        MS
-*
-*   \return        none
-*
-*   \note
-*
-***************************************************************************************************/
-void NRF24_setup_default_registers( void )
-{
-    /* Setup all the default register values, these can all be modified later */
-    u8_t register_val;
-
-    register_val = 0x0E;
-    NRF24_write_registers( W_REGISTER, CONFIG, &register_val, 1 );
-
-    register_val = 0x00;
-    NRF24_write_registers( W_REGISTER, EN_AUTO_ACK, &register_val, 1 );
-
-    register_val = 0x03;
-    NRF24_write_registers( W_REGISTER, EN_RXADDR, &register_val, 1 );
-
-    register_val = 0x00;
-    NRF24_write_registers( W_REGISTER, SETUP_RETR,  &register_val, 1 );
-
-    register_val = 0x6C;
-    NRF24_write_registers( W_REGISTER, RF_CH, &register_val, 1 );
-
-    register_val = 0x26;
-    NRF24_write_registers( W_REGISTER, RF_SETUP, &register_val, 1 );
-
-    NRF24_write_registers( W_REGISTER, RX_ADDR_P0, (u8_t*)&NRF24_data_pipe_default_s, sizeof(NRF24_data_pipe_default_s) );
-
-    NRF24_write_registers( W_REGISTER, TX_ADDR, (u8_t*)&NRF24_data_pipe_default_s, sizeof(NRF24_data_pipe_default_s) );
-
-    register_val = 0x20;
-    NRF24_write_registers( W_REGISTER, RX_PW_P0, &register_val, 1 );
-
-    /* Flush out the tx and rx buffers */
-    NRF24_flush_rx();
-    NRF24_flush_tx();
-
-    NRF24_set_rf_data_rate(RF24_250KBPS);
-    //RF_set_rf_data_rate( RF24_1MBPS );
 }
 
 
@@ -399,8 +338,6 @@ pass_fail_et NRF24_set_low_level_mode( NRF24_low_level_mode_et mode )
 */
 pass_fail_et NRF24_set_channel( u8_t channel )
 {
- 	u8_t register_val;
-
  	/* The channel does not need to be masked but bit 7 always needs to be 0 */
 	if( channel > NRF_MAX_CHANNEL_SELECTION )
 	{
@@ -571,7 +508,7 @@ u8_t NRF24_get_status(void)
 *
 *******************************************************************************
 */
-low_high_et NRF24_check_status_mask( MRF24_status_masks_et mask, u8_t* data_p )
+low_high_et NRF24_check_status_mask( NRF24_status_masks_et mask, u8_t* data_p )
 {
     u8_t status;
     low_high_et returnval = 0u;
@@ -624,7 +561,7 @@ low_high_et NRF24_check_status_mask( MRF24_status_masks_et mask, u8_t* data_p )
 *
 *******************************************************************************
 */
-low_high_et NRF24_check_fifo_mask( MRF24_fifo_masks_et mask, u8_t* data_p )
+low_high_et NRF24_check_fifo_mask( NRF24_fifo_masks_et mask, u8_t* data_p )
 {
     u8_t status;
     low_high_et returnval = 0u;
@@ -753,7 +690,7 @@ pass_fail_et NRF24_set_reuse_tx_payload( disable_enable_et state )
     u8_t register_val;
     register_val = NOP;
 
-    if( state == ENABLE )
+    if( state == ENABLE_ )
     {
         NRF24_write_registers( REUSE_TX_PL, ADDRESS_NOP, &register_val, 1u );
     }
@@ -889,7 +826,6 @@ pass_fail_et NRF24_setup_retries( NRF24_retransmitt_time_et time, u8_t counts )
 */
 pass_fail_et NRF24_open_write_data_pipe( u8_t pipe_num, const u8_t* data_pipe_address )
 {
-    u8_t regiter_val;
     u8_t payload_size = 32u;
 
     /* 6 pipes can be opened, let the user select from 0 - 5 and auto correct their
@@ -924,8 +860,6 @@ pass_fail_et NRF24_open_write_data_pipe( u8_t pipe_num, const u8_t* data_pipe_ad
 */
 pass_fail_et NRF24_read_data_pipe( u8_t pipe_num, const u8_t* data_p )
 {
-    u8_t regiter_val;
-
     /* 6 pipes can be opened, let the user select from 0 - 5 and auto correct their
     selection if we need to */
     if( pipe_num > 5 )
@@ -981,11 +915,18 @@ pass_fail_et NRF24_status_register_clr_bit( u8_t bit_mask )
 *
 *******************************************************************************
 */
-pass_fail_et NRF24_send_payload( u8_t* buffer, u8_t len )
+pass_fail_et NRF24_send_payload( void )
 {
     u8_t stuff_buffer_size;
     u8_t dpl_enabled_check;
     disable_enable_et dpl_enabled = DISABLE_;
+
+    /* setup the len */
+    u8_t len = NRF24_tx_rx_payload_info_s.NRF24_tx_payload_size;
+
+    /* Setup the pointer to the data */
+    u8_t * buffer;
+    buffer = NRF24_tx_rx_payload_info_s.NRF24_tx_rf_payload;
 
     /* Clear the max retry bit before sending any further data */
     NRF24_status_register_clr_bit( MAX_RT );
@@ -1126,7 +1067,7 @@ pass_fail_et NRF24_get_payload( u8_t* buffer )
 pass_fail_et NRF24_set_dynamic_payloads( disable_enable_et state, u8_t pipe_num )
 {
     u8_t register_val;
-    pass_fail_et return_val;
+    pass_fail_et return_val = PASS;
 
     if( pipe_num > NRF_MAX_NUM_PIPES )
     {
@@ -1173,7 +1114,6 @@ pass_fail_et NRF24_set_dynamic_payloads( disable_enable_et state, u8_t pipe_num 
 */
 pass_fail_et NRF24_toggle_features_register( void )
 {
-    pass_fail_et return_val;
     u8_t register_val = 0x73;
 
     NRF24_write_registers( ACTIVATE, FEATURE, (u8_t*)&register_val, 1 );
@@ -1196,7 +1136,7 @@ pass_fail_et NRF24_toggle_features_register( void )
 */
 pass_fail_et NRF24_read_all_registers( u8_t* data_p )
 {
-	pass_fail_et return_val;
+	pass_fail_et return_val = PASS;
 
     u8_t i;
 
@@ -1212,7 +1152,7 @@ pass_fail_et NRF24_read_all_registers( u8_t* data_p )
         }
     }
 
-	return ( PASS );
+	return ( return_val );
 }
 
 
@@ -1231,10 +1171,14 @@ pass_fail_et NRF24_read_all_registers( u8_t* data_p )
 */
 void NRF24_setup_payload( u8_t* data_p, u8_t len )
 {
-    pass_fail_et return_val;
+    /* First reset the entire tx payload to 0 */
+    STDC_memset( NRF24_tx_rx_payload_info_s.NRF24_tx_rf_payload, 0x00 , sizeof( NRF24_tx_rx_payload_info_s.NRF24_tx_rf_payload ) );
 
-    /* We have found a free array so lets fill it */
-    STDC_memcpy( NRF24_tx_rf_payload_s, data_p , 32 );
+    /* Setup the size of the payload */
+    NRF24_tx_rx_payload_info_s.NRF24_tx_payload_size = len;
+
+    /* Copy the data into the tx buffer */
+    STDC_memcpy( NRF24_tx_rx_payload_info_s.NRF24_tx_rf_payload, data_p , NRF24_tx_rx_payload_info_s.NRF24_tx_payload_size );
 }
 
 
@@ -1255,7 +1199,6 @@ void NRF24_setup_payload( u8_t* data_p, u8_t len )
 void NRF24_setup_CRC_scheme( disable_enable_et state, NRF24_crclength_et crc_len )
 {
     u8_t register_val;
-    pass_fail_et return_val;
 
     if( crc_len > RF24_CRC_16 )
     {
@@ -1275,8 +1218,6 @@ void NRF24_setup_CRC_scheme( disable_enable_et state, NRF24_crclength_et crc_len
     register_val |= ( crc_len << CRCO );
 
     NRF24_write_registers( W_REGISTER, CONFIG, (u8_t*)&register_val, 1 );
-
-    return ( return_val );
 }
 
 
@@ -1295,7 +1236,6 @@ void NRF24_setup_CRC_scheme( disable_enable_et state, NRF24_crclength_et crc_len
 void NRF24_setup_constant_wave( disable_enable_et state )
 {
     u8_t register_val;
-    pass_fail_et return_val;
 
     /* Find out the size of the payload setting for the specific pipe */
     NRF24_read_registers( R_REGISTER, RF_SETUP, &register_val, 1 );
@@ -1306,8 +1246,6 @@ void NRF24_setup_constant_wave( disable_enable_et state )
     register_val |= ( state << CONT_WAVE );
 
     NRF24_write_registers( W_REGISTER, RF_SETUP, (u8_t*)&register_val, 1 );
-
-    return ( return_val );
 }
 
 
@@ -1326,7 +1264,6 @@ void NRF24_setup_constant_wave( disable_enable_et state )
 void NRF24_setup_pll( disable_enable_et state )
 {
     u8_t register_val;
-    pass_fail_et return_val;
 
     /* Find out the size of the payload setting for the specific pipe */
     NRF24_read_registers( R_REGISTER, RF_SETUP, &register_val, 1 );
@@ -1337,8 +1274,6 @@ void NRF24_setup_pll( disable_enable_et state )
     register_val |= ( state << PLL_LOCK );
 
     NRF24_write_registers( W_REGISTER, RF_SETUP, (u8_t*)&register_val, 1 );
-
-    return ( return_val );
 }
 
 
@@ -1356,7 +1291,6 @@ void NRF24_setup_pll( disable_enable_et state )
 void NRF24_setup_address_widths( NRF24_address_width_et value )
 {
     u8_t register_val;
-    pass_fail_et return_val;
 
     NRF24_read_registers( R_REGISTER, SETUP_AW, &register_val, 1 );
 
@@ -1365,8 +1299,6 @@ void NRF24_setup_address_widths( NRF24_address_width_et value )
     register_val |= ( value << AW );
 
     NRF24_write_registers( W_REGISTER, SETUP_AW, (u8_t*)&register_val, 1 );
-
-    return ( return_val );
 }
 
 
@@ -1411,7 +1343,7 @@ u8_t NRF24_get_retry_count( void )
 pass_fail_et NRF24_setup_dynamic_ack( disable_enable_et state )
 {
     u8_t register_val;
-    pass_fail_et return_val;
+    pass_fail_et return_val  = PASS;
 
     /* Read the feature register */
     NRF24_read_registers( R_REGISTER, FEATURE, &register_val, 1 );
@@ -1533,13 +1465,17 @@ void NRF24_tick( void )
                 HAL_BRD_toggle_debug_pin();
             }
 
+            NRF24_tx_rx_payload_info_s.NRF24_tx_retry_ctr = NRF24_get_retry_count();
+
+
             if( NRF24_cycle_counter_s > 10 )
             {
                 NRF24_cycle_counter_s = 0u;
+                NRF24_tx_rx_payload_info_s.NRF24_tx_retry_ctr = 0u;
 
-                NRF24_setup_payload( "Open Door", 10 );
+                NRF24_setup_payload( "Open Door", 10u );
 
-                NRF24_send_payload( NRF24_tx_rf_payload_s, 10 );
+                NRF24_send_payload();
             }
             else
             {
@@ -1584,12 +1520,12 @@ void NRF24_tick( void )
                 /* we may have received a packet !!!!!!*/
                 NRF24_status_register_clr_bit( RX_DR );
 
-                NRF24_get_payload( NRF24_rx_rf_payload_s );
+                NRF24_get_payload( NRF24_tx_rx_payload_info_s.NRF24_rx_rf_payload );
 
-                if( ( STDC_memcompare( NRF24_rx_rf_payload_s, "Open Door", 10) ) == TRUE )
+                if( ( STDC_memcompare( NRF24_tx_rx_payload_info_s.NRF24_rx_rf_payload, "Open Door", 10) ) == TRUE )
                 {
                     HAL_BRD_toggle_led();
-                    STDC_memset( NRF24_rx_rf_payload_s, 0x00, sizeof( NRF24_rx_rf_payload_s ) );
+                    STDC_memset( NRF24_tx_rx_payload_info_s.NRF24_rx_rf_payload, 0x00, sizeof( NRF24_tx_rx_payload_info_s.NRF24_rx_rf_payload ) );
                 }
             }
         }

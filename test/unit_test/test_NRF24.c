@@ -9,7 +9,6 @@
 
 #include "STM32_stubs.h"
 
-
 //-- module being tested
 #include "NRF24.h"
 
@@ -30,11 +29,10 @@ const u8_t NRF24_data_pipe_custom[5];
 
 NRF24_state_et NRF24_state_s = NRF24_POWERING_UP;
 
-u8_t  NRF24_rx_rf_payload_s[20];
 u8_t  NRF24_status_register_s;
 u8_t  NRF24_fifo_status_s;
 u16_t NRF24_cycle_counter_s;
-u8_t  NRF24_tx_rf_payload_s[3][32];
+NRF24_tx_rx_payload_info_st NRF24_tx_rx_payload_info_s;
 
 
 /*******************************************************************************
@@ -45,6 +43,8 @@ false_true_et HAL_SPI_get_init_status( void );
 void HAL_SPI_init( void );
 void HAL_BRD_NRF24_spi_slave_select( low_high_et state );
 void HAL_BRD_NRF24_set_ce_pin_state( low_high_et state );
+void HAL_BRD_toggle_led( void );
+void HAL_BRD_toggle_debug_pin( void );
 
 
 u8_t address_index_s = 0u;
@@ -279,22 +279,22 @@ void test_address_widths( void )
 void test_retries( void )
 {
     return_register_byte = 0x00;
-    NRF24_setup_retriese( RF24_250_US, 1 );
-    NRF24_setup_retriese( RF24_750_US, 1 );
-    NRF24_setup_retriese( RF24_4000_US, 1 );
+    NRF24_setup_retries( RF24_250_US, 1 );
+    NRF24_setup_retries( RF24_750_US, 1 );
+    NRF24_setup_retries( RF24_4000_US, 1 );
 
-    NRF24_setup_retriese( RF24_250_US, 5 );
-    NRF24_setup_retriese( RF24_750_US, 5 );
-    NRF24_setup_retriese( RF24_4000_US, 5 );
+    NRF24_setup_retries( RF24_250_US, 5 );
+    NRF24_setup_retries( RF24_750_US, 5 );
+    NRF24_setup_retries( RF24_4000_US, 5 );
 
     return_register_byte = 0xFF;
-    NRF24_setup_retriese( RF24_250_US, 15 );
-    NRF24_setup_retriese( RF24_750_US, 15 );
-    NRF24_setup_retriese( RF24_4000_US, 15 );
+    NRF24_setup_retries( RF24_250_US, 15 );
+    NRF24_setup_retries( RF24_750_US, 15 );
+    NRF24_setup_retries( RF24_4000_US, 15 );
 
-    NRF24_setup_retriese( RF24_250_US, 100 );
-    NRF24_setup_retriese( RF24_750_US, 100 );
-    NRF24_setup_retriese( RF24_4000_US, 105 );
+    NRF24_setup_retries( RF24_250_US, 100 );
+    NRF24_setup_retries( RF24_750_US, 100 );
+    NRF24_setup_retries( RF24_4000_US, 105 );
 }
 
 
@@ -368,6 +368,16 @@ void HAL_BRD_NRF24_spi_slave_select( low_high_et state )
 
 
 void HAL_BRD_NRF24_set_ce_pin_state( low_high_et state )
+{
+
+}
+
+void  HAL_BRD_toggle_led( void )
+{
+
+}
+
+void HAL_BRD_toggle_debug_pin( void )
 {
 
 }

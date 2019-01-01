@@ -276,7 +276,7 @@ typedef enum
     RF24_MAX_RETR_REACHED,
     RF24_RX_PIPE_DATA_NUM,
     RF24_TX_FIFO_FULL
-} MRF24_status_masks_et;
+} NRF24_status_masks_et;
 
 typedef enum
 {
@@ -285,9 +285,17 @@ typedef enum
     RF24_TX_EMPTY = 4u,
     RF24_TX_FULL,
     RF24_TX_REUSE
-} MRF24_fifo_masks_et;
+} NRF24_fifo_masks_et;
 
 
+typedef struct
+{
+    u8_t  NRF24_rx_rf_payload[NRF_MAX_PAYLOAD_SIZE];
+    u8_t  NRF24_rx_payload_size;
+    u8_t  NRF24_tx_rf_payload[NRF_MAX_PAYLOAD_SIZE];
+    u8_t  NRF24_tx_payload_size;
+    u8_t  NRF24_tx_retry_ctr;
+} NRF24_tx_rx_payload_info_st;
 
 
 /***************************************************************************************************
@@ -319,7 +327,7 @@ void                 NRF24_setup_pll( disable_enable_et state );
 pass_fail_et         NRF24_open_write_data_pipe( u8_t pipe_num, const u8_t* data_pipe_address );
 u8_t                 NRF24_get_FIFO_status(void);
 pass_fail_et         NRF24_status_register_clr_bit( u8_t bit_mask );
-pass_fail_et         NRF24_send_payload( u8_t* buffer, u8_t len );
+pass_fail_et         NRF24_send_payload( void );
 pass_fail_et         NRF24_get_payload( u8_t* buffer );
 pass_fail_et         NRF24_toggle_features_register( void );
 pass_fail_et         NRF24_set_AA_data_pipe( disable_enable_et state, u8_t pipe_num );
@@ -328,8 +336,8 @@ pass_fail_et         NRF24_set_dynamic_payloads( disable_enable_et state, u8_t p
 void                 NRF24_setup_address_widths( NRF24_address_width_et value );
 pass_fail_et         NRF24_enable_data_pipe( disable_enable_et state, u8_t pipe_num );
 pass_fail_et         NRF24_setup_retries( NRF24_retransmitt_time_et time, u8_t counts );
-low_high_et          NRF24_check_status_mask( MRF24_status_masks_et mask, u8_t* data_p );
-low_high_et          NRF24_check_fifo_mask( MRF24_fifo_masks_et mask, u8_t* data_p );
+low_high_et          NRF24_check_status_mask( NRF24_status_masks_et mask, u8_t* data_p );
+low_high_et          NRF24_check_fifo_mask( NRF24_fifo_masks_et mask, u8_t* data_p );
 pass_fail_et         NRF24_read_data_pipe( u8_t pipe_num, const u8_t* data_p );
 u8_t 				 NRF24_get_retry_count( void );
 pass_fail_et 		 NRF24_setup_dynamic_ack( disable_enable_et state );
