@@ -990,6 +990,11 @@ pass_fail_et NRF24_send_payload( void )
 
     NRF24_ce_select(LOW);
 
+    if( NRF24_tx_rx_payload_info_s.NRF24_tx_payload_ctr <  U16_T_MAX )
+    {
+        NRF24_tx_rx_payload_info_s.NRF24_tx_payload_ctr++;
+    }
+
     return ( PASS );
 }
 
@@ -1405,25 +1410,25 @@ void NRF24_tick( void )
             /* Setup initial register values */
             NRF24_set_configuration( NRF24_DEFAULT_CONFIG );
 
+            /* Set channel and power levels */
             NRF24_set_PA_TX_power( RF_MAX_TX_PWR );
-
             NRF24_set_rf_data_rate( RF24_250KBPS );
-
-            NRF24_read_all_registers( NRF24_register_readback_s );
 
             /* open up the data pipe to communicate with the receiver */
             NRF24_open_write_data_pipe( 0, NRF24_data_pipe_default_s );
             NRF24_read_data_pipe( 0, NRF24_data_pipe_test_s );
+
+            /* Setup retries and dynamic ACKS */
             NRF24_set_dynamic_payloads( ENABLE, 0 );
-
             NRF24_setup_dynamic_ack( ENABLE );
-
             NRF24_set_AA_data_pipe( ENABLE, 0 );
+            NRF24_setup_retries( RF24_2000_US, 10u );
 
-            NRF24_setup_retries( RF24_2000_US, 5u );
+            /* After all the setup read back the regs */
+            NRF24_read_all_registers( NRF24_register_readback_s );
 
             /* Setup has completed so now move onto the next state */
-            NRF24_state_s = NRF24_SETUP_TX;
+            NRF24_state_s = NRF24_SETUP_RX;
 
             //NRF24_state_s = NVM_info_s.NVM_generic_data_blk_s.nrf_startup_tx_rx_mode;
         }
@@ -1436,14 +1441,8 @@ void NRF24_tick( void )
 
             NRF24_ce_select( LOW );
 
-            /* Flush out the tx and rx buffers */
-            NRF24_flush_rx();
-            NRF24_flush_tx();
-
-            NRF24_status_register_clr_bit( TX_DS );
-            NRF24_status_register_clr_bit( TX_DS );
-            NRF24_status_register_clr_bit( TX_DS );
-
+            /* Flush out the tx and rx buffers to get ready for tx */
+            NRF24_complete_flush();
 
             /* Move onto the TX_MODE state */
             NRF24_state_s = NRF24_TX;
@@ -1451,38 +1450,11 @@ void NRF24_tick( void )
 
         case NRF24_TX:
         {
-			if( NRF24_check_status_mask( RF24_TX_DATA_SENT, &NRF24_status_register_s ) == HIGH )
-            {
-                NRF24_status_register_clr_bit( TX_DS );
+            /* Handle the ACKS and failed tx's */
+            NRF24_handle_acks_and_tx_failures();
 
-                HAL_BRD_toggle_led();
-            }
-            else if( NRF24_check_status_mask( RF24_MAX_RETR_REACHED, &NRF24_status_register_s ) == HIGH )
-            {
-                /* Clear the max retry bit before sending any further data */
-                NRF24_status_register_clr_bit( MAX_RT );
-
-                HAL_BRD_toggle_debug_pin();
-            }
-
-            NRF24_tx_rx_payload_info_s.NRF24_tx_retry_ctr = NRF24_get_retry_count();
-
-
-            if( NRF24_cycle_counter_s > 10 )
-            {
-                NRF24_cycle_counter_s = 0u;
-                NRF24_tx_rx_payload_info_s.NRF24_tx_retry_ctr = 0u;
-
-                NRF24_setup_payload( "Open Door", 10u );
-
-                NRF24_send_payload();
-            }
-            else
-            {
-                NRF24_cycle_counter_s ++;
-            }
-
-			NRF24_read_all_registers( NRF24_register_readback_s );
+            /* Handle the next RF TX time and send payload if necessary */
+            NRF24_scheduled_tx();
         }
         break;
 
@@ -1491,16 +1463,11 @@ void NRF24_tick( void )
         	/* carry out the necessary steps to transition to TX_MODE */
 			NRF24_set_low_level_mode( NRF_RX_MODE );
 
-			/* Flush out the tx and rx buffers */
-			NRF24_flush_rx();
-			NRF24_flush_tx();
-
-			NRF24_status_register_clr_bit( TX_DS );
-			NRF24_status_register_clr_bit( TX_DS );
-			NRF24_status_register_clr_bit( TX_DS );
+			/* Flush out the tx and rx buffers to get ready for rx */
+            NRF24_complete_flush();
 
 			/* The CE pin to has to be HIGH to Receive */
-			NRF24_ce_select(HIGH);
+			NRF24_ce_select( HIGH );
 
 			/* Move onto the RX_MODE state */
 			NRF24_state_s = NRF24_RX;
@@ -1511,16 +1478,14 @@ void NRF24_tick( void )
             /* We are now in Receive mode so lets just wait for a packet to come in */
             /* Eventually might be interrupt driven but for now lets poll */
 
-            /* Grab the status of the RF chip */
-            NRF24_status_register_s = NRF24_get_status();
-            NRF24_fifo_status_s = NRF24_get_FIFO_status();
-
             if( NRF24_check_status_mask( RF24_RX_DATA_READY, &NRF24_status_register_s ) == HIGH )
             {
                 /* we may have received a packet !!!!!!*/
                 NRF24_status_register_clr_bit( RX_DR );
 
                 NRF24_get_payload( NRF24_tx_rx_payload_info_s.NRF24_rx_rf_payload );
+
+                NRF24_handle_packet_stats( 3u );
 
                 if( ( STDC_memcompare( NRF24_tx_rx_payload_info_s.NRF24_rx_rf_payload, "Open Door", 10) ) == TRUE )
                 {
@@ -1583,6 +1548,150 @@ NRF24_state_et NRF24_get_state( void )
     return ( NRF24_state_s );
 }
 
+
+
+
+
+/*!
+****************************************************************************************************
+*
+*   \brief         Completely flush out all the TX and RX buffers on the NRF chip
+*
+*   \author        MS
+*
+*   \return        none
+*
+*   \note
+*
+***************************************************************************************************/
+void NRF24_complete_flush( void )
+{
+    NRF24_flush_rx();
+    NRF24_flush_tx();
+
+    NRF24_status_register_clr_bit( TX_DS );
+    NRF24_status_register_clr_bit( TX_DS );
+    NRF24_status_register_clr_bit( TX_DS );
+}
+
+
+
+/*!
+****************************************************************************************************
+*
+*   \brief         Schedules the next TX from the NRF chipRX buffers on the NRF chip
+*
+*   \author        MS
+*
+*   \return        none
+*
+*   \note
+*
+***************************************************************************************************/
+void NRF24_scheduled_tx( void )
+{
+    if( NRF24_cycle_counter_s > NRF24_TX_SCHEDULE_CNT )
+    {
+        NRF24_cycle_counter_s = 0u;
+
+        NRF24_setup_payload( "Open Door", 10u );
+
+        NRF24_send_payload();
+    }
+    else
+    {
+        NRF24_cycle_counter_s ++;
+    }
+}
+
+
+/*!
+****************************************************************************************************
+*
+*   \brief         Handles ACKS and failed tx's
+*
+*   \author        MS
+*
+*   \return        none
+*
+*   \note
+*
+***************************************************************************************************/
+void NRF24_handle_acks_and_tx_failures( void )
+{
+    if( NRF24_check_status_mask( RF24_TX_DATA_SENT, &NRF24_status_register_s ) == HIGH )
+    {
+        /* Clear the Data sent bit or else we cant send any more data */
+        NRF24_status_register_clr_bit( TX_DS );
+
+        HAL_BRD_toggle_led();
+
+        NRF24_handle_packet_stats( 1 );
+    }
+    else if( NRF24_check_status_mask( RF24_MAX_RETR_REACHED, &NRF24_status_register_s ) == HIGH )
+    {
+        /* Clear the max retry bit before sending any further data */
+        NRF24_status_register_clr_bit( MAX_RT );
+
+        HAL_BRD_toggle_debug_pin();
+
+        NRF24_handle_packet_stats( 2 );
+    }
+}
+
+
+/*!
+****************************************************************************************************
+*
+*   \brief         Collect stats about the RF link
+*
+*   \author        MS
+*
+*   \return        none
+*
+*   \note
+*
+***************************************************************************************************/
+void NRF24_handle_packet_stats( u8_t type )
+{
+    if( type == 1 )
+    {
+        /* Data was sent and an ACK was received */
+    }
+    else if ( type == 2)
+    {
+        /* Data was sent and an ACK was not received ( MAX RETRIES ASSERTED ) */
+        if( NRF24_tx_rx_payload_info_s.NRF24_tx_failed_ctr < U16_T_MAX )
+        {
+            NRF24_tx_rx_payload_info_s.NRF24_tx_failed_ctr++;
+        }
+    }
+    else
+    {
+        /* Keep track of the received packets */
+        if( NRF24_tx_rx_payload_info_s.NRF24_rx_payload_ctr < U16_T_MAX )
+        {
+            NRF24_tx_rx_payload_info_s.NRF24_rx_payload_ctr++;
+        }
+
+        /* Now grab the RX fail counter */
+        //NRF24_tx_rx_payload_info_s.NRF24_tx_failed_ctr = ( payload frame ctr - NRF24_rx_payload_ctr );
+    }
+
+    if( NRF24_tx_rx_payload_info_s.NRF24_tx_payload_ctr < NRF_MAX_STATS_SIZE )
+    {
+        /* Get the retry count */
+        NRF24_tx_rx_payload_info_s.NRF24_tx_retry_ctr = NRF24_get_retry_count();
+
+        NRF24_tx_rx_payload_info_s.NRF24_tx_failed_stats[NRF24_tx_rx_payload_info_s.NRF24_tx_payload_ctr] = NRF24_tx_rx_payload_info_s.NRF24_tx_retry_ctr;
+    }
+
+    /* Keep track of the highest fail watermark */
+    if( NRF24_tx_rx_payload_info_s.NRF24_tx_retry_ctr > NRF24_tx_rx_payload_info_s.NRF24_tx_high_retry_cnt_s )
+    {
+        NRF24_tx_rx_payload_info_s.NRF24_tx_high_retry_cnt_s = NRF24_tx_rx_payload_info_s.NRF24_tx_retry_ctr;
+    }
+}
 
 
 /*!
