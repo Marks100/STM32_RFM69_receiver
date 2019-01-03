@@ -96,7 +96,7 @@
 #define RF_PWR_HIGH 2
 
 #define NRF24_TICK_RATE_MS          20u
-#define NRF24_TX_SCHEDULE_TIME_MS   200u
+#define NRF24_TX_SCHEDULE_TIME_MS   500u
 
 #define NRF24_TX_SCHEDULE_CNT       ( NRF24_TX_SCHEDULE_TIME_MS / NRF24_TICK_RATE_MS )
 #define NRF24_WRITE_BIT             0x20
@@ -107,6 +107,8 @@
 #define NRF_DATA_PIPE_OFFSET        10u
 #define NRF_MAX_PAYLOAD_SIZE        32u
 #define NRF_MAX_STATS_SIZE          1000u
+#define NRF_NUM_RX_BUFFERS			3u
+#define NRF_PACKET_CTR_SIZE         2u
 
 
 
@@ -128,8 +130,10 @@ typedef enum
     NRF24_STANDBY,
     NRF24_SETUP_TX,
     NRF24_TX,
+    NRF24_TX_TEST_MODE,
     NRF24_SETUP_RX,
     NRF24_RX,
+    NRF24_RX_TEST_MODE,
     NRF24_POWER_DOWN,
     NRF24_SETUP_CONST_WAVE,
     NRF24_CONST_WAVE,
@@ -295,15 +299,16 @@ typedef enum
 
 typedef struct
 {
-    u8_t  NRF24_rx_rf_payload[NRF_MAX_PAYLOAD_SIZE];
+    u8_t  NRF24_rx_rf_payload[NRF_MAX_PAYLOAD_SIZE * NRF_NUM_RX_BUFFERS];
     u8_t  NRF24_rx_payload_size;
+    u16_t NRF24_rx_failed_ctr;
+    u16_t NRF24_rx_missed_packets;
     u8_t  NRF24_tx_rf_payload[NRF_MAX_PAYLOAD_SIZE];
     u8_t  NRF24_tx_payload_size;
     u16_t NRF24_tx_payload_ctr;
     u16_t NRF24_rx_payload_ctr;
     u8_t  NRF24_tx_retry_ctr;
     u16_t NRF24_tx_failed_ctr;
-    u16_t NRF24_rx_failed_ctr;
     u8_t  NRF24_tx_failed_stats[NRF_MAX_STATS_SIZE];
     u8_t  NRF24_tx_high_retry_cnt_s;
 } NRF24_tx_rx_payload_info_st;
@@ -357,7 +362,7 @@ pass_fail_et         NRF24_read_all_registers( u8_t* data_p );
 void                 NRF24_setup_payload( u8_t* data_p, u8_t len );
 NRF24_state_et       NRF24_get_state( void );
 void                 NRF24_complete_flush( void );
-void                 NRF24_scheduled_tx( void );
+false_true_et        NRF24_scheduled_tx( void );
 void                 NRF24_handle_acks_and_tx_failures( void );
 void                 NRF24_set_state( NRF24_state_et state );
 void                 NRF24_spi_slave_select( low_high_et state );
