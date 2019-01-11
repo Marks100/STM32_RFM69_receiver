@@ -1429,9 +1429,7 @@ void NRF24_tick( void )
             NRF24_read_all_registers( NRF24_register_readback_s );
 
             /* Setup has completed so now move onto the next state */
-            NRF24_state_s = NRF24_SETUP_TX;
-
-            //NRF24_state_s = NVM_info_s.NVM_generic_data_blk_s.nrf_startup_tx_rx_mode;
+            NRF24_state_s = NVM_info_s.NVM_generic_data_blk_s.nrf_startup_tx_rx_mode;
         }
         break;
 
@@ -1446,9 +1444,10 @@ void NRF24_tick( void )
             NRF24_complete_flush();
 
             /* Move onto the TX_MODE state */
-            //NRF24_state_s = NRF24_TX;
-            NRF24_state_s = NRF24_TX_TEST_MODE;
+            NRF24_state_s = NRF24_TX;
+            //NRF24_state_s = NRF24_TX_TEST_MODE;
         }
+        break;
 
         case NRF24_TX:
         {
@@ -1477,6 +1476,7 @@ void NRF24_tick( void )
 				}
 				else
 				{
+					NRF24_start_rf_test_s = TRUE;
 					data_array[0] = ( ( NRF24_tx_rx_payload_info_s.NRF24_tx_payload_ctr & 0xFF00 ) >> 8u );
 					data_array[1] =  ( NRF24_tx_rx_payload_info_s.NRF24_tx_payload_ctr & 0x00FF );
 					STDC_memset( &data_array[2], 0x55, sizeof( data_array ) - NRF_PACKET_CTR_SIZE );
@@ -1503,9 +1503,10 @@ void NRF24_tick( void )
 			NRF24_ce_select( HIGH );
 
 			/* Move onto the RX_MODE state */
-			//NRF24_state_s = NRF24_RX;
-			NRF24_state_s = NRF24_RX_TEST_MODE;
+			NRF24_state_s = NRF24_RX;
+			//NRF24_state_s = NRF24_RX_TEST_MODE;
         }
+        break;
 
         case NRF24_RX:
         {
@@ -1521,11 +1522,7 @@ void NRF24_tick( void )
 
                 NRF24_handle_packet_stats( 3u );
 
-                if( ( STDC_memcompare( NRF24_tx_rx_payload_info_s.NRF24_rx_rf_payload, "Open Door", 10) ) == TRUE )
-                {
-                    HAL_BRD_toggle_led();
-                    //STDC_memset( NRF24_tx_rx_payload_info_s.NRF24_rx_rf_payload, 0x00, sizeof( NRF24_tx_rx_payload_info_s.NRF24_rx_rf_payload ) );
-                }
+                HAL_BRD_toggle_led();
             }
         }
         break;
