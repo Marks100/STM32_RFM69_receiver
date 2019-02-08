@@ -87,6 +87,7 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 100u:
+            RF_MGR_tick();
         	break;
 
         case 120u:
@@ -108,6 +109,7 @@ void MODE_MGR_action_schedule_normal( void )
 
         case 200u:
             //RFM69_tick();
+            RF_MGR_tick();
         	break;
 
         case 220u://RFM69_tick
@@ -128,6 +130,7 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 300u:
+            RF_MGR_tick();
         	break;
 
         case 320u:
@@ -148,6 +151,7 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 400u:
+            RF_MGR_tick();
             //RFM69_tick();
         	break;
 
@@ -169,6 +173,7 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 500u:
+            RF_MGR_tick();
         	break;
 
         case 520u:
@@ -190,6 +195,7 @@ void MODE_MGR_action_schedule_normal( void )
 
         case 600u:
             //RFM69_tick();
+            RF_MGR_tick();
         	break;
 
         case 620u:
@@ -210,6 +216,7 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 700u:
+            RF_MGR_tick();
         	break;
 
         case 720u:
@@ -230,6 +237,7 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 800u:
+            RF_MGR_tick();
             //RFM69_tick();
         	break;
 
@@ -251,6 +259,7 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 900u:
+            RF_MGR_tick();
         	break;
 
         case 920u:
@@ -271,6 +280,7 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 1000u:
+            RF_MGR_tick();
             //RFM69_tick();
 
             /* keep track of time in secs */

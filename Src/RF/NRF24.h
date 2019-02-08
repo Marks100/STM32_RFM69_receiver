@@ -112,6 +112,14 @@
 
 
 
+
+
+
+#define RF_MGR_RF_DATA_HANDLER_SIZE 10u
+#define EARLY_PROTOTYPE_SED          1u
+
+
+
 /***************************************************************************************************
 **                              Constants                                                         **
 ***************************************************************************************************/
@@ -299,7 +307,7 @@ typedef enum
 
 typedef struct
 {
-    u8_t  NRF24_rx_rf_payload[NRF_MAX_PAYLOAD_SIZE * NRF_NUM_RX_BUFFERS];
+    u8_t  NRF24_rx_rf_payload[NRF_MAX_PAYLOAD_SIZE];
     u8_t  NRF24_rx_payload_size;
     u16_t NRF24_rx_failed_ctr;
     u16_t NRF24_rx_missed_packets;
@@ -312,6 +320,23 @@ typedef struct
     u8_t  NRF24_tx_failed_stats[NRF_MAX_STATS_SIZE];
     u8_t  NRF24_tx_high_retry_cnt_s;
 } NRF24_tx_rx_payload_info_st;
+
+
+
+typedef struct
+{
+    u8_t sensor_type;
+    u16_t node_id;
+    u8_t payload[32];
+} data_packet_st;
+
+
+
+typedef struct
+{
+    data_packet_st data_packet_s[RF_MGR_RF_DATA_HANDLER_SIZE];
+    u8_t watermark;
+}RF_MGR_rf_data_store_st;
 
 
 /***************************************************************************************************
@@ -367,6 +392,11 @@ void                 NRF24_handle_acks_and_tx_failures( void );
 void                 NRF24_set_state( NRF24_state_et state );
 void                 NRF24_spi_slave_select( low_high_et state );
 void                 NRF24_ce_select( low_high_et state );
+
+void                 RF_MGR_packet_received_event( u8_t* rf_data, u8_t rf_data_size );
+void                 RF_MGR_tick( void );
+void                 RF_MGR_analyse_received_packets( void );
+void                 RF_MGR_handle_early_prototype_sed( u16_t sensor_id, u8_t* data_p );
 
 
 

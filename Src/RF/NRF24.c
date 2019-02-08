@@ -55,6 +55,8 @@ STATIC NRF24_tx_rx_payload_info_st NRF24_tx_rx_payload_info_s;
 STATIC false_true_et  NRF24_start_rf_test_s;
 
 
+STATIC RF_MGR_rf_data_store_st RF_MGR_rf_data_store_s;
+
 /***************************************************************************************************
 **                              Data declarations and definitions                                 **
 ***************************************************************************************************/
@@ -87,6 +89,10 @@ void NRF24_init( void )
 	NRF24_start_rf_test_s = TRUE;
 
     STDC_memset( &NRF24_tx_rx_payload_info_s, 0x00, sizeof( NRF24_tx_rx_payload_info_s ) );
+
+
+
+    STDC_memset( &RF_MGR_rf_data_store_s, 0x00, sizeof( RF_MGR_rf_data_store_s ) );
 }
 
 
@@ -1510,6 +1516,8 @@ void NRF24_tick( void )
 
         case NRF24_RX:
         {
+        	u8_t fifo;
+        	u8_t i;
             /* We are now in Receive mode so lets just wait for a packet to come in */
             /* Eventually might be interrupt driven but for now lets poll */
 
@@ -1518,7 +1526,21 @@ void NRF24_tick( void )
                 /* we may have received a packet !!!!!!*/
                 NRF24_status_register_clr_bit( RX_DR );
 
-                NRF24_get_payload( NRF24_tx_rx_payload_info_s.NRF24_rx_rf_payload );
+                for( i = 0u; i < NRF_NUM_RX_BUFFERS; i++ )
+                {
+                	/* There is 3 receive buffers so make sure we read them all */
+                	if( NRF24_check_fifo_mask( RF24_RX_EMPTY, &fifo ) != HIGH )
+                	{
+                		NRF24_get_payload( &NRF24_tx_rx_payload_info_s.NRF24_rx_rf_payload );
+
+                		/* The first byte in every RF frame is random and needs to be discarded */
+                		RF_MGR_packet_received_event( &NRF24_tx_rx_payload_info_s.NRF24_rx_rf_payload[1], 31u );
+                	}
+                	else
+                	{
+                		i = NRF_NUM_RX_BUFFERS;
+                	}
+                }
 
                 NRF24_handle_packet_stats( 3u );
 
@@ -1782,6 +1804,87 @@ void NRF24_ce_select( low_high_et state )
 
 
 
+
+
+
+
+
+
+
+void RF_MGR_tick( void )
+{
+    RF_MGR_analyse_received_packets();
+}
+
+
+void RF_MGR_analyse_received_packets( void )
+{
+    /* Handle different sensor types */
+    u8_t sensor_type;
+    u16_t sensor_id;
+
+    if( RF_MGR_rf_data_store_s.watermark > 0u )
+    {
+        sensor_type = RF_MGR_rf_data_store_s.data_packet_s[RF_MGR_rf_data_store_s.watermark - 1u ].sensor_type;
+        sensor_id   = RF_MGR_rf_data_store_s.data_packet_s[RF_MGR_rf_data_store_s.watermark - 1u ].node_id;
+
+        switch( sensor_type )
+        {
+            case EARLY_PROTOTYPE_SED:
+                RF_MGR_handle_early_prototype_sed( sensor_id, &RF_MGR_rf_data_store_s.data_packet_s[RF_MGR_rf_data_store_s.watermark - 1u ].payload );
+                break;
+
+            default:
+                break;
+        }
+
+        /* Decrease the watermark */
+        RF_MGR_rf_data_store_s.watermark --;
+    }
+}
+
+
+
+void RF_MGR_handle_early_prototype_sed( u16_t sensor_id, u8_t* data_p )
+{
+    u8_t packet_type;
+    u8_t mode_type;
+
+    packet_type = data_p[0];
+    mode_type   = data_p[1];
+}
+
+
+
+
+
+
+void RF_MGR_packet_received_event( u8_t* rf_data, u8_t rf_data_size )
+{
+    u8_t sensor_type;
+
+    sensor_type = rf_data[0];
+
+    /* Check is there free space */
+    if( RF_MGR_rf_data_store_s.watermark < RF_MGR_RF_DATA_HANDLER_SIZE )
+    {
+        /* Check for valid sensor type */
+        if( sensor_type != 0u )
+        {
+            RF_MGR_rf_data_store_s.data_packet_s[RF_MGR_rf_data_store_s.watermark].sensor_type = rf_data[0];
+            RF_MGR_rf_data_store_s.data_packet_s[RF_MGR_rf_data_store_s.watermark].node_id     = ( rf_data[1] << 8u | rf_data[2] ) ;
+
+            /* Copy in the payload */
+            STDC_memcpy( RF_MGR_rf_data_store_s.data_packet_s[RF_MGR_rf_data_store_s.watermark].payload, &rf_data[3], rf_data_size - 3 );
+
+            RF_MGR_rf_data_store_s.watermark++;
+        }
+    }
+    else
+    {
+        /* No more room */
+    }
+}
 
 
 /***************************************************************************************************
