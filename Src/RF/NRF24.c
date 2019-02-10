@@ -57,6 +57,8 @@ STATIC false_true_et  NRF24_start_rf_test_s;
 
 STATIC RF_MGR_rf_data_store_st RF_MGR_rf_data_store_s;
 
+STATIC RF_MGR_sed_data_st	   RF_MGR_sed_data_s;
+
 /***************************************************************************************************
 **                              Data declarations and definitions                                 **
 ***************************************************************************************************/
@@ -93,6 +95,7 @@ void NRF24_init( void )
 
 
     STDC_memset( &RF_MGR_rf_data_store_s, 0x00, sizeof( RF_MGR_rf_data_store_s ) );
+    STDC_memset( &RF_MGR_sed_data_s, 0x00, sizeof( RF_MGR_sed_data_s ) );
 }
 
 
@@ -1523,8 +1526,6 @@ void NRF24_tick( void )
 
             if( NRF24_check_status_mask( RF24_RX_DATA_READY, &NRF24_status_register_s ) == HIGH )
             {
-                /* we may have received a packet !!!!!!*/
-                NRF24_status_register_clr_bit( RX_DR );
 
                 for( i = 0u; i < NRF_NUM_RX_BUFFERS; i++ )
                 {
@@ -1534,7 +1535,7 @@ void NRF24_tick( void )
                 		NRF24_get_payload( &NRF24_tx_rx_payload_info_s.NRF24_rx_rf_payload );
 
                 		/* The first byte in every RF frame is random and needs to be discarded */
-                		RF_MGR_packet_received_event( &NRF24_tx_rx_payload_info_s.NRF24_rx_rf_payload[1], 31u );
+                		//RF_MGR_packet_received_event( &NRF24_tx_rx_payload_info_s.NRF24_rx_rf_payload[1], 31u );
                 	}
                 	else
                 	{
@@ -1542,9 +1543,16 @@ void NRF24_tick( void )
                 	}
                 }
 
-                NRF24_handle_packet_stats( 3u );
+                //NRF24_handle_packet_stats( 3u );
 
                 HAL_BRD_toggle_led();
+
+				/* we may have received a packet !!!!!!*/
+				NRF24_status_register_clr_bit( RX_DR );
+				/* we may have received a packet !!!!!!*/
+				NRF24_status_register_clr_bit( RX_DR );
+				/* we may have received a packet !!!!!!*/
+				NRF24_status_register_clr_bit( RX_DR );
             }
         }
         break;
@@ -1850,13 +1858,23 @@ void RF_MGR_handle_early_prototype_sed( u16_t sensor_id, u8_t* data_p )
     u8_t packet_type;
     u8_t mode_type;
 
-    packet_type = data_p[0];
-    mode_type   = data_p[1];
+    RF_MGR_sed_data_s.node_id     = sensor_id;
+    RF_MGR_sed_data_s.packet_type = data_p[0];
+    RF_MGR_sed_data_s.mode_type   = data_p[1];
+    RF_MGR_sed_data_s.packet_ctr  ++;
+    RF_MGR_sed_data_s.status      = data_p[4];
+    RF_MGR_sed_data_s.temp        = data_p[5];
 }
 
 
-
-
+/* byte 0 - Sensor type - common
+ * byte 1 Node ID MSB   - common
+ * byte 2 Node ID LSB   - common
+ * byte 3 packet type   - 1st SED
+ * byte 4 mode type     - 1st SED
+ * byte 5 status        - 1st SED
+ * byte 6 temp		    - 1st SED
+ */
 
 
 void RF_MGR_packet_received_event( u8_t* rf_data, u8_t rf_data_size )

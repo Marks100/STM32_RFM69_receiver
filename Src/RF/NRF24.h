@@ -325,9 +325,9 @@ typedef struct
 
 typedef struct
 {
-    u8_t sensor_type;
+    u8_t  sensor_type;
     u16_t node_id;
-    u8_t payload[32];
+    u8_t  payload[32];
 } data_packet_st;
 
 
@@ -337,6 +337,17 @@ typedef struct
     data_packet_st data_packet_s[RF_MGR_RF_DATA_HANDLER_SIZE];
     u8_t watermark;
 }RF_MGR_rf_data_store_st;
+
+
+typedef struct
+{
+	u16_t node_id;
+	u8_t  packet_type;
+	u8_t  mode_type;
+	u16_t packet_ctr;
+	u8_t  status;
+	u8_t  temp;
+} RF_MGR_sed_data_st;
 
 
 /***************************************************************************************************
