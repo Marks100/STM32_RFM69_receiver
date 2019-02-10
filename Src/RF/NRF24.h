@@ -346,7 +346,8 @@ typedef struct
 	u8_t  mode_type;
 	u16_t packet_ctr;
 	u8_t  status;
-	u8_t  temp;
+	s8_t  temperature;
+	u16_t pressure;
 } RF_MGR_sed_data_st;
 
 

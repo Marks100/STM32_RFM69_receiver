@@ -1851,7 +1851,12 @@ void RF_MGR_handle_early_prototype_sed( u16_t sensor_id, u8_t* data_p )
     RF_MGR_sed_data_s.mode_type   = data_p[1];
     RF_MGR_sed_data_s.packet_ctr  ++;
     RF_MGR_sed_data_s.status      = data_p[4];
-    RF_MGR_sed_data_s.temp        = data_p[5];
+    RF_MGR_sed_data_s.temperature = data_p[5];
+    RF_MGR_sed_data_s.pressure    = data_p[6];
+
+
+    RF_MGR_sed_data_s.temperature = -40;
+	RF_MGR_sed_data_s.pressure    = 100u;
 
     RF_MGR_display_sed_data();
 }
@@ -1895,6 +1900,8 @@ void RF_MGR_packet_received_event( u8_t* rf_data, u8_t rf_data_size )
 }
 
 
+
+
 void RF_MGR_display_sed_data( void )
 {
 	u8_t display_data[200];
@@ -1905,17 +1912,76 @@ void RF_MGR_display_sed_data( void )
 	STDC_memset( display_data, 0x00, sizeof( display_data ) );
 
 	SERIAL_send_newline();
-	sprintf( display_data, "Sensor Type: \t1st Gen Sleepy Sensor Device\r\nSensor ID:\t%d\r\nPacket Type:\t%d\r\nMode Type:\t%d\r\n",
-			RF_MGR_sed_data_s.node_id, RF_MGR_sed_data_s.packet_type, RF_MGR_sed_data_s.mode_type, RF_MGR_sed_data_s.packet_ctr );
+	sprintf( display_data, "Sensor Type: \t1st Gen Sleepy Sensor Device\r\nSensor ID:\t%d\r\n",
+			RF_MGR_sed_data_s.node_id );
 	SERIAL_Send_data( display_data );
 	STDC_memset( display_data, 0x00, sizeof( display_data ) );
 
-	sprintf( display_data, "Packet ctr:\t%d\r\nTemperature:\tunknown\r\nPressure:\tunknown",
-				 RF_MGR_sed_data_s.packet_ctr );
-		SERIAL_Send_data( display_data );
-		STDC_memset( display_data, 0x00, sizeof( display_data ) );
-		SERIAL_send_newline();
-		SERIAL_send_newline();
+	switch( RF_MGR_sed_data_s.packet_type )
+	{
+		case 0:
+			sprintf( display_data, "Sensor Type: \t1\r\n");
+			break;
+
+		case 1:
+			sprintf( display_data, "Sensor Type: \t2\r\n");
+			break;
+
+		case 2:
+			sprintf( display_data, "Sensor Type: \t3\r\n");
+			break;
+
+		case 3:
+			sprintf( display_data, "Sensor Type: \t4\r\n");
+			break;
+
+		case 4:
+			sprintf( display_data, "Sensor Type: \t5\r\n");
+			break;
+
+		default:
+			sprintf( display_data, "Sensor Type: \t5\r\n");
+			break;
+	}
+
+	SERIAL_Send_data( display_data );
+	STDC_memset( display_data, 0x00, sizeof( display_data ) );
+
+	switch( RF_MGR_sed_data_s.mode_type )
+	{
+		case 0:
+			sprintf( display_data, "Mode Type: \t1\r\n");
+			break;
+
+		case 1:
+			sprintf( display_data, "Mode Type: \t2\r\n");
+			break;
+
+		case 2:
+			sprintf( display_data, "Mode Type: \t3\r\n");
+			break;
+
+		case 3:
+			sprintf( display_data, "Mode Type: \t4\r\n");
+			break;
+
+		case 4:
+			sprintf( display_data, "Mode Type: \t5\r\n");
+			break;
+
+		default:
+			sprintf( display_data, "Mode Type: \t5\r\n");
+			break;
+	}
+	SERIAL_Send_data( display_data );
+	STDC_memset( display_data, 0x00, sizeof( display_data ) );
+
+	sprintf( display_data, "Packet ctr:\t%d\r\nTemperature:\t%03d*c\r\nPressure:\t%04dmbar",
+			 RF_MGR_sed_data_s.packet_ctr, RF_MGR_sed_data_s.temperature, RF_MGR_sed_data_s.pressure );
+	SERIAL_Send_data( display_data );
+	STDC_memset( display_data, 0x00, sizeof( display_data ) );
+	SERIAL_send_newline();
+	SERIAL_send_newline();
 }
 
 
