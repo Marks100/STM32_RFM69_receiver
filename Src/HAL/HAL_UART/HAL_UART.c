@@ -85,6 +85,9 @@ STATIC const u8_t SERIAL_buffer_reset_message_s[] =
 STATIC const u8_t SERIAL_invalid_cmd_message_s[] =
 		"\r\nERROR! that is not a valid command!\r\nPlease try again or type 'help' for help menu..\r\n\r\n";
 
+STATIC const u8_t SERIAL_newline_s[] =
+		"\r\n\r\n";
+
 
 
 STATIC false_true_et SERIAL_cr_received_s;
@@ -184,7 +187,7 @@ void SERIAL_init( void )
 		USART2 receive data register is not empty */
 	USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
 
-	SERIAL_stream_mode_s = TRUE;
+	SERIAL_stream_mode_s = FALSE;
 	SERIAL_cr_received_s = FALSE;
 	SERIAL_rx_buf_idx_s = 0u;
 	SERIAL_rx_buf_char_s = 0u;
@@ -288,6 +291,11 @@ void SERIAL_close( void )
 	SERIAL_Send_data( SERIAL_welcome_message_s );
 }
 
+
+void SERIAL_send_newline( void )
+{
+	SERIAL_Send_data( SERIAL_newline_s );
+}
 
 
 void SERIAL_msg_handler( void )

@@ -1528,10 +1528,10 @@ void NRF24_tick( void )
             {
             	NRF24_ce_select( LOW );
 
-                		NRF24_get_payload( NRF24_tx_rx_payload_info_s.NRF24_rx_rf_payload );
+				NRF24_get_payload( NRF24_tx_rx_payload_info_s.NRF24_rx_rf_payload );
 
-                		/* The first byte in every RF frame is random and needs to be discarded */
-                		//RF_MGR_packet_received_event( &NRF24_tx_rx_payload_info_s.NRF24_rx_rf_payload[1], 31u );
+				/* The first byte in every RF frame is random and needs to be discarded */
+				RF_MGR_packet_received_event( &NRF24_tx_rx_payload_info_s.NRF24_rx_rf_payload[1], 31u );
 
                 //NRF24_handle_packet_stats( 3u );
 
@@ -1852,6 +1852,8 @@ void RF_MGR_handle_early_prototype_sed( u16_t sensor_id, u8_t* data_p )
     RF_MGR_sed_data_s.packet_ctr  ++;
     RF_MGR_sed_data_s.status      = data_p[4];
     RF_MGR_sed_data_s.temp        = data_p[5];
+
+    RF_MGR_display_sed_data();
 }
 
 
@@ -1890,6 +1892,30 @@ void RF_MGR_packet_received_event( u8_t* rf_data, u8_t rf_data_size )
     {
         /* No more room */
     }
+}
+
+
+void RF_MGR_display_sed_data( void )
+{
+	u8_t display_data[200];
+
+	SERIAL_send_newline();
+	sprintf( display_data, "**------------------------------------------------**");
+	SERIAL_Send_data( display_data );
+	STDC_memset( display_data, 0x00, sizeof( display_data ) );
+
+	SERIAL_send_newline();
+	sprintf( display_data, "Sensor Type: \t1st Gen Sleepy Sensor Device\r\nSensor ID:\t%d\r\nPacket Type:\t%d\r\nMode Type:\t%d\r\n",
+			RF_MGR_sed_data_s.node_id, RF_MGR_sed_data_s.packet_type, RF_MGR_sed_data_s.mode_type, RF_MGR_sed_data_s.packet_ctr );
+	SERIAL_Send_data( display_data );
+	STDC_memset( display_data, 0x00, sizeof( display_data ) );
+
+	sprintf( display_data, "Packet ctr:\t%d\r\nTemperature:\tunknown\r\nPressure:\tunknown",
+				 RF_MGR_sed_data_s.packet_ctr );
+		SERIAL_Send_data( display_data );
+		STDC_memset( display_data, 0x00, sizeof( display_data ) );
+		SERIAL_send_newline();
+		SERIAL_send_newline();
 }
 
 

@@ -45,6 +45,7 @@ int main(void)
 	HAL_BRD_init();
 	HAL_I2C_init();
 	HAL_SPI_init();
+	SERIAL_init();
 	NVM_init();
 
     /* Start the timer to keep track of reception count */
@@ -57,16 +58,6 @@ int main(void)
 	NRF24_init();
 
 	MODE_MGR_init();
-
-	if( debug_mode == ENABLE )
-	{
-		/* In debug mode lets init the debug usart as this consumes lots of power */
-		SERIAL_init();
-
-		/* power up the RF chip */
-		RFM69_set_enable_pin_state( HIGH );
-		RFM69_set_reset_pin_state( LOW );
-	}
 
 	/* Init the systick timer */
 	MAIN_SYSTICK_init();

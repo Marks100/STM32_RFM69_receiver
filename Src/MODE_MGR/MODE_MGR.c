@@ -66,6 +66,7 @@ void MODE_MGR_20ms_tick( void )
 void MODE_MGR_action_schedule_normal( void )
 {
     NRF24_tick();
+    SERIAL_msg_handler();
 
     switch( MODE_MGR_tick_timer_msecs_s )
     {
