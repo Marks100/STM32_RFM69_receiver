@@ -1524,24 +1524,14 @@ void NRF24_tick( void )
             /* We are now in Receive mode so lets just wait for a packet to come in */
             /* Eventually might be interrupt driven but for now lets poll */
 
-            if( NRF24_check_status_mask( RF24_RX_DATA_READY, &NRF24_status_register_s ) == HIGH )
+            if( ( NRF24_check_status_mask( RF24_RX_DATA_READY, &NRF24_status_register_s ) == HIGH ) || ( NRF24_check_fifo_mask( RF24_RX_EMPTY ,&fifo ) == LOW ) )
             {
+            	NRF24_ce_select( LOW );
 
-                for( i = 0u; i < NRF_NUM_RX_BUFFERS; i++ )
-                {
-                	/* There is 3 receive buffers so make sure we read them all */
-                	if( NRF24_check_fifo_mask( RF24_RX_EMPTY, &fifo ) != HIGH )
-                	{
-                		NRF24_get_payload( &NRF24_tx_rx_payload_info_s.NRF24_rx_rf_payload );
+                		NRF24_get_payload( NRF24_tx_rx_payload_info_s.NRF24_rx_rf_payload );
 
                 		/* The first byte in every RF frame is random and needs to be discarded */
                 		//RF_MGR_packet_received_event( &NRF24_tx_rx_payload_info_s.NRF24_rx_rf_payload[1], 31u );
-                	}
-                	else
-                	{
-                		i = NRF_NUM_RX_BUFFERS;
-                	}
-                }
 
                 //NRF24_handle_packet_stats( 3u );
 
@@ -1549,10 +1539,8 @@ void NRF24_tick( void )
 
 				/* we may have received a packet !!!!!!*/
 				NRF24_status_register_clr_bit( RX_DR );
-				/* we may have received a packet !!!!!!*/
-				NRF24_status_register_clr_bit( RX_DR );
-				/* we may have received a packet !!!!!!*/
-				NRF24_status_register_clr_bit( RX_DR );
+
+				NRF24_ce_select( HIGH );
             }
         }
         break;
