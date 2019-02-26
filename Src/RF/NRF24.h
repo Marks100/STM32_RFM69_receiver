@@ -115,7 +115,7 @@
 
 
 
-#define RF_MGR_RF_DATA_HANDLER_SIZE 10u
+#define RF_MGR_RF_DATA_HANDLER_SIZE  40u
 #define EARLY_PROTOTYPE_SED          1u
 
 
@@ -328,6 +328,8 @@ typedef struct
     u8_t  sensor_type;
     u16_t node_id;
     u8_t  payload[32];
+    u32_t packet_counter;
+    false_true_et updated;
 } data_packet_st;
 
 
@@ -335,7 +337,6 @@ typedef struct
 typedef struct
 {
     data_packet_st data_packet_s[RF_MGR_RF_DATA_HANDLER_SIZE];
-    u8_t watermark;
 }RF_MGR_rf_data_store_st;
 
 
@@ -408,8 +409,9 @@ void                 NRF24_ce_select( low_high_et state );
 void                 RF_MGR_packet_received_event( u8_t* rf_data, u8_t rf_data_size );
 void                 RF_MGR_tick( void );
 void                 RF_MGR_analyse_received_packets( void );
-void                 RF_MGR_handle_early_prototype_sed( u16_t sensor_id, u8_t* data_p );
-
+void                 RF_MGR_handle_early_prototype_sed( u16_t sensor_id, u8_t* data_p, u32_t packet_count );
+void                 RF_MGR_get_all_decoded_IDs( u16_t* data_p );
+pass_fail_et 		 RF_MGR_remove_node( u8_t pos );
 
 
 #endif /* RF_H multiple inclusion guard */

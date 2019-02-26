@@ -1818,30 +1818,35 @@ void RF_MGR_analyse_received_packets( void )
     /* Handle different sensor types */
     u8_t sensor_type;
     u16_t sensor_id;
+    u8_t node_index;
 
-    if( RF_MGR_rf_data_store_s.watermark > 0u )
+    /* Check is there free space by looking for an id of 0 in the rf data struct */
+    for( node_index = 0u; node_index < RF_MGR_RF_DATA_HANDLER_SIZE; node_index++ )
     {
-        sensor_type = RF_MGR_rf_data_store_s.data_packet_s[RF_MGR_rf_data_store_s.watermark - 1u ].sensor_type;
-        sensor_id   = RF_MGR_rf_data_store_s.data_packet_s[RF_MGR_rf_data_store_s.watermark - 1u ].node_id;
-
-        switch( sensor_type )
+        if( RF_MGR_rf_data_store_s.data_packet_s[node_index].updated == TRUE )
         {
-            case EARLY_PROTOTYPE_SED:
-                RF_MGR_handle_early_prototype_sed( sensor_id, &RF_MGR_rf_data_store_s.data_packet_s[RF_MGR_rf_data_store_s.watermark - 1u ].payload );
-                break;
+            RF_MGR_rf_data_store_s.data_packet_s[node_index].updated = FALSE;
 
-            default:
-                break;
+            sensor_type = RF_MGR_rf_data_store_s.data_packet_s[node_index].sensor_type;
+            sensor_id = RF_MGR_rf_data_store_s.data_packet_s[node_index].node_id;
+
+            switch( sensor_type )
+            {
+                case EARLY_PROTOTYPE_SED:
+                    RF_MGR_handle_early_prototype_sed( sensor_id, &RF_MGR_rf_data_store_s.data_packet_s[node_index].payload,
+                                                       RF_MGR_rf_data_store_s.data_packet_s[node_index ].packet_counter );
+                    break;
+
+                default:
+                    break;
+            }
         }
-
-        /* Decrease the watermark */
-        RF_MGR_rf_data_store_s.watermark --;
     }
 }
 
 
 
-void RF_MGR_handle_early_prototype_sed( u16_t sensor_id, u8_t* data_p )
+void RF_MGR_handle_early_prototype_sed( u16_t sensor_id, u8_t* data_p, u32_t packet_count )
 {
     u8_t packet_type;
     u8_t mode_type;
@@ -1849,7 +1854,7 @@ void RF_MGR_handle_early_prototype_sed( u16_t sensor_id, u8_t* data_p )
     RF_MGR_sed_data_s.node_id     = sensor_id;
     RF_MGR_sed_data_s.packet_type = data_p[0];
     RF_MGR_sed_data_s.mode_type   = data_p[1];
-    RF_MGR_sed_data_s.packet_ctr  ++;
+    RF_MGR_sed_data_s.packet_ctr  = packet_count;
     RF_MGR_sed_data_s.status      = data_p[4];
     RF_MGR_sed_data_s.temperature = data_p[5];
     RF_MGR_sed_data_s.pressure    = data_p[6];
@@ -1875,27 +1880,38 @@ void RF_MGR_handle_early_prototype_sed( u16_t sensor_id, u8_t* data_p )
 void RF_MGR_packet_received_event( u8_t* rf_data, u8_t rf_data_size )
 {
     u8_t sensor_type;
+    u8_t node_index;
+    u16_t node_id;
 
     sensor_type = rf_data[0];
+    node_id = ( rf_data[1] << 8u | rf_data[2] ) ;
 
-    /* Check is there free space */
-    if( RF_MGR_rf_data_store_s.watermark < RF_MGR_RF_DATA_HANDLER_SIZE )
+    /* Check is there free space by looking for an id of 0 in the rf data struct */
+    for( node_index = 0u; node_index < RF_MGR_RF_DATA_HANDLER_SIZE; node_index++ )
     {
-        /* Check for valid sensor type */
-        if( sensor_type != 0u )
+        if( ( ( RF_MGR_rf_data_store_s.data_packet_s[node_index].node_id == 0u ) ||
+              ( RF_MGR_rf_data_store_s.data_packet_s[node_index].node_id == node_id ) ) )
         {
-            RF_MGR_rf_data_store_s.data_packet_s[RF_MGR_rf_data_store_s.watermark].sensor_type = rf_data[0];
-            RF_MGR_rf_data_store_s.data_packet_s[RF_MGR_rf_data_store_s.watermark].node_id     = ( rf_data[1] << 8u | rf_data[2] ) ;
+            /* free space or an existing id in that space so lets fill it :) */
 
-            /* Copy in the payload */
-            STDC_memcpy( RF_MGR_rf_data_store_s.data_packet_s[RF_MGR_rf_data_store_s.watermark].payload, &rf_data[3], rf_data_size - 3 );
+            /* Check for valid sensor type */
+            if( sensor_type != 0u )
+            {
+                RF_MGR_rf_data_store_s.data_packet_s[node_index].sensor_type = rf_data[0];
+                RF_MGR_rf_data_store_s.data_packet_s[node_index].node_id     = ( rf_data[1] << 8u | rf_data[2] ) ;
 
-            RF_MGR_rf_data_store_s.watermark++;
+                /* Copy in the payload */
+                STDC_memcpy( RF_MGR_rf_data_store_s.data_packet_s[node_index].payload, &rf_data[3], rf_data_size - 3 );
+
+                /* increment the packet counter for the individual node id */
+                RF_MGR_rf_data_store_s.data_packet_s[node_index].packet_counter++;
+
+                /* Updated frame received */
+                RF_MGR_rf_data_store_s.data_packet_s[node_index].updated = TRUE;
+            }
+            /* Break out as we have found a free space and no need to keep searching */
+            break;
         }
-    }
-    else
-    {
-        /* No more room */
     }
 }
 
@@ -1912,7 +1928,7 @@ void RF_MGR_display_sed_data( void )
 	STDC_memset( display_data, 0x00, sizeof( display_data ) );
 
 	SERIAL_send_newline();
-	sprintf( display_data, "Sensor Type: \t1st Gen Sleepy Sensor Device\r\nSensor ID:\t%d\r\n",
+	sprintf( display_data, "Sensor ID:\t0x%04X\r\n",
 			RF_MGR_sed_data_s.node_id );
 	SERIAL_Send_data( display_data );
 	STDC_memset( display_data, 0x00, sizeof( display_data ) );
@@ -1940,7 +1956,7 @@ void RF_MGR_display_sed_data( void )
 			break;
 
 		default:
-			sprintf( display_data, "Sensor Type: \t5\r\n");
+			sprintf( display_data, "Sensor Type: \t1st Gen Sleepy Sensor Device\r\n");
 			break;
 	}
 
@@ -1984,6 +2000,55 @@ void RF_MGR_display_sed_data( void )
 	SERIAL_send_newline();
 }
 
+
+
+
+void RF_MGR_get_all_decoded_IDs( u16_t* data_p )
+{
+    u8_t ids = 0u;
+
+    for( ids = 0u; ids < RF_MGR_RF_DATA_HANDLER_SIZE; ids++ )
+    {
+        data_p[ids] = ( RF_MGR_rf_data_store_s.data_packet_s[ids].node_id );
+    }
+}
+
+
+
+pass_fail_et RF_MGR_remove_node( u8_t pos )
+{
+	pass_fail_et returnType = FAIL;
+	u8_t node_num = 0u;
+
+	/* first of all check that the pos is valid */
+	if( pos <= RF_MGR_RF_DATA_HANDLER_SIZE )
+	{
+		if( RF_MGR_rf_data_store_s.data_packet_s[pos].node_id != 0u )
+		{
+			STDC_memset( &RF_MGR_rf_data_store_s.data_packet_s[pos], 0x00, sizeof( data_packet_st ) );
+
+			/* Now that we have removed that ID and its 0, we want to shift the IDs that are above it
+			 * in the array down to fill the empty spot */
+
+			for( pos = pos; pos < RF_MGR_RF_DATA_HANDLER_SIZE; pos++ )
+			{
+				if( RF_MGR_rf_data_store_s.data_packet_s[pos + 1].node_id != 0u )
+				{
+					STDC_memcpy( &RF_MGR_rf_data_store_s.data_packet_s[pos],
+							 	 &RF_MGR_rf_data_store_s.data_packet_s[pos + 1], sizeof( data_packet_st ) );
+				}
+				else
+				{
+					STDC_memset( &RF_MGR_rf_data_store_s.data_packet_s[pos], 0x00, sizeof( data_packet_st ) );
+					break;
+				}
+			}
+			returnType = PASS;
+		}
+	}
+
+	return ( returnType );
+}
 
 /***************************************************************************************************
 **                              Private Functions                                                 **
