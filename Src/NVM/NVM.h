@@ -1,9 +1,10 @@
 #ifndef NVM_H
 #define NVM_H
 
-//#include "COMPILER_defs.h"
-//#include "COMPILER_config.h"
+#include "COMPILER_defs.h"
+#include "COMPILER_config.h"
 #include "C_defs.h"
+#include "NRF24.h"
 #include "RFM69.h"
 
 /***************************************************************************************************
@@ -40,7 +41,7 @@ typedef enum
 /**************************************************************************************************/
 typedef enum
 {
-    NVM_VERS_GENERIC_DATA         = 3,
+    NVM_VERS_GENERIC_DATA         = 8,
 } NVM_blk_version_et;
 /***************************************************************************************************
 This is the version number of the NVM block, This needs to be incremented when changing the layout
@@ -51,8 +52,10 @@ the structure of the block or when adding new bytes in
 typedef struct
 {
     u32_t sleep_time;
-    u8_t tx_power_level;
-    u8_t node_id;
+    u8_t  tx_power_level;
+    u8_t  node_id;
+    RFM69_static_configuration_et rf_config;
+    NRF24_state_et nrf_startup_tx_rx_mode;
 } NVM_generic_data_blk_st;
 
 

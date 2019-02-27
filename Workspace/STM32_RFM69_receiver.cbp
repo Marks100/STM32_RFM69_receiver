@@ -1,0 +1,369 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="STM32_RFM69_receiver" />
+		<Option makefile_is_custom="1" />
+		<Option execution_dir="../../STM32_RFM69_receiver" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="all">
+				<Option output="STM32_RFM69_receiver.exe" prefix_auto="1" extension_auto="0" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<MakeCommands>
+					<Build command="$make -f $makefile $target" />
+					<CompileFile command="" />
+					<Clean command="" />
+					<DistClean command="$make -f $makefile distclean$target" />
+					<AskRebuildNeeded command="" />
+					<SilentBuild command="$make -f $makefile $target &gt; $(CMD_NULL)" />
+				</MakeCommands>
+			</Target>
+			<Target title="memory_stats">
+				<Option output="STM32_RFM69_receiver" prefix_auto="1" extension_auto="1" />
+				<Option type="0" />
+				<Option compiler="gcc" />
+			</Target>
+			<Target title="release_package">
+				<Option output="STM32_RFM69_receiver" prefix_auto="1" extension_auto="1" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option use_console_runner="0" />
+			</Target>
+			<Target title="total_clean">
+				<Option output="STM32_RFM69_receiver" prefix_auto="1" extension_auto="1" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option use_console_runner="0" />
+			</Target>
+			<Target title="build_clean">
+				<Option output="STM32_RFM69_receiver" prefix_auto="1" extension_auto="1" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option use_console_runner="0" />
+			</Target>
+			<Target title="test_all">
+				<Option output="STM32_RFM69_receiver" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="../test/build/test/out/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option use_console_runner="0" />
+				<MakeCommands>
+					<Build command="$make -f $makefile $target" />
+					<CompileFile command="" />
+					<Clean command="" />
+					<DistClean command="$make -f $makefile distclean$target" />
+					<AskRebuildNeeded command="" />
+					<SilentBuild command="$make -f $makefile $target &gt; $(CMD_NULL)" />
+				</MakeCommands>
+			</Target>
+			<Target title="test_specific">
+				<Option output="../test/build/test/out/$(ACTIVE_EDITOR_STEM).exe" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="../test/build/test/out" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option use_console_runner="0" />
+				<MakeCommands>
+					<Build command="$make -f $makefile $(ACTIVE_EDITOR_STEM).test" />
+					<CompileFile command="" />
+					<Clean command="" />
+					<DistClean command="$make -f $makefile distclean$target" />
+					<AskRebuildNeeded command="" />
+					<SilentBuild command="$make -f $makefile $(ACTIVE_EDITOR_STEM).test &gt; $(CMD_NULL)" />
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+		</Compiler>
+		<Unit filename="../Makefile">
+			<Option target="all" />
+			<Option target="memory_stats" />
+		</Unit>
+		<Unit filename="../Src/COMMON_MODULES/COMPILER_config.h">
+			<Option target="all" />
+			<Option target="memory_stats" />
+		</Unit>
+		<Unit filename="../Src/COMMON_MODULES/xINC/COMPILER_check.h">
+			<Option target="all" />
+			<Option target="memory_stats" />
+		</Unit>
+		<Unit filename="../Src/COMMON_MODULES/xINC/COMPILER_defs.h">
+			<Option target="all" />
+			<Option target="memory_stats" />
+		</Unit>
+		<Unit filename="../Src/COMMON_MODULES/xINC/C_defs.h">
+			<Option target="all" />
+			<Option target="memory_stats" />
+		</Unit>
+		<Unit filename="../Src/COMMON_MODULES/xINC/MEM_placement.h">
+			<Option target="all" />
+			<Option target="memory_stats" />
+		</Unit>
+		<Unit filename="../Src/COMMON_MODULES/xINC/RTOS.h">
+			<Option target="all" />
+			<Option target="memory_stats" />
+		</Unit>
+		<Unit filename="../Src/COMMON_MODULES/xINC/SELMATH/SELMATH.c">
+			<Option compilerVar="CC" />
+			<Option target="all" />
+			<Option target="memory_stats" />
+		</Unit>
+		<Unit filename="../Src/COMMON_MODULES/xINC/SELMATH/SELMATH.h">
+			<Option target="all" />
+			<Option target="memory_stats" />
+		</Unit>
+		<Unit filename="../Src/COMMON_MODULES/xINC/SELMATH/SELMATH_pri.h">
+			<Option target="all" />
+			<Option target="memory_stats" />
+		</Unit>
+		<Unit filename="../Src/COMMON_MODULES/xINC/STDC/STDC.c">
+			<Option compilerVar="CC" />
+			<Option target="all" />
+			<Option target="memory_stats" />
+		</Unit>
+		<Unit filename="../Src/COMMON_MODULES/xINC/STDC/STDC.h">
+			<Option target="all" />
+			<Option target="memory_stats" />
+		</Unit>
+		<Unit filename="../Src/COMMON_MODULES/xINC/TPMS_std.h">
+			<Option target="all" />
+			<Option target="memory_stats" />
+		</Unit>
+		<Unit filename="../Src/COMMON_MODULES/xINC/TPMS_types.h">
+			<Option target="all" />
+			<Option target="memory_stats" />
+		</Unit>
+		<Unit filename="../Src/COMMON_MODULES/xLIBS/CHKSUM/CHKSUM.c">
+			<Option compilerVar="CC" />
+			<Option target="all" />
+			<Option target="memory_stats" />
+		</Unit>
+		<Unit filename="../Src/COMMON_MODULES/xLIBS/CHKSUM/CHKSUM.h">
+			<Option target="all" />
+			<Option target="memory_stats" />
+		</Unit>
+		<Unit filename="../Src/COMMON_MODULES/xLIBS/CHKSUM/CHKSUM_pri.h">
+			<Option target="all" />
+			<Option target="memory_stats" />
+		</Unit>
+		<Unit filename="../Src/COMMON_MODULES/xLIBS/CHKSUM/CHKSUM_svn_rev.h">
+			<Option target="all" />
+			<Option target="memory_stats" />
+		</Unit>
+		<Unit filename="../Src/HAL/HAL_ADC/HAL_ADC.c">
+			<Option compilerVar="CC" />
+			<Option target="all" />
+			<Option target="memory_stats" />
+		</Unit>
+		<Unit filename="../Src/HAL/HAL_ADC/HAL_ADC.h">
+			<Option target="all" />
+			<Option target="memory_stats" />
+		</Unit>
+		<Unit filename="../Src/HAL/HAL_BRD/HAL_BRD.c">
+			<Option compilerVar="CC" />
+			<Option target="all" />
+			<Option target="memory_stats" />
+		</Unit>
+		<Unit filename="../Src/HAL/HAL_BRD/HAL_BRD.h">
+			<Option target="all" />
+			<Option target="memory_stats" />
+		</Unit>
+		<Unit filename="../Src/HAL/HAL_I2C/HAL_I2C.c">
+			<Option compilerVar="CC" />
+			<Option target="all" />
+			<Option target="memory_stats" />
+		</Unit>
+		<Unit filename="../Src/HAL/HAL_I2C/HAL_I2C.h">
+			<Option target="all" />
+			<Option target="memory_stats" />
+		</Unit>
+		<Unit filename="../Src/HAL/HAL_SPI/HAL_SPI.c">
+			<Option compilerVar="CC" />
+			<Option target="all" />
+			<Option target="memory_stats" />
+		</Unit>
+		<Unit filename="../Src/HAL/HAL_SPI/HAL_SPI.h">
+			<Option target="all" />
+			<Option target="memory_stats" />
+		</Unit>
+		<Unit filename="../Src/HAL/HAL_TIM/HAL_TIM.c">
+			<Option compilerVar="CC" />
+			<Option target="all" />
+			<Option target="memory_stats" />
+		</Unit>
+		<Unit filename="../Src/HAL/HAL_TIM/HAL_TIM.h">
+			<Option target="all" />
+			<Option target="memory_stats" />
+		</Unit>
+		<Unit filename="../Src/HAL/HAL_UART/HAL_UART.c">
+			<Option compilerVar="CC" />
+			<Option target="all" />
+			<Option target="memory_stats" />
+		</Unit>
+		<Unit filename="../Src/HAL/HAL_UART/HAL_UART.h">
+			<Option target="all" />
+			<Option target="memory_stats" />
+		</Unit>
+		<Unit filename="../Src/MAIN/main.c">
+			<Option compilerVar="CC" />
+			<Option target="all" />
+			<Option target="memory_stats" />
+		</Unit>
+		<Unit filename="../Src/MAIN/main.h">
+			<Option target="all" />
+			<Option target="memory_stats" />
+		</Unit>
+		<Unit filename="../Src/MODE_MGR/MODE_MGR.c">
+			<Option compilerVar="CC" />
+			<Option target="all" />
+			<Option target="memory_stats" />
+			<Option target="release_package" />
+			<Option target="total_clean" />
+			<Option target="build_clean" />
+		</Unit>
+		<Unit filename="../Src/MODE_MGR/MODE_MGR.h">
+			<Option target="all" />
+			<Option target="memory_stats" />
+			<Option target="release_package" />
+			<Option target="total_clean" />
+			<Option target="build_clean" />
+		</Unit>
+		<Unit filename="../Src/NVM/NVM.c">
+			<Option compilerVar="CC" />
+			<Option target="all" />
+			<Option target="memory_stats" />
+		</Unit>
+		<Unit filename="../Src/NVM/NVM.h">
+			<Option target="all" />
+			<Option target="memory_stats" />
+		</Unit>
+		<Unit filename="../Src/NVM/NVM_defaults.h">
+			<Option target="all" />
+			<Option target="memory_stats" />
+		</Unit>
+		<Unit filename="../Src/PROJ_CONFIG/PROJ_config.h">
+			<Option target="all" />
+			<Option target="memory_stats" />
+		</Unit>
+		<Unit filename="../Src/PROJ_CONFIG/SEL_RTOS_config.h">
+			<Option target="all" />
+			<Option target="memory_stats" />
+		</Unit>
+		<Unit filename="../Src/PROJ_CONFIG/STDC_A_config.h">
+			<Option target="all" />
+			<Option target="memory_stats" />
+		</Unit>
+		<Unit filename="../Src/PROJ_CONFIG/STDC_config.h">
+			<Option target="all" />
+			<Option target="memory_stats" />
+		</Unit>
+		<Unit filename="../Src/RF/NRF24.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../Src/RF/NRF24.h" />
+		<Unit filename="../Src/RF/NRF24_Registers.h" />
+		<Unit filename="../Src/RF/RFM69.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../Src/RF/RFM69.h" />
+		<Unit filename="../Src/RF/RFM69_Registers.h" />
+		<Unit filename="../Src/VERSIONS/VERSIONS.c">
+			<Option compilerVar="CC" />
+			<Option target="all" />
+			<Option target="memory_stats" />
+		</Unit>
+		<Unit filename="../Src/VERSIONS/VERSIONS.h">
+			<Option target="all" />
+			<Option target="memory_stats" />
+		</Unit>
+		<Unit filename="../Src/autoversion.h">
+			<Option target="all" />
+			<Option target="memory_stats" />
+		</Unit>
+		<Unit filename="../test/unit_test/test_MODE_MGR.c">
+			<Option compilerVar="CC" />
+			<Option target="all" />
+			<Option target="memory_stats" />
+			<Option target="release_package" />
+			<Option target="total_clean" />
+			<Option target="build_clean" />
+			<Option target="test_all" />
+		</Unit>
+		<Unit filename="../test/unit_test/test_NRF24.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="cmsis/core_cm3.h" />
+		<Unit filename="cmsis/core_cmFunc.h" />
+		<Unit filename="cmsis/core_cmInstr.h" />
+		<Unit filename="cmsis_boot/startup/startup_stm32f10x_md.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="cmsis_boot/stm32f10x.h" />
+		<Unit filename="cmsis_boot/stm32f10x_conf.h" />
+		<Unit filename="cmsis_boot/system_stm32f10x.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="cmsis_boot/system_stm32f10x.h" />
+		<Unit filename="stm_lib/inc/misc.h" />
+		<Unit filename="stm_lib/inc/stm32f10x_adc.h" />
+		<Unit filename="stm_lib/inc/stm32f10x_bkp.h" />
+		<Unit filename="stm_lib/inc/stm32f10x_crc.h" />
+		<Unit filename="stm_lib/inc/stm32f10x_exti.h" />
+		<Unit filename="stm_lib/inc/stm32f10x_flash.h" />
+		<Unit filename="stm_lib/inc/stm32f10x_gpio.h" />
+		<Unit filename="stm_lib/inc/stm32f10x_i2c.h" />
+		<Unit filename="stm_lib/inc/stm32f10x_pwr.h" />
+		<Unit filename="stm_lib/inc/stm32f10x_rcc.h" />
+		<Unit filename="stm_lib/inc/stm32f10x_spi.h" />
+		<Unit filename="stm_lib/inc/stm32f10x_tim.h" />
+		<Unit filename="stm_lib/inc/stm32f10x_usart.h" />
+		<Unit filename="stm_lib/src/misc.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="stm_lib/src/stm32f10x_adc.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="stm_lib/src/stm32f10x_bkp.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="stm_lib/src/stm32f10x_crc.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="stm_lib/src/stm32f10x_exti.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="stm_lib/src/stm32f10x_flash.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="stm_lib/src/stm32f10x_gpio.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="stm_lib/src/stm32f10x_i2c.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="stm_lib/src/stm32f10x_pwr.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="stm_lib/src/stm32f10x_rcc.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="stm_lib/src/stm32f10x_spi.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="stm_lib/src/stm32f10x_tim.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="stm_lib/src/stm32f10x_usart.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+			<lib_finder disable_auto="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

@@ -5,6 +5,8 @@
 #include "misc.h"
 
 #include "HAL_BRD.h"
+#include "main.h"
+#include "RFM69.h"
 
 false_true_et HAL_BRD_rtc_triggered_s;
 false_true_et debug_mode;
@@ -39,7 +41,7 @@ void HAL_BRD_init( void )
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
 
-	/* small delay to allow the button tp settle */
+	/* small delay to allow the button to settle */
 	delay_us(500);
 
 	debug_mode = HAL_BRD_read_debug_pin();
@@ -54,53 +56,42 @@ void HAL_BRD_init( void )
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
 	GPIO_Init(GPIOB, &GPIO_InitStructure);
 
-	/* Setup the RF ( RFM69 ) RESET Pin ( PB11 ) */
+	/* Setup the RF ( RFM69 ) RESET Pin ( PB10 ) */
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
 	GPIO_Init(GPIOB, &GPIO_InitStructure);
 
-	if( debug_mode == ENABLE )
-	{
-		/* Configure the GPIO_LED pin */
-		GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13;
-		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-		GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
-		GPIO_Init(GPIOC, &GPIO_InitStructure);
+	/* Setup the Selector mode switches( PB15, PB14, PB13, PB12 ) */
+	GPIO_InitStructure.GPIO_Pin = ( GPIO_Pin_15 | GPIO_Pin_14 | GPIO_Pin_13 | GPIO_Pin_12 );
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;
+	GPIO_Init(GPIOB, &GPIO_InitStructure);
 
-		/* Turn the led off straight away to save power */
-		HAL_BRD_set_LED( OFF );
+	/* Configure the GPIO_LED pin */
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
+    GPIO_Init(GPIOC, &GPIO_InitStructure);
 
-		/* Configure the wakeup ( or in debug mode interrupt ) pin */
-		GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;
-		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;
-		GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
-		GPIO_Init(GPIOA, &GPIO_InitStructure);
+    /* Configure the DEBUG output pin */
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
 
-		/* If we are in debug mode then we can configure the wakeup pin to have an ISR */
-		GPIO_EXTILineConfig(GPIO_PortSourceGPIOA, GPIO_PinSource0 );
+	/* Configure the NRF24 NCS pin */
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
 
-		EXTI_InitTypeDef EXTI_InitStruct;
+	/* Configure the NRF24 CE pin */
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
 
-		EXTI_InitStruct.EXTI_Line = EXTI_Line0 ;
-		EXTI_InitStruct.EXTI_LineCmd = ENABLE;
-		EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt ;
-		EXTI_InitStruct.EXTI_Trigger = EXTI_Trigger_Rising;
-		EXTI_Init(&EXTI_InitStruct);
-
-		NVIC_InitTypeDef NVIC_InitStruct;
-
-		/* Add IRQ vector to NVIC */
-		NVIC_InitStruct.NVIC_IRQChannel = EXTI0_IRQn;
-		/* Set priority */
-		NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 0x00;
-		/* Set sub priority */
-		NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0x00;
-		/* Enable interrupt */
-		NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
-		/* Add to NVIC */
-		NVIC_Init(&NVIC_InitStruct);
-	}
 
 	/* Enable the "RFM69 packet received" interrupt on pin A1 */
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1;
@@ -132,9 +123,12 @@ void HAL_BRD_init( void )
 	NVIC_Init(&NVIC_InitStruct);
 
 	HAL_BRD_RFM69_spi_slave_select( HIGH );
-	HAL_BRD_RFM69_set_reset_Pin_state( LOW );
+	HAL_BRD_RFM69_set_reset_pin_state( LOW );
 
 	HAL_BRD_rtc_triggered_s = TRUE;
+
+    /* Turn the led off straight away to save power */
+    HAL_BRD_set_LED( OFF );
 }
 
 
@@ -154,7 +148,7 @@ void HAL_BRD_init( void )
 *   \return        low_high_et
 *
 ***************************************************************************************************/
-low_high_et HAL_BRD_Read_Pin_state( GPIO_TypeDef * port, u16_t pin )
+low_high_et HAL_BRD_read_pin_state( GPIO_TypeDef * port, u16_t pin )
 {
 	low_high_et returnType;
 
@@ -185,7 +179,7 @@ low_high_et HAL_BRD_Read_Pin_state( GPIO_TypeDef * port, u16_t pin )
 *   \return        None
 *
 ***************************************************************************************************/
-void HAL_BRD_Set_Pin_state(  GPIO_TypeDef * port, u16_t pin, low_high_et state )
+void HAL_BRD_set_pin_state(  GPIO_TypeDef * port, u16_t pin, low_high_et state )
 {
 	if( state == HIGH)
 	{
@@ -209,17 +203,16 @@ void HAL_BRD_Set_Pin_state(  GPIO_TypeDef * port, u16_t pin, low_high_et state )
 *   \return        None
 *
 ***************************************************************************************************/
-void HAL_BRD_Toggle_Pin_state(  GPIO_TypeDef * port, u16_t pin )
+void HAL_BRD_toggle_pin_state(  GPIO_TypeDef * port, u16_t pin )
 {
-
     /* Firstly read the PIN state */
     if( ( port->ODR & pin ) == pin )
     {
-        HAL_BRD_Set_Pin_state( port, pin, LOW );
+        HAL_BRD_set_pin_state( port, pin, LOW );
     }
     else
     {
-        HAL_BRD_Set_Pin_state( port, pin, HIGH );
+        HAL_BRD_set_pin_state( port, pin, HIGH );
     }
 }
 
@@ -236,9 +229,9 @@ void HAL_BRD_Toggle_Pin_state(  GPIO_TypeDef * port, u16_t pin )
 *   \return        None
 *
 ***************************************************************************************************/
-void HAL_BRD_Set_batt_monitor_state( disable_enable_et state )
+void HAL_BRD_set_batt_monitor_state( disable_enable_et state )
 {
-	if( state == ENABLE )
+	if( state == ENABLE_ )
 	{
 		//HAL_BRD_Set_Pin_state();
 	}
@@ -266,7 +259,7 @@ EXTERNAL API's
 *   \return        None
 *
 ***************************************************************************************************/
-void HAL_BRD_RFM69_set_enable_Pin_state( low_high_et state )
+void HAL_BRD_RFM69_set_enable_pin_state( low_high_et state )
 {
 	if( state == HIGH )
 	{
@@ -282,6 +275,29 @@ void HAL_BRD_RFM69_set_enable_Pin_state( low_high_et state )
 /*!
 ****************************************************************************************************
 *
+*   \brief         SETS the rf enable pin
+*
+*   \author        MS
+*
+*   \return        None
+*
+***************************************************************************************************/
+void HAL_BRD_NRF24_set_ce_pin_state( low_high_et state )
+{
+	if( state == HIGH )
+	{
+		HAL_BRD_set_pin_state( GPIOA, GPIO_Pin_10, HIGH );
+	}
+	else
+	{
+		HAL_BRD_set_pin_state( GPIOA, GPIO_Pin_10, LOW );
+	}
+}
+
+
+/*!
+****************************************************************************************************
+*
 *   \brief         SETS the rf RST pin
 *
 *   \author        MS
@@ -289,15 +305,15 @@ void HAL_BRD_RFM69_set_enable_Pin_state( low_high_et state )
 *   \return        None
 *
 ***************************************************************************************************/
-void HAL_BRD_RFM69_set_reset_Pin_state( low_high_et state )
+void HAL_BRD_RFM69_set_reset_pin_state( low_high_et state )
 {
 	if( state == HIGH )
 	{
-		HAL_BRD_Set_Pin_state( GPIOB, GPIO_Pin_10, HIGH );
+		HAL_BRD_set_pin_state( GPIOB, GPIO_Pin_10, HIGH );
 	}
 	else
 	{
-		HAL_BRD_Set_Pin_state( GPIOB, GPIO_Pin_10, LOW );
+		HAL_BRD_set_pin_state( GPIOB, GPIO_Pin_10, LOW );
 	}
 }
 
@@ -318,11 +334,34 @@ void HAL_BRD_RFM69_spi_slave_select( low_high_et state )
 {
 	if( state == HIGH )
 	{
-		HAL_BRD_Set_Pin_state( GPIOB, GPIO_Pin_1, HIGH );
+		HAL_BRD_set_pin_state( GPIOB, GPIO_Pin_1, HIGH );
 	}
 	else
 	{
-		HAL_BRD_Set_Pin_state( GPIOB, GPIO_Pin_1, LOW );
+		HAL_BRD_set_pin_state( GPIOB, GPIO_Pin_1, LOW );
+	}
+}
+
+
+/*!
+****************************************************************************************************
+*
+*   \brief         SETS the SPI chip select pin for the RF module
+*
+*   \author        MS
+*
+*   \return        None
+*
+***************************************************************************************************/
+void HAL_BRD_NRF24_spi_slave_select( low_high_et state )
+{
+	if( state == HIGH )
+	{
+		HAL_BRD_set_pin_state( GPIOA, GPIO_Pin_9, HIGH );
+	}
+	else
+	{
+		HAL_BRD_set_pin_state( GPIOA, GPIO_Pin_9, LOW );
 	}
 }
 
@@ -339,9 +378,9 @@ void HAL_BRD_RFM69_spi_slave_select( low_high_et state )
 *   \return        None
 *
 ***************************************************************************************************/
-void HAL_BRD_Toggle_led( void )
+void HAL_BRD_toggle_led( void )
 {
-    HAL_BRD_Toggle_Pin_state( GPIOC, GPIO_Pin_13 );
+    HAL_BRD_toggle_pin_state( GPIOC, GPIO_Pin_13 );
 }
 
 
@@ -358,8 +397,35 @@ void HAL_BRD_set_LED( off_on_et state )
 	{
 		val = LOW;
 	}
-	HAL_BRD_Set_Pin_state( GPIOC, GPIO_Pin_13, val);
+	HAL_BRD_set_pin_state( GPIOC, GPIO_Pin_13, val);
 }
+
+
+
+
+
+/*!
+****************************************************************************************************
+*
+*   \brief         Toggles the debug pin
+*
+*   \author        MS
+*
+*   \return        None
+*
+***************************************************************************************************/
+void HAL_BRD_toggle_debug_pin( void )
+{
+    HAL_BRD_toggle_pin_state( GPIOA, GPIO_Pin_8 );
+}
+
+
+
+void HAL_BRD_set_debug_pin( off_on_et state )
+{
+	HAL_BRD_set_pin_state( GPIOA, GPIO_Pin_8, state );
+}
+
 
 
 
@@ -379,7 +445,7 @@ disable_enable_et HAL_BRD_read_debug_pin( void )
 	low_high_et state;
 	disable_enable_et mode;
 
-	state = HAL_BRD_Read_Pin_state(GPIOA, GPIO_Pin_4 );
+	state = HAL_BRD_read_pin_state(GPIOA, GPIO_Pin_4 );
 
 	mode = (( state == HIGH ) ? ENABLE : DISABLE );
 
@@ -389,7 +455,43 @@ disable_enable_et HAL_BRD_read_debug_pin( void )
 
 
 
+/*!
+****************************************************************************************************
+*
+*   \brief         Reads the state of the slider pin
+*
+*   \author        MS
+*
+*   \return        low_high_et state of the pin
+*
+***************************************************************************************************/
+low_high_et HAL_BRD_read_selector_switch_pin( HAL_BRD_switch_slider_et slider )
+{
+    low_high_et state = LOW;
 
+    switch ( slider )
+    {
+        case SLIDER_1:
+            state = HAL_BRD_read_pin_state( GPIOB, GPIO_Pin_12 );
+        break;
+
+        case SLIDER_2:
+            state = HAL_BRD_read_pin_state( GPIOB, GPIO_Pin_13 );
+        break;
+
+        case SLIDER_3:
+            state = HAL_BRD_read_pin_state( GPIOB, GPIO_Pin_14 );
+        break;
+
+        case SLIDER_4:
+            state = HAL_BRD_read_pin_state( GPIOB, GPIO_Pin_15 );
+        break;
+
+        default:
+            break;
+    }
+    return ( state );
+}
 
 
 /*!
@@ -402,9 +504,9 @@ disable_enable_et HAL_BRD_read_debug_pin( void )
 *   \return        None
 *
 ***************************************************************************************************/
-void HAL_BRD_Toggle_heartbeat_pin(  void )
+void HAL_BRD_toggle_heartbeat_pin(  void )
 {
-    HAL_BRD_Toggle_Pin_state( GPIOB, GPIO_Pin_11 );
+    HAL_BRD_toggle_pin_state( GPIOB, GPIO_Pin_11 );
 }
 
 

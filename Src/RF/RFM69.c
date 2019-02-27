@@ -49,12 +49,15 @@ STATIC u8_t send_data[RFM69_MAX_PAYLOAD_LEN] =
     52,53,54,55,56,57,58,59,60,61
 };
 
-false_true_et RFM69_packet_sent_s;
-false_true_et RFM69_packet_received_s;
-u8_t  RFM69_tx_power_level_s;
-u32_t RFM69_received_packet_cnt_s;
-f32_t RFM69_packet_reception_percent_s;
-s8_t RFM69_last_rssi_s;
+false_true_et  RFM69_init_s;
+false_true_et  RFM69_packet_sent_s;
+false_true_et  RFM69_packet_received_s;
+u8_t           RFM69_tx_power_level_s;
+u32_t          RFM69_received_packet_cnt_s;
+f32_t          RFM69_packet_reception_percent_s;
+s8_t           RFM69_last_rssi_s;
+u32_t          RFM69_packet_received_timestamp_s;
+RFM69_state_et RFM69_state_s;
 
 
 /***************************************************************************************************
@@ -70,6 +73,7 @@ s8_t RFM69_last_rssi_s;
 
 void RFM69_init( void )
 {
+    RFM69_state_s =
 	RFM69_tx_power_level_s = NVM_info_s.NVM_generic_data_blk_s.tx_power_level;
 	RFM69_received_packet_cnt_s = 0u;
 
@@ -78,6 +82,43 @@ void RFM69_init( void )
 
 	RFM69_packet_reception_percent_s = 0.0f;
 	RFM69_last_rssi_s = -127;
+	RFM69_packet_received_timestamp_s = 0u;
+}
+
+
+
+void RFM69_tick( void )
+{
+    switch( RFM69_state_s )
+    {
+        case RFM69_MGR_INITIALISING:
+            RFM69_state_s = RFM69_MGR_RX_MODE;
+            break;
+        break;
+
+        case RFM69_MGR_SETUP_TX_MODE:
+            RFM69_setup_receive_mode();
+            RFM69_state_s = RFM69_MGR_RX_MODE;
+        break;
+
+        case RFM69_MGR_TX_MODE:
+        break;
+        case RFM69_MGR_SETUP_RX_MODE:
+        break;
+
+        case RFM69_MGR_RX_MODE:
+            RFM69_receive_frame();
+        break;
+
+        case RFM69_MGR_SLEEP_MODE:
+        break;
+
+        case RFM69_MGR_IDLE:
+        break;
+
+        case RFM69_MGR_RF_RESET:
+        break;
+    }
 }
 
 
@@ -122,7 +163,7 @@ void RFM69_setup_receive_mode( void )
 	if( RFM69_read_reserved_registers() == PASS )
 	{
 		/* Fire down a config of registers */
-		RFM69_set_configuration( RFM69_433_FSK_122KBPS_CONFIG );
+		RFM69_set_configuration( NVM_info_s.NVM_generic_data_blk_s.tx_power_level );
 
 		RFM69_set_PA_level( RFM69_tx_power_level_s );
 
@@ -176,26 +217,17 @@ void RFM69_receive_frame( void )
 		RFM69_packet_received_s = FALSE;
 
 		/* Grab the current value of RSSi as quickly as possible */
-		RFM69_last_rssi_s = RFM69_read_RSSI();
+		//RFM69_last_rssi_s = RFM69_read_RSSI();
 
 		/* Set to standby mode and read the FIFO for the RF data */
 		RFM69_set_operating_mode( RFM69_STANDBY_MODE );
 		RFM69_read_FIFO_register( read_data );
 		RFM69_set_operating_mode( RFM69_RECEIVE_MODE );
 
-		if( RFM69_received_packet_cnt_s == 0u )
-		{
-			/* Increment the packet count */
-			RFM69_received_packet_cnt_s ++;
+        /* Increment the packet count */
+        RFM69_received_packet_cnt_s ++;
 
-			/* Start the timer to keep track of reception count */
-			HAL_TIM_1_start();
-		}
-		else
-		{
-			/* Increment the packet count */
-			RFM69_received_packet_cnt_s ++;
-		}
+        RFM69_timestamp_receieved_packet();
 	}
 }
 
@@ -257,6 +289,17 @@ pass_fail_et RFM69_set_configuration( RFM69_static_configuration_et config )
 
 			returnType = FAIL;
 		}
+
+		u8_t val = 0x30;
+
+		/* This register sits out on its own but the datasheet says to set it to this value so i will comply with the law */
+		if( RFM69_write_registers( WRITE_TO_CHIP, REGTESTDAGC, &val, 1 ) == FAIL )
+        {
+            /* Configuration failed :( */
+			STDC_basic_assert();
+
+			returnType = FAIL;
+        }
 
 #endif
     }
@@ -607,7 +650,7 @@ u8_t RFM69_trigger_RSSi_measurement( void )
     /* Now wait for the RSSI read to be completed */
     while( ( register_val & RF_RSSI_DONE ) == 0x00 )
     {
-    	 RFM69_read_registers( READ_FROM_CHIP, REGRSSICONFIG, &register_val, 1 );
+    	RFM69_read_registers( READ_FROM_CHIP, REGRSSICONFIG, &register_val, 1 );
     }
 
     return ( status );
@@ -680,7 +723,7 @@ false_true_et RFM69_set_clock_out( disable_enable_et state )
     register_val &= ~BIT_MASK_3_BIT;
 
     /* This disables the CLK_OUT */
- 	if( state == DISABLE )
+ 	if( state == DISABLE_ )
     {
         register_val |= CLK_OUT_OFF;
     }
@@ -1081,7 +1124,7 @@ false_true_et RFM69_set_own_node_address( u8_t address )
 {
 	u8_t register_val;
 	false_true_et status = TRUE;
-	
+
 	/* Write down the node address */
 	RFM69_write_registers( WRITE_TO_CHIP, REGNODEADRS, &register_val, 1  );
 
@@ -1182,10 +1225,11 @@ false_true_et RFM69_write_to_FIFO( u8_t* buffer, u8_t len )
 
 
 
-false_true_et RFM69_Send_frame( u8_t* buffer, u8_t len, u8_t rx_node_address )
+false_true_et RFM69_send_frame( u8_t* buffer, u8_t len, u8_t rx_node_address )
 {
     false_true_et status = FALSE;
     u8_t tx_buffer[RFM69_MAX_PAYLOAD_LEN];
+	u16_t timeout = 0u;
     u8_t test_buffer[RFM69_MAX_DATA_LEN];
 
     /* Set to standby */
@@ -1208,9 +1252,19 @@ false_true_et RFM69_Send_frame( u8_t* buffer, u8_t len, u8_t rx_node_address )
     RFM69_set_operating_mode( RFM69_TRANSMIT_MODE );
 
     /* The packet is now being sent */
-    while( RFM69_packet_sent_s == FALSE )
+    while( ( RFM69_packet_sent_s == FALSE ) && ( timeout < RFM69_TIMEOUT ) )
     {
-    	//TODO : timeout
+    	/* WE NEED TO HAVE A TIMEOUT HERE JUST SO THE WHOLE OPERATION DOESNT STOP BECAUSE
+    	A FRAME DIDNT GET SENT */
+    	delay_us( 100 );
+
+    	/* increment the timeout */
+    	timeout ++;
+    }
+
+    if( timeout == RFM69_TIMEOUT )
+    {
+        STDC_basic_assert();
     }
 
     /* Set to standby again */
@@ -1251,6 +1305,16 @@ s8_t RFM69_get_last_received_RSSI( void )
 	return ( RFM69_last_rssi_s );
 }
 
+void RFM69_timestamp_receieved_packet( void )
+{
+    RFM69_packet_received_timestamp_s = HAL_TIM_get_time();
+}
+
+u32_t RFM69_get_receieved_packet_timestamp( void )
+{
+    return ( RFM69_packet_received_timestamp_s );
+}
+
 
 /*!
 ****************************************************************************************************
@@ -1266,13 +1330,8 @@ s8_t RFM69_get_last_received_RSSI( void )
 ***************************************************************************************************/
 void RFM69_reset( void )
 {
-	RFM69_set_reset_pin_state( HIGH );
-
-	delay_us(1000);
-
-	RFM69_set_reset_pin_state( LOW );
-
-	delay_us(1000);
+	/* Reset the init status */
+	RFM69_init_s = FALSE;
 }
 
 
@@ -1280,11 +1339,11 @@ void RFM69_reset( void )
 
 void RFM69_set_reset_pin_state( low_high_et state )
 {
-    HAL_BRD_RFM69_set_reset_Pin_state( state );
+    HAL_BRD_RFM69_set_reset_pin_state( state );
 }
 
 
 void RFM69_set_enable_pin_state( low_high_et state )
 {
-    HAL_BRD_RFM69_set_enable_Pin_state( state );
+    HAL_BRD_RFM69_set_enable_pin_state( state );
 }

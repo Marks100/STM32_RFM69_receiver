@@ -13,7 +13,7 @@ rm -fR ./vendor
 
 cd ..
 #create new ceedling env
-echo n | ceedling new test 
+ceedling new test 
 
 #now remove the unwanted ceedling stuff and create the usefull stuff
 cd test

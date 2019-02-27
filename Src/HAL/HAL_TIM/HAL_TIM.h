@@ -49,7 +49,9 @@ void HAL_TIM_2_start( void );
 void HAL_TIM_3_stop( void );
 void HAL_TIM_3_start( void );
 
+void  HAL_TIM_increment_secs( void );
 u32_t HAL_TIM_get_time( void );
+
 void HAL_TIM_3_SetAutoreload( u16_t new_time_ms );
 
 
