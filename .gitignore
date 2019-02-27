@@ -17,3 +17,5 @@ Src/autoversion.h
 test/vendor/
 test/rakefile.rb
 test/build/
+Workspace/STM32_RF_HUB/
+Workspace/STM32_RF_HUB.comarker
