@@ -18,6 +18,7 @@
 #ifdef GCC_TEST
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #endif // GCC_TEST
 
@@ -1852,16 +1853,14 @@ void RF_MGR_handle_early_prototype_sed( u16_t sensor_id, u8_t* data_p, u32_t pac
     u8_t mode_type;
 
     RF_MGR_sed_data_s.node_id     = sensor_id;
+
     RF_MGR_sed_data_s.packet_type = data_p[0];
     RF_MGR_sed_data_s.mode_type   = data_p[1];
+    RF_MGR_sed_data_s.status      = data_p[2];
+    RF_MGR_sed_data_s.temperature  = ( data_p[3] << 8u );
+    RF_MGR_sed_data_s.temperature |= ( data_p[4] );
     RF_MGR_sed_data_s.packet_ctr  = packet_count;
-    RF_MGR_sed_data_s.status      = data_p[4];
-    RF_MGR_sed_data_s.temperature = data_p[5];
     RF_MGR_sed_data_s.pressure    = data_p[6];
-
-
-    RF_MGR_sed_data_s.temperature = -40;
-	RF_MGR_sed_data_s.pressure    = 100u;
 
     RF_MGR_display_sed_data();
 }
@@ -1873,7 +1872,8 @@ void RF_MGR_handle_early_prototype_sed( u16_t sensor_id, u8_t* data_p, u32_t pac
  * byte 3 packet type   - 1st SED
  * byte 4 mode type     - 1st SED
  * byte 5 status        - 1st SED
- * byte 6 temp		    - 1st SED
+ * byte 6 temp 		    - 1st SED ( degree c )
+ * byte 7 temp		    - 1st SED ( degree c remainder )
  */
 
 
@@ -1992,8 +1992,12 @@ void RF_MGR_display_sed_data( void )
 	SERIAL_Send_data( display_data );
 	STDC_memset( display_data, 0x00, sizeof( display_data ) );
 
-	sprintf( display_data, "Packet ctr:\t%d\r\nTemperature:\t%03d*c\r\nPressure:\t%04dmbar",
-			 RF_MGR_sed_data_s.packet_ctr, RF_MGR_sed_data_s.temperature, RF_MGR_sed_data_s.pressure );
+	/* The temperature needs to be divided by 10 */
+	s16_t temp_whole = ( RF_MGR_sed_data_s.temperature/10 );
+	u8_t remainder = ( abs( RF_MGR_sed_data_s.temperature ) - ( abs(temp_whole) * 10 ) );
+
+	sprintf( display_data, "Packet ctr:\t%d\r\nTemperature:\t%d.%d degree c\r\nPressure:\t%04d mbar",
+			 RF_MGR_sed_data_s.packet_ctr, temp_whole, remainder, RF_MGR_sed_data_s.pressure );
 	SERIAL_Send_data( display_data );
 	STDC_memset( display_data, 0x00, sizeof( display_data ) );
 	SERIAL_send_newline();
