@@ -65,39 +65,43 @@ void MODE_MGR_20ms_tick( void )
 ***************************************************************************************************/
 void MODE_MGR_action_schedule_normal( void )
 {
+    NRF24_tick();
+    SERIAL_msg_handler();
+
     switch( MODE_MGR_tick_timer_msecs_s )
     {
         case 20u:
-            SERIAL_msg_handler();
+            //SERIAL_msg_handler();
         	break;
 
         case 40u:
-            RFM69_receive_frame();
+            //RFM69_tick();
         	break;
 
         case 60u:
-            MODE_MGR_analyse_switches();
+            //MODE_MGR_analyse_switches();
         	break;
 
         case 80u:
         	NVM_tick();
-        	RFM69_receive_frame();
+        	//RFM69_tick();
         	break;
 
         case 100u:
+            RF_MGR_tick();
         	break;
 
         case 120u:
-            SERIAL_msg_handler();
-            RFM69_receive_frame();
+            //SERIAL_msg_handler();
+            //RFM69_tick();
         	break;
 
         case 140u:
         	break;
 
         case 160u:
-            RFM69_receive_frame();
-            MODE_MGR_analyse_switches();
+            //RFM69_tick();
+            //MODE_MGR_analyse_switches();
         	break;
 
         case 180u:
@@ -105,40 +109,42 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 200u:
-            RFM69_receive_frame();
+            //RFM69_tick();
+            RF_MGR_tick();
         	break;
 
-        case 220u:
-            SERIAL_msg_handler();
+        case 220u://RFM69_tick
+            //SERIAL_msg_handler();
         	break;
 
         case 240u:
-            RFM69_receive_frame();
+            //RFM69_tick();
         	break;
 
         case 260u:
-            MODE_MGR_analyse_switches();
+            //MODE_MGR_analyse_switches();
         	break;
 
         case 280u:
         	NVM_tick();
-        	RFM69_receive_frame();
+        	//RFM69_tick();
         	break;
 
         case 300u:
+            RF_MGR_tick();
         	break;
 
         case 320u:
-            SERIAL_msg_handler();
-            RFM69_receive_frame();
+            //SERIAL_msg_handler();
+            //RFM69_tick();
         	break;
 
         case 340u:
         	break;
 
         case 360u:
-            RFM69_receive_frame();
-            MODE_MGR_analyse_switches();
+            //RFM69_tick();
+            //MODE_MGR_analyse_switches();
         	break;
 
         case 380u:
@@ -146,40 +152,42 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 400u:
-            RFM69_receive_frame();
+            RF_MGR_tick();
+            //RFM69_tick();
         	break;
 
         case 420u:
-            SERIAL_msg_handler();
+            //SERIAL_msg_handler();
         	break;
 
         case 440u:
-            RFM69_receive_frame();
+            //RFM69_tick();
         	break;
 
         case 460u:
-            MODE_MGR_analyse_switches();
+            //MODE_MGR_analyse_switches();
         	break;
 
         case 480u:
         	NVM_tick();
-        	RFM69_receive_frame();
+        	//RFM69_tick();
         	break;
 
         case 500u:
+            RF_MGR_tick();
         	break;
 
         case 520u:
-            SERIAL_msg_handler();
-            RFM69_receive_frame();
+            //SERIAL_msg_handler();
+            //RFM69_tick();
         	break;
 
         case 540u:
         	break;
 
         case 560u:
-            RFM69_receive_frame();
-            MODE_MGR_analyse_switches();
+            //RFM69_tick();
+            //MODE_MGR_analyse_switches();
         	break;
 
         case 580u:
@@ -187,40 +195,42 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 600u:
-            RFM69_receive_frame();
+            //RFM69_tick();
+            RF_MGR_tick();
         	break;
 
         case 620u:
-            SERIAL_msg_handler();
+            //SERIAL_msg_handler();
         	break;
 
         case 640u:
-            RFM69_receive_frame();
+            //RFM69_tick();
         	break;
 
         case 660u:
-            MODE_MGR_analyse_switches();
+           // MODE_MGR_analyse_switches();
         	break;
 
         case 680u:
         	NVM_tick();
-        	RFM69_receive_frame();
+        	//RFM69_tick();
         	break;
 
         case 700u:
+            RF_MGR_tick();
         	break;
 
         case 720u:
-            SERIAL_msg_handler();
-            RFM69_receive_frame();
+            //SERIAL_msg_handler();
+            //RFM69_tick();
         	break;
 
         case 740u:
         	break;
 
         case 760u:
-            RFM69_receive_frame();
-            MODE_MGR_analyse_switches();
+            //RFM69_tick();
+            //MODE_MGR_analyse_switches();
         	break;
 
         case 780u:
@@ -228,40 +238,42 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 800u:
-            RFM69_receive_frame();
+            RF_MGR_tick();
+            //RFM69_tick();
         	break;
 
         case 820u:
-            SERIAL_msg_handler();
+            //SERIAL_msg_handler();
         	break;
 
         case 840u:
-            RFM69_receive_frame();
+            //RFM69_tick();
         	break;
 
         case 860u:
-            MODE_MGR_analyse_switches();
+            //MODE_MGR_analyse_switches();
         	break;
 
         case 880u:
         	NVM_tick();
-        	RFM69_receive_frame();
+        	//RFM69_tick();
         	break;
 
         case 900u:
+            RF_MGR_tick();
         	break;
 
         case 920u:
-            SERIAL_msg_handler();
-            RFM69_receive_frame();
+            //SERIAL_msg_handler();
+            //RFM69_tick();
         	break;
 
         case 940u:
         	break;
 
         case 960u:
-            RFM69_receive_frame();
-            MODE_MGR_analyse_switches();
+            //RFM69_tick();
+            //MODE_MGR_analyse_switches();
         	break;
 
         case 980u:
@@ -269,7 +281,8 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 1000u:
-            RFM69_receive_frame();
+            RF_MGR_tick();
+            //RFM69_tick();
 
             /* keep track of time in secs */
             HAL_TIM_increment_secs();

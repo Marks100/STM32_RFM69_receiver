@@ -89,7 +89,7 @@ const RFM69_register_data_st RFM69_default_register_set[] =
     { REGDIOMAPPING2   ,0x07 },         
     { REGIRQFLAGS1     ,0x80 },         
     { REGIRQFLAGS2     ,0x00 },         
-    { REGRSSITHRESH    ,0xE4 },         
+    { REGRSSITHRESH    ,0xFF },
     { REGRXTIMEOUT1    ,0x00 },         
     { REGRXTIMEOUT2    ,0x00 }, 
 	/*!Packet Engine Registers*/        

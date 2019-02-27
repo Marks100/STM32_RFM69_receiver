@@ -45,30 +45,22 @@ int main(void)
 	HAL_BRD_init();
 	HAL_I2C_init();
 	HAL_SPI_init();
+	SERIAL_init();
 	NVM_init();
-	HAL_TIM_1_init();
+
     /* Start the timer to keep track of reception count */
-	HAL_TIM_1_start();
+	HAL_TIM_1_init();
 
 	/* Initialise the RFM69 variables */
 	RFM69_init();
+
+	/* Initialise the NRF24 variables */
+	NRF24_init();
 
 	MODE_MGR_init();
 
 	/* Init the systick timer */
 	MAIN_SYSTICK_init();
-
-	if( debug_mode == ENABLE )
-	{
-		/* In debug mode lets init the debug usart as this consumes lots of power */
-		SERIAL_init();
-
-		/* power up the RF chip */
-		RFM69_set_enable_pin_state( HIGH );
-		RFM69_set_reset_pin_state( LOW );
-	}
-
-	RFM69_setup_receive_mode();
 
 	while (1)
 	{
@@ -91,8 +83,6 @@ void SysTick_Handler( void )
 		debug_timer_s = 0u;
 
 		MODE_MGR_20ms_tick();
-
-		HAL_BRD_toggle_led();
 	}
 }
 

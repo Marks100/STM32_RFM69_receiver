@@ -126,6 +126,7 @@ test/vendor:
 	@echo Testing $(TEST_FILE)...
 	cd test && rake test:$(TEST_FILE)
 
+
 # Wild card test will allow any test to run once the name is provided
 %.test_with_coverage: test/vendor
 	@$(eval TEST_FILE := $(subst .test_with_coverage,.c,$@))
@@ -230,6 +231,7 @@ RAM_PERC_LIMIT := 80
 RAM_CALC_LIMIT := $(shell echo $$(($(RAM_SIZE) * $(RAM_PERC_LIMIT) / 100 )))
 
 
+
 .PHONY: memory_stats
 memory_stats: $(GCC_ARM_OUT_DIR)/$(STM32_MAP_FILE)
 	@echo "Analysing elf file for memory stats...."
@@ -265,14 +267,14 @@ release_package:
 	@$(MAKE) -s GCC_ARM
 	@echo Generating memory stats...
 	@$(MAKE) -s memory_stats > /dev/null
-	@echo Copying build output to $(RELEASE_PACKAGE_NAME) folder..
+	@echo "Copying build output to $(RELEASE_PACKAGE_NAME) folder.."
 	@cp -r $(GCC_ARM_OUT_DIR)/. $(RELEASE_PACKAGE_NAME)
-	@echo "copying version file info"
+	@echo "Copying version file info"
 	@cp -f $(AUTOVERS_HEADER) $(RELEASE_PACKAGE_NAME)
 	@touch $(RELEASE_PACKAGE_NAME)/SW_V$(MAJOR_SW).$(MINOR_SW).$(VERIFICATION_SW)_BETA
 	@find  $(RELEASE_PACKAGE_NAME) -type f -print0 | sort -z | xargs -0 sha1sum > $(RELEASE_PACKAGE_NAME)/chksum.txt
-	@echo Checksum file generated..
-	@echo zipping up the release package..
+	@echo "Checksum file generated.."
+	@echo "zipping up the release package.."
 	@-7za a "$(RELEASE_PACKAGE_NAME)/$(RELEASE_PACKAGE_NAME)_V$(MAJOR_SW).$(MINOR_SW).$(VERIFICATION_SW)_BETA.zip" $(RELEASE_PACKAGE_NAME)/* > /dev/null
 	@find $(RELEASE_PACKAGE_NAME) ! -name '$(RELEASE_PACKAGE_NAME)*' -print0 | xargs -0 rm -fr
 	@echo "Release package created V$(MAJOR_SW).$(MINOR_SW).$(VERIFICATION_SW)_BETA"

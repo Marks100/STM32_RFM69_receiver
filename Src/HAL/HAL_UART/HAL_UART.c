@@ -85,6 +85,9 @@ STATIC const u8_t SERIAL_buffer_reset_message_s[] =
 STATIC const u8_t SERIAL_invalid_cmd_message_s[] =
 		"\r\nERROR! that is not a valid command!\r\nPlease try again or type 'help' for help menu..\r\n\r\n";
 
+STATIC const u8_t SERIAL_newline_s[] =
+		"\r\n\r\n";
+
 
 
 STATIC false_true_et SERIAL_cr_received_s;
@@ -184,7 +187,7 @@ void SERIAL_init( void )
 		USART2 receive data register is not empty */
 	USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
 
-	SERIAL_stream_mode_s = TRUE;
+	SERIAL_stream_mode_s = FALSE;
 	SERIAL_cr_received_s = FALSE;
 	SERIAL_rx_buf_idx_s = 0u;
 	SERIAL_rx_buf_char_s = 0u;
@@ -288,6 +291,11 @@ void SERIAL_close( void )
 	SERIAL_Send_data( SERIAL_welcome_message_s );
 }
 
+
+void SERIAL_send_newline( void )
+{
+	SERIAL_Send_data( SERIAL_newline_s );
+}
 
 
 void SERIAL_msg_handler( void )
@@ -666,6 +674,34 @@ void SERIAL_msg_handler( void )
 				sprintf( SERIAL_tx_buf_s, "\r\nRun time in secs since power-up:\t\t\t%d%\r\n", time );
 				SERIAL_Send_data( SERIAL_tx_buf_s );
 				STDC_memset( SERIAL_tx_buf_s, 0x20, sizeof( SERIAL_tx_buf_s ) );
+			}
+			else if(( strstr(sub_string, "list nodes") != 0 ) )
+            {
+                u8_t num_node = 0u;
+                u16_t node_ids[RF_MGR_RF_DATA_HANDLER_SIZE];
+
+                RF_MGR_get_all_decoded_IDs( node_ids );
+
+                for( num_node = 0; num_node < RF_MGR_RF_DATA_HANDLER_SIZE; num_node++ )
+                {
+                    if( node_ids[num_node] != 0u )
+                    {
+                        sprintf( SERIAL_tx_buf_s, "Node ID %02d:\t0x%04X\r\n", num_node, node_ids[num_node] );
+                        SERIAL_Send_data( SERIAL_tx_buf_s );
+                        STDC_memset( SERIAL_tx_buf_s, 0x20, sizeof( SERIAL_tx_buf_s ) );
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                sprintf( SERIAL_tx_buf_s, "Num Free Nodes:\t%02d\r\n", ( RF_MGR_RF_DATA_HANDLER_SIZE - num_node ) );
+                SERIAL_Send_data( SERIAL_tx_buf_s );
+                STDC_memset( SERIAL_tx_buf_s, 0x20, sizeof( SERIAL_tx_buf_s ) );
+            }
+			else if(( strstr(sub_string, "remove node") != 0 ) )
+			{
+				RF_MGR_remove_node( 0 );
 			}
 			else
 			{
