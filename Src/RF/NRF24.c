@@ -1966,27 +1966,15 @@ void RF_MGR_display_sed_data( void )
 	switch( RF_MGR_sed_data_s.mode_type )
 	{
 		case 0:
-			sprintf( display_data, "Mode Type: \t1\r\n");
+			sprintf( display_data, "Mode Type:\tNORMAL MODE\r\n");
 			break;
 
 		case 1:
-			sprintf( display_data, "Mode Type: \t2\r\n");
-			break;
-
-		case 2:
-			sprintf( display_data, "Mode Type: \t3\r\n");
-			break;
-
-		case 3:
-			sprintf( display_data, "Mode Type: \t4\r\n");
-			break;
-
-		case 4:
-			sprintf( display_data, "Mode Type: \t5\r\n");
+			sprintf( display_data, "Mode Type:\tDEBUG MODE\r\n");
 			break;
 
 		default:
-			sprintf( display_data, "Mode Type: \t5\r\n");
+			sprintf( display_data, "Mode Type:\tNORMAL MODE\r\n");
 			break;
 	}
 	SERIAL_Send_data( display_data );
