@@ -1980,9 +1980,14 @@ void RF_MGR_display_sed_data( void )
 	SERIAL_Send_data( display_data );
 	STDC_memset( display_data, 0x00, sizeof( display_data ) );
 
+	sprintf( display_data, "Status 1:\t%d\r\nStatus 2:\t%d\r\n", 0, 0 );
+	SERIAL_Send_data( display_data );
+	STDC_memset( display_data, 0x00, sizeof( display_data ) );
+
 	/* The temperature needs to be divided by 10 */
 	s16_t temp_whole = ( RF_MGR_sed_data_s.temperature/10 );
 	u8_t remainder = ( abs( RF_MGR_sed_data_s.temperature ) - ( abs(temp_whole) * 10 ) );
+
 
 	sprintf( display_data, "Packet ctr:\t%d\r\nTemperature:\t%d.%d degree c\r\nPressure:\t%04d mbar",
 			 RF_MGR_sed_data_s.packet_ctr, temp_whole, remainder, RF_MGR_sed_data_s.pressure );
