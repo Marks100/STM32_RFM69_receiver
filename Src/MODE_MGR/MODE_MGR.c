@@ -66,7 +66,7 @@ void MODE_MGR_20ms_tick( void )
 void MODE_MGR_action_schedule_normal( void )
 {
     NRF24_tick();
-    SERIAL_msg_handler();
+    CLI_message_handler();
 
     switch( MODE_MGR_tick_timer_msecs_s )
     {
@@ -286,9 +286,6 @@ void MODE_MGR_action_schedule_normal( void )
 
             /* keep track of time in secs */
             HAL_TIM_increment_secs();
-
-            /* Trigger the stream */
-            SERIAL_trigger_stream_output();
         	break;
 
 			default:

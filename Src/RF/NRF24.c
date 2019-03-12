@@ -28,6 +28,7 @@
 #include "HAL_BRD.h"
 #include "HAL_SPI.h"
 #include "NVM.h"
+#include "CLI.h"
 #include "main.h"
 #include "NRF24.h"
 #include "NRF24_Registers.h"
@@ -1954,15 +1955,17 @@ void RF_MGR_display_sed_data( void )
 {
 	u8_t display_data[200];
 
-	SERIAL_send_newline();
+	STDC_memset( display_data, 0x20, sizeof( display_data ) );
+
+	CLI_send_newline();
 	sprintf( display_data, "**------------------------------------------------**");
-	SERIAL_Send_data( display_data );
+	CLI_send_data( display_data, strlen( display_data ) );
 	STDC_memset( display_data, 0x00, sizeof( display_data ) );
 
-	SERIAL_send_newline();
+	CLI_send_newline();
 	sprintf( display_data, "Sensor ID:\t0x%04X\r\n",
 			RF_MGR_sed_data_s.node_id );
-	SERIAL_Send_data( display_data );
+	CLI_send_data( display_data, strlen( display_data ) );
 	STDC_memset( display_data, 0x00, sizeof( display_data ) );
 
 	switch( RF_MGR_sed_data_s.packet_type )
@@ -1992,7 +1995,7 @@ void RF_MGR_display_sed_data( void )
 			break;
 	}
 
-	SERIAL_Send_data( display_data );
+	CLI_send_data( display_data, strlen( display_data ) );
 	STDC_memset( display_data, 0x00, sizeof( display_data ) );
 
 	switch( RF_MGR_sed_data_s.mode_type )
@@ -2009,11 +2012,11 @@ void RF_MGR_display_sed_data( void )
 			sprintf( display_data, "Mode Type:\tNORMAL MODE\r\n");
 			break;
 	}
-	SERIAL_Send_data( display_data );
+	CLI_send_data( display_data, strlen( display_data ) );
 	STDC_memset( display_data, 0x00, sizeof( display_data ) );
 
 	sprintf( display_data, "Status 1:\t0x%02X\r\nStatus 2:\t0x%02X\r\n", 0, 0 );
-	SERIAL_Send_data( display_data );
+	CLI_send_data( display_data, strlen( display_data ) );
 	STDC_memset( display_data, 0x00, sizeof( display_data ) );
 
 	/* The temperature needs to be divided by 10 */
@@ -2023,10 +2026,10 @@ void RF_MGR_display_sed_data( void )
 
 	sprintf( display_data, "Packet ctr:\t%d\r\nTemperature:\t%d.%d degree c\r\n",
 			 RF_MGR_sed_data_s.packet_ctr, temp_whole, remainder );
-	SERIAL_Send_data( display_data );
+	CLI_send_data( display_data, strlen( display_data ) );
 	STDC_memset( display_data, 0x00, sizeof( display_data ) );
-	SERIAL_send_newline();
-	SERIAL_send_newline();
+	CLI_send_newline();
+	CLI_send_newline();
 }
 
 

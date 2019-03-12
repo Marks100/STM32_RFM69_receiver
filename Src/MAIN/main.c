@@ -15,7 +15,6 @@
 #include "HAL_ADC.h"
 #include "HAL_SPI.h"
 #include "HAL_I2C.h"
-#include "HAL_UART.h"
 #include "HAL_TIM.h"
 #include "MODE_MGR.h"
 #include "nvm.h"
@@ -45,7 +44,7 @@ int main(void)
 	HAL_BRD_init();
 	HAL_I2C_init();
 	HAL_SPI_init();
-	SERIAL_init();
+	CLI_init();
 	NVM_init();
 
     /* Start the timer to keep track of reception count */
