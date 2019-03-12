@@ -110,9 +110,8 @@
 #define NRF_NUM_RX_BUFFERS			3u
 #define NRF_PACKET_CTR_SIZE         2u
 
-
-
-
+#define NRF24_TICK_RATE_MS          20u
+#define NRF24_TIMEOUT_VAL_SEC       ( 60u * 60u * ( 1000u / NRF24_TICK_RATE_MS ) )
 
 
 #define RF_MGR_RF_DATA_HANDLER_SIZE  40u
@@ -145,6 +144,7 @@ typedef enum
     NRF24_POWER_DOWN,
     NRF24_SETUP_CONST_WAVE,
     NRF24_CONST_WAVE,
+    NRF24_RESET
 } NRF24_state_et;
 
 
@@ -405,6 +405,7 @@ void                 NRF24_handle_acks_and_tx_failures( void );
 void                 NRF24_set_state( NRF24_state_et state );
 void                 NRF24_spi_slave_select( low_high_et state );
 void                 NRF24_ce_select( low_high_et state );
+void 				 NRF24_handle_supervisor_reset( void );
 
 void                 RF_MGR_packet_received_event( u8_t* rf_data, u8_t rf_data_size );
 void                 RF_MGR_tick( void );

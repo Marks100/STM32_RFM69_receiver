@@ -52,12 +52,12 @@ STATIC u8_t  NRF24_status_register_s;
 STATIC u8_t  NRF24_register_readback_s[DEFAULT_CONFIGURATION_SIZE];
 STATIC u16_t NRF24_cycle_counter_s;
 STATIC NRF24_tx_rx_payload_info_st NRF24_tx_rx_payload_info_s;
-
 STATIC false_true_et  NRF24_start_rf_test_s;
 
+STATIC u32_t NRF24_recieve_timeout_s;
+STATIC u16_t NRF24_resets_s;
 
 STATIC RF_MGR_rf_data_store_st RF_MGR_rf_data_store_s;
-
 STATIC RF_MGR_sed_data_st	   RF_MGR_sed_data_s;
 
 /***************************************************************************************************
@@ -91,9 +91,10 @@ void NRF24_init( void )
 
 	NRF24_start_rf_test_s = TRUE;
 
+	NRF24_recieve_timeout_s = NRF24_TIMEOUT_VAL_SEC;
+	NRF24_resets_s = 0u;
+
     STDC_memset( &NRF24_tx_rx_payload_info_s, 0x00, sizeof( NRF24_tx_rx_payload_info_s ) );
-
-
 
     STDC_memset( &RF_MGR_rf_data_store_s, 0x00, sizeof( RF_MGR_rf_data_store_s ) );
     STDC_memset( &RF_MGR_sed_data_s, 0x00, sizeof( RF_MGR_sed_data_s ) );
@@ -1542,6 +1543,9 @@ void NRF24_tick( void )
 				NRF24_status_register_clr_bit( RX_DR );
 
 				NRF24_ce_select( HIGH );
+
+				/* Reset the supervisor timeout */
+				NRF24_recieve_timeout_s = NRF24_TIMEOUT_VAL_SEC;
             }
         }
         break;
@@ -1596,9 +1600,14 @@ void NRF24_tick( void )
             NRF24_ce_select(HIGH);
             break;
 
+        case NRF24_RESET:
+            NRF24_set_state( NRF24_INITIALISING );
+            break;
+
         default:
         break;
     }
+    NRF24_handle_supervisor_reset();
 }
 
 
@@ -1676,6 +1685,29 @@ false_true_et NRF24_scheduled_tx( void )
     }
 
     return ( time_expired );
+}
+
+
+
+void NRF24_handle_supervisor_reset( void )
+{
+	/* Decrement the supervisor timeout */
+	if( NRF24_recieve_timeout_s > 0u )
+	{
+		NRF24_recieve_timeout_s --;
+	}
+
+	if( NRF24_recieve_timeout_s == 0u )
+	{
+		NRF24_recieve_timeout_s = NRF24_TIMEOUT_VAL_SEC;
+
+		NRF24_set_state( NRF24_RESET );
+
+		if( NRF24_resets_s < U16_T_MAX )
+		{
+			NRF24_resets_s ++;
+		}
+	}
 }
 
 
@@ -1980,7 +2012,7 @@ void RF_MGR_display_sed_data( void )
 	SERIAL_Send_data( display_data );
 	STDC_memset( display_data, 0x00, sizeof( display_data ) );
 
-	sprintf( display_data, "Status 1:\t%d\r\nStatus 2:\t%d\r\n", 0, 0 );
+	sprintf( display_data, "Status 1:\t0x%02X\r\nStatus 2:\t0x%02X\r\n", 0, 0 );
 	SERIAL_Send_data( display_data );
 	STDC_memset( display_data, 0x00, sizeof( display_data ) );
 
@@ -1989,8 +2021,8 @@ void RF_MGR_display_sed_data( void )
 	u8_t remainder = ( abs( RF_MGR_sed_data_s.temperature ) - ( abs(temp_whole) * 10 ) );
 
 
-	sprintf( display_data, "Packet ctr:\t%d\r\nTemperature:\t%d.%d degree c\r\nPressure:\t%04d mbar",
-			 RF_MGR_sed_data_s.packet_ctr, temp_whole, remainder, RF_MGR_sed_data_s.pressure );
+	sprintf( display_data, "Packet ctr:\t%d\r\nTemperature:\t%d.%d degree c\r\n",
+			 RF_MGR_sed_data_s.packet_ctr, temp_whole, remainder );
 	SERIAL_Send_data( display_data );
 	STDC_memset( display_data, 0x00, sizeof( display_data ) );
 	SERIAL_send_newline();
