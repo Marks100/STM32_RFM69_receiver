@@ -105,17 +105,16 @@ void CLI_handle_serial_command ( void )
 	char  output_string[100];
 	STDC_memset( output_string, 0, sizeof( output_string ) );
 
-	error = CLI_parse_cmd( CLI_msg_read_s, &argument_count, argVector, CLI_CMD_LINE_ARGS_MAX );
+	//error = CLI_parse_cmd( CLI_msg_read_s, &argument_count, argVector, CLI_CMD_LINE_ARGS_MAX );
 
 	if( error == CLI_ERROR_NONE )
 	{
 		//error = CLI_process_cmd( argCount, argVector );
 	}
 
-	strcpy( output_string, CLI_err_string[error] );
+	//strcpy( output_string, CLI_err_string[error] );
 
-	CLI_send_data( output_string, strlen(output_string) );
-	CLI_print_prompt( TRUE );
+	//CLI_send_data( output_string, strlen(output_string) );
 }
 
 /*!
@@ -132,6 +131,8 @@ void CLI_handle_serial_command ( void )
 void CLI_handle_received_char( u8_t received_char )
 {
     u8_t index = 0u;
+    u8_t useable_commands = 0u;
+    u8_t i = 0;
 
     if( ( ( received_char >= CLI_SPACE ) && ( received_char <= CLI_DEL ) ) || ( received_char <= CLI_CR ) )
     {
@@ -147,9 +148,9 @@ void CLI_handle_received_char( u8_t received_char )
 
             if( CLI_rx_command_len != 0u )
             {
-                STDC_memset( CLI_cmd_history_s.cmd_list[CLI_cmd_history_s.index_to_next_cmd].cmd, 0, sizeof( CLI_cmd_history_s.cmd_list[CLI_cmd_history_s.index_to_next_cmd].cmd ) );
+                STDC_memset( &CLI_cmd_history_s.cmd_list[CLI_cmd_history_s.index_to_next_cmd].cmd, 0x00, sizeof( CLI_cmd_history_s.cmd_list[CLI_cmd_history_s.index_to_next_cmd].cmd ) );
 
-                strcpy( CLI_cmd_history_s.cmd_list[CLI_cmd_history_s.index_to_next_cmd].cmd, CLI_msg_read_s);
+                STDC_memcpy( &CLI_cmd_history_s.cmd_list[CLI_cmd_history_s.index_to_next_cmd].cmd, CLI_msg_read_s, CLI_rx_command_len );
 
                 CLI_cmd_history_s.index_to_next_cmd = ( CLI_cmd_history_s.index_to_next_cmd + 1u )%CLI_MAX_COMMAND_HISTORY;
             }
@@ -157,7 +158,7 @@ void CLI_handle_received_char( u8_t received_char )
         else if( received_char == CLI_DEL )
         {
             CLI_byte_index_s = 0u;
-            STDC_memset( CLI_msg_read_s, 0x20, sizeof( CLI_msg_read_s ) );
+            STDC_memset( CLI_msg_read_s, 0x00, sizeof( CLI_msg_read_s ) );
             CLI_msg_read_s[ CLI_byte_index_s ] = 0u;
             CLI_send_data( (u8_t*)ERASE_CURRENT_LINE, strlen(ERASE_CURRENT_LINE));
             CLI_print_prompt( FALSE );
@@ -167,7 +168,7 @@ void CLI_handle_received_char( u8_t received_char )
         	if( CLI_byte_index_s > 0u )
         	{
 				CLI_byte_index_s--;
-				CLI_msg_read_s[ CLI_byte_index_s ] = 0x20;
+				CLI_msg_read_s[ CLI_byte_index_s ] = 0x00;
 				CLI_send_data( "\b ", strlen("\b ") );
 				CLI_send_data( &received_char, 1u );
         	}
@@ -180,31 +181,46 @@ void CLI_handle_received_char( u8_t received_char )
             //load the previous command and print it and wait for the carriage return
             CLI_msg_read_s[ CLI_byte_index_s++ ] = received_char;
 
-            if( received_char == UP_ARROW )
+            /* count the number of non 0 commands */
+            for( i = 0u; i < CLI_MAX_COMMAND_HISTORY; i++ )
             {
-            	if( CLI_cmd_history_s.index_to_next_cmd == 0u )
+            	if( CLI_cmd_history_s.cmd_list[i].cmd[0] != 0x00 )
             	{
-            		CLI_cmd_history_s.index_to_next_cmd = ( CLI_MAX_COMMAND_HISTORY - CLI_cmd_history_s.index_to_next_cmd - 1u );
+            		useable_commands += 1u;
             	}
-            	else
-            	{
-            		CLI_cmd_history_s.index_to_next_cmd -= 1u;
-				}
             }
-            else
+
+            /* Ifthere are no useable commands then dont allow the user to scroll up or down */
+            if( useable_commands != 0u )
             {
-            	CLI_cmd_history_s.index_to_next_cmd = ( ( CLI_cmd_history_s.index_to_next_cmd + 1u ) % CLI_MAX_COMMAND_HISTORY );
+				if( received_char == UP_ARROW )
+				{
+					if( CLI_cmd_history_s.index_to_next_cmd == 0u )
+					{
+						CLI_cmd_history_s.index_to_next_cmd = ( useable_commands - 1u );
+					}
+					else
+					{
+						CLI_cmd_history_s.index_to_next_cmd -= 1u;
+					}
+				}
+				else
+				{
+					CLI_cmd_history_s.index_to_next_cmd = ( ( CLI_cmd_history_s.index_to_next_cmd + 1u ) % useable_commands );
+				}
+
+				STDC_memset( CLI_msg_read_s, 0x00, sizeof( CLI_msg_read_s ) );
+
+				strcpy( CLI_msg_read_s, CLI_cmd_history_s.cmd_list[ CLI_cmd_history_s.index_to_next_cmd ].cmd);
+
+				CLI_byte_index_s = strlen( CLI_cmd_history_s.cmd_list[ CLI_cmd_history_s.index_to_next_cmd ].cmd );
+
+				CLI_send_data( (u8_t*)ERASE_CURRENT_LINE, strlen(ERASE_CURRENT_LINE) );
+
+				CLI_print_prompt( FALSE );
+
+				CLI_send_data( CLI_msg_read_s, strlen( CLI_msg_read_s ) );
             }
-
-            strcpy( CLI_msg_read_s, CLI_cmd_history_s.cmd_list[ CLI_cmd_history_s.index_to_next_cmd ].cmd);
-
-            CLI_byte_index_s = strlen( CLI_cmd_history_s.cmd_list[ CLI_cmd_history_s.index_to_next_cmd ].cmd );
-
-            CLI_send_data( (u8_t*)ERASE_CURRENT_LINE, strlen(ERASE_CURRENT_LINE) );
-
-            CLI_print_prompt( FALSE );
-
-            CLI_send_data( (u8_t*)CLI_cmd_history_s.cmd_list[  CLI_cmd_history_s.index_to_next_cmd ].cmd, strlen( CLI_cmd_history_s.cmd_list[  CLI_cmd_history_s.index_to_next_cmd ].cmd ) );
             return;
         }
         else if( ( received_char == LEFT_ARROW || received_char == RIGHT_ARROW ) && ( CLI_msg_read_s[ CLI_byte_index_s - 1u ] == '[' ) )
@@ -219,7 +235,7 @@ void CLI_handle_received_char( u8_t received_char )
         }
         else
         {
-            if( CLI_byte_index_s <= CLI_MAX_INPUT_CHARS )
+            if( CLI_byte_index_s < CLI_MAX_INPUT_CHARS )
             {
             	/* Record every byte that gets received */
             	CLI_msg_read_s[ CLI_byte_index_s++ ] = received_char;
@@ -231,7 +247,7 @@ void CLI_handle_received_char( u8_t received_char )
 
 STATIC void CLI_clear_rx_buffer( void )
 {
-     STDC_memset( CLI_msg_read_s, 0x20, sizeof( CLI_msg_read_s ) );
+     STDC_memset( CLI_msg_read_s, 0x00, sizeof( CLI_msg_read_s ) );
      CLI_byte_index_s = 0u;
      CLI_rx_command_len = 0u;
 }
