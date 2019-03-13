@@ -6,7 +6,7 @@ stages:
 - build
 
 before_script:
-  - "call BuildEnv\\xBuildEnv\\setCmdEnv.cmd"
+  - "BuildEnv\\xBuildEnv\\setCmdEnv.cmd"
 
 app_build:
   stage: build
