@@ -1,1 +1,14 @@
 install: true
+
+language: c
+
+stages:
+- build
+
+before_script:
+  - "call BuildEnv\\xBuildEnv\\setCmdEnv.cmd"
+
+app_build:
+  stage: build
+  script:
+  - "sh -l -c \"cd $PTLD && make release_package\""
