@@ -1,12 +1,9 @@
-install: true
-
 language: c
 
 stages:
 - build
 
-before_script:
-  - "BuildEnv\\xBuildEnv\\setCmdEnv.cmd"
+before_script: ./BuildEnv/xBuildEnv/setCmdEnv.cmd
 
 app_build:
   stage: build
