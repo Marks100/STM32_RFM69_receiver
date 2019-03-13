@@ -54,12 +54,13 @@ typedef struct
 
 
 
-
 void CLI_init( void );
 void CLI_message_handler( void );
 void CLI_send_newline( void );
 void CLI_print_welcome_message( void );
+void CLI_handle_received_char( u8_t received_char );
 
+STATIC void 		 CLI_handle_serial_command ( void );
 STATIC false_true_et CLI_is_hex_char(char c);
 STATIC false_true_et CLI_is_dec_char(char c);
 STATIC false_true_et CLI_carriage_return_check( void );
@@ -67,8 +68,9 @@ STATIC void          CLI_clear_rx_buffer( void );
 STATIC void          CLI_print_prompt( false_true_et newline );
 STATIC false_true_et CLI_is_space_or_newLine( char c );
 STATIC unsigned long long CLI_str_to_hex( const char* str );
+STATIC CLI_error_et  CLI_parse_cmd( char* message_string, u8_t* calc_argumen_count, char **argument_vector, u8_t max_num_args );
 
-void CLI_handle_received_char( u8_t received_char );
+
 
 
 

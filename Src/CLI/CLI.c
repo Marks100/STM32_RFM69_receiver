@@ -33,9 +33,6 @@ const char CLI_closing_serial_port_s[] =
 const char CLI_newline[] =
         "\r\n\r\n";
 
-STATIC CLI_cmd_history_st CLI_cmd_history_s;
-
-
 const char* CLI_err_string[ CLI_ERROR_MAX ] =
 {
     "\r\n",
@@ -43,22 +40,23 @@ const char* CLI_err_string[ CLI_ERROR_MAX ] =
     "\r\nOperation failed\r\n",
     "\r\nToo many arguments\r\n",
     "\r\nInvalid arguments\r\n",
-    "\r\nNot supported\r\n",
-    "\r\nCmd prohibited in this mode\r\n",
-    "\r\nCmd not found\r\n",
+    "\r\nCommand not supported\r\n",
+    "\r\nCommand prohibited in this mode\r\n",
+    "\r\nCommand has not found\r\n",
     "\r\nOut of range\r\n",
     "\r\nInvalid Hex param\r\n",
     "\r\nInvalid Dec param\r\n",
     "\r\nInvalid hex param length\r\n",
     "\r\nInvalid Dec param length\r\n",
-    "\r\nAlready set\r\n",
+    "\r\nValue is already set\r\n",
     "\r\nInvalid string input\r\n"
 };
 
-STATIC u8_t          CLI_byte_index_s;
-STATIC u8_t          CLI_rx_command_len;
-STATIC false_true_et CLI_cr_received_s;
-STATIC char          CLI_msg_read_s[CLI_MAX_INPUT_CHARS];
+STATIC u8_t               CLI_byte_index_s;
+STATIC u8_t               CLI_rx_command_len;
+STATIC false_true_et      CLI_cr_received_s;
+STATIC char               CLI_msg_read_s[CLI_MAX_INPUT_CHARS];
+STATIC CLI_cmd_history_st CLI_cmd_history_s;
 
 
 
@@ -87,12 +85,38 @@ void CLI_message_handler( void )
         /* Reset the carriage return flag */
         CLI_cr_received_s = FALSE;
 
-        CLI_byte_index_s = 0u; // remove
+        /* handle the actual received command */
+        CLI_handle_serial_command();
+
+        /* Clear out the buffers */
+        CLI_clear_rx_buffer();
 
         CLI_print_prompt( TRUE );
     }
 }
 
+
+void CLI_handle_serial_command ( void )
+{
+	CLI_error_et error = CLI_ERROR_NONE;
+	char *argVector[ CLI_CMD_LINE_ARGS_MAX ];
+	u8_t argument_count = 0u;
+
+	char  output_string[100];
+	STDC_memset( output_string, 0, sizeof( output_string ) );
+
+	error = CLI_parse_cmd( CLI_msg_read_s, &argument_count, argVector, CLI_CMD_LINE_ARGS_MAX );
+
+	if( error == CLI_ERROR_NONE )
+	{
+		//error = CLI_process_cmd( argCount, argVector );
+	}
+
+	strcpy( output_string, CLI_err_string[error] );
+
+	CLI_send_data( output_string, strlen(output_string) );
+	CLI_print_prompt( TRUE );
+}
 
 /*!
 ****************************************************************************************************
@@ -123,11 +147,11 @@ void CLI_handle_received_char( u8_t received_char )
 
             if( CLI_rx_command_len != 0u )
             {
-                //STDC_memset( cmdhistory.cmd_list[cmdhistory.index2next].cmd, 0, sizeof( cmdhistory.cmd_list[cmdhistory.index2next].cmd ) );
+                STDC_memset( CLI_cmd_history_s.cmd_list[CLI_cmd_history_s.index_to_next_cmd].cmd, 0, sizeof( CLI_cmd_history_s.cmd_list[CLI_cmd_history_s.index_to_next_cmd].cmd ) );
 
-                //strcpy(cmdhistory.cmd_list[cmdhistory.index2next].cmd,DEBUG_CLI_msg_read_s);
+                strcpy( CLI_cmd_history_s.cmd_list[CLI_cmd_history_s.index_to_next_cmd].cmd, CLI_msg_read_s);
 
-                //cmdhistory.index2next = (cmdhistory.index2next+1)%DEBUG_CLI_MAX_COMMAND_HISTORY;
+                CLI_cmd_history_s.index_to_next_cmd = ( CLI_cmd_history_s.index_to_next_cmd + 1u )%CLI_MAX_COMMAND_HISTORY;
             }
         }
         else if( received_char == CLI_DEL )
@@ -158,24 +182,29 @@ void CLI_handle_received_char( u8_t received_char )
 
             if( received_char == UP_ARROW )
             {
-                //index = (cmdhistory.index2next)?cmdhistory.index2next-1:DEBUG_CLI_MAX_COMMAND_HISTORY-1;
+            	if( CLI_cmd_history_s.index_to_next_cmd == 0u )
+            	{
+            		CLI_cmd_history_s.index_to_next_cmd = ( CLI_MAX_COMMAND_HISTORY - CLI_cmd_history_s.index_to_next_cmd - 1u );
+            	}
+            	else
+            	{
+            		CLI_cmd_history_s.index_to_next_cmd -= 1u;
+				}
             }
             else
             {
-                //index = (cmdhistory.index2next+1)%DEBUG_CLI_MAX_COMMAND_HISTORY;
+            	CLI_cmd_history_s.index_to_next_cmd = ( ( CLI_cmd_history_s.index_to_next_cmd + 1u ) % CLI_MAX_COMMAND_HISTORY );
             }
 
-            //cmdhistory.index2next = index;
+            strcpy( CLI_msg_read_s, CLI_cmd_history_s.cmd_list[ CLI_cmd_history_s.index_to_next_cmd ].cmd);
 
-            //strcpy(DEBUG_CLI_msg_read_s,cmdhistory.cmd_list[index].cmd);
+            CLI_byte_index_s = strlen( CLI_cmd_history_s.cmd_list[ CLI_cmd_history_s.index_to_next_cmd ].cmd );
 
-            //DEBUG_CLI_byte_index_s = strlen(cmdhistory.cmd_list[index].cmd);
-
-            CLI_send_data( (u8_t*)ERASE_CURRENT_LINE, strlen(ERASE_CURRENT_LINE));
+            CLI_send_data( (u8_t*)ERASE_CURRENT_LINE, strlen(ERASE_CURRENT_LINE) );
 
             CLI_print_prompt( FALSE );
 
-            //HAL_UART_send_data( (u8_t*)cmdhistory.cmd_list[index].cmd, strlen(cmdhistory.cmd_list[index].cmd) );
+            CLI_send_data( (u8_t*)CLI_cmd_history_s.cmd_list[  CLI_cmd_history_s.index_to_next_cmd ].cmd, strlen( CLI_cmd_history_s.cmd_list[  CLI_cmd_history_s.index_to_next_cmd ].cmd ) );
             return;
         }
         else if( ( received_char == LEFT_ARROW || received_char == RIGHT_ARROW ) && ( CLI_msg_read_s[ CLI_byte_index_s - 1u ] == '[' ) )
@@ -221,7 +250,6 @@ STATIC false_true_et CLI_carriage_return_check( void )
 
 
 
-
 STATIC false_true_et CLI_is_space_or_newLine( char c )
 {
     false_true_et return_type = FALSE;
@@ -232,7 +260,6 @@ STATIC false_true_et CLI_is_space_or_newLine( char c )
     }
     return ( return_type );
 }
-
 
 
 STATIC false_true_et CLI_is_hex_char( char c )
@@ -295,6 +322,48 @@ void CLI_send_data( u8_t* data, u16_t data_size )
     HAL_UART_send_data( data, data_size );
 }
 
+
+STATIC CLI_error_et CLI_parse_cmd( char* message_string, u8_t* calc_argumen_count, char **argument_vector, u8_t max_num_args )
+{
+//    CLI_error_et error = CLI_ERROR_NONE;
+//    char* cmd;
+//
+//    *calc_argumen_count = 0u;
+//
+//    for( )
+//    for (cmd = aString; IsSpaceOrNewLine(*cmd) && *cmd; cmd++)
+//        ;
+//
+//    if (*cmd)
+//    {
+//        aArgv[(*aArgc)++] = cmd++; // the first argument
+//
+//        for (; *cmd; cmd++)
+//        {
+//            if (IsSpaceOrNewLine(*cmd))
+//            {
+//                *cmd = '\0';
+//            }
+//            else if (*(cmd - 1) == '\0')
+//            {
+//                if( (*aArgc) >= aArgcMax )
+//                {
+//                    error = DEBUG_CLI_ERROR_INVALID_ARGS_MORE;
+//                    break;
+//                }
+//                aArgv[(*aArgc)++] = cmd;
+//            }
+//        }
+//    }
+//    else
+//    {
+//        // a null charater encountered!!
+//        // a simple new line entered by user. So just print the prompt
+//        error = DEBUG_CLI_ERROR_EMPTY;
+//    }
+//
+//    return error;
+}
 
 
 
