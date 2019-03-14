@@ -42,7 +42,7 @@ typedef enum
 
 typedef struct
 {
-    u8_t cmd[CLI_MAX_INPUT_CHARS];
+    u8_t cmd[CLI_MAX_INPUT_CHARS + 1u];
 }CLI_cmd_st;
 
 

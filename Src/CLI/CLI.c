@@ -55,7 +55,7 @@ const char* CLI_err_string[ CLI_ERROR_MAX ] =
 STATIC u8_t               CLI_byte_index_s;
 STATIC u8_t               CLI_rx_command_len;
 STATIC false_true_et      CLI_cr_received_s;
-STATIC char               CLI_msg_read_s[CLI_MAX_INPUT_CHARS];
+STATIC char               CLI_msg_read_s[CLI_MAX_INPUT_CHARS + 1];
 STATIC CLI_cmd_history_st CLI_cmd_history_s;
 
 
