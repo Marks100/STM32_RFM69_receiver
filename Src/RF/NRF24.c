@@ -1529,7 +1529,7 @@ void NRF24_tick( void )
 
             if( ( NRF24_check_status_mask( RF24_RX_DATA_READY, &NRF24_status_register_s ) == HIGH ) || ( NRF24_check_fifo_mask( RF24_RX_EMPTY ,&fifo ) == LOW ) )
             {
-            	NRF24_ce_select( LOW );
+            	//NRF24_ce_select( LOW );
 
 				NRF24_get_payload( NRF24_tx_rx_payload_info_s.NRF24_rx_rf_payload );
 
@@ -1543,7 +1543,7 @@ void NRF24_tick( void )
 				/* we may have received a packet !!!!!!*/
 				NRF24_status_register_clr_bit( RX_DR );
 
-				NRF24_ce_select( HIGH );
+				//NRF24_ce_select( HIGH );
 
 				/* Reset the supervisor timeout */
 				NRF24_recieve_timeout_s = NRF24_TIMEOUT_VAL_SEC;
