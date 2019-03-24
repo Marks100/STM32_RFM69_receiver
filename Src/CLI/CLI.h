@@ -2,8 +2,6 @@
 #define CLI_H
 
 
-
-
 #define CLI_MAX_INPUT_CHARS           60u
 #define CLI_CMD_LINE_ARGS_MAX         6
 #define CLI_MAX_COMMAND_HISTORY       6
@@ -19,6 +17,23 @@
 #define ERASE_CURRENT_LINE            "\r                                                                        \r\b\b\b"
 #define NULL_PARAM_LIST               //{0}
 #define IGNORE_RANGE_CHECK            ((u32_t)~0)
+
+#define RED			"\x1b[31m"
+#define GREEN		"\x1b[32m"
+#define BLUE		"\x1b[34m"
+#define YELLOW		"\x1b[33m"
+#define CYAN		"\x1b[36m"
+#define MAGENTA		"\x1b[35m"
+#define WHITE		"\x1b[37m"
+
+#define SUPPORTED_FOR_ALL_MODES                      0xFFFF
+
+#define HELP_HELP                "help:              Prints the help menu\r\n"
+#define HELP_VER                 "ver:               Returns the SW and HW versions of the WES\r\n"
+#define HELP_SET_MODE            "setmode:           Sets the operating mode of the device\r\n"
+#define HELP_RESET               "reset:             Resets CPU\r\n"
+#define HELP_NVM                 "readnvm:           Returns the current NVM info\r\n"
+#define HELP_SET_ID              "setid:             Sets the ID of the device\r\n"
 
 typedef enum
 {
@@ -52,6 +67,17 @@ typedef struct
     CLI_cmd_st cmd_list[CLI_MAX_COMMAND_HISTORY];
 }CLI_cmd_history_st;
 
+typedef struct
+{
+    const char *command_name;
+    CLI_error_et (*command_handler)(u8_t aArgCount, char *aArgVector[] );
+    const char *helpinfo;
+    u16_t availbility;  // bit map setting of all modes in which this cmd would be supported
+    disable_enable_et public;        // if this is TRUE it means this command is exposed to customers otherwise it is for developers
+    u8_t num_params;
+    //const CLI_Param_st param_list[CLI_CMD_LINE_ARGS_MAX];
+} CLI_Command_st;
+
 
 
 void CLI_init( void );
@@ -68,7 +94,21 @@ STATIC void          CLI_clear_rx_buffer( void );
 STATIC void          CLI_print_prompt( false_true_et newline );
 STATIC false_true_et CLI_is_space_or_newLine( char c );
 STATIC unsigned long long CLI_str_to_hex( const char* str );
-STATIC CLI_error_et  CLI_parse_cmd( char* message_string, u8_t* calc_argumen_count, char **argument_vector, u8_t max_num_args );
+
+STATIC CLI_error_et CLI_parse_cmd( char* message_string, u8_t* calc_argumen_count, char **argument_vector, u8_t max_num_args );
+STATIC CLI_error_et CLI_process_cmd( u8_t  aArgCount, char *aArgVector[] );
+
+
+
+/* CLI handler functios */
+STATIC CLI_error_et help_handler( u8_t aArgCount, char *aArgVector[] );
+STATIC CLI_error_et ver_handler( u8_t aArgCount, char *aArgVector[] );
+STATIC CLI_error_et setmode_handler( u8_t aArgCount, char *aArgVector[] );
+STATIC CLI_error_et reset_handler( u8_t aArgCount, char *aArgVector[] );
+STATIC CLI_error_et readnvm_handler( u8_t aArgCount, char *aArgVector[] );
+STATIC CLI_error_et setid_handler( u8_t aArgCount, char *aArgVector[] );
+STATIC CLI_error_et nvm_handler( u8_t aArgCount, char *aArgVector[] );
+
 
 
 

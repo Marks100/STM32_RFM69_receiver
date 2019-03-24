@@ -31,18 +31,18 @@ const char CLI_closing_serial_port_s[] =
         "\r\nClosing serial port due to inactivity to save power, please press the \"Enter\" key to re-open the debug prompt";
 
 const char CLI_newline[] =
-        "\r\n\r\n";
+        "\r\n";
 
 const char* CLI_err_string[ CLI_ERROR_MAX ] =
 {
-    "\r\n",
-    "\r\n",
+    "\r",
+    "\r",
     "\r\nOperation failed\r\n",
     "\r\nToo many arguments\r\n",
     "\r\nInvalid arguments\r\n",
     "\r\nCommand not supported\r\n",
     "\r\nCommand prohibited in this mode\r\n",
-    "\r\nCommand has not found\r\n",
+    "\r\nCommand not found\r\n",
     "\r\nOut of range\r\n",
     "\r\nInvalid Hex param\r\n",
     "\r\nInvalid Dec param\r\n",
@@ -57,6 +57,19 @@ STATIC u8_t               CLI_rx_command_len;
 STATIC false_true_et      CLI_cr_received_s;
 STATIC char               CLI_msg_read_s[CLI_MAX_INPUT_CHARS + 1];
 STATIC CLI_cmd_history_st CLI_cmd_history_s;
+
+
+STATIC const CLI_Command_st CLI_commands[] =
+{
+	{ "help",		&help_handler,			HELP_HELP, 				{SUPPORTED_FOR_ALL_MODES}, ENABLE, 0 },
+	{ "ver",		&ver_handler,			HELP_VER , 				{SUPPORTED_FOR_ALL_MODES}, ENABLE, 0 },
+	{ "setmode",	&setmode_handler,	    HELP_SET_MODE, 			{SUPPORTED_FOR_ALL_MODES}, ENABLE, 1 },
+	{ "reset",		&reset_handler,	    	HELP_RESET, 			{SUPPORTED_FOR_ALL_MODES}, ENABLE, 0 },
+	{ "readnvm",	&readnvm_handler,	    HELP_NVM, 	    		{SUPPORTED_FOR_ALL_MODES}, ENABLE, 0 },
+	{ "setid",	    &setid_handler,	        HELP_SET_ID, 	        {SUPPORTED_FOR_ALL_MODES}, ENABLE, 0 },
+	{ "nvm",		&nvm_handler,			HELP_NVM,				{SUPPORTED_FOR_ALL_MODES}, ENABLE, 0 },
+	{ NULL,			NULL,					NULL,					{SUPPORTED_FOR_ALL_MODES}, ENABLE, 0 },
+};
 
 
 
@@ -105,16 +118,16 @@ void CLI_handle_serial_command ( void )
 	char  output_string[100];
 	STDC_memset( output_string, 0, sizeof( output_string ) );
 
-	//error = CLI_parse_cmd( CLI_msg_read_s, &argument_count, argVector, CLI_CMD_LINE_ARGS_MAX );
+	error = CLI_parse_cmd( CLI_msg_read_s, &argument_count, argVector, CLI_CMD_LINE_ARGS_MAX );
 
 	if( error == CLI_ERROR_NONE )
 	{
-		//error = CLI_process_cmd( argCount, argVector );
+		error = CLI_process_cmd( argument_count, argVector );
 	}
 
-	//strcpy( output_string, CLI_err_string[error] );
+	strcpy( output_string, CLI_err_string[error] );
 
-	//CLI_send_data( output_string, strlen(output_string) );
+	CLI_send_data( output_string, strlen(output_string) );
 }
 
 /*!
@@ -325,9 +338,11 @@ STATIC void CLI_print_prompt( false_true_et newline )
 
     if( newline == TRUE )
     {
-        sprintf( prompt_string, "\r\n");
+    	CLI_send_newline();
+    	CLI_send_newline();
     }
-    sprintf(  &prompt_string[ ( newline == TRUE ) ? 2:0 ], "CLI PROMPT>" );
+    //sprintf(  &prompt_string[ ( newline == TRUE ) ? 2:0 ], ""RED"CLI PROMPT>" );
+    sprintf(  prompt_string, "CLI PROMPT>" );
 
     CLI_send_data( (u8_t*)prompt_string, strlen( prompt_string ) );
 }
@@ -339,47 +354,197 @@ void CLI_send_data( u8_t* data, u16_t data_size )
 }
 
 
-STATIC CLI_error_et CLI_parse_cmd( char* message_string, u8_t* calc_argumen_count, char **argument_vector, u8_t max_num_args )
+STATIC CLI_error_et CLI_parse_cmd( char* message_string, u8_t* argumen_count, char **argument_vector, u8_t max_num_args )
 {
-//    CLI_error_et error = CLI_ERROR_NONE;
-//    char* cmd;
-//
-//    *calc_argumen_count = 0u;
-//
-//    for( )
-//    for (cmd = aString; IsSpaceOrNewLine(*cmd) && *cmd; cmd++)
-//        ;
-//
-//    if (*cmd)
-//    {
-//        aArgv[(*aArgc)++] = cmd++; // the first argument
-//
-//        for (; *cmd; cmd++)
-//        {
-//            if (IsSpaceOrNewLine(*cmd))
-//            {
-//                *cmd = '\0';
-//            }
-//            else if (*(cmd - 1) == '\0')
-//            {
-//                if( (*aArgc) >= aArgcMax )
-//                {
-//                    error = DEBUG_CLI_ERROR_INVALID_ARGS_MORE;
-//                    break;
-//                }
-//                aArgv[(*aArgc)++] = cmd;
-//            }
-//        }
-//    }
-//    else
-//    {
-//        // a null charater encountered!!
-//        // a simple new line entered by user. So just print the prompt
-//        error = DEBUG_CLI_ERROR_EMPTY;
-//    }
-//
-//    return error;
+    CLI_error_et error = CLI_ERROR_NONE;
+    char* cmd;
+    u8_t calc_argumen_count = 0u;
+    u8_t i = 0u;
+
+    cmd = message_string;
+
+    // Search for the first charachter */
+    for( i = 0u; i < strlen( message_string ) - 1; i++ )
+    {
+    	if( CLI_is_space_or_newLine( *(cmd+i) ) != TRUE )
+    	{
+    		break;
+    	}
+    }
+
+    /* We have pointed the command to the start of the string ignoring any leading spaces or tabs
+     * and because we have found that this charachter was not a space we can immediately move to the next charachter*/
+
+    argument_vector[calc_argumen_count++] = cmd;
+    cmd += ( i + 1u );
+
+	for (; *cmd; cmd++)
+	{
+		if ( CLI_is_space_or_newLine(*cmd) == TRUE )
+		{
+			*cmd = '\0';
+		}
+		else if ( *(cmd - 1u) == '\0')
+		{
+			if( ( calc_argumen_count ) >= max_num_args )
+			{
+				error = CLI_ERROR_INVALID_ARGS_MORE;
+				break;
+			}
+			argument_vector[calc_argumen_count++] = cmd;
+		}
+	}
+
+	*argumen_count = calc_argumen_count;
+
+    return error;
 }
+
+
+STATIC CLI_error_et CLI_process_cmd( u8_t  aArgCount, char *aArgVector[] )
+{
+    CLI_error_et error = CLI_ERROR_NONE;
+    const CLI_Command_st *cmd = NULL;
+
+    for ( cmd = CLI_commands; cmd->command_name != NULL; cmd++ )
+    {
+        if ( (strcmp( aArgVector[0], cmd->command_name ) == 0u ) )
+        {
+			//the command can be executed. Now get into validating the parameters and their values provided by the user
+			error = CLI_ERROR_NONE;
+        	//error = DEBUG_CLI_get_cum_validate_cmd_params(cmd, (aArgCount-1), ((aArgCount-1)?&aArgVector[1]:NULL),((aArgCount-1)?val:NULL));
+//			}
+//			else
+//			{
+//				error = CLI_ERROR_PROHIBITED;
+//			}
+			// there is a matching entry in the table. just come out of the loop!
+			break;
+    	}
+    }
+
+    if(cmd->command_name == NULL)
+    {
+        // looks like we have looped through the entire table and we did not get see the command.
+        error = CLI_ERROR_NOT_FOUND;
+    }
+
+    if( error == CLI_ERROR_NONE  )
+    {
+        error = cmd->command_handler((aArgCount-1), aArgVector );
+    }
+
+    return error;
+}
+
+
+
+
+STATIC CLI_error_et help_handler( u8_t aArgCount, char *aArgVector[] )
+{
+	char  output_string[250] = { 0 };
+	const CLI_Command_st *cmd = NULL;
+
+	CLI_send_newline();
+
+	for ( cmd = CLI_commands; cmd->command_name != NULL; cmd++)
+	{
+		STDC_memset( output_string, 0x20, sizeof( output_string ) );
+
+		if( strcmp( cmd->command_name,"mode") == 0 )
+		{
+			sprintf(output_string, cmd->helpinfo);
+			CLI_send_data( output_string, strlen(output_string));
+
+			STDC_memset( output_string, 0, sizeof( output_string ) );
+			CLI_send_newline();
+		}
+		else
+		{
+			sprintf(output_string, "\r\t%s", cmd->helpinfo);
+			CLI_send_data( output_string, strlen(output_string));
+		}
+	}
+	CLI_send_newline();
+}
+
+STATIC CLI_error_et setmode_handler( u8_t aArgCount, char *aArgVector[] )
+{
+
+}
+
+STATIC CLI_error_et reset_handler( u8_t aArgCount, char *aArgVector[] )
+{
+
+}
+
+STATIC CLI_error_et readnvm_handler( u8_t aArgCount, char *aArgVector[] )
+{
+
+}
+
+STATIC CLI_error_et ver_handler( u8_t aArgCount, char *aArgVector[] )
+{
+	char output_string[200];
+	char version_num[5];
+	
+	STDC_memset( output_string, 0x20, sizeof( output_string ) );
+
+	//HAL_BRD_get_SW_version_num( version_num );
+
+	CLI_send_newline();
+	sprintf( output_string, "SW version is %d.%d.%d", version_num[0], version_num[1], version_num[2] );
+	CLI_send_data( output_string, strlen(output_string));
+
+	//HAL_BRD_get_HW_version_num( version_num );
+
+	CLI_send_newline();
+	sprintf( output_string, "HW version is %d.%d", version_num[0], version_num[1] );
+	CLI_send_data( output_string, strlen(output_string));
+}
+
+
+
+STATIC CLI_error_et setid_handler( u8_t aArgCount, char *aArgVector[] )
+{
+	char output_string[200];
+	u16_t id = 0;
+
+	u8_t test_string[2];
+	test_string[0] = 0x30;
+	test_string[1] = 0x31;
+//	test_string[2] = 0x32;
+//	test_string[3] = 0x33;
+//	test_string[4] = 0x34;
+
+	id = CLI_str_to_hex( test_string );
+
+	//id = atoi( aArgVector[1] );
+
+	if( id <= 0xFFFF )
+	{
+		sprintf( output_string, "Devide ID has been set to 0x%04d", id );
+	}
+
+	CLI_send_newline();
+	CLI_send_data( output_string, strlen(output_string));
+}
+
+
+
+STATIC CLI_error_et nvm_handler( u8_t aArgCount, char *aArgVector[] )
+{
+	char output_string[200];
+
+	sprintf( output_string, "chksum:\t0x%02X\r\nVers:\t%d\r\nwrites:\t%d\r\nSleep time:\t%d\r\n", NVM_info_s.checksum, NVM_info_s.version,
+																								  NVM_info_s.write_count,
+																								  NVM_info_s.NVM_generic_data_blk_s.sleep_time );
+
+	CLI_send_newline();
+	CLI_send_data( output_string, strlen(output_string));
+}
+
+
 
 
 

@@ -79,5 +79,4 @@ void HAL_BRD_set_rtc_trigger_status( false_true_et state );
 disable_enable_et HAL_BRD_read_debug_pin( void );
 
 
-
 #endif
