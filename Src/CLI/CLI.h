@@ -85,6 +85,8 @@ void CLI_message_handler( void );
 void CLI_send_newline( void );
 void CLI_print_welcome_message( void );
 void CLI_handle_received_char( u8_t received_char );
+void CLI_send_data( char* data, u16_t data_size );
+
 
 STATIC void 		 CLI_handle_serial_command ( void );
 STATIC false_true_et CLI_is_hex_char(char c);

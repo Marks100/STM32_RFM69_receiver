@@ -167,7 +167,7 @@ void RFM69_setup_receive_mode( void )
 
 		RFM69_set_PA_level( RFM69_tx_power_level_s );
 
-		RFM69_set_own_node_address( NVM_info_s.NVM_generic_data_blk_s.node_id );
+		RFM69_set_own_node_address( NVM_info_s.NVM_generic_data_blk_s.device_id );
 
 		RFM69_read_registers( READ_FROM_CHIP_BURST_MODE, REGOPMODE, read_data, sizeof( read_data ) );
 

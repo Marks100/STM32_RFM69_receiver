@@ -51,9 +51,9 @@ the structure of the block or when adding new bytes in
 
 typedef struct
 {
-    u32_t sleep_time;
-    u8_t  tx_power_level;
-    u8_t  node_id;
+    u32_t  sleep_time;
+    u8_t   tx_power_level;
+    u16_t  device_id;
     RFM69_static_configuration_et rf_config;
     NRF24_state_et nrf_startup_tx_rx_mode;
 } NVM_generic_data_blk_st;

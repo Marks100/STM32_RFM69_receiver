@@ -252,9 +252,6 @@ void HAL_I2C_read_multiple_registers( u8_t dev_add, u8_t reg_start_add, u8_t* da
 
 void RTC_ext_init( void )
 {
-	u8_t data;
-	u8_t wakeup_time;
-
 	u8_t data_burst[16];
 
 	/* Write down the default config */

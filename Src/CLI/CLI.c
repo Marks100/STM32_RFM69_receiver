@@ -61,14 +61,14 @@ STATIC CLI_cmd_history_st CLI_cmd_history_s;
 
 STATIC const CLI_Command_st CLI_commands[] =
 {
-	{ "help",		&help_handler,			HELP_HELP, 				{SUPPORTED_FOR_ALL_MODES}, ENABLE, 0 },
-	{ "ver",		&ver_handler,			HELP_VER , 				{SUPPORTED_FOR_ALL_MODES}, ENABLE, 0 },
-	{ "setmode",	&setmode_handler,	    HELP_SET_MODE, 			{SUPPORTED_FOR_ALL_MODES}, ENABLE, 1 },
-	{ "reset",		&reset_handler,	    	HELP_RESET, 			{SUPPORTED_FOR_ALL_MODES}, ENABLE, 0 },
-	{ "readnvm",	&readnvm_handler,	    HELP_NVM, 	    		{SUPPORTED_FOR_ALL_MODES}, ENABLE, 0 },
-	{ "setid",	    &setid_handler,	        HELP_SET_ID, 	        {SUPPORTED_FOR_ALL_MODES}, ENABLE, 0 },
-	{ "nvm",		&nvm_handler,			HELP_NVM,				{SUPPORTED_FOR_ALL_MODES}, ENABLE, 0 },
-	{ NULL,			NULL,					NULL,					{SUPPORTED_FOR_ALL_MODES}, ENABLE, 0 },
+	 {"help",		&help_handler,			HELP_HELP, 				SUPPORTED_FOR_ALL_MODES, ENABLE, 0},
+	 {"ver",		&ver_handler,			HELP_VER , 				SUPPORTED_FOR_ALL_MODES, ENABLE, 0},
+	 {"setmode",	&setmode_handler,	    HELP_SET_MODE, 			SUPPORTED_FOR_ALL_MODES, ENABLE, 1},
+	 {"reset",		&reset_handler,	    	HELP_RESET, 			SUPPORTED_FOR_ALL_MODES, ENABLE, 0},
+	 {"readnvm",	&readnvm_handler,	    HELP_NVM, 	    		SUPPORTED_FOR_ALL_MODES, ENABLE, 0},
+	 {"setid",	    &setid_handler,	        HELP_SET_ID, 	        SUPPORTED_FOR_ALL_MODES, ENABLE, 0},
+	 {"nvm",		&nvm_handler,			HELP_NVM,				SUPPORTED_FOR_ALL_MODES, ENABLE, 0},
+	 {NULL,			NULL,					NULL,					SUPPORTED_FOR_ALL_MODES, ENABLE, 0},
 };
 
 
@@ -348,7 +348,7 @@ STATIC void CLI_print_prompt( false_true_et newline )
 }
 
 
-void CLI_send_data( u8_t* data, u16_t data_size )
+void CLI_send_data( char* data, u16_t data_size )
 {
     HAL_UART_send_data( data, data_size );
 }
@@ -444,6 +444,7 @@ STATIC CLI_error_et help_handler( u8_t aArgCount, char *aArgVector[] )
 {
 	char  output_string[250] = { 0 };
 	const CLI_Command_st *cmd = NULL;
+	CLI_error_et error = CLI_ERROR_NONE;
 
 	CLI_send_newline();
 
@@ -466,28 +467,38 @@ STATIC CLI_error_et help_handler( u8_t aArgCount, char *aArgVector[] )
 		}
 	}
 	CLI_send_newline();
+
+	return ( error );
 }
 
 STATIC CLI_error_et setmode_handler( u8_t aArgCount, char *aArgVector[] )
 {
+	CLI_error_et error = CLI_ERROR_NONE;
+
+	return( error );
 
 }
 
 STATIC CLI_error_et reset_handler( u8_t aArgCount, char *aArgVector[] )
 {
+	CLI_error_et error = CLI_ERROR_NONE;
 
+	return( error );
 }
 
 STATIC CLI_error_et readnvm_handler( u8_t aArgCount, char *aArgVector[] )
 {
+	CLI_error_et error = CLI_ERROR_NONE;
 
+	return( error );
 }
 
 STATIC CLI_error_et ver_handler( u8_t aArgCount, char *aArgVector[] )
 {
+	CLI_error_et error = CLI_ERROR_NONE;
 	char output_string[200];
 	char version_num[5];
-	
+
 	STDC_memset( output_string, 0x20, sizeof( output_string ) );
 
 	//HAL_BRD_get_SW_version_num( version_num );
@@ -501,24 +512,30 @@ STATIC CLI_error_et ver_handler( u8_t aArgCount, char *aArgVector[] )
 	CLI_send_newline();
 	sprintf( output_string, "HW version is %d.%d", version_num[0], version_num[1] );
 	CLI_send_data( output_string, strlen(output_string));
+
+	return( error );
 }
 
 
 
 STATIC CLI_error_et setid_handler( u8_t aArgCount, char *aArgVector[] )
 {
+	CLI_error_et error = CLI_ERROR_NONE;
 	char output_string[200];
 	u16_t id = 0;
+	u8_t temp_id_val[4];
 
-	u8_t test_string[2];
+	u8_t test_string[4];
 	test_string[0] = 0x30;
 	test_string[1] = 0x31;
-//	test_string[2] = 0x32;
-//	test_string[3] = 0x33;
-//	test_string[4] = 0x34;
+	test_string[2] = 0x32;
+	test_string[3] = 0x33;
 
 	id = CLI_str_to_hex( test_string );
 
+	sprintf( temp_id_val, "%c%c%c%c", test_string[0], test_string[1], test_string[2], test_string[3] );
+
+	id = CLI_str_to_hex( test_string );
 	//id = atoi( aArgVector[1] );
 
 	if( id <= 0xFFFF )
@@ -528,12 +545,15 @@ STATIC CLI_error_et setid_handler( u8_t aArgCount, char *aArgVector[] )
 
 	CLI_send_newline();
 	CLI_send_data( output_string, strlen(output_string));
+
+	return( error );
 }
 
 
 
 STATIC CLI_error_et nvm_handler( u8_t aArgCount, char *aArgVector[] )
 {
+	CLI_error_et error = CLI_ERROR_NONE;
 	char output_string[200];
 
 	sprintf( output_string, "chksum:\t0x%02X\r\nVers:\t%d\r\nwrites:\t%d\r\nSleep time:\t%d\r\n", NVM_info_s.checksum, NVM_info_s.version,
@@ -542,6 +562,8 @@ STATIC CLI_error_et nvm_handler( u8_t aArgCount, char *aArgVector[] )
 
 	CLI_send_newline();
 	CLI_send_data( output_string, strlen(output_string));
+
+	return( error );
 }
 
 

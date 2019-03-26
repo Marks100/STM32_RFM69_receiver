@@ -7,6 +7,7 @@
 #include "HAL_ADC.h"
 #include "HAL_BRD.h"
 #include "HAL_TIM.h"
+#include "CLI.h"
 #include "RFM69.h"
 #include "HAL_UART.h"
 
@@ -316,6 +317,7 @@ MODE_MGR_mode_et MODE_MGR_get_mode( void )
 void MODE_MGR_change_mode( void )
 {
 	false_true_et reset_value = FALSE;
+	(void)reset_value;
 
 	switch( MODE_MGR_mode_s )
 	{
