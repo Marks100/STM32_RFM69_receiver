@@ -353,7 +353,7 @@ void CLI_send_data( char* data, u16_t data_size )
 }
 
 
-STATIC CLI_error_et CLI_parse_cmd( char* message_string, u8_t* argumen_count, char **argument_vector, u8_t max_num_args )
+STATIC CLI_error_et CLI_parse_cmd( char* message_string, u8_t* argumen_count, char *argument_vector[], u8_t max_num_args )
 {
     CLI_error_et error = CLI_ERROR_NONE;
     char* cmd;
@@ -404,6 +404,7 @@ STATIC CLI_error_et CLI_validate_arguments( u8_t aArgCount, char *aArgVector[], 
 {
 	CLI_error_et error = CLI_ERROR_NONE;
 	u8_t i = 0u;
+	u8_t len = 0u;
 
 	if( aArgCount > CLI_CMD_LINE_ARGS_MAX )
 	{
@@ -413,9 +414,9 @@ STATIC CLI_error_et CLI_validate_arguments( u8_t aArgCount, char *aArgVector[], 
 	if( error == CLI_ERROR_NONE)
 	{
 		/* Valid number of args, now check the length of each args */
-		for( i = 0u; i < CLI_CMD_LINE_ARGS_MAX; i++ )
+		for( i = 0u; i < aArgCount; i++ )
 		{
-			u8_t len = strlen( aArgVector[i+1] );
+			len = strlen( aArgVector[i+1] );
 			if( len > CLI_commands[command_index].param_list[i].num_chars )
 			{
 				error = CLI_ERROR_INVALID_ARGS;

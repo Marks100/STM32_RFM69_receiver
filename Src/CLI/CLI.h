@@ -110,7 +110,7 @@ STATIC void          CLI_print_prompt( false_true_et newline );
 STATIC false_true_et CLI_is_space_or_newLine( char c );
 STATIC unsigned long long CLI_str_to_hex( const char* str );
 
-STATIC CLI_error_et CLI_parse_cmd( char* message_string, u8_t* calc_argumen_count, char **argument_vector, u8_t max_num_args );
+STATIC CLI_error_et CLI_parse_cmd( char* message_string, u8_t* calc_argumen_count, char *argument_vector[], u8_t max_num_args );
 STATIC CLI_error_et CLI_process_cmd( u8_t  aArgCount, char *aArgVector[] );
 STATIC CLI_error_et CLI_validate_arguments( u8_t  aArgCount, char *aArgVector[], u8_t command_index );
 
