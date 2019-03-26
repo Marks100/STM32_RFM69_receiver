@@ -61,14 +61,14 @@ STATIC CLI_cmd_history_st CLI_cmd_history_s;
 
 STATIC const CLI_Command_st CLI_commands[] =
 {
-	 {"help",		&help_handler,			HELP_HELP, 				SUPPORTED_FOR_ALL_MODES, ENABLE, 0},
-	 {"ver",		&ver_handler,			HELP_VER , 				SUPPORTED_FOR_ALL_MODES, ENABLE, 0},
-	 {"setmode",	&setmode_handler,	    HELP_SET_MODE, 			SUPPORTED_FOR_ALL_MODES, ENABLE, 1},
-	 {"reset",		&reset_handler,	    	HELP_RESET, 			SUPPORTED_FOR_ALL_MODES, ENABLE, 0},
-	 {"readnvm",	&readnvm_handler,	    HELP_NVM, 	    		SUPPORTED_FOR_ALL_MODES, ENABLE, 0},
-	 {"setid",	    &setid_handler,	        HELP_SET_ID, 	        SUPPORTED_FOR_ALL_MODES, ENABLE, 0},
-	 {"nvm",		&nvm_handler,			HELP_NVM,				SUPPORTED_FOR_ALL_MODES, ENABLE, 0},
-	 {NULL,			NULL,					NULL,					SUPPORTED_FOR_ALL_MODES, ENABLE, 0},
+	 {"help",		&help_handler,			HELP_HELP, 				SUPPORTED_FOR_ALL_MODES, ENABLE, 0, NULL_PARAM_LIST },
+	 {"ver",		&ver_handler,			HELP_VER , 				SUPPORTED_FOR_ALL_MODES, ENABLE, 0, NULL_PARAM_LIST },
+	 {"setmode",	&setmode_handler,	    HELP_SET_MODE, 			SUPPORTED_FOR_ALL_MODES, ENABLE, 1, NULL_PARAM_LIST },
+	 {"reset",		&reset_handler,	    	HELP_RESET, 			SUPPORTED_FOR_ALL_MODES, ENABLE, 0, NULL_PARAM_LIST },
+	 {"readnvm",	&readnvm_handler,	    HELP_NVM, 	    		SUPPORTED_FOR_ALL_MODES, ENABLE, 0, NULL_PARAM_LIST },
+	 {"setid",	    &setid_handler,	        HELP_SET_ID, 	        SUPPORTED_FOR_ALL_MODES, ENABLE, 1, SET_ID_CMD_PARAM_LIST },
+	 {"nvm",		&nvm_handler,			HELP_NVM,				SUPPORTED_FOR_ALL_MODES, ENABLE, 0, NULL_PARAM_LIST },
+	 {NULL,			NULL,					NULL,					SUPPORTED_FOR_ALL_MODES, ENABLE, 0, NULL_PARAM_LIST },
 };
 
 
@@ -341,7 +341,6 @@ STATIC void CLI_print_prompt( false_true_et newline )
     	CLI_send_newline();
     	CLI_send_newline();
     }
-    //sprintf(  &prompt_string[ ( newline == TRUE ) ? 2:0 ], ""RED"CLI PROMPT>" );
     sprintf(  prompt_string, "CLI PROMPT>" );
 
     CLI_send_data( (u8_t*)prompt_string, strlen( prompt_string ) );
@@ -401,18 +400,47 @@ STATIC CLI_error_et CLI_parse_cmd( char* message_string, u8_t* argumen_count, ch
 }
 
 
-STATIC CLI_error_et CLI_process_cmd( u8_t  aArgCount, char *aArgVector[] )
+STATIC CLI_error_et CLI_validate_arguments( u8_t aArgCount, char *aArgVector[], u8_t command_index )
+{
+	CLI_error_et error = CLI_ERROR_NONE;
+	u8_t i = 0u;
+
+	if( aArgCount > CLI_CMD_LINE_ARGS_MAX )
+	{
+		error = CLI_ERROR_INVALID_ARGS_MORE;
+	}
+
+	if( error == CLI_ERROR_NONE)
+	{
+		/* Valid number of args, now check the length of each args */
+		for( i = 0u; i < CLI_CMD_LINE_ARGS_MAX; i++ )
+		{
+			u8_t len = strlen( aArgVector[i+1] );
+			if( len > CLI_commands[command_index].param_list[i].num_chars )
+			{
+				error = CLI_ERROR_INVALID_ARGS;
+				break;
+			}
+		}
+
+	}
+	return ( error );
+}
+
+
+
+STATIC CLI_error_et CLI_process_cmd( u8_t aArgCount, char *aArgVector[] )
 {
     CLI_error_et error = CLI_ERROR_NONE;
     const CLI_Command_st *cmd = NULL;
+    u8_t command_index = 0u;
 
     for ( cmd = CLI_commands; cmd->command_name != NULL; cmd++ )
     {
         if ( (strcmp( aArgVector[0], cmd->command_name ) == 0u ) )
         {
 			//the command can be executed. Now get into validating the parameters and their values provided by the user
-			error = CLI_ERROR_NONE;
-        	//error = DEBUG_CLI_get_cum_validate_cmd_params(cmd, (aArgCount-1), ((aArgCount-1)?&aArgVector[1]:NULL),((aArgCount-1)?val:NULL));
+        	error = CLI_validate_arguments( aArgCount - 1, aArgVector, command_index );
 //			}
 //			else
 //			{
@@ -421,12 +449,16 @@ STATIC CLI_error_et CLI_process_cmd( u8_t  aArgCount, char *aArgVector[] )
 			// there is a matching entry in the table. just come out of the loop!
 			break;
     	}
+        command_index += 1u;
     }
 
-    if(cmd->command_name == NULL)
+    if( error == CLI_ERROR_NONE )
     {
-        // looks like we have looped through the entire table and we did not get see the command.
-        error = CLI_ERROR_NOT_FOUND;
+		if(cmd->command_name == NULL)
+		{
+			// looks like we have looped through the entire table and we did not get see the command.
+			error = CLI_ERROR_NOT_FOUND;
+		}
     }
 
     if( error == CLI_ERROR_NONE  )
@@ -523,24 +555,24 @@ STATIC CLI_error_et setid_handler( u8_t aArgCount, char *aArgVector[] )
 	CLI_error_et error = CLI_ERROR_NONE;
 	char output_string[200];
 	u16_t id = 0;
-	u8_t temp_id_val[4];
+	u32_t temp_id_val;
 
-	u8_t test_string[4];
+	u8_t test_string[5];
 	test_string[0] = 0x30;
 	test_string[1] = 0x31;
 	test_string[2] = 0x32;
 	test_string[3] = 0x33;
+	test_string[4] = '\0';
 
-	id = CLI_str_to_hex( test_string );
+	id = strtoul( aArgVector[1], NULL, 16 );
 
-	sprintf( temp_id_val, "%c%c%c%c", test_string[0], test_string[1], test_string[2], test_string[3] );
-
-	id = CLI_str_to_hex( test_string );
-	//id = atoi( aArgVector[1] );
-
-	if( id <= 0xFFFF )
+	if( strlen( aArgVector[1]) <= 4 )
 	{
-		sprintf( output_string, "Devide ID has been set to 0x%04d", id );
+		sprintf( output_string, "Devide ID has been set to 0x%04X", id );
+	}
+	else
+	{
+		sprintf( output_string, "Invalid format, Id is 4 charachters eg 1234" );
 	}
 
 	CLI_send_newline();

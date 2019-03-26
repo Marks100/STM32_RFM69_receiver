@@ -35,6 +35,12 @@
 #define HELP_NVM                 "readnvm:           Returns the current NVM info\r\n"
 #define HELP_SET_ID              "setid:             Sets the ID of the device\r\n"
 
+#define NULL_PARAM_LIST{\
+		0,(u32_t)0x0000,(u32_t)0x0000 }
+
+#define SET_ID_CMD_PARAM_LIST {\
+		4,(u32_t)0x0001,(u32_t)0xFFFF }
+
 typedef enum
 {
     CLI_ERROR_NONE = 0,
@@ -69,13 +75,20 @@ typedef struct
 
 typedef struct
 {
+    u8_t  num_chars;
+    u32_t llimit;
+    u32_t ulimit;
+} CLI_Param_st;
+
+typedef struct
+{
     const char *command_name;
     CLI_error_et (*command_handler)(u8_t aArgCount, char *aArgVector[] );
     const char *helpinfo;
-    u16_t availbility;  // bit map setting of all modes in which this cmd would be supported
-    disable_enable_et public;        // if this is TRUE it means this command is exposed to customers otherwise it is for developers
+    u16_t availbility;  			// bit map setting of all modes in which this cmd would be supported
+    disable_enable_et public;       // if this is TRUE it means this command is exposed to customers otherwise it is for developers
     u8_t num_params;
-    //const CLI_Param_st param_list[CLI_CMD_LINE_ARGS_MAX];
+    CLI_Param_st param_list[CLI_CMD_LINE_ARGS_MAX];
 } CLI_Command_st;
 
 
@@ -99,6 +112,7 @@ STATIC unsigned long long CLI_str_to_hex( const char* str );
 
 STATIC CLI_error_et CLI_parse_cmd( char* message_string, u8_t* calc_argumen_count, char **argument_vector, u8_t max_num_args );
 STATIC CLI_error_et CLI_process_cmd( u8_t  aArgCount, char *aArgVector[] );
+STATIC CLI_error_et CLI_validate_arguments( u8_t  aArgCount, char *aArgVector[], u8_t command_index );
 
 
 
