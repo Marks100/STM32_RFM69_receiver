@@ -1,6 +1,6 @@
 ---
 versionInfo:
-  msn: RFM69_RECEIVER
+  msn: STM32_RF_HUB
   major: 1
-  patch: 0
+  patch: 1
   verification: 0

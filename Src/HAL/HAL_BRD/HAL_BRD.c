@@ -7,6 +7,7 @@
 #include "HAL_BRD.h"
 #include "main.h"
 #include "RFM69.h"
+#include "autoversion.h"
 
 false_true_et HAL_BRD_rtc_triggered_s;
 false_true_et debug_mode;
@@ -550,9 +551,9 @@ void HAL_BRD_get_SW_version_num( u8_t *version_num_p )
 	/* Reference the included autoversion.h file so that we can grab the SW version number */
 	char version_num_array[SW_VERSION_NUM_SIZE];
 
-	version_num_array[0] = 1; //WES_VERSION_MAJOR;
-	version_num_array[1] = 12; //WES_VERSION_PATCH;
-	version_num_array[2] = 5;  //WES_VERSION_VERIFICATION;
+	version_num_array[0] = STM32_RF_HUB_VERSION_MAJOR;
+	version_num_array[1] = STM32_RF_HUB_VERSION_PATCH;
+	version_num_array[2] = STM32_RF_HUB_VERSION_VERIFICATION;
 
 	/* Now copy the local version array back to the pointer */
 	STDC_memcpy( version_num_p, version_num_array, sizeof( version_num_array ) );
@@ -572,7 +573,7 @@ void HAL_BRD_get_SW_version_num( u8_t *version_num_p )
 ***************************************************************************************************/
 void HAL_BRD_get_HW_version_num( u8_t *version_num_p )
 {
-
+	*version_num_p = 0u;
 }
 
 

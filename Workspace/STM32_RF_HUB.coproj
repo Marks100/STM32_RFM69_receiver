@@ -8,6 +8,7 @@
         <Option name="UseFPU" value="0"/>
         <Option name="UserEditCompiler" value=""/>
         <Option name="SupportCPlusplus" value="0"/>
+        <Option name="CompileBeforeDebug" value="1"/>
         <Includepaths>
           <Includepath path="."/>
         </Includepaths>
@@ -43,7 +44,7 @@
         <Option name="BIN" value="1"/>
       </Output>
       <User>
-        <UserRun name="Run#1" type="Before" checked="0" value=""/>
+        <UserRun name="Run#1" type="Before" checked="1" value="${project.path}/../buildenv/bin/prebuild.bat ${project.path}"/>
         <UserRun name="Run#1" type="After" checked="0" value=""/>
       </User>
     </BuildOption>
