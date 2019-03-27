@@ -72,8 +72,8 @@ STATIC const CLI_Command_st CLI_commands[] =
 	 {"temp",		  &temp_handler,		HELP_TEMP,			    SUPPORTED_FOR_ALL_MODES, ENABLE, 0, { NULL_PARAM_LIST } },
 	 {"batt",		  &batt_handler,		HELP_BATT,			    SUPPORTED_FOR_ALL_MODES, ENABLE, 0, { NULL_PARAM_LIST } },
 	 {"listnodes",    &listnodes_handler,	HELP_LISTNODES,		    SUPPORTED_FOR_ALL_MODES, ENABLE, 0, { NULL_PARAM_LIST } },
-	 {"removenodes",  &removenodes_handler, HELP_LISTNODES,		    SUPPORTED_FOR_ALL_MODES, ENABLE, 0, { REMOVENODES_CMD_PARAM_LIST } },
-	 {NULL,			NULL,					NULL,					SUPPORTED_FOR_ALL_MODES, ENABLE, 0, { NULL_PARAM_LIST } },
+	 {"removenode",   &removenode_handler, HELP_REMOVENODE,         SUPPORTED_FOR_ALL_MODES, ENABLE, 0, { REMOVENODE_CMD_PARAM_LIST } },
+	 {NULL,			  NULL,					NULL,					SUPPORTED_FOR_ALL_MODES, ENABLE, 0, { NULL_PARAM_LIST } },
 
 };
 
@@ -696,6 +696,8 @@ CLI_error_et listnodes_handler( u8_t aArgCount, char *aArgVector[] )
 	u8_t num_node = 0u;
 	u16_t node_ids[RF_MGR_RF_DATA_HANDLER_SIZE];
 
+	CLI_send_newline();
+
 	RF_MGR_get_all_decoded_IDs( node_ids );
 
 	for( num_node = 0; num_node < RF_MGR_RF_DATA_HANDLER_SIZE; num_node++ )
@@ -721,12 +723,14 @@ CLI_error_et listnodes_handler( u8_t aArgCount, char *aArgVector[] )
 }
 
 
-CLI_error_et removenodes_handler( u8_t aArgCount, char *aArgVector[] )
+CLI_error_et removenode_handler( u8_t aArgCount, char *aArgVector[] )
 {
 	CLI_error_et error = CLI_ERROR_NONE;
 	char output_string[200];
 	false_true_et node_located = FALSE;
 	u16_t id = 0u;
+
+	CLI_send_newline();
 
 	/* Lets read all the nodes first to ensure that the one being deleted is actually on the list */
 	u8_t num_node = 0u;
@@ -757,7 +761,7 @@ CLI_error_et removenodes_handler( u8_t aArgCount, char *aArgVector[] )
 	}
 	else
 	{
-		sprintf( output_string, "Node 0x%04X has not been located in the current list!!!,\r\nhere is the current list of nodes", id );
+		sprintf( output_string, "Node 0x%04X has not been located in the current list!!!,\r\nHere is the current list of nodes..", id );
 		CLI_send_data( output_string, strlen(output_string));
 		CLI_send_newline();
 		STDC_memset( output_string, 0x20, sizeof( output_string ) );

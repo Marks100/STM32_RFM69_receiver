@@ -33,11 +33,12 @@
 #define HELP_RESET               "reset:             Resets CPU\r\n"
 #define HELP_NVM                 "readnvm:           Returns the current NVM info\r\n"
 #define HELP_SET_ID              "setid:             Sets the ID of the device\r\n"
-#define HELP_CLOCKS				 "clocks:			 Reads the values of the internal clocks\r\n"
-#define HELP_TEMP				 "temp:			     Reads the internal temperature value of the device\r\n"
-#define HELP_BATT				 "batt:			     Reads the internal battery/supply voltoge of the device\r\n"
-#define HELP_LISTNODES			 "listnodes:		 Lists all of the connected sensor node IDs\r\n"
-#define HELP_REMOVENODES		 "removenodes:		 Removes a specific node from the list of connected nodes\r\n"
+#define HELP_CLOCKS				 "clocks:            Reads the values of the internal clocks\r\n"
+#define HELP_TEMP				 "temp:              Reads the internal temperature value of the device\r\n"
+#define HELP_BATT				 "batt:              Reads the internal battery/supply voltoge of the device\r\n"
+#define HELP_LISTNODES			 "listnodes:         Lists all of the connected sensor node IDs\r\n"
+#define HELP_REMOVENODE          "removenode:        Removes a specific node from the list of connected nodes\r\n"
+
 
 #define NULL_PARAM_LIST {\
 		0,(u32_t)0x0000,(u32_t)0x0000 }
@@ -45,7 +46,7 @@
 #define SET_ID_CMD_PARAM_LIST {\
 		4,(u32_t)0x0001,(u32_t)0xFFFF }
 
-#define REMOVENODES_CMD_PARAM_LIST {\
+#define REMOVENODE_CMD_PARAM_LIST {\
 		4,(u32_t)0x0001,(u32_t)0xFFFF }
 
 typedef enum
@@ -136,7 +137,7 @@ CLI_error_et clocks_handler( u8_t aArgCount, char *aArgVector[] );
 CLI_error_et temp_handler( u8_t aArgCount, char *aArgVector[] );
 CLI_error_et batt_handler( u8_t aArgCount, char *aArgVector[] );
 CLI_error_et listnodes_handler( u8_t aArgCount, char *aArgVector[] );
-CLI_error_et removenodes_handler( u8_t aArgCount, char *aArgVector[] );
+CLI_error_et removenode_handler( u8_t aArgCount, char *aArgVector[] );
 
 
 
