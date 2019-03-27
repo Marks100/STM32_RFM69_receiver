@@ -409,10 +409,12 @@ void 				 NRF24_handle_supervisor_reset( void );
 
 void                 RF_MGR_packet_received_event( u8_t* rf_data, u8_t rf_data_size );
 void                 RF_MGR_tick( void );
+void 				 NRF24_handle_packet_stats( u8_t type );
 void                 RF_MGR_analyse_received_packets( void );
 void                 RF_MGR_handle_early_prototype_sed( u16_t sensor_id, u8_t* data_p, u32_t packet_count );
 void                 RF_MGR_get_all_decoded_IDs( u16_t* data_p );
 pass_fail_et 		 RF_MGR_remove_node( u8_t pos );
+void 				 RF_MGR_display_sed_data( void );
 
 
 #endif /* RF_H multiple inclusion guard */

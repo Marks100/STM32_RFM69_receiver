@@ -15,12 +15,11 @@
 #ifndef UNIT_TEST
 #endif
 
-#ifdef GCC_TEST
-#include <stdlib.h>
+#include <stdint.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#endif // GCC_TEST
 
 #include "C_defs.h"
 #include "STDC.h"
@@ -1523,7 +1522,6 @@ void NRF24_tick( void )
         case NRF24_RX:
         {
         	u8_t fifo;
-        	u8_t i;
             /* We are now in Receive mode so lets just wait for a packet to come in */
             /* Eventually might be interrupt driven but for now lets poll */
 
@@ -1867,7 +1865,7 @@ void RF_MGR_analyse_received_packets( void )
             switch( sensor_type )
             {
                 case EARLY_PROTOTYPE_SED:
-                    RF_MGR_handle_early_prototype_sed( sensor_id, &RF_MGR_rf_data_store_s.data_packet_s[node_index].payload,
+                    RF_MGR_handle_early_prototype_sed( sensor_id, (u8_t*)&RF_MGR_rf_data_store_s.data_packet_s[node_index].payload,
                                                        RF_MGR_rf_data_store_s.data_packet_s[node_index ].packet_counter );
                     break;
 
@@ -1882,8 +1880,6 @@ void RF_MGR_analyse_received_packets( void )
 
 void RF_MGR_handle_early_prototype_sed( u16_t sensor_id, u8_t* data_p, u32_t packet_count )
 {
-    u8_t packet_type;
-    u8_t mode_type;
 
     RF_MGR_sed_data_s.node_id     = sensor_id;
 
@@ -2050,7 +2046,6 @@ void RF_MGR_get_all_decoded_IDs( u16_t* data_p )
 pass_fail_et RF_MGR_remove_node( u8_t pos )
 {
 	pass_fail_et returnType = FAIL;
-	u8_t node_num = 0u;
 
 	/* first of all check that the pos is valid */
 	if( pos <= RF_MGR_RF_DATA_HANDLER_SIZE )

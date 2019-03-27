@@ -5,6 +5,7 @@
 #include "misc.h"
 
 #include "HAL_BRD.h"
+#include "STDC.h"
 #include "main.h"
 #include "RFM69.h"
 #include "autoversion.h"

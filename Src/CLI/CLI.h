@@ -2,7 +2,7 @@
 #define CLI_H
 
 
-#define CLI_MAX_INPUT_CHARS           60u
+#define CLI_MAX_INPUT_CHARS           40u
 #define CLI_CMD_LINE_ARGS_MAX         6
 #define CLI_MAX_COMMAND_HISTORY       6
 #define CLI_BACKSPACE                 0x08
@@ -15,7 +15,6 @@
 #define LEFT_ARROW					  0x43
 #define RIGHT_ARROW					  0x44
 #define ERASE_CURRENT_LINE            "\r                                                                        \r\b\b\b"
-#define NULL_PARAM_LIST               //{0}
 #define IGNORE_RANGE_CHECK            ((u32_t)~0)
 
 #define RED			"\x1b[31m"
@@ -35,7 +34,7 @@
 #define HELP_NVM                 "readnvm:           Returns the current NVM info\r\n"
 #define HELP_SET_ID              "setid:             Sets the ID of the device\r\n"
 
-#define NULL_PARAM_LIST{\
+#define NULL_PARAM_LIST {\
 		0,(u32_t)0x0000,(u32_t)0x0000 }
 
 #define SET_ID_CMD_PARAM_LIST {\
@@ -101,32 +100,30 @@ void CLI_handle_received_char( u8_t received_char );
 void CLI_send_data( char* data, u16_t data_size );
 
 
-STATIC void 		 CLI_handle_serial_command ( void );
-STATIC false_true_et CLI_is_hex_char(char c);
-STATIC false_true_et CLI_is_dec_char(char c);
-STATIC false_true_et CLI_carriage_return_check( void );
-STATIC void          CLI_clear_rx_buffer( void );
-STATIC void          CLI_print_prompt( false_true_et newline );
-STATIC false_true_et CLI_is_space_or_newLine( char c );
-STATIC unsigned long long CLI_str_to_hex( const char* str );
+void 		  CLI_handle_serial_command ( void );
+false_true_et CLI_is_hex_char(char c);
+false_true_et CLI_is_dec_char(char c);
+false_true_et CLI_carriage_return_check( void );
+void          CLI_clear_rx_buffer( void );
+void          CLI_print_prompt( false_true_et newline );
+false_true_et CLI_is_space_or_newLine( char c );
+unsigned long long CLI_str_to_hex( const char* str );
 
-STATIC CLI_error_et CLI_parse_cmd( char* message_string, u8_t* calc_argumen_count, char *argument_vector[], u8_t max_num_args );
-STATIC CLI_error_et CLI_process_cmd( u8_t  aArgCount, char *aArgVector[] );
-STATIC CLI_error_et CLI_validate_arguments( u8_t  aArgCount, char *aArgVector[], u8_t command_index );
+CLI_error_et CLI_parse_cmd( char* message_string, u8_t* calc_argumen_count, char *argument_vector[], u8_t max_num_args );
+CLI_error_et CLI_process_cmd( u8_t  aArgCount, char *aArgVector[] );
+CLI_error_et CLI_validate_arguments( u8_t  aArgCount, char *aArgVector[], u8_t command_index );
+void 		 CLI_store_history( void );
 
 
 
 /* CLI handler functios */
-STATIC CLI_error_et help_handler( u8_t aArgCount, char *aArgVector[] );
-STATIC CLI_error_et ver_handler( u8_t aArgCount, char *aArgVector[] );
-STATIC CLI_error_et setmode_handler( u8_t aArgCount, char *aArgVector[] );
-STATIC CLI_error_et reset_handler( u8_t aArgCount, char *aArgVector[] );
-STATIC CLI_error_et readnvm_handler( u8_t aArgCount, char *aArgVector[] );
-STATIC CLI_error_et setid_handler( u8_t aArgCount, char *aArgVector[] );
-STATIC CLI_error_et nvm_handler( u8_t aArgCount, char *aArgVector[] );
-
-
-
+CLI_error_et help_handler( u8_t aArgCount, char *aArgVector[] );
+CLI_error_et ver_handler( u8_t aArgCount, char *aArgVector[] );
+CLI_error_et setmode_handler( u8_t aArgCount, char *aArgVector[] );
+CLI_error_et reset_handler( u8_t aArgCount, char *aArgVector[] );
+CLI_error_et readnvm_handler( u8_t aArgCount, char *aArgVector[] );
+CLI_error_et setid_handler( u8_t aArgCount, char *aArgVector[] );
+CLI_error_et nvm_handler( u8_t aArgCount, char *aArgVector[] );
 
 
 

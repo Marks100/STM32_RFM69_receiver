@@ -4,6 +4,7 @@
 #include "COMPILER_defs.h"
 #include "COMPILER_config.h"
 #include "C_defs.h"
+#include "CLI.h"
 #include "NRF24.h"
 #include "RFM69.h"
 
@@ -56,6 +57,7 @@ typedef struct
     u16_t  device_id;
     RFM69_static_configuration_et rf_config;
     NRF24_state_et nrf_startup_tx_rx_mode;
+    CLI_cmd_st cmd_list[CLI_MAX_COMMAND_HISTORY];
 } NVM_generic_data_blk_st;
 
 

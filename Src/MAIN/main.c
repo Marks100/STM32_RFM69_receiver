@@ -40,12 +40,13 @@ int main(void)
 	RCC_PCLK2Config(RCC_HCLK_Div1);
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR, ENABLE);
 
+	NVM_init();
+
 	/* Init the HW */
 	HAL_BRD_init();
 	HAL_I2C_init();
 	HAL_SPI_init();
 	CLI_init();
-	NVM_init();
 
     /* Start the timer to keep track of reception count */
 	HAL_TIM_1_init();
