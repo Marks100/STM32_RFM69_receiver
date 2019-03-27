@@ -44,7 +44,7 @@
         <Option name="BIN" value="1"/>
       </Output>
       <User>
-        <UserRun name="Run#1" type="Before" checked="1" value="${project.path}/../buildenv/bin/prebuild.bat ${project.path}"/>
+        <UserRun name="Run#1" type="Before" checked="1" value="${project.path}/../buildenv/bin/prebuild.bat COIDE ${project.path}"/>
         <UserRun name="Run#1" type="After" checked="0" value=""/>
       </User>
     </BuildOption>
