@@ -522,6 +522,23 @@ STATIC CLI_error_et reset_handler( u8_t aArgCount, char *aArgVector[] )
 STATIC CLI_error_et readnvm_handler( u8_t aArgCount, char *aArgVector[] )
 {
 	CLI_error_et error = CLI_ERROR_NONE;
+	char output_string[200];
+	NVM_generic_data_blk_st* nvm_p = &(NVM_info_s.NVM_generic_data_blk_s);
+
+	STDC_memset(output_string, 0x00, sizeof(output_string));
+
+	sprintf( output_string, "/****** NVM data ******/\r\nChecksum:\t%X\r\nVersion:\t%d\r\nWrite count:\t%d",
+	NVM_info_s.checksum,
+	NVM_info_s.version,
+	NVM_info_s.write_count );
+	CLI_send_data( output_string, strlen(output_string));
+	CLI_send_newline();
+
+	STDC_memset(output_string, 0x00, sizeof(output_string));
+	sprintf( output_string, "%02X",
+	nvm_p->device_id );
+	CLI_send_data( output_string, strlen(output_string));
+	CLI_send_newline();
 
 	return( error );
 }
@@ -530,20 +547,20 @@ STATIC CLI_error_et ver_handler( u8_t aArgCount, char *aArgVector[] )
 {
 	CLI_error_et error = CLI_ERROR_NONE;
 	char output_string[200];
-	char version_num[5];
+	char version_num[SW_VERSION_NUM_SIZE];
 
 	STDC_memset( output_string, 0x20, sizeof( output_string ) );
 
-	//HAL_BRD_get_SW_version_num( version_num );
+	HAL_BRD_get_SW_version_num( version_num );
 
 	CLI_send_newline();
 	sprintf( output_string, "SW version is %d.%d.%d", version_num[0], version_num[1], version_num[2] );
 	CLI_send_data( output_string, strlen(output_string));
 
-	//HAL_BRD_get_HW_version_num( version_num );
+	HAL_BRD_get_HW_version_num( version_num );
 
 	CLI_send_newline();
-	sprintf( output_string, "HW version is %d.%d", version_num[0], version_num[1] );
+	sprintf( output_string, "HW version is %d", version_num[0] );
 	CLI_send_data( output_string, strlen(output_string));
 
 	return( error );
@@ -556,28 +573,16 @@ STATIC CLI_error_et setid_handler( u8_t aArgCount, char *aArgVector[] )
 	CLI_error_et error = CLI_ERROR_NONE;
 	char output_string[200];
 	u16_t id = 0;
-	u32_t temp_id_val;
-
-	u8_t test_string[5];
-	test_string[0] = 0x30;
-	test_string[1] = 0x31;
-	test_string[2] = 0x32;
-	test_string[3] = 0x33;
-	test_string[4] = '\0';
 
 	id = strtoul( aArgVector[1], NULL, 16 );
+	NVM_info_s.NVM_generic_data_blk_s.device_id = id;
 
-	if( strlen( aArgVector[1]) <= 4 )
-	{
-		sprintf( output_string, "Devide ID has been set to 0x%04X", id );
-	}
-	else
-	{
-		sprintf( output_string, "Invalid format, Id is 4 charachters eg 1234" );
-	}
+	sprintf( output_string, "Devide ID has been set to 0x%04X", id );
 
 	CLI_send_newline();
 	CLI_send_data( output_string, strlen(output_string));
+
+	NVM_request_flush();
 
 	return( error );
 }

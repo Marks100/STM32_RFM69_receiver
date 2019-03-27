@@ -22,6 +22,7 @@
 ***************************************************************************************************/
 /* None */
 #define SELECTOR_MODE_BIT_MASK ( 0x0F )
+#define SW_VERSION_NUM_SIZE    ( 3u )
 
 
 /***************************************************************************************************
@@ -77,6 +78,9 @@ void HAL_BRD_NRF24_set_ce_pin_state( low_high_et state );
 false_true_et HAL_BRD_get_rtc_trigger_status( void );
 void HAL_BRD_set_rtc_trigger_status( false_true_et state );
 disable_enable_et HAL_BRD_read_debug_pin( void );
+
+void HAL_BRD_get_SW_version_num( u8_t *version_num_p );
+void HAL_BRD_get_HW_version_num( u8_t *version_num_p );
 
 
 #endif
