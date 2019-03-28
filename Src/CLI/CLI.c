@@ -61,16 +61,21 @@ STATIC CLI_cmd_history_st CLI_cmd_history_s;
 
 STATIC const CLI_Command_st CLI_commands[] =
 {
-	 {"help",		&help_handler,			HELP_HELP, 				SUPPORTED_FOR_ALL_MODES, ENABLE, 0, { NULL_PARAM_LIST } },
-	 {"ver",		&ver_handler,			HELP_VER , 				SUPPORTED_FOR_ALL_MODES, ENABLE, 0, { NULL_PARAM_LIST } },
-	 {"setmode",	&setmode_handler,	    HELP_SET_MODE, 			SUPPORTED_FOR_ALL_MODES, ENABLE, 1, { NULL_PARAM_LIST } },
-	 {"reset",		&reset_handler,	    	HELP_RESET, 			SUPPORTED_FOR_ALL_MODES, ENABLE, 0, { NULL_PARAM_LIST } },
-	 {"readnvm",	&readnvm_handler,	    HELP_NVM, 	    		SUPPORTED_FOR_ALL_MODES, ENABLE, 0, { NULL_PARAM_LIST } },
-	 {"setid",	    &setid_handler,	        HELP_SET_ID, 	        SUPPORTED_FOR_ALL_MODES, ENABLE, 1, { SET_ID_CMD_PARAM_LIST } },
-	 {"nvm",		&nvm_handler,			HELP_NVM,				SUPPORTED_FOR_ALL_MODES, ENABLE, 0, { NULL_PARAM_LIST } },
+	 {"help",		  &help_handler,		HELP_HELP, 				SUPPORTED_FOR_ALL_MODES, ENABLE, 0, { NULL_PARAM_LIST } },
+	 {"ver",		  &ver_handler,			HELP_VER , 				SUPPORTED_FOR_ALL_MODES, ENABLE, 0, { NULL_PARAM_LIST } },
+	 {"setmode",	  &setmode_handler,	    HELP_SET_MODE, 			SUPPORTED_FOR_ALL_MODES, ENABLE, 1, { NULL_PARAM_LIST } },
+	 {"reset",		  &reset_handler,	    HELP_RESET, 			SUPPORTED_FOR_ALL_MODES, ENABLE, 0, { NULL_PARAM_LIST } },
+	 {"readnvm",	  &readnvm_handler,	    HELP_NVM, 	    		SUPPORTED_FOR_ALL_MODES, ENABLE, 0, { NULL_PARAM_LIST } },
+	 {"setid",	      &setid_handler,	    HELP_SET_ID, 	        SUPPORTED_FOR_ALL_MODES, ENABLE, 1, { SET_ID_CMD_PARAM_LIST } },
+	 {"nvm",		  &nvm_handler,			HELP_NVM,				SUPPORTED_FOR_ALL_MODES, ENABLE, 0, { NULL_PARAM_LIST } },
+	 {"clocks",		  &clocks_handler,		HELP_CLOCKS,			SUPPORTED_FOR_ALL_MODES, ENABLE, 0, { NULL_PARAM_LIST } },
+	 {"temp",		  &temp_handler,		HELP_TEMP,			    SUPPORTED_FOR_ALL_MODES, ENABLE, 0, { NULL_PARAM_LIST } },
+	 {"batt",		  &batt_handler,		HELP_BATT,			    SUPPORTED_FOR_ALL_MODES, ENABLE, 0, { NULL_PARAM_LIST } },
+	 {"listnodes",    &listnodes_handler,	HELP_LISTNODES,		    SUPPORTED_FOR_ALL_MODES, ENABLE, 0, { NULL_PARAM_LIST } },
+	 {"removenodes",  &removenodes_handler, HELP_LISTNODES,		    SUPPORTED_FOR_ALL_MODES, ENABLE, 0, { REMOVENODES_CMD_PARAM_LIST } },
 	 {NULL,			NULL,					NULL,					SUPPORTED_FOR_ALL_MODES, ENABLE, 0, { NULL_PARAM_LIST } },
-};
 
+};
 
 
 void CLI_init( void )
@@ -630,6 +635,24 @@ CLI_error_et nvm_handler( u8_t aArgCount, char *aArgVector[] )
 																								  (int)NVM_info_s.version,
 																								  (int)NVM_info_s.write_count,
 																								  (int)NVM_info_s.NVM_generic_data_blk_s.sleep_time );
+	CLI_send_newline();
+	CLI_send_data( output_string, strlen(output_string));
+
+	return( error );
+}
+
+
+CLI_error_et clocks_handler( u8_t aArgCount, char *aArgVector[] )
+{
+	CLI_error_et error = CLI_ERROR_NONE;
+	char output_string[200];
+
+	RCC_ClocksTypeDef RCC_Clocks;
+	RCC_GetClocksFreq (&RCC_Clocks);
+
+	sprintf( output_string, "SYSCLK:\t%dHz\r\nHCLK:\t%dHz\r\nPCLK1:\t%dHz\r\nPCLK2:\t%dHz\r\nADCCLK:\t%dHz\r\n",
+			(int)RCC_Clocks.SYSCLK_Frequency, (int)RCC_Clocks.HCLK_Frequency, (int)RCC_Clocks.PCLK1_Frequency,
+			(int)RCC_Clocks.PCLK2_Frequency, (int)RCC_Clocks.ADCCLK_Frequency );
 
 	CLI_send_newline();
 	CLI_send_data( output_string, strlen(output_string));
@@ -637,6 +660,129 @@ CLI_error_et nvm_handler( u8_t aArgCount, char *aArgVector[] )
 	return( error );
 }
 
+
+CLI_error_et temp_handler( u8_t aArgCount, char *aArgVector[] )
+{
+	CLI_error_et error = CLI_ERROR_NONE;
+	char output_string[200];
+
+	sprintf( output_string, "The internal device temperature is not yet supported!!!" );
+
+	CLI_send_newline();
+	CLI_send_data( output_string, strlen(output_string));
+
+	return( error );
+}
+
+CLI_error_et batt_handler( u8_t aArgCount, char *aArgVector[] )
+{
+	CLI_error_et error = CLI_ERROR_NONE;
+	char output_string[200];
+
+	sprintf( output_string, "The internal battery/supply voltage is not yet supported!!!" );
+
+	CLI_send_newline();
+	CLI_send_data( output_string, strlen(output_string));
+
+	return( error );
+}
+
+
+CLI_error_et listnodes_handler( u8_t aArgCount, char *aArgVector[] )
+{
+	CLI_error_et error = CLI_ERROR_NONE;
+	char output_string[200];
+
+	u8_t num_node = 0u;
+	u16_t node_ids[RF_MGR_RF_DATA_HANDLER_SIZE];
+
+	RF_MGR_get_all_decoded_IDs( node_ids );
+
+	for( num_node = 0; num_node < RF_MGR_RF_DATA_HANDLER_SIZE; num_node++ )
+	{
+		if( node_ids[num_node] != 0u )
+		{
+			sprintf( output_string, "Node ID %02d:\t0x%04X\r\n", num_node, node_ids[num_node] );
+			CLI_send_data( output_string, strlen(output_string));
+			CLI_send_newline();
+			STDC_memset( output_string, 0x20, sizeof( output_string ) );
+		}
+		else
+		{
+			break;
+		}
+	}
+	sprintf( output_string, "Num Free Nodes:\t%02d\r\n", ( RF_MGR_RF_DATA_HANDLER_SIZE - num_node ) );
+	CLI_send_data( output_string, strlen(output_string));
+	CLI_send_newline();
+	STDC_memset( output_string, 0x20, sizeof( output_string ) );
+
+	return( error );
+}
+
+
+CLI_error_et removenodes_handler( u8_t aArgCount, char *aArgVector[] )
+{
+	CLI_error_et error = CLI_ERROR_NONE;
+	char output_string[200];
+	false_true_et node_located = FALSE;
+	u16_t id = 0u;
+
+	/* Lets read all the nodes first to ensure that the one being deleted is actually on the list */
+	u8_t num_node = 0u;
+	u16_t node_ids[RF_MGR_RF_DATA_HANDLER_SIZE];
+
+	RF_MGR_get_all_decoded_IDs( node_ids );
+
+	/* What ID is the user trying to remove */
+	id = strtoul( aArgVector[1], NULL, 16 );
+
+	/* Is that node actually on the list */
+	for( num_node = 0; num_node < RF_MGR_RF_DATA_HANDLER_SIZE; num_node++ )
+	{
+		if( node_ids[num_node] == id )
+		{
+			node_located = TRUE;
+			break;
+		}
+	}
+
+	if( node_located == TRUE )
+	{
+		RF_MGR_remove_node( 0 );
+		sprintf( output_string, "Node 0x%04X has been located in the current list and will be deleted...", id );
+		CLI_send_data( output_string, strlen(output_string));
+		CLI_send_newline();
+		STDC_memset( output_string, 0x20, sizeof( output_string ) );
+	}
+	else
+	{
+		sprintf( output_string, "Node 0x%04X has not been located in the current list!!!,\r\nhere is the current list of nodes", id );
+		CLI_send_data( output_string, strlen(output_string));
+		CLI_send_newline();
+		STDC_memset( output_string, 0x20, sizeof( output_string ) );
+
+		/* Print the current list to the user so that they can see them and delete the correct node */
+		for( num_node = 0; num_node < RF_MGR_RF_DATA_HANDLER_SIZE; num_node++ )
+		{
+			if( node_ids[num_node] != 0u )
+			{
+				sprintf( output_string, "Node ID %02d:\t0x%04X\r\n", num_node, node_ids[num_node] );
+				CLI_send_data( output_string, strlen(output_string));
+				CLI_send_newline();
+				STDC_memset( output_string, 0x20, sizeof( output_string ) );
+			}
+			else
+			{
+				break;
+			}
+		}
+	}
+
+
+
+	return( error );
+}
 
 
 
