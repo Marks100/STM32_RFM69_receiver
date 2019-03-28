@@ -46,6 +46,15 @@ typedef enum
 } HAL_BRD_switch_slider_et;
 
 
+typedef enum
+{
+	LED_0 = 0,
+	LED_1,
+	LED_2,
+	LED_3,
+	LED_MAX
+} HAL_BRD_led_et;
+
 
 /***************************************************************************************************
 **                              Exported Globals                                                  **

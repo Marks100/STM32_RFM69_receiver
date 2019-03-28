@@ -1,6 +1,8 @@
 #ifndef CLI_H
 #define CLI_H
 
+#include "C_defs.h"
+
 
 #define CLI_MAX_INPUT_CHARS           40u
 #define CLI_CMD_LINE_ARGS_MAX         6
@@ -38,6 +40,7 @@
 #define HELP_BATT				 "batt:              Reads the internal battery/supply voltoge of the device\r\n"
 #define HELP_LISTNODES			 "listnodes:         Lists all of the connected sensor node IDs\r\n"
 #define HELP_REMOVENODE          "removenode:        Removes a specific node from the list of connected nodes\r\n"
+#define HELP_LED                 "led:               Removes a specific node from the list of connected nodes\r\n"
 
 
 #define NULL_PARAM_LIST {\
@@ -48,6 +51,10 @@
 
 #define REMOVENODE_CMD_PARAM_LIST {\
 		4,(u32_t)0x0001,(u32_t)0xFFFF }
+
+#define LED_CMD_PARAM_LIST { \
+		{ 1, (u32_t)LED_0,(u32_t)LED_MAX - 1 }, \
+		{ 1, (u32_t)OFF,(u32_t)ON } }
 
 typedef enum
 {
@@ -138,6 +145,7 @@ CLI_error_et temp_handler( u8_t aArgCount, char *aArgVector[] );
 CLI_error_et batt_handler( u8_t aArgCount, char *aArgVector[] );
 CLI_error_et listnodes_handler( u8_t aArgCount, char *aArgVector[] );
 CLI_error_et removenode_handler( u8_t aArgCount, char *aArgVector[] );
+CLI_error_et led_handler( u8_t aArgCount, char *aArgVector[] );
 
 
 

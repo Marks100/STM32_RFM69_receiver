@@ -72,7 +72,8 @@ STATIC const CLI_Command_st CLI_commands[] =
 	 {"temp",		  &temp_handler,		HELP_TEMP,			    SUPPORTED_FOR_ALL_MODES, ENABLE, 0, { NULL_PARAM_LIST } },
 	 {"batt",		  &batt_handler,		HELP_BATT,			    SUPPORTED_FOR_ALL_MODES, ENABLE, 0, { NULL_PARAM_LIST } },
 	 {"listnodes",    &listnodes_handler,	HELP_LISTNODES,		    SUPPORTED_FOR_ALL_MODES, ENABLE, 0, { NULL_PARAM_LIST } },
-	 {"removenode",   &removenode_handler, HELP_REMOVENODE,         SUPPORTED_FOR_ALL_MODES, ENABLE, 0, { REMOVENODE_CMD_PARAM_LIST } },
+	 {"removenode",   &removenode_handler,  HELP_REMOVENODE,        SUPPORTED_FOR_ALL_MODES, ENABLE, 0, { REMOVENODE_CMD_PARAM_LIST } },
+	 {"led",   		  &led_handler,         HELP_LED,               SUPPORTED_FOR_ALL_MODES, ENABLE, 0, { LED_CMD_PARAM_LIST } },
 	 {NULL,			  NULL,					NULL,					SUPPORTED_FOR_ALL_MODES, ENABLE, 0, { NULL_PARAM_LIST } },
 
 };
@@ -783,10 +784,31 @@ CLI_error_et removenode_handler( u8_t aArgCount, char *aArgVector[] )
 		}
 	}
 
-
-
 	return( error );
 }
+
+
+CLI_error_et led_handler( u8_t aArgCount, char *aArgVector[] )
+{
+	CLI_error_et error = CLI_ERROR_NONE;
+	char output_string[200];
+	u8_t led = 0u;
+	off_on_et state = OFF;
+
+	CLI_send_newline();
+
+	/* What LED is the user trying to control */
+	id = strtoul( aArgVector[1], NULL, 16 );
+
+	state = (off_on_et)strtoul( aArgVector[1], NULL, 16 );
+
+
+
+
+
+
+}
+
 
 
 
