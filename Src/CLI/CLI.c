@@ -61,20 +61,20 @@ STATIC CLI_cmd_history_st CLI_cmd_history_s;
 
 STATIC const CLI_Command_st CLI_commands[] =
 {
-	 {"help",		  &help_handler,		HELP_HELP, 				SUPPORTED_FOR_ALL_MODES, ENABLE, 0, { NULL_PARAM_LIST } },
-	 {"ver",		  &ver_handler,			HELP_VER , 				SUPPORTED_FOR_ALL_MODES, ENABLE, 0, { NULL_PARAM_LIST } },
-	 {"setmode",	  &setmode_handler,	    HELP_SET_MODE, 			SUPPORTED_FOR_ALL_MODES, ENABLE, 1, { NULL_PARAM_LIST } },
-	 {"reset",		  &reset_handler,	    HELP_RESET, 			SUPPORTED_FOR_ALL_MODES, ENABLE, 0, { NULL_PARAM_LIST } },
-	 {"readnvm",	  &readnvm_handler,	    HELP_NVM, 	    		SUPPORTED_FOR_ALL_MODES, ENABLE, 0, { NULL_PARAM_LIST } },
-	 {"setid",	      &setid_handler,	    HELP_SET_ID, 	        SUPPORTED_FOR_ALL_MODES, ENABLE, 1, { SET_ID_CMD_PARAM_LIST } },
-	 {"nvm",		  &nvm_handler,			HELP_NVM,				SUPPORTED_FOR_ALL_MODES, ENABLE, 0, { NULL_PARAM_LIST } },
-	 {"clocks",		  &clocks_handler,		HELP_CLOCKS,			SUPPORTED_FOR_ALL_MODES, ENABLE, 0, { NULL_PARAM_LIST } },
-	 {"temp",		  &temp_handler,		HELP_TEMP,			    SUPPORTED_FOR_ALL_MODES, ENABLE, 0, { NULL_PARAM_LIST } },
-	 {"batt",		  &batt_handler,		HELP_BATT,			    SUPPORTED_FOR_ALL_MODES, ENABLE, 0, { NULL_PARAM_LIST } },
-	 {"listnodes",    &listnodes_handler,	HELP_LISTNODES,		    SUPPORTED_FOR_ALL_MODES, ENABLE, 0, { NULL_PARAM_LIST } },
-	 {"removenode",   &removenode_handler,  HELP_REMOVENODE,        SUPPORTED_FOR_ALL_MODES, ENABLE, 0, { REMOVENODE_CMD_PARAM_LIST } },
-	 {"led",   		  &led_handler,         HELP_LED,               SUPPORTED_FOR_ALL_MODES, ENABLE, 0, { LED_CMD_PARAM_LIST } },
-	 {NULL,			  NULL,					NULL,					SUPPORTED_FOR_ALL_MODES, ENABLE, 0, { NULL_PARAM_LIST } },
+	 {"help",		  &help_handler,		HELP_HELP, 				SUPPORTED_FOR_ALL_MODES, ENABLE, 0, NULL_PARAM_LIST },
+	 {"ver",		  &ver_handler,			HELP_VER , 				SUPPORTED_FOR_ALL_MODES, ENABLE, 0, NULL_PARAM_LIST },
+	 {"setmode",	  &setmode_handler,	    HELP_SET_MODE, 			SUPPORTED_FOR_ALL_MODES, ENABLE, 1, NULL_PARAM_LIST },
+	 {"reset",		  &reset_handler,	    HELP_RESET, 			SUPPORTED_FOR_ALL_MODES, ENABLE, 0, NULL_PARAM_LIST },
+	 {"readnvm",	  &readnvm_handler,	    HELP_NVM, 	    		SUPPORTED_FOR_ALL_MODES, ENABLE, 0, NULL_PARAM_LIST },
+	 {"setid",	      &setid_handler,	    HELP_SET_ID, 	        SUPPORTED_FOR_ALL_MODES, ENABLE, 1, SET_ID_CMD_PARAM_LIST },
+	 {"nvm",		  &nvm_handler,			HELP_NVM,				SUPPORTED_FOR_ALL_MODES, ENABLE, 0, NULL_PARAM_LIST },
+	 {"clocks",		  &clocks_handler,		HELP_CLOCKS,			SUPPORTED_FOR_ALL_MODES, ENABLE, 0, NULL_PARAM_LIST },
+	 {"temp",		  &temp_handler,		HELP_TEMP,			    SUPPORTED_FOR_ALL_MODES, ENABLE, 0, NULL_PARAM_LIST },
+	 {"batt",		  &batt_handler,		HELP_BATT,			    SUPPORTED_FOR_ALL_MODES, ENABLE, 0, NULL_PARAM_LIST },
+	 {"listnodes",    &listnodes_handler,	HELP_LISTNODES,		    SUPPORTED_FOR_ALL_MODES, ENABLE, 0, NULL_PARAM_LIST },
+	 {"removenode",   &removenode_handler,  HELP_REMOVENODE,        SUPPORTED_FOR_ALL_MODES, ENABLE, 1, REMOVENODE_CMD_PARAM_LIST },
+	 {"led",   		  &led_handler,         HELP_LED,               SUPPORTED_FOR_ALL_MODES, ENABLE, 2, LED_CMD_PARAM_LIST  },
+	 {NULL,			  NULL,					NULL,					SUPPORTED_FOR_ALL_MODES, ENABLE, 0, NULL_PARAM_LIST  },
 
 };
 
@@ -792,21 +792,28 @@ CLI_error_et led_handler( u8_t aArgCount, char *aArgVector[] )
 {
 	CLI_error_et error = CLI_ERROR_NONE;
 	char output_string[200];
-	u8_t led = 0u;
+	HAL_BRD_led_et led = 0u;
 	off_on_et state = OFF;
 
 	CLI_send_newline();
 
 	/* What LED is the user trying to control */
-	id = strtoul( aArgVector[1], NULL, 16 );
+	led = strtoul( aArgVector[1], NULL, 16 );
+	state = (off_on_et)strtoul( aArgVector[2], NULL, 16 );
 
-	state = (off_on_et)strtoul( aArgVector[1], NULL, 16 );
+	if( led == 0x0a )
+	{
+		HAL_BRD_set_LED_state( LED_0, state );
+		HAL_BRD_set_LED_state( LED_1, state );
+		HAL_BRD_set_LED_state( LED_2, state );
+		HAL_BRD_set_LED_state( LED_3, state );
+	}
+	else
+	{
+		HAL_BRD_set_LED_state( led, state );
+	}
 
-
-
-
-
-
+	return( error );
 }
 
 

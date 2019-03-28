@@ -53,7 +53,7 @@
 		4,(u32_t)0x0001,(u32_t)0xFFFF }
 
 #define LED_CMD_PARAM_LIST { \
-		{ 1, (u32_t)LED_0,(u32_t)LED_MAX - 1 }, \
+		{ 1, (u32_t)LED_0,(u32_t)(LED_MAX - 1) }, \
 		{ 1, (u32_t)OFF,(u32_t)ON } }
 
 typedef enum
