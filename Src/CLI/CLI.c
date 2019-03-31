@@ -422,6 +422,8 @@ CLI_error_et CLI_validate_arguments( u8_t aArgCount, char *aArgVector[], u8_t co
 	CLI_error_et error = CLI_ERROR_NONE;
 	u8_t i = 0u;
 	u8_t len = 0u;
+	u32_t min_arg_value;
+	u32_t max_arg_value;
 
 	if( aArgCount > CLI_CMD_LINE_ARGS_MAX )
 	{
@@ -794,6 +796,8 @@ CLI_error_et led_handler( u8_t aArgCount, char *aArgVector[] )
 	char output_string[200];
 	HAL_BRD_led_et led = 0u;
 	off_on_et state = OFF;
+
+	(void)output_string;
 
 	CLI_send_newline();
 
