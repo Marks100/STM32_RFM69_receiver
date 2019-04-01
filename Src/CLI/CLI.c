@@ -65,17 +65,17 @@ STATIC const CLI_Command_st CLI_commands[] =
 	 {"ver",		  &ver_handler,			HELP_VER , 				SUPPORTED_FOR_ALL_MODES, ENABLE, 0, NULL_PARAM_LIST },
 	 {"setmode",	  &setmode_handler,	    HELP_SET_MODE, 			SUPPORTED_FOR_ALL_MODES, ENABLE, 1, NULL_PARAM_LIST },
 	 {"reset",		  &reset_handler,	    HELP_RESET, 			SUPPORTED_FOR_ALL_MODES, ENABLE, 0, NULL_PARAM_LIST },
-	 {"readnvm",	  &readnvm_handler,	    HELP_NVM, 	    		SUPPORTED_FOR_ALL_MODES, ENABLE, 0, NULL_PARAM_LIST },
 	 {"setid",	      &setid_handler,	    HELP_SET_ID, 	        SUPPORTED_FOR_ALL_MODES, ENABLE, 1, SET_ID_CMD_PARAM_LIST },
 	 {"nvm",		  &nvm_handler,			HELP_NVM,				SUPPORTED_FOR_ALL_MODES, ENABLE, 0, NULL_PARAM_LIST },
 	 {"clocks",		  &clocks_handler,		HELP_CLOCKS,			SUPPORTED_FOR_ALL_MODES, ENABLE, 0, NULL_PARAM_LIST },
 	 {"temp",		  &temp_handler,		HELP_TEMP,			    SUPPORTED_FOR_ALL_MODES, ENABLE, 0, NULL_PARAM_LIST },
 	 {"batt",		  &batt_handler,		HELP_BATT,			    SUPPORTED_FOR_ALL_MODES, ENABLE, 0, NULL_PARAM_LIST },
 	 {"listnodes",    &listnodes_handler,	HELP_LISTNODES,		    SUPPORTED_FOR_ALL_MODES, ENABLE, 0, NULL_PARAM_LIST },
-	 {"removenode",   &removenode_handler,  HELP_REMOVENODE,        SUPPORTED_FOR_ALL_MODES, ENABLE, 1, REMOVENODE_CMD_PARAM_LIST },
 	 {"led",   		  &led_handler,         HELP_LED,               SUPPORTED_FOR_ALL_MODES, ENABLE, 2, LED_CMD_PARAM_LIST  },
-	 {NULL,			  NULL,					NULL,					SUPPORTED_FOR_ALL_MODES, ENABLE, 0, NULL_PARAM_LIST  },
-
+	 {"wladd", 		  &wl_add_handler,      HELP_WL_ADD, 			SUPPORTED_FOR_ALL_MODES, ENABLE, 1, WL_ADD_CMD_PARAM_LIST  },
+	 {"wlremove",     &wl_remove_handler,	HELP_WL_REM,			SUPPORTED_FOR_ALL_MODES, ENABLE, 1, WL_REMOVE_CMD_PARAM_LIST  },
+	 {"wldisplay",    &wl_display_handler,	HELP_WL_DISPLAY,	    SUPPORTED_FOR_ALL_MODES, ENABLE, 1, NULL_PARAM_LIST  },
+	 {NULL,			  NULL,					NULL,					SUPPORTED_FOR_ALL_MODES, ENABLE, 0, NULL_PARAM_LIST  }
 };
 
 
@@ -182,9 +182,6 @@ void CLI_handle_received_char( u8_t received_char )
             CLI_cr_received_s = TRUE;
             CLI_send_data( "\n", sizeof(received_char) );
 
-            /* Setup the index for the first command entered by the user */
-            CLI_cmd_history_s.index_to_next_cmd = ( useable_commands % CLI_MAX_COMMAND_HISTORY );
-
             if( CLI_rx_command_len != 0u )
             {
             	/* Dont add the new command if its already on the current list */
@@ -199,6 +196,12 @@ void CLI_handle_received_char( u8_t received_char )
 
 				if( command_present == FALSE )
 				{
+	            	if( useable_commands != CLI_MAX_COMMAND_HISTORY)
+					{
+						 /* Setup the index for the first command entered by the user, as the history is not full */
+						 CLI_cmd_history_s.index_to_next_cmd = ( useable_commands  % CLI_MAX_COMMAND_HISTORY );
+					}
+
 					STDC_memset( &CLI_cmd_history_s.cmd_list[CLI_cmd_history_s.index_to_next_cmd].cmd, 0x00, sizeof( CLI_cmd_history_s.cmd_list[CLI_cmd_history_s.index_to_next_cmd].cmd ) );
 
 					STDC_memcpy( &CLI_cmd_history_s.cmd_list[CLI_cmd_history_s.index_to_next_cmd].cmd, CLI_msg_read_s, CLI_rx_command_len );
@@ -257,7 +260,6 @@ void CLI_handle_received_char( u8_t received_char )
 				CLI_store_history();
 
 				STDC_memset( CLI_msg_read_s, 0x00, sizeof( CLI_msg_read_s ) );
-
 				strcpy( CLI_msg_read_s, CLI_cmd_history_s.cmd_list[ CLI_cmd_history_s.index_to_next_cmd ].cmd);
 
 				CLI_byte_index_s = strlen( CLI_cmd_history_s.cmd_list[ CLI_cmd_history_s.index_to_next_cmd ].cmd );
@@ -655,11 +657,16 @@ CLI_error_et nvm_handler( u8_t aArgCount, char *aArgVector[] )
 	STDC_memset( output_string, 0x00, sizeof( output_string ) );
 
 	CLI_send_newline();
-	sprintf( output_string, "/****** NVM data ******/\r\nchksum:\t0x%02X\r\nVers:\t%d\r\nwrites:\t%d\r\nSleep time:\t%d\r\n",
+	sprintf( output_string, "/****** NVM data ******/\r\nchksum:\t\t0x%02X\r\nVers:\t\t%d\r\nwrites:\t\t%d\r\n",
 																									   NVM_info_s.checksum,
 																								  (int)NVM_info_s.version,
-																								  (int)NVM_info_s.write_count,
-	     																						  (int)NVM_info_s.NVM_generic_data_blk_s.sleep_time );
+																								  (int)NVM_info_s.write_count );
+
+	CLI_send_newline();
+	CLI_send_data( output_string, strlen(output_string));
+
+	sprintf( output_string, "Device ID:\t0x%02X\r\n",
+	(int)NVM_info_s.NVM_generic_data_blk_s.device_id );
 	CLI_send_newline();
 	CLI_send_data( output_string, strlen(output_string));
 
@@ -743,7 +750,6 @@ CLI_error_et listnodes_handler( u8_t aArgCount, char *aArgVector[] )
 		{
 			sprintf( output_string, "Node ID %02d:\t0x%04X\r\n", num_node, node_ids[num_node] );
 			CLI_send_data( output_string, strlen(output_string));
-			CLI_send_newline();
 			STDC_memset( output_string, 0x20, sizeof( output_string ) );
 		}
 		else
@@ -760,7 +766,7 @@ CLI_error_et listnodes_handler( u8_t aArgCount, char *aArgVector[] )
 }
 
 
-CLI_error_et removenode_handler( u8_t aArgCount, char *aArgVector[] )
+CLI_error_et remove_wl_node_handler( u8_t aArgCount, char *aArgVector[] )
 {
 	CLI_error_et error = CLI_ERROR_NONE;
 	char output_string[200];
@@ -849,6 +855,93 @@ CLI_error_et led_handler( u8_t aArgCount, char *aArgVector[] )
 	else
 	{
 		HAL_BRD_set_LED_state( led, state );
+	}
+
+	return( error );
+}
+
+
+CLI_error_et wl_add_handler( u8_t aArgCount, char *aArgVector[] )
+{
+	CLI_error_et error = CLI_ERROR_NONE;
+	char output_string[200];
+	pass_fail_et result;
+	u16_t id;
+
+	/* What ID are we trying to add */
+	id = strtoul( aArgVector[1], NULL, 16 );
+
+	CLI_send_newline();
+
+	result = RF_MGR_add_wl_node( id );
+
+	if( result == PASS )
+	{
+		sprintf( output_string, "Node ID 0x%04X successfully added", id );
+		CLI_send_data( output_string, strlen(output_string));
+		CLI_send_newline();
+	}
+	else
+	{
+		sprintf( output_string, "Failed to add Node ID 0x%02X", id );
+		CLI_send_data( output_string, strlen(output_string));
+		CLI_send_newline();
+	}
+
+
+	return( error );
+}
+
+
+
+CLI_error_et wl_remove_handler( u8_t aArgCount, char *aArgVector[] )
+{
+	CLI_error_et error = CLI_ERROR_NONE;
+	char output_string[200];
+	u8_t pos = 0u;
+	pass_fail_et result;
+
+	CLI_send_newline();
+
+	/* What LED is the user trying to control */
+	pos = strtoul( aArgVector[1], NULL, 10 );
+
+	result = RF_MGR_remove_wl_node( pos );
+
+	if( result == PASS )
+	{
+		sprintf( output_string, "Node at position %d successfully removed", pos );
+		CLI_send_data( output_string, strlen(output_string));
+		CLI_send_newline();
+	}
+	else
+	{
+		sprintf( output_string, "Failed to remove node at position %d", pos );
+		CLI_send_data( output_string, strlen(output_string));
+		CLI_send_newline();
+	}
+
+	return( error );
+}
+
+
+CLI_error_et wl_display_handler( u8_t aArgCount, char *aArgVector[] )
+{
+	CLI_error_et error = CLI_ERROR_NONE;
+	char output_string[200];
+	u8_t i = 0u;
+	RF_MGR_whitelist_st *data_p;
+
+	data_p = RF_MGR_get_whitelist_addres();
+
+	CLI_send_newline();
+
+	for( i = 0; i < RF_MGR_RF_DATA_HANDLER_SIZE ; i++ )
+	{
+		sprintf( output_string, "Node %02d ID:\t0x%04X", i, *( data_p + i ) );
+		//sprintf( output_string, "Node %02d ID:\t0x%02X", i, data_p[i]->id );
+		CLI_send_data( output_string, strlen(output_string));
+		CLI_send_newline();
 	}
 
 	return( error );

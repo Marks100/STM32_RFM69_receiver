@@ -352,6 +352,11 @@ typedef struct
 } RF_MGR_sed_data_st;
 
 
+typedef struct
+{
+	u16_t id;
+} RF_MGR_whitelist_st;
+
 /***************************************************************************************************
 **                              Exported Globals                                                  **
 ***************************************************************************************************/
@@ -413,8 +418,11 @@ void 				 NRF24_handle_packet_stats( u8_t type );
 void                 RF_MGR_analyse_received_packets( void );
 void                 RF_MGR_handle_early_prototype_sed( u16_t sensor_id, u8_t* data_p, u32_t packet_count );
 void                 RF_MGR_get_all_decoded_IDs( u16_t* data_p );
-pass_fail_et 		 RF_MGR_remove_node( u8_t pos );
+pass_fail_et 		 RF_MGR_remove_wl_node( u8_t pos );
+pass_fail_et 		 RF_MGR_add_wl_node( u16_t node_id );
 void 				 RF_MGR_display_sed_data( void );
+RF_MGR_whitelist_st* RF_MGR_get_whitelist_addres( void );
+pass_fail_et 		 RF_MGR_add_wl_node( u16_t id );
 
 
 #endif /* RF_H multiple inclusion guard */

@@ -1,0 +1,37 @@
+setbaud 115200
+
+sendln 'wldispllay'
+mpause 100
+
+sendln 'wladd 000A'
+mpause 100
+
+sendln 'wladd 000B'
+mpause 100
+
+sendln 'wladd 000C'
+mpause 100
+
+sendln 'wladd 000D'
+mpause 100
+
+sendln 'wladd 000E'
+mpause 100
+
+sendln 'wladd 000F'
+mpause 100
+
+sendln 'wladd 0010'
+mpause 100
+
+sendln 'wladd 00011'
+mpause 100
+
+sendln 'wladd 0012'
+mpause 100
+
+sendln 'wladd 0013'
+mpause 100
+
+sendln 'wldispllay'
+mpause 100

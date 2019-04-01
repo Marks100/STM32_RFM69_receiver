@@ -40,8 +40,10 @@
 #define HELP_BATT				 "batt:              Reads the internal battery/supply voltoge of the device\r\n"
 #define HELP_LISTNODES			 "listnodes:         Lists all of the connected sensor node IDs\r\n"
 #define HELP_REMOVENODE          "removenode:        Removes a specific node from the list of connected nodes\r\n"
-#define HELP_LED                 "led:               Removes a specific node from the list of connected nodes\r\n"
-
+#define HELP_LED                 "led:               <0..3> <0..1> Controls the leds\r\n"
+#define HELP_WL_ADD              "wladd:             Adds the ID of a node to the RF whitelist\r\n"
+#define HELP_WL_REM              "wlremove:          Removes the selected pos from the RF whitelist\r\n"
+#define HELP_WL_DISPLAY          "wldisplay:         Displays the entire RF whitelist\r\n"
 
 #define NULL_PARAM_LIST {\
 		0,(u32_t)0x0000,(u32_t)0x0000 }
@@ -49,12 +51,15 @@
 #define SET_ID_CMD_PARAM_LIST {\
 		4,(u32_t)0x0001,(u32_t)0xFFFF }
 
-#define REMOVENODE_CMD_PARAM_LIST {\
-		4,(u32_t)0x0001,(u32_t)0xFFFF }
-
 #define LED_CMD_PARAM_LIST { \
 		{ 1, (u32_t)LED_0,(u32_t)(LED_MAX - 1) }, \
 		{ 1, (u32_t)OFF,(u32_t)ON } }
+
+#define WL_ADD_CMD_PARAM_LIST { \
+		4, (u32_t)1,(u32_t)(0xFFFF) }
+
+#define WL_REMOVE_CMD_PARAM_LIST {\
+		2,(u32_t)0x0000,(u32_t)RF_MGR_RF_DATA_HANDLER_SIZE }
 
 typedef enum
 {
@@ -146,7 +151,9 @@ CLI_error_et batt_handler( u8_t aArgCount, char *aArgVector[] );
 CLI_error_et listnodes_handler( u8_t aArgCount, char *aArgVector[] );
 CLI_error_et removenode_handler( u8_t aArgCount, char *aArgVector[] );
 CLI_error_et led_handler( u8_t aArgCount, char *aArgVector[] );
-
+CLI_error_et wl_add_handler( u8_t aArgCount, char *aArgVector[] );
+CLI_error_et wl_remove_handler( u8_t aArgCount, char *aArgVector[] );
+CLI_error_et wl_display_handler( u8_t aArgCount, char *aArgVector[] );
 
 
 #endif

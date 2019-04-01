@@ -59,6 +59,7 @@ STATIC u16_t NRF24_resets_s;
 
 STATIC RF_MGR_rf_data_store_st RF_MGR_rf_data_store_s;
 STATIC RF_MGR_sed_data_st	   RF_MGR_sed_data_s;
+STATIC RF_MGR_whitelist_st	   RF_MGR_whitelist_s[RF_MGR_RF_DATA_HANDLER_SIZE];
 
 /***************************************************************************************************
 **                              Data declarations and definitions                                 **
@@ -84,6 +85,8 @@ STATIC RF_MGR_sed_data_st	   RF_MGR_sed_data_s;
 ***************************************************************************************************/
 void NRF24_init( void )
 {
+	u8_t i;
+
 	/* Set up the state to initialise the module in the 1 sec tick */
 	NRF24_state_s = NRF24_POWERING_UP;
 	NRF24_cycle_counter_s = NRF24_TX_SCHEDULE_CNT;
@@ -98,6 +101,12 @@ void NRF24_init( void )
 
     STDC_memset( &RF_MGR_rf_data_store_s, 0x00, sizeof( RF_MGR_rf_data_store_s ) );
     STDC_memset( &RF_MGR_sed_data_s, 0x00, sizeof( RF_MGR_sed_data_s ) );
+
+    /* Copy the whitelist from NVM */
+    for( i = 0; i < RF_MGR_RF_DATA_HANDLER_SIZE; i++ )
+    {
+    	STDC_memcpy( &RF_MGR_whitelist_s[i].id, &NVM_info_s.NVM_generic_data_blk_s.rf_whitelist[i].id, sizeof( RF_MGR_whitelist_s[i].id ) );
+    }
 }
 
 
@@ -2043,30 +2052,30 @@ void RF_MGR_get_all_decoded_IDs( u16_t* data_p )
 
 
 
-pass_fail_et RF_MGR_remove_node( u8_t pos )
+pass_fail_et RF_MGR_remove_wl_node( u8_t pos )
 {
 	pass_fail_et returnType = FAIL;
 
 	/* first of all check that the pos is valid */
-	if( pos <= RF_MGR_RF_DATA_HANDLER_SIZE )
+	if( pos < RF_MGR_RF_DATA_HANDLER_SIZE )
 	{
-		if( RF_MGR_rf_data_store_s.data_packet_s[pos].node_id != 0u )
+		if( RF_MGR_whitelist_s[pos].id != 0u )
 		{
-			STDC_memset( &RF_MGR_rf_data_store_s.data_packet_s[pos], 0x00, sizeof( data_packet_st ) );
+			STDC_memset( &RF_MGR_whitelist_s[pos].id, 0x00, sizeof( RF_MGR_whitelist_s[pos].id ) );
 
 			/* Now that we have removed that ID and its 0, we want to shift the IDs that are above it
 			 * in the array down to fill the empty spot */
 
 			for( pos = pos; pos < RF_MGR_RF_DATA_HANDLER_SIZE; pos++ )
 			{
-				if( RF_MGR_rf_data_store_s.data_packet_s[pos + 1].node_id != 0u )
+				if( RF_MGR_whitelist_s[pos + 1].id != 0u )
 				{
-					STDC_memcpy( &RF_MGR_rf_data_store_s.data_packet_s[pos],
-							 	 &RF_MGR_rf_data_store_s.data_packet_s[pos + 1], sizeof( data_packet_st ) );
+					STDC_memcpy( &RF_MGR_whitelist_s[pos].id,
+							 	&RF_MGR_whitelist_s[pos + 1].id, sizeof( RF_MGR_whitelist_s[pos].id ) );
 				}
 				else
 				{
-					STDC_memset( &RF_MGR_rf_data_store_s.data_packet_s[pos], 0x00, sizeof( data_packet_st ) );
+					STDC_memset( &RF_MGR_whitelist_s[pos].id, 0x00, sizeof( RF_MGR_whitelist_s[pos].id ) );
 					break;
 				}
 			}
@@ -2075,6 +2084,37 @@ pass_fail_et RF_MGR_remove_node( u8_t pos )
 	}
 
 	return ( returnType );
+}
+
+
+pass_fail_et RF_MGR_add_wl_node( u16_t id )
+{
+	pass_fail_et returnType = FAIL;
+	u8_t pos = 0u;
+
+	/* first of all check that the pos is valid */
+	for( pos = 0u; pos < RF_MGR_RF_DATA_HANDLER_SIZE; pos++ )
+	{
+		if( RF_MGR_whitelist_s[pos].id == id )
+		{
+			returnType = FAIL;
+			break;
+		}
+		if( RF_MGR_whitelist_s[pos].id == 0u )
+		{
+			/* We have found a free position */
+			RF_MGR_whitelist_s[pos].id = id;
+			returnType = PASS;
+			break;
+		}
+	}
+	return ( returnType );
+}
+
+
+RF_MGR_whitelist_st* RF_MGR_get_whitelist_addres( void )
+{
+	return( &RF_MGR_whitelist_s );
 }
 
 /***************************************************************************************************

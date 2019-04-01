@@ -58,6 +58,7 @@ typedef struct
     RFM69_static_configuration_et rf_config;
     NRF24_state_et nrf_startup_tx_rx_mode;
     CLI_cmd_st cmd_list[CLI_MAX_COMMAND_HISTORY];
+    RF_MGR_whitelist_st rf_whitelist[RF_MGR_RF_DATA_HANDLER_SIZE];
 } NVM_generic_data_blk_st;
 
 
