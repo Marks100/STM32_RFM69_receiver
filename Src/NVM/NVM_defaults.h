@@ -52,7 +52,7 @@ const NVM_generic_data_blk_st      NVM_DEFAULT_GENERIC_DATA_BLK_s =
 	{ "help",
 	  "ver",
 	  "reset",
-	  "",
+	  "nvm",
 	  "",
 	  "",
 	}

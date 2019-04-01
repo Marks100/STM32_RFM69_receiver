@@ -158,10 +158,20 @@ void CLI_handle_serial_command ( void )
 void CLI_handle_received_char( u8_t received_char )
 {
     u8_t useable_commands = 0u;
+    false_true_et command_present = FALSE;
     u8_t i = 0;
 
     if( ( ( received_char >= CLI_SPACE ) && ( received_char <= CLI_DEL ) ) || ( received_char <= CLI_CR ) )
     {
+		/* count the number of non 0 commands */
+		for( i = 0u; i < CLI_MAX_COMMAND_HISTORY; i++ )
+		{
+			if( CLI_cmd_history_s.cmd_list[i].cmd[0] != 0x00 )
+			{
+				useable_commands += 1u;
+			}
+		}
+
         if ( received_char == '\r')
         {
             CLI_rx_command_len = CLI_byte_index_s;
@@ -172,13 +182,29 @@ void CLI_handle_received_char( u8_t received_char )
             CLI_cr_received_s = TRUE;
             CLI_send_data( "\n", sizeof(received_char) );
 
+            /* Setup the index for the first command entered by the user */
+            CLI_cmd_history_s.index_to_next_cmd = ( useable_commands % CLI_MAX_COMMAND_HISTORY );
+
             if( CLI_rx_command_len != 0u )
             {
-                STDC_memset( &CLI_cmd_history_s.cmd_list[CLI_cmd_history_s.index_to_next_cmd].cmd, 0x00, sizeof( CLI_cmd_history_s.cmd_list[CLI_cmd_history_s.index_to_next_cmd].cmd ) );
+            	/* Dont add the new command if its already on the current list */
+				for( i = 0u; i < useable_commands; i++ )
+				{
+					if( STDC_memcompare( CLI_cmd_history_s.cmd_list[i].cmd, CLI_msg_read_s, CLI_rx_command_len ) )
+					{
+						command_present = TRUE;
+						break;
+					}
+				}
 
-                STDC_memcpy( &CLI_cmd_history_s.cmd_list[CLI_cmd_history_s.index_to_next_cmd].cmd, CLI_msg_read_s, CLI_rx_command_len );
+				if( command_present == FALSE )
+				{
+					STDC_memset( &CLI_cmd_history_s.cmd_list[CLI_cmd_history_s.index_to_next_cmd].cmd, 0x00, sizeof( CLI_cmd_history_s.cmd_list[CLI_cmd_history_s.index_to_next_cmd].cmd ) );
 
-                CLI_cmd_history_s.index_to_next_cmd = ( CLI_cmd_history_s.index_to_next_cmd + 1u )%CLI_MAX_COMMAND_HISTORY;
+					STDC_memcpy( &CLI_cmd_history_s.cmd_list[CLI_cmd_history_s.index_to_next_cmd].cmd, CLI_msg_read_s, CLI_rx_command_len );
+
+					CLI_cmd_history_s.index_to_next_cmd = ( CLI_cmd_history_s.index_to_next_cmd + 1u )%CLI_MAX_COMMAND_HISTORY;
+				}
             }
 
             CLI_store_history();
@@ -209,16 +235,7 @@ void CLI_handle_received_char( u8_t received_char )
             //load the previous command and print it and wait for the carriage return
             CLI_msg_read_s[ CLI_byte_index_s++ ] = received_char;
 
-            /* count the number of non 0 commands */
-            for( i = 0u; i < CLI_MAX_COMMAND_HISTORY; i++ )
-            {
-            	if( CLI_cmd_history_s.cmd_list[i].cmd[0] != 0x00 )
-            	{
-            		useable_commands += 1u;
-            	}
-            }
-
-            /* Ifthere are no useable commands then dont allow the user to scroll up or down */
+            /* If there are no useable commands then dont allow the user to scroll up or down */
             if( useable_commands != 0u )
             {
 				if( received_char == UP_ARROW )
@@ -638,22 +655,23 @@ CLI_error_et nvm_handler( u8_t aArgCount, char *aArgVector[] )
 	STDC_memset( output_string, 0x00, sizeof( output_string ) );
 
 	CLI_send_newline();
-	sprintf( output_string, "chksum:\t0x%02X\r\nVers:\t%d\r\nwrites:\t%d\r\nSleep time:\t%d\r\n", NVM_info_s.checksum,
+	sprintf( output_string, "/****** NVM data ******/\r\nchksum:\t0x%02X\r\nVers:\t%d\r\nwrites:\t%d\r\nSleep time:\t%d\r\n",
+																									   NVM_info_s.checksum,
 																								  (int)NVM_info_s.version,
 																								  (int)NVM_info_s.write_count,
-																								  (int)NVM_info_s.NVM_generic_data_blk_s.sleep_time );
+	     																						  (int)NVM_info_s.NVM_generic_data_blk_s.sleep_time );
 	CLI_send_newline();
 	CLI_send_data( output_string, strlen(output_string));
 
 	STDC_memset( output_string, 0x00, sizeof( output_string ) );
-	sprintf( output_string, "Stored CLI commands:" );
+	sprintf( output_string, "Stored CLI commands:\r\n" );
 	CLI_send_newline();
 	CLI_send_data( output_string, strlen(output_string));
 
 	for( i = 0u; i < CLI_MAX_COMMAND_HISTORY; i++ )
 	{
 		STDC_memset( output_string, 0x00, sizeof( output_string ) );
-		sprintf( output_string, "%2d: %s\r\n", i, NVM_info_s.NVM_generic_data_blk_s.cmd_list[i].cmd );
+		sprintf( output_string, "%2d: %s\r\n", i + 1, NVM_info_s.NVM_generic_data_blk_s.cmd_list[i].cmd );
 		CLI_send_data( output_string, strlen(output_string));
 	}
 
