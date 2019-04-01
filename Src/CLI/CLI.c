@@ -631,13 +631,29 @@ CLI_error_et nvm_handler( u8_t aArgCount, char *aArgVector[] )
 {
 	CLI_error_et error = CLI_ERROR_NONE;
 	char output_string[200];
+	u8_t i = 0u;
 
+	STDC_memset( output_string, 0x00, sizeof( output_string ) );
+
+	CLI_send_newline();
 	sprintf( output_string, "chksum:\t0x%02X\r\nVers:\t%d\r\nwrites:\t%d\r\nSleep time:\t%d\r\n", NVM_info_s.checksum,
 																								  (int)NVM_info_s.version,
 																								  (int)NVM_info_s.write_count,
 																								  (int)NVM_info_s.NVM_generic_data_blk_s.sleep_time );
 	CLI_send_newline();
 	CLI_send_data( output_string, strlen(output_string));
+
+	STDC_memset( output_string, 0x00, sizeof( output_string ) );
+	sprintf( output_string, "Stored CLI commands:" );
+	CLI_send_newline();
+	CLI_send_data( output_string, strlen(output_string));
+
+	for( i = 0u; i < CLI_MAX_COMMAND_HISTORY; i++ )
+	{
+		STDC_memset( output_string, 0x00, sizeof( output_string ) );
+		sprintf( output_string, "%2d: %s\r\n", i, NVM_info_s.NVM_generic_data_blk_s.cmd_list[i].cmd );
+		CLI_send_data( output_string, strlen(output_string));
+	}
 
 	return( error );
 }
