@@ -9,4 +9,3 @@ if "%1"=="COIDE" (
 
 cd %PTLD%\BuildEnv\xBuildEnv\bin\
 ruby.exe sVersion -a %PTLD%\Src\
- No newline at end of file

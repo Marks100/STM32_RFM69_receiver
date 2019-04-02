@@ -341,7 +341,7 @@ void RFM69_get_configuration( RFM69_static_configuration_et config, RFM69_regist
 *   \note
 *
 ***************************************************************************************************/
-pass_fail_et RFM69_read_registers( RFM69_instruction_et instruction, RFM69_registers_et address, u8_t read_data[], u8_t num_bytes )
+pass_fail_et RFM69_read_registers( RFM69_instruction_et instruction, RFM69_registers_et address, u8_t* read_data, u8_t num_bytes )
 {
     /* assume pass until prove otherwise */
     pass_fail_et result = PASS;
@@ -414,7 +414,7 @@ pass_fail_et RFM69_read_registers( RFM69_instruction_et instruction, RFM69_regis
 *
 *******************************************************************************
 */
-pass_fail_et RFM69_write_registers( RFM69_instruction_et instruction, RFM69_registers_et address, u8_t write_data[], u8_t num_bytes )
+pass_fail_et RFM69_write_registers( RFM69_instruction_et instruction, RFM69_registers_et address, u8_t* write_data, u8_t num_bytes )
 {
     /* assume pass until prove otherwise */
     pass_fail_et result = PASS;
@@ -583,7 +583,7 @@ u8_t RFM69_read_temp( void )
 	}
 
 	/* Read the temperature measurement */
-	RFM69_read_registers( READ_FROM_CHIP, REGTEMP2, &temp, 1 );
+	RFM69_read_registers( READ_FROM_CHIP, REGTEMP2, (u8_t*)&temp, 1 );
 	temp += COURSE_TEMP_COEF;
 	temp ^= 0xFF;
 

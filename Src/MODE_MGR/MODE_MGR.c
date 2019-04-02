@@ -72,7 +72,6 @@ void MODE_MGR_action_schedule_normal( void )
     switch( MODE_MGR_tick_timer_msecs_s )
     {
         case 20u:
-            //SERIAL_msg_handler();
         	break;
 
         case 40u:
@@ -93,7 +92,6 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 120u:
-            //SERIAL_msg_handler();
             //RFM69_tick();
         	break;
 
@@ -115,7 +113,6 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 220u://RFM69_tick
-            //SERIAL_msg_handler();
         	break;
 
         case 240u:
@@ -136,7 +133,6 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 320u:
-            //SERIAL_msg_handler();
             //RFM69_tick();
         	break;
 
@@ -158,7 +154,6 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 420u:
-            //SERIAL_msg_handler();
         	break;
 
         case 440u:
@@ -179,7 +174,6 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 520u:
-            //SERIAL_msg_handler();
             //RFM69_tick();
         	break;
 
@@ -201,7 +195,6 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 620u:
-            //SERIAL_msg_handler();
         	break;
 
         case 640u:
@@ -222,7 +215,6 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 720u:
-            //SERIAL_msg_handler();
             //RFM69_tick();
         	break;
 
@@ -244,7 +236,6 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 820u:
-            //SERIAL_msg_handler();
         	break;
 
         case 840u:
@@ -265,7 +256,6 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 920u:
-            //SERIAL_msg_handler();
             //RFM69_tick();
         	break;
 

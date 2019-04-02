@@ -2108,13 +2108,15 @@ pass_fail_et RF_MGR_add_wl_node( u16_t id )
 			break;
 		}
 	}
+
+
 	return ( returnType );
 }
 
 
 RF_MGR_whitelist_st* RF_MGR_get_whitelist_addres( void )
 {
-	return( &RF_MGR_whitelist_s );
+	return( &RF_MGR_whitelist_s[0] );
 }
 
 /***************************************************************************************************
