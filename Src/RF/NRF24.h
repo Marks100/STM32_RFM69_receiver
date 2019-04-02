@@ -422,7 +422,6 @@ pass_fail_et 		 RF_MGR_remove_wl_node( u8_t pos );
 pass_fail_et 		 RF_MGR_add_wl_node( u16_t node_id );
 void 				 RF_MGR_display_sed_data( void );
 RF_MGR_whitelist_st* RF_MGR_get_whitelist_addres( void );
-pass_fail_et 		 RF_MGR_add_wl_node( u16_t id );
 
 
 #endif /* RF_H multiple inclusion guard */

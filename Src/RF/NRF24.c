@@ -2108,6 +2108,8 @@ pass_fail_et RF_MGR_add_wl_node( u16_t id )
 			break;
 		}
 	}
+
+
 	return ( returnType );
 }
 

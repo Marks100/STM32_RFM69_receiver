@@ -520,7 +520,7 @@ void CLI_store_history( void )
 
 	for( i = 0u; i < CLI_MAX_COMMAND_HISTORY; i++ )
 	{
-		STDC_memcpy( &NVM_info_s.NVM_generic_data_blk_s.cmd_list[i], &CLI_cmd_history_s.cmd_list[i], sizeof( CLI_cmd_history_s.cmd_list ) );
+		STDC_memcpy( &NVM_info_s.NVM_generic_data_blk_s.cmd_list[i], &CLI_cmd_history_s.cmd_list[i], sizeof( CLI_cmd_st ) );
 	}
 }
 
@@ -942,7 +942,7 @@ CLI_error_et wl_display_handler( u8_t aArgCount, char *aArgVector[] )
 
 	for( i = 0; i < RF_MGR_RF_DATA_HANDLER_SIZE ; i++ )
 	{
-		sprintf( output_string, "Node %02d ID:\t0x%02X", i, data_p->id );
+		sprintf( output_string, "Node %02d ID:\t0x%04X", i, data_p->id );
 		CLI_send_data( output_string, strlen(output_string));
 		CLI_send_newline();
 		data_p ++;
