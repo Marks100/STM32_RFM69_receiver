@@ -5,6 +5,7 @@
     #include "stm32f10x_rcc.h"
     #include "stm32f10x_pwr.h"
 	#include "stm32f10x_i2c.h"
+	#include "stm32f10x_wwdg.h"
 #endif
 
 #include "C_defs.h"
@@ -61,6 +62,8 @@ int main(void)
 
 	/* Init the systick timer */
 	MAIN_SYSTICK_init();
+
+	MAIN_WATCHDOG_init();
 
 	while (1)
 	{
@@ -123,6 +126,21 @@ void delay_us(u16_t us)
 		      );
 }
 
+
+
+void MAIN_WATCHDOG_init( void )
+{
+	WWDG_DeInit();
+	WWDG_SetPrescaler(WWDG_Prescaler_8);
+	WWDG_SetWindowValue(0x7F);
+	WWDG_Enable(0x5F);
+}
+
+
+void MAIN_WATCHDOG_deinit( void )
+{
+	WWDG_DeInit();
+}
 
 
 
