@@ -5,7 +5,7 @@
     #include "stm32f10x_rcc.h"
     #include "stm32f10x_pwr.h"
 	#include "stm32f10x_i2c.h"
-	#include "stm32f10x_wwdg.h"
+	#include "stm32f10x_iwdg.h"
 #endif
 
 #include "C_defs.h"
@@ -130,18 +130,28 @@ void delay_us(u16_t us)
 
 void MAIN_WATCHDOG_init( void )
 {
-	WWDG_DeInit();
-	WWDG_SetPrescaler(WWDG_Prescaler_8);
-	WWDG_SetWindowValue(0x7F);
-	WWDG_Enable(0x5F);
+	/* This pauses the watchdog while debugging */
+	DBGMCU->CR |= DBGMCU_CR_DBG_IWDG_STOP;
+
+	IWDG_WriteAccessCmd(IWDG_WriteAccess_Enable);
+	IWDG_SetPrescaler(IWDG_Prescaler_4); // 4, 8, 16 ... 256
+	IWDG_SetReload(0x07D0);//This parameter must be a number between 0 and 0x0FFF.
+	IWDG_ReloadCounter();
+	IWDG_Enable();
 }
 
 
 void MAIN_WATCHDOG_deinit( void )
 {
-	WWDG_DeInit();
+	/* Cant disable :( */
 }
 
+
+void MAIN_WATCHDOG_kick( void )
+{
+	IWDG_SetReload(0x07D0);//This parameter must be a number between 0 and 0x0FFF.
+	IWDG_ReloadCounter();
+}
 
 
 

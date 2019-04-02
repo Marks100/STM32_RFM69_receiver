@@ -64,7 +64,7 @@ STATIC const CLI_Command_st CLI_commands[] =
 {
 	 {"help",		  &help_handler,		HELP_HELP, 				SUPPORTED_FOR_ALL_MODES, ENABLE, 0, NULL_PARAM_LIST },
 	 {"ver",		  &ver_handler,			HELP_VER , 				SUPPORTED_FOR_ALL_MODES, ENABLE, 0, NULL_PARAM_LIST },
-	 {"setmode",	  &setmode_handler,	    HELP_SET_MODE, 			SUPPORTED_FOR_ALL_MODES, ENABLE, 1, NULL_PARAM_LIST },
+	 {"setmode",	  &setmode_handler,	    HELP_SET_MODE, 			SUPPORTED_FOR_ALL_MODES, ENABLE, 0, NULL_PARAM_LIST },
 	 {"reset",		  &reset_handler,	    HELP_RESET, 			SUPPORTED_FOR_ALL_MODES, ENABLE, 0, NULL_PARAM_LIST },
 	 {"setid",	      &setid_handler,	    HELP_SET_ID, 	        SUPPORTED_FOR_ALL_MODES, ENABLE, 1, SET_ID_CMD_PARAM_LIST },
 	 {"nvm",		  &nvm_handler,			HELP_NVM,				SUPPORTED_FOR_ALL_MODES, ENABLE, 0, NULL_PARAM_LIST },
@@ -75,7 +75,8 @@ STATIC const CLI_Command_st CLI_commands[] =
 	 {"led",   		  &led_handler,         HELP_LED,               SUPPORTED_FOR_ALL_MODES, ENABLE, 2, LED_CMD_PARAM_LIST  },
 	 {"wladd", 		  &wl_add_handler,      HELP_WL_ADD, 			SUPPORTED_FOR_ALL_MODES, ENABLE, 1, WL_ADD_CMD_PARAM_LIST  },
 	 {"wlremove",     &wl_remove_handler,	HELP_WL_REM,			SUPPORTED_FOR_ALL_MODES, ENABLE, 1, WL_REMOVE_CMD_PARAM_LIST  },
-	 {"wldisplay",    &wl_display_handler,	HELP_WL_DISPLAY,	    SUPPORTED_FOR_ALL_MODES, ENABLE, 1, NULL_PARAM_LIST  },
+	 {"wldisplay",    &wl_display_handler,	HELP_WL_DISPLAY,	    SUPPORTED_FOR_ALL_MODES, ENABLE, 0, NULL_PARAM_LIST  },
+	 {"test",    	  &test_handler,	    HELP_TEST,	            SUPPORTED_FOR_ALL_MODES, ENABLE, 0, NULL_PARAM_LIST  },
 	 {NULL,			  NULL,					NULL,					SUPPORTED_FOR_ALL_MODES, ENABLE, 0, NULL_PARAM_LIST  }
 };
 
@@ -951,6 +952,18 @@ CLI_error_et wl_display_handler( u8_t aArgCount, char *aArgVector[] )
 	return( error );
 }
 
+
+
+CLI_error_et test_handler( u8_t aArgCount, char *aArgVector[] )
+{
+	CLI_error_et error = CLI_ERROR_NONE;
+	char output_string[200];
+	u8_t i = 0u;
+
+	while(1);
+
+	return( error );
+}
 
 
 
