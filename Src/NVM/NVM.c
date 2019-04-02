@@ -309,7 +309,7 @@ false_true_et NVM_write_segment ( void )
 	address = NVM_FLASH_PTR_START_ADDR;
 
 	/* Now read the memory back, starting at the memory register start address */
-	STDC_memcpy( (u8_t*)pointer_struct_p, address, sizeof (NVM_info_st) );
+	STDC_memcpy( (u8_t*)pointer_struct_p, (u8_t*)address, sizeof (NVM_info_st) );
 
 #else
 

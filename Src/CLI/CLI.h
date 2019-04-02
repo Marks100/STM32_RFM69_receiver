@@ -45,21 +45,17 @@
 #define HELP_WL_REM              "wlremove:          Removes the selected pos from the RF whitelist\r\n"
 #define HELP_WL_DISPLAY          "wldisplay:         Displays the entire RF whitelist\r\n"
 
-#define NULL_PARAM_LIST {\
-		0,(u32_t)0x0000,(u32_t)0x0000 }
+#define NULL_PARAM_LIST { { 0, (u32_t)0x0000, (u32_t)0x0000 } }
 
-#define SET_ID_CMD_PARAM_LIST {\
-		4,(u32_t)0x0001,(u32_t)0xFFFF }
+#define SET_ID_CMD_PARAM_LIST { { 4, (u32_t)0x0001, (u32_t)0xFFFF } }
 
 #define LED_CMD_PARAM_LIST { \
 		{ 1, (u32_t)LED_0,(u32_t)(LED_MAX - 1) }, \
 		{ 1, (u32_t)OFF,(u32_t)ON } }
 
-#define WL_ADD_CMD_PARAM_LIST { \
-		4, (u32_t)1,(u32_t)(0xFFFF) }
+#define WL_ADD_CMD_PARAM_LIST { { 4, (u32_t)1,(u32_t)(0xFFFF) } }
 
-#define WL_REMOVE_CMD_PARAM_LIST {\
-		2,(u32_t)0x0000,(u32_t)RF_MGR_RF_DATA_HANDLER_SIZE }
+#define WL_REMOVE_CMD_PARAM_LIST { { 2,(u32_t)0x0000,(u32_t)RF_MGR_RF_DATA_HANDLER_SIZE } }
 
 typedef enum
 {

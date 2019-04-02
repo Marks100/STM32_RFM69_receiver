@@ -15,6 +15,7 @@
 #include "C_defs.h"
 #include "STDC.h"
 #include "NVM.h"
+#include "NRF24.h"
 #include "HAL_BRD.h"
 #include "COMPILER_defs.h"
 
@@ -444,6 +445,9 @@ CLI_error_et CLI_validate_arguments( u8_t aArgCount, char *aArgVector[], u8_t co
 	u32_t min_arg_value;
 	u32_t max_arg_value;
 
+	(void)min_arg_value;
+	(void)max_arg_value;
+
 	if( aArgCount > CLI_CMD_LINE_ARGS_MAX )
 	{
 		error = CLI_ERROR_INVALID_ARGS_MORE;
@@ -796,7 +800,7 @@ CLI_error_et remove_wl_node_handler( u8_t aArgCount, char *aArgVector[] )
 
 	if( node_located == TRUE )
 	{
-		RF_MGR_remove_node( 0 );
+		RF_MGR_remove_wl_node( 0 );
 		sprintf( output_string, "Node 0x%04X has been located in the current list and will be deleted...", id );
 		CLI_send_data( output_string, strlen(output_string));
 		CLI_send_newline();
@@ -938,10 +942,10 @@ CLI_error_et wl_display_handler( u8_t aArgCount, char *aArgVector[] )
 
 	for( i = 0; i < RF_MGR_RF_DATA_HANDLER_SIZE ; i++ )
 	{
-		sprintf( output_string, "Node %02d ID:\t0x%04X", i, *( data_p + i ) );
-		//sprintf( output_string, "Node %02d ID:\t0x%02X", i, data_p[i]->id );
+		sprintf( output_string, "Node %02d ID:\t0x%02X", i, data_p->id );
 		CLI_send_data( output_string, strlen(output_string));
 		CLI_send_newline();
+		data_p ++;
 	}
 
 	return( error );
