@@ -7,6 +7,7 @@
 #include "HAL_ADC.h"
 #include "HAL_BRD.h"
 #include "HAL_TIM.h"
+#include "MAIN.h"
 #include "CLI.h"
 #include "RFM69.h"
 #include "HAL_UART.h"

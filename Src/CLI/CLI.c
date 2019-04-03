@@ -957,8 +957,6 @@ CLI_error_et wl_display_handler( u8_t aArgCount, char *aArgVector[] )
 CLI_error_et test_handler( u8_t aArgCount, char *aArgVector[] )
 {
 	CLI_error_et error = CLI_ERROR_NONE;
-	char output_string[200];
-	u8_t i = 0u;
 
 	while(1);
 

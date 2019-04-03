@@ -193,7 +193,7 @@ ok_nok_et NVM_check_blk_crc_and_version ( void )
     u16_t crc;
     ok_nok_et result = NOK;
 
-    crc = CHKSUM_calc_xor_checksum(  (u8_t*)&NVM_info_s.NVM_generic_data_blk_s, sizeof( NVM_info_s.NVM_generic_data_blk_s ) );
+    crc = CHKSUM_calc_xor_checksum( (u8_t*)&NVM_info_s.NVM_generic_data_blk_s, sizeof( NVM_info_s.NVM_generic_data_blk_s ) );
 
     if( NVM_info_s.checksum == crc )
     {
