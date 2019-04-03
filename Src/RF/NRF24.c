@@ -59,7 +59,7 @@ STATIC u16_t NRF24_resets_s;
 
 STATIC RF_MGR_rf_data_store_st RF_MGR_rf_data_store_s;
 STATIC RF_MGR_sed_data_st	   RF_MGR_sed_data_s;
-STATIC RF_MGR_whitelist_st	   RF_MGR_whitelist_s[RF_MGR_RF_DATA_HANDLER_SIZE];
+STATIC RF_MGR_whitelist_st	   RF_MGR_whitelist_s;
 
 /***************************************************************************************************
 **                              Data declarations and definitions                                 **
@@ -105,8 +105,10 @@ void NRF24_init( void )
     /* Copy the whitelist from NVM */
     for( i = 0; i < RF_MGR_RF_DATA_HANDLER_SIZE; i++ )
     {
-    	STDC_memcpy( &RF_MGR_whitelist_s[i].id, &NVM_info_s.NVM_generic_data_blk_s.rf_whitelist[i].id, sizeof( RF_MGR_whitelist_s[i].id ) );
+    	STDC_memcpy( &RF_MGR_whitelist_s.id[i], &NVM_info_s.NVM_generic_data_blk_s.rf_whitelist[i], sizeof( RF_MGR_whitelist_s.id ) );
     }
+
+    RF_MGR_whitelist_s.state = NVM_info_s.NVM_generic_data_blk_s.whitelist_state;
 }
 
 
@@ -1465,7 +1467,6 @@ void NRF24_tick( void )
 
             /* Move onto the TX_MODE state */
             NRF24_state_s = NRF24_TX;
-            //NRF24_state_s = NRF24_TX_TEST_MODE;
         }
         break;
 
@@ -1524,7 +1525,6 @@ void NRF24_tick( void )
 
 			/* Move onto the RX_MODE state */
 			NRF24_state_s = NRF24_RX;
-			//NRF24_state_s = NRF24_RX_TEST_MODE;
         }
         break;
 
@@ -1536,21 +1536,15 @@ void NRF24_tick( void )
 
             if( ( NRF24_check_status_mask( RF24_RX_DATA_READY, &NRF24_status_register_s ) == HIGH ) || ( NRF24_check_fifo_mask( RF24_RX_EMPTY ,&fifo ) == LOW ) )
             {
-            	//NRF24_ce_select( LOW );
-
 				NRF24_get_payload( NRF24_tx_rx_payload_info_s.NRF24_rx_rf_payload );
 
 				/* The first byte in every RF frame is random and needs to be discarded */
 				RF_MGR_packet_received_event( &NRF24_tx_rx_payload_info_s.NRF24_rx_rf_payload[1], 31u );
 
-                //NRF24_handle_packet_stats( 3u );
-
                 HAL_BRD_toggle_led();
 
 				/* we may have received a packet !!!!!!*/
 				NRF24_status_register_clr_bit( RX_DR );
-
-				//NRF24_ce_select( HIGH );
 
 				/* Reset the supervisor timeout */
 				NRF24_recieve_timeout_s = NRF24_TIMEOUT_VAL_SEC;
@@ -1920,36 +1914,48 @@ void RF_MGR_packet_received_event( u8_t* rf_data, u8_t rf_data_size )
     u8_t sensor_type;
     u8_t node_index;
     u16_t node_id;
+    false_true_et id_allowed = TRUE;
 
     sensor_type = rf_data[0];
     node_id = ( rf_data[1] << 8u | rf_data[2] ) ;
 
-    /* Check is there free space by looking for an id of 0 in the rf data struct */
-    for( node_index = 0u; node_index < RF_MGR_RF_DATA_HANDLER_SIZE; node_index++ )
+    if( RF_MGR_whitelist_s.state == ENABLE_ )
     {
-        if( ( ( RF_MGR_rf_data_store_s.data_packet_s[node_index].node_id == 0u ) ||
-              ( RF_MGR_rf_data_store_s.data_packet_s[node_index].node_id == node_id ) ) )
-        {
-            /* free space or an existing id in that space so lets fill it :) */
+    	if( RF_MGR_check_ID_in_whitelist( node_id ) == FALSE )
+    	{
+    		id_allowed = FALSE;
+    	}
+    }
 
-            /* Check for valid sensor type */
-            if( sensor_type != 0u )
-            {
-                RF_MGR_rf_data_store_s.data_packet_s[node_index].sensor_type = rf_data[0];
-                RF_MGR_rf_data_store_s.data_packet_s[node_index].node_id     = ( rf_data[1] << 8u | rf_data[2] ) ;
+    if( id_allowed == TRUE )
+    {
+		/* Check is there free space by looking for an id of 0 in the rf data struct */
+		for( node_index = 0u; node_index < RF_MGR_RF_DATA_HANDLER_SIZE; node_index++ )
+		{
+			if( ( ( RF_MGR_rf_data_store_s.data_packet_s[node_index].node_id == 0u ) ||
+				  ( RF_MGR_rf_data_store_s.data_packet_s[node_index].node_id == node_id ) ) )
+			{
+				/* free space or an existing id in that space so lets fill it, if the whitelist permitts :) */
 
-                /* Copy in the payload */
-                STDC_memcpy( RF_MGR_rf_data_store_s.data_packet_s[node_index].payload, &rf_data[3], rf_data_size - 3 );
+				/* Check for valid sensor type */
+				if( sensor_type != 0u )
+				{
+					RF_MGR_rf_data_store_s.data_packet_s[node_index].sensor_type = rf_data[0];
+					RF_MGR_rf_data_store_s.data_packet_s[node_index].node_id     = ( rf_data[1] << 8u | rf_data[2] ) ;
 
-                /* increment the packet counter for the individual node id */
-                RF_MGR_rf_data_store_s.data_packet_s[node_index].packet_counter++;
+					/* Copy in the payload */
+					STDC_memcpy( RF_MGR_rf_data_store_s.data_packet_s[node_index].payload, &rf_data[3], rf_data_size - 3 );
 
-                /* Updated frame received */
-                RF_MGR_rf_data_store_s.data_packet_s[node_index].updated = TRUE;
-            }
-            /* Break out as we have found a free space and no need to keep searching */
-            break;
-        }
+					/* increment the packet counter for the individual node id */
+					RF_MGR_rf_data_store_s.data_packet_s[node_index].packet_counter++;
+
+					/* Updated frame received */
+					RF_MGR_rf_data_store_s.data_packet_s[node_index].updated = TRUE;
+				}
+				/* Break out as we have found a free space and no need to keep searching */
+				break;
+			}
+		}
     }
 }
 
@@ -2059,23 +2065,23 @@ pass_fail_et RF_MGR_remove_wl_node( u8_t pos )
 	/* first of all check that the pos is valid */
 	if( pos < RF_MGR_RF_DATA_HANDLER_SIZE )
 	{
-		if( RF_MGR_whitelist_s[pos].id != 0u )
+		if( RF_MGR_whitelist_s.id[pos] != 0u )
 		{
-			STDC_memset( &RF_MGR_whitelist_s[pos].id, 0x00, sizeof( RF_MGR_whitelist_s[pos].id ) );
+			STDC_memset( &RF_MGR_whitelist_s.id[pos], 0x00, sizeof( RF_MGR_whitelist_s.id ) );
 
 			/* Now that we have removed that ID and its 0, we want to shift the IDs that are above it
 			 * in the array down to fill the empty spot */
 
 			for( pos = pos; pos < RF_MGR_RF_DATA_HANDLER_SIZE; pos++ )
 			{
-				if( RF_MGR_whitelist_s[pos + 1].id != 0u )
+				if( RF_MGR_whitelist_s.id[pos + 1] != 0u )
 				{
-					STDC_memcpy( &RF_MGR_whitelist_s[pos].id,
-							 	&RF_MGR_whitelist_s[pos + 1].id, sizeof( RF_MGR_whitelist_s[pos].id ) );
+					STDC_memcpy( &RF_MGR_whitelist_s.id[pos],
+							 	&RF_MGR_whitelist_s.id[pos + 1], sizeof( RF_MGR_whitelist_s.id[pos] ) );
 				}
 				else
 				{
-					STDC_memset( &RF_MGR_whitelist_s[pos].id, 0x00, sizeof( RF_MGR_whitelist_s[pos].id ) );
+					STDC_memset( &RF_MGR_whitelist_s.id[pos], 0x00, sizeof( RF_MGR_whitelist_s.id[pos] ) );
 					break;
 				}
 			}
@@ -2095,28 +2101,48 @@ pass_fail_et RF_MGR_add_wl_node( u16_t id )
 	/* first of all check that the pos is valid */
 	for( pos = 0u; pos < RF_MGR_RF_DATA_HANDLER_SIZE; pos++ )
 	{
-		if( RF_MGR_whitelist_s[pos].id == id )
+		if( RF_MGR_whitelist_s.id[pos] == id )
 		{
 			returnType = FAIL;
 			break;
 		}
-		if( RF_MGR_whitelist_s[pos].id == 0u )
+		if( RF_MGR_whitelist_s.id[pos] == 0u )
 		{
 			/* We have found a free position */
-			RF_MGR_whitelist_s[pos].id = id;
+			RF_MGR_whitelist_s.id[pos] = id;
 			returnType = PASS;
 			break;
 		}
 	}
-
-
 	return ( returnType );
+}
+
+false_true_et RF_MGR_check_ID_in_whitelist( u16_t id )
+{
+	u8_t i;
+	false_true_et id_found = FALSE;
+
+	for( i = 0; i < RF_MGR_RF_DATA_HANDLER_SIZE; i++ )
+	{
+		if( id == RF_MGR_whitelist_s.id[i] )
+		{
+			id_found = TRUE;
+			break;
+		}
+	}
+	return( id_found );
 }
 
 
 RF_MGR_whitelist_st* RF_MGR_get_whitelist_addres( void )
 {
-	return( &RF_MGR_whitelist_s[0] );
+	return( &RF_MGR_whitelist_s );
+}
+
+
+void RF_MGR_set_whitelist_state( disable_enable_et state )
+{
+	RF_MGR_whitelist_s.state = state;
 }
 
 /***************************************************************************************************

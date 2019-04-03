@@ -6,7 +6,7 @@
       <Compile>
         <Option name="OptimizationLevel" value="0"/>
         <Option name="UseFPU" value="0"/>
-        <Option name="UserEditCompiler" value="-Wno-pointer-sign; -Wno-unused-value"/>
+        <Option name="UserEditCompiler" value="-Wno-pointer-sign; -Wno-unused-value;"/>
         <Option name="SupportCPlusplus" value="0"/>
         <Option name="CompileBeforeDebug" value="1"/>
         <Includepaths>
@@ -75,6 +75,8 @@
     <Component id="50" name="CMSIS core" path="" type="2"/>
     <Component id="439" name="CMSIS_Boot" path="" type="2"/>
     <Component id="440" name="RCC" path="" type="2"/>
+    <Component id="449" name="IWDG" path="" type="2"/>
+    <Component id="450" name="WWDG" path="" type="2"/>
     <Component id="456" name="TIM" path="" type="2"/>
   </Components>
   <Files>
@@ -102,6 +104,7 @@
     <File name="Src/HAL/HAL_SPI/HAL_SPI.o" path="../Src/HAL/HAL_SPI/HAL_SPI.o" type="1"/>
     <File name="stm_lib/inc/stm32f10x_spi.h" path="stm_lib/inc/stm32f10x_spi.h" type="1"/>
     <File name="stm_lib/src/stm32f10x_adc.c" path="stm_lib/src/stm32f10x_adc.c" type="1"/>
+    <File name="stm_lib/inc/stm32f10x_iwdg.h" path="stm_lib/inc/stm32f10x_iwdg.h" type="1"/>
     <File name="stm32f10x_iwdg.h" path="stm_lib/inc/stm32f10x_iwdg.h" type="1"/>
     <File name="Src/MAIN/main.o" path="../Src/MAIN/main.o" type="1"/>
     <File name="Src/HAL/HAL_ADC/HAL_ADC.c" path="../Src/HAL/HAL_ADC/HAL_ADC.c" type="1"/>
@@ -116,6 +119,7 @@
     <File name="stm_lib/src/stm32f10x_gpio.c" path="stm_lib/src/stm32f10x_gpio.c" type="1"/>
     <File name="Src/VERSIONS/VERSIONS.h" path="../Src/VERSIONS/VERSIONS.h" type="1"/>
     <File name="stm_lib/inc/stm32f10x_usart.h" path="stm_lib/inc/stm32f10x_usart.h" type="1"/>
+    <File name="stm32f10x_wwdg.c" path="stm_lib/src/stm32f10x_wwdg.c" type="1"/>
     <File name="cmsis_boot/system_stm32f10x.c" path="cmsis_boot/system_stm32f10x.c" type="1"/>
     <File name="stm_lib/inc/misc.h" path="stm_lib/inc/misc.h" type="1"/>
     <File name="stdio" path="" type="2"/>
@@ -126,8 +130,8 @@
     <File name="Src/COMMON_MODULES/xINC/SELMATH" path="" type="2"/>
     <File name="Src/HAL/HAL_TIM/HAL_TIM.h" path="../Src/HAL/HAL_TIM/HAL_TIM.h" type="1"/>
     <File name="Src/RF/RFM69_Registers.h" path="../Src/RF/RFM69_Registers.h" type="1"/>
-    <File name="stm_lib/src/stm32f10x_flash.o" path="stm_lib/src/stm32f10x_flash.o" type="1"/>
     <File name="stm_lib/src/stm32f10x_rcc.c" path="stm_lib/src/stm32f10x_rcc.c" type="1"/>
+    <File name="stm_lib/src/stm32f10x_flash.o" path="stm_lib/src/stm32f10x_flash.o" type="1"/>
     <File name="Src/COMMON_MODULES" path="" type="2"/>
     <File name="Src/COMMON_MODULES/xINC/RTOS.h" path="../Src/COMMON_MODULES/xINC/RTOS.h" type="1"/>
     <File name="Src/COMMON_MODULES/COMPILER_config.h" path="../Src/COMMON_MODULES/COMPILER_config.h" type="1"/>
@@ -166,6 +170,7 @@
     <File name="Src/HAL/HAL_SPI" path="" type="2"/>
     <File name="Src/COMMON_MODULES/xINC/STDC/STDC.h" path="../Src/COMMON_MODULES/xINC/STDC/STDC.h" type="1"/>
     <File name="stm_lib/src/stm32f10x_spi.c" path="stm_lib/src/stm32f10x_spi.c" type="1"/>
+    <File name="stm_lib/src/stm32f10x_iwdg.c" path="stm_lib/src/stm32f10x_iwdg.c" type="1"/>
     <File name="stm_lib/src/stm32f10x_crc.o" path="stm_lib/src/stm32f10x_crc.o" type="1"/>
     <File name="Src/COMMON_MODULES/xLIBS/CHKSUM/CHKSUM.h" path="../Src/COMMON_MODULES/xLIBS/CHKSUM/CHKSUM.h" type="1"/>
     <File name="Src/COMMON_MODULES/xINC/SELMATH/SELMATH.c" path="../Src/COMMON_MODULES/xINC/SELMATH/SELMATH.c" type="1"/>
@@ -201,6 +206,7 @@
     <File name="stm32f10x_iwdg.c" path="stm_lib/src/stm32f10x_iwdg.c" type="1"/>
     <File name="stm_lib/src/stm32f10x_gpio.o" path="stm_lib/src/stm32f10x_gpio.o" type="1"/>
     <File name="Src/COMMON_MODULES/xINC/STDC/STDC_svn_rev.tmpl" path="../Src/COMMON_MODULES/xINC/STDC/STDC_svn_rev.tmpl" type="1"/>
+    <File name="stm32f10x_wwdg.h" path="stm_lib/inc/stm32f10x_wwdg.h" type="1"/>
     <File name="Src/PROJ_CONFIG/SEL_RTOS_config.h" path="../Src/PROJ_CONFIG/SEL_RTOS_config.h" type="1"/>
     <File name="stm_lib/src/stm32f10x_pwr.o" path="stm_lib/src/stm32f10x_pwr.o" type="1"/>
     <File name="Src/COMMON_MODULES/xINC/COMPILER_check.h" path="../Src/COMMON_MODULES/xINC/COMPILER_check.h" type="1"/>
@@ -211,8 +217,8 @@
     <File name="stm_lib/inc/stm32f10x_rcc.h" path="stm_lib/inc/stm32f10x_rcc.h" type="1"/>
     <File name="stm_lib/inc/stm32f10x_i2c.h" path="stm_lib/inc/stm32f10x_i2c.h" type="1"/>
     <File name="Src/HAL/HAL_BRD" path="" type="2"/>
-    <File name="CLI" path="" type="2"/>
     <File name="Src/NVM" path="" type="2"/>
+    <File name="CLI" path="" type="2"/>
     <File name="Src/COMMON_MODULES/xLIBS" path="" type="2"/>
     <File name="Src/HAL/HAL_SPI/HAL_SPI.h" path="../Src/HAL/HAL_SPI/HAL_SPI.h" type="1"/>
     <File name="Src/HAL/HAL_BRD/HAL_BRD.h" path="../Src/HAL/HAL_BRD/HAL_BRD.h" type="1"/>

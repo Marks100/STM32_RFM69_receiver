@@ -352,9 +352,11 @@ typedef struct
 } RF_MGR_sed_data_st;
 
 
+
 typedef struct
 {
-	u16_t id;
+	u16_t id[RF_MGR_RF_DATA_HANDLER_SIZE];
+	disable_enable_et state;
 } RF_MGR_whitelist_st;
 
 /***************************************************************************************************
@@ -422,6 +424,8 @@ pass_fail_et 		 RF_MGR_remove_wl_node( u8_t pos );
 pass_fail_et 		 RF_MGR_add_wl_node( u16_t node_id );
 void 				 RF_MGR_display_sed_data( void );
 RF_MGR_whitelist_st* RF_MGR_get_whitelist_addres( void );
+false_true_et 		 RF_MGR_check_ID_in_whitelist( u16_t id );
+void 				 RF_MGR_set_whitelist_state( disable_enable_et state );
 
 
 #endif /* RF_H multiple inclusion guard */
