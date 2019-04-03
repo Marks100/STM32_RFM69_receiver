@@ -38,13 +38,9 @@
 /***************************************************************************************************
 **                              Function Prototypes                                               **
 ***************************************************************************************************/
-void SERIAL_init( void );
-void SERIAL_Send_data(const char *pucBuffer);
-void SERIAL_clear_RXBuffer(void);
-void SERIAL_clear_TXBuffer(void);
-void SERIAL_msg_handler( void );
-void SERIAL_trigger_stream_output( void );
-void SERIAL_send_newline( void );
+void HAL_UART_init( void );
+void HAL_UART_close( void );
+void HAL_UART_send_data(const char *pucBuffer, u16_t data_size );
 
 
 

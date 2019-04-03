@@ -252,13 +252,10 @@ void HAL_I2C_read_multiple_registers( u8_t dev_add, u8_t reg_start_add, u8_t* da
 
 void RTC_ext_init( void )
 {
-	u8_t data;
-	u8_t wakeup_time;
-
 	u8_t data_burst[16];
 
 	/* Write down the default config */
-	HAL_I2C_write_multiple_register( RTC_EXT_I2C_ADDRESS, Control_status_1, RTC_EXT_default_register_values, sizeof( RTC_EXT_default_register_values ) );
+	HAL_I2C_write_multiple_register( RTC_EXT_I2C_ADDRESS, Control_status_1, (u8_t*)RTC_EXT_default_register_values, sizeof( RTC_EXT_default_register_values ) );
 
 	/* Now adjust it with the currently stored NVM value */
 	RTC_set_wakeup_time( NVM_info_s.NVM_generic_data_blk_s.sleep_time );

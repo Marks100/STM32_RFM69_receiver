@@ -5,6 +5,7 @@
     #include "stm32f10x_rcc.h"
     #include "stm32f10x_pwr.h"
 	#include "stm32f10x_i2c.h"
+	#include "stm32f10x_iwdg.h"
 #endif
 
 #include "C_defs.h"
@@ -15,7 +16,6 @@
 #include "HAL_ADC.h"
 #include "HAL_SPI.h"
 #include "HAL_I2C.h"
-#include "HAL_UART.h"
 #include "HAL_TIM.h"
 #include "MODE_MGR.h"
 #include "nvm.h"
@@ -41,12 +41,13 @@ int main(void)
 	RCC_PCLK2Config(RCC_HCLK_Div1);
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR, ENABLE);
 
+	NVM_init();
+
 	/* Init the HW */
 	HAL_BRD_init();
 	HAL_I2C_init();
 	HAL_SPI_init();
-	SERIAL_init();
-	NVM_init();
+	CLI_init();
 
     /* Start the timer to keep track of reception count */
 	HAL_TIM_1_init();
@@ -61,6 +62,8 @@ int main(void)
 
 	/* Init the systick timer */
 	MAIN_SYSTICK_init();
+
+	MAIN_WATCHDOG_init();
 
 	while (1)
 	{
@@ -124,6 +127,31 @@ void delay_us(u16_t us)
 }
 
 
+
+void MAIN_WATCHDOG_init( void )
+{
+	/* This pauses the watchdog while debugging */
+	DBGMCU->CR |= DBGMCU_CR_DBG_IWDG_STOP;
+
+	IWDG_WriteAccessCmd(IWDG_WriteAccess_Enable);
+	IWDG_SetPrescaler(IWDG_Prescaler_4); // 4, 8, 16 ... 256
+	IWDG_SetReload(0x07D0);//This parameter must be a number between 0 and 0x0FFF.
+	IWDG_ReloadCounter();
+	IWDG_Enable();
+}
+
+
+void MAIN_WATCHDOG_deinit( void )
+{
+	/* Cant disable :( */
+}
+
+
+void MAIN_WATCHDOG_kick( void )
+{
+	IWDG_SetReload(0x07D0);//This parameter must be a number between 0 and 0x0FFF.
+	IWDG_ReloadCounter();
+}
 
 
 

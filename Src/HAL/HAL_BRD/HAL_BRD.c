@@ -5,8 +5,10 @@
 #include "misc.h"
 
 #include "HAL_BRD.h"
+#include "STDC.h"
 #include "main.h"
 #include "RFM69.h"
+#include "autoversion.h"
 
 false_true_et HAL_BRD_rtc_triggered_s;
 false_true_et debug_mode;
@@ -92,6 +94,11 @@ void HAL_BRD_init( void )
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
 
+	/* Configure the LED pins */
+	GPIO_InitStructure.GPIO_Pin = ( GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15 );
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
+	GPIO_Init(GPIOB, &GPIO_InitStructure);
 
 	/* Enable the "RFM69 packet received" interrupt on pin A1 */
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1;
@@ -128,7 +135,7 @@ void HAL_BRD_init( void )
 	HAL_BRD_rtc_triggered_s = TRUE;
 
     /* Turn the led off straight away to save power */
-    HAL_BRD_set_LED( OFF );
+    HAL_BRD_set_onboard_LED( OFF );
 }
 
 
@@ -219,6 +226,39 @@ void HAL_BRD_toggle_pin_state(  GPIO_TypeDef * port, u16_t pin )
 
 
 
+
+
+
+/**************************************************************************************************
+EXTERNAL API's
+***************************************************************************************************/
+void HAL_BRD_set_LED_state( HAL_BRD_led_et led, off_on_et state )
+{
+	switch( led )
+	{
+		case LED_0:
+			HAL_BRD_set_pin_state( GPIOB, GPIO_Pin_12, state );
+			break;
+
+		case LED_1:
+			HAL_BRD_set_pin_state( GPIOB, GPIO_Pin_13, state );
+			break;
+
+		case LED_2:
+			HAL_BRD_set_pin_state( GPIOB, GPIO_Pin_14, state );
+			break;
+
+		case LED_3:
+			HAL_BRD_set_pin_state( GPIOB, GPIO_Pin_15, state );
+			break;
+
+		default:
+			break;
+	}
+}
+
+
+
 /*!
 ****************************************************************************************************
 *
@@ -240,12 +280,6 @@ void HAL_BRD_set_batt_monitor_state( disable_enable_et state )
 		//HAL_BRD_Set_Pin_state();
 	}
 }
-
-
-/**************************************************************************************************
-EXTERNAL API's
-***************************************************************************************************/
-
 
 
 
@@ -384,7 +418,7 @@ void HAL_BRD_toggle_led( void )
 }
 
 
-void HAL_BRD_set_LED( off_on_et state )
+void HAL_BRD_set_onboard_LED( off_on_et state )
 {
 	low_high_et val;
 
@@ -531,6 +565,48 @@ false_true_et HAL_BRD_get_rtc_trigger_status( void )
 void HAL_BRD_set_rtc_trigger_status( false_true_et state )
 {
 	HAL_BRD_rtc_triggered_s = state;
+}
+
+
+
+/*!
+****************************************************************************************************
+*
+*   \brief         returns the SW version number
+*
+*   \author        MS
+*
+*   \return        None
+*
+***************************************************************************************************/
+void HAL_BRD_get_SW_version_num( u8_t *version_num_p )
+{
+	/* Reference the included autoversion.h file so that we can grab the SW version number */
+	char version_num_array[SW_VERSION_NUM_SIZE];
+
+	version_num_array[0] = STM32_RF_HUB_VERSION_MAJOR;
+	version_num_array[1] = STM32_RF_HUB_VERSION_PATCH;
+	version_num_array[2] = STM32_RF_HUB_VERSION_VERIFICATION;
+
+	/* Now copy the local version array back to the pointer */
+	STDC_memcpy( version_num_p, version_num_array, sizeof( version_num_array ) );
+}
+
+
+
+/*!
+****************************************************************************************************
+*
+*   \brief         returns the HAL_BRD_NRF24_spi_slave_selectW version number
+*
+*   \author        MS
+*
+*   \return        None
+*
+***************************************************************************************************/
+void HAL_BRD_get_HW_version_num( u8_t *version_num_p )
+{
+	*version_num_p = 0u;
 }
 
 

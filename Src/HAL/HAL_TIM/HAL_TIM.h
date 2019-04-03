@@ -40,7 +40,7 @@
 ***************************************************************************************************/
 
 
-void HAL_TIM_init( void );
+void HAL_TIM_1_init( void );
 void HAL_TIM_1_start( void );
 void HAL_TIM_1_stop( void );
 void HAL_TIM_2_stop( void );

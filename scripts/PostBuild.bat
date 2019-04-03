@@ -33,8 +33,8 @@ echo Copying Objec files to new folder location..
 XCOPY "%OLD_BUILD_DIR%\..\obj" "%NEW_BUILD_DIR%\object_files" /E /I /Y
 echo.
 
-cd %MAKEFILE_DIR% 
-call BuildEnv\xBuildEnv\setCmdEnv.cmd && sh -l -c "make generate_memory_stats"
+REM cd %MAKEFILE_DIR% 
+REM call BuildEnv\xBuildEnv\setCmdEnv.cmd && sh -l -c "make generate_memory_stats"
 goto END
 
 
@@ -46,8 +46,7 @@ echo Argument 1.. MAKEFILE_DIR  = The directory of the project makefile.
 echo Argument 2.. OLD_BUILD_DIR = The directory of the compiled build output.
 echo Argument 3.. NEW_BUILD_DIR = The new directory for the compiled build output to be copied to.
 
-TIMEOUT /t 20
-
+TIMEOUT /t 10
 
 
 REM EOF

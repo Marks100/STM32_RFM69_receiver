@@ -7,6 +7,8 @@
 #include "HAL_ADC.h"
 #include "HAL_BRD.h"
 #include "HAL_TIM.h"
+#include "MAIN.h"
+#include "CLI.h"
 #include "RFM69.h"
 #include "HAL_UART.h"
 
@@ -66,12 +68,11 @@ void MODE_MGR_20ms_tick( void )
 void MODE_MGR_action_schedule_normal( void )
 {
     NRF24_tick();
-    SERIAL_msg_handler();
+    CLI_message_handler();
 
     switch( MODE_MGR_tick_timer_msecs_s )
     {
         case 20u:
-            //SERIAL_msg_handler();
         	break;
 
         case 40u:
@@ -88,11 +89,11 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 100u:
+        	MAIN_WATCHDOG_kick();
             RF_MGR_tick();
         	break;
 
         case 120u:
-            //SERIAL_msg_handler();
             //RFM69_tick();
         	break;
 
@@ -109,12 +110,12 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 200u:
+        	MAIN_WATCHDOG_kick();
             //RFM69_tick();
             RF_MGR_tick();
         	break;
 
         case 220u://RFM69_tick
-            //SERIAL_msg_handler();
         	break;
 
         case 240u:
@@ -131,11 +132,11 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 300u:
+        	MAIN_WATCHDOG_kick();
             RF_MGR_tick();
         	break;
 
         case 320u:
-            //SERIAL_msg_handler();
             //RFM69_tick();
         	break;
 
@@ -152,12 +153,12 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 400u:
+        	MAIN_WATCHDOG_kick();
             RF_MGR_tick();
             //RFM69_tick();
         	break;
 
         case 420u:
-            //SERIAL_msg_handler();
         	break;
 
         case 440u:
@@ -174,11 +175,11 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 500u:
+        	MAIN_WATCHDOG_kick();
             RF_MGR_tick();
         	break;
 
         case 520u:
-            //SERIAL_msg_handler();
             //RFM69_tick();
         	break;
 
@@ -195,12 +196,12 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 600u:
+        	MAIN_WATCHDOG_kick();
             //RFM69_tick();
             RF_MGR_tick();
         	break;
 
         case 620u:
-            //SERIAL_msg_handler();
         	break;
 
         case 640u:
@@ -217,11 +218,11 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 700u:
+        	MAIN_WATCHDOG_kick();
             RF_MGR_tick();
         	break;
 
         case 720u:
-            //SERIAL_msg_handler();
             //RFM69_tick();
         	break;
 
@@ -238,12 +239,12 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 800u:
+        	MAIN_WATCHDOG_kick();
             RF_MGR_tick();
             //RFM69_tick();
         	break;
 
         case 820u:
-            //SERIAL_msg_handler();
         	break;
 
         case 840u:
@@ -260,11 +261,11 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 900u:
+        	MAIN_WATCHDOG_kick();
             RF_MGR_tick();
         	break;
 
         case 920u:
-            //SERIAL_msg_handler();
             //RFM69_tick();
         	break;
 
@@ -281,14 +282,12 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 1000u:
+        	MAIN_WATCHDOG_kick();
             RF_MGR_tick();
             //RFM69_tick();
 
             /* keep track of time in secs */
             HAL_TIM_increment_secs();
-
-            /* Trigger the stream */
-            SERIAL_trigger_stream_output();
         	break;
 
 			default:
@@ -319,6 +318,7 @@ MODE_MGR_mode_et MODE_MGR_get_mode( void )
 void MODE_MGR_change_mode( void )
 {
 	false_true_et reset_value = FALSE;
+	(void)reset_value;
 
 	switch( MODE_MGR_mode_s )
 	{

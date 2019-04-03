@@ -42,13 +42,6 @@ extern NVM_info_st NVM_info_s;
 
 STATIC RFM69_data_packet_st RFM69_data_packet_s;
 
-STATIC u8_t send_data[RFM69_MAX_PAYLOAD_LEN] =
-{
-    1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,
-    28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,
-    52,53,54,55,56,57,58,59,60,61
-};
-
 false_true_et  RFM69_init_s;
 false_true_et  RFM69_packet_sent_s;
 false_true_et  RFM69_packet_received_s;
@@ -167,7 +160,7 @@ void RFM69_setup_receive_mode( void )
 
 		RFM69_set_PA_level( RFM69_tx_power_level_s );
 
-		RFM69_set_own_node_address( NVM_info_s.NVM_generic_data_blk_s.node_id );
+		RFM69_set_own_node_address( NVM_info_s.NVM_generic_data_blk_s.device_id );
 
 		RFM69_read_registers( READ_FROM_CHIP_BURST_MODE, REGOPMODE, read_data, sizeof( read_data ) );
 
@@ -209,7 +202,6 @@ void RFM69_setup_receive_mode( void )
 void RFM69_receive_frame( void )
 {
 	u8_t read_data[RFM69_MAX_DATA_LEN];
-	u8_t register_val = 0u;
 
 	if( RFM69_packet_received_s == TRUE )
 	{
@@ -324,7 +316,7 @@ pass_fail_et RFM69_set_configuration( RFM69_static_configuration_et config )
 ***************************************************************************************************/
 void RFM69_get_configuration( RFM69_static_configuration_et config, RFM69_register_data_st* data_p )
 {
-    u8_t i,j = 0;
+    u8_t i = 0;
 
     for(  i = 0; i < RFM69_config_c[ config ].length; i++ )
     {
@@ -349,7 +341,7 @@ void RFM69_get_configuration( RFM69_static_configuration_et config, RFM69_regist
 *   \note
 *
 ***************************************************************************************************/
-pass_fail_et RFM69_read_registers( RFM69_instruction_et instruction, RFM69_registers_et address, u8_t read_data[], u8_t num_bytes )
+pass_fail_et RFM69_read_registers( RFM69_instruction_et instruction, RFM69_registers_et address, u8_t* read_data, u8_t num_bytes )
 {
     /* assume pass until prove otherwise */
     pass_fail_et result = PASS;
@@ -422,7 +414,7 @@ pass_fail_et RFM69_read_registers( RFM69_instruction_et instruction, RFM69_regis
 *
 *******************************************************************************
 */
-pass_fail_et RFM69_write_registers( RFM69_instruction_et instruction, RFM69_registers_et address, u8_t write_data[], u8_t num_bytes )
+pass_fail_et RFM69_write_registers( RFM69_instruction_et instruction, RFM69_registers_et address, u8_t* write_data, u8_t num_bytes )
 {
     /* assume pass until prove otherwise */
     pass_fail_et result = PASS;
@@ -591,7 +583,7 @@ u8_t RFM69_read_temp( void )
 	}
 
 	/* Read the temperature measurement */
-	RFM69_read_registers( READ_FROM_CHIP, REGTEMP2, &temp, 1 );
+	RFM69_read_registers( READ_FROM_CHIP, REGTEMP2, (u8_t*)&temp, 1 );
 	temp += COURSE_TEMP_COEF;
 	temp ^= 0xFF;
 
@@ -1230,7 +1222,6 @@ false_true_et RFM69_send_frame( u8_t* buffer, u8_t len, u8_t rx_node_address )
     false_true_et status = FALSE;
     u8_t tx_buffer[RFM69_MAX_PAYLOAD_LEN];
 	u16_t timeout = 0u;
-    u8_t test_buffer[RFM69_MAX_DATA_LEN];
 
     /* Set to standby */
     RFM69_set_operating_mode( RFM69_STANDBY_MODE );

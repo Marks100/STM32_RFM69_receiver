@@ -193,7 +193,7 @@ ok_nok_et NVM_check_blk_crc_and_version ( void )
     u16_t crc;
     ok_nok_et result = NOK;
 
-    crc = CHKSUM_calc_xor_checksum(  (u8_t*)&NVM_info_s.NVM_generic_data_blk_s, sizeof( NVM_info_s.NVM_generic_data_blk_s ) );
+    crc = CHKSUM_calc_xor_checksum( (u8_t*)&NVM_info_s.NVM_generic_data_blk_s, sizeof( NVM_info_s.NVM_generic_data_blk_s ) );
 
     if( NVM_info_s.checksum == crc )
     {
@@ -309,7 +309,7 @@ false_true_et NVM_write_segment ( void )
 	address = NVM_FLASH_PTR_START_ADDR;
 
 	/* Now read the memory back, starting at the memory register start address */
-	STDC_memcpy( pointer_struct_p, address, sizeof (NVM_info_st) );
+	STDC_memcpy( (u8_t*)pointer_struct_p, (u8_t*)address, sizeof (NVM_info_st) );
 
 #else
 

@@ -22,6 +22,7 @@
 ***************************************************************************************************/
 /* None */
 #define SELECTOR_MODE_BIT_MASK ( 0x0F )
+#define SW_VERSION_NUM_SIZE    ( 3u )
 
 
 /***************************************************************************************************
@@ -44,6 +45,15 @@ typedef enum
     SLIDER_MAX
 } HAL_BRD_switch_slider_et;
 
+
+typedef enum
+{
+	LED_0 = 0,
+	LED_1,
+	LED_2,
+	LED_3,
+	LED_MAX
+} HAL_BRD_led_et;
 
 
 /***************************************************************************************************
@@ -73,11 +83,15 @@ void HAL_BRD_RFM69_spi_slave_select( low_high_et state );
 low_high_et HAL_BRD_read_selector_switch_pin( HAL_BRD_switch_slider_et slider );
 void HAL_BRD_NRF24_spi_slave_select( low_high_et state );
 void HAL_BRD_NRF24_set_ce_pin_state( low_high_et state );
+void HAL_BRD_set_LED_state( HAL_BRD_led_et led, off_on_et state );
+void HAL_BRD_set_onboard_LED( off_on_et state );
 
 false_true_et HAL_BRD_get_rtc_trigger_status( void );
 void HAL_BRD_set_rtc_trigger_status( false_true_et state );
 disable_enable_et HAL_BRD_read_debug_pin( void );
 
+void HAL_BRD_get_SW_version_num( u8_t *version_num_p );
+void HAL_BRD_get_HW_version_num( u8_t *version_num_p );
 
 
 #endif

@@ -1,7 +1,0 @@
-#!/bin/bash
-
-CURRENT=`pwd`
-
-echo `pwd`
-
-echo Build Aborted

@@ -4,6 +4,7 @@
 #include "COMPILER_defs.h"
 #include "COMPILER_config.h"
 #include "C_defs.h"
+#include "CLI.h"
 #include "NRF24.h"
 #include "RFM69.h"
 
@@ -51,11 +52,13 @@ the structure of the block or when adding new bytes in
 
 typedef struct
 {
-    u32_t sleep_time;
-    u8_t  tx_power_level;
-    u8_t  node_id;
+    u32_t  sleep_time;
+    u8_t   tx_power_level;
+    u16_t  device_id;
     RFM69_static_configuration_et rf_config;
     NRF24_state_et nrf_startup_tx_rx_mode;
+    CLI_cmd_st cmd_list[CLI_MAX_COMMAND_HISTORY];
+    RF_MGR_whitelist_st rf_whitelist[RF_MGR_RF_DATA_HANDLER_SIZE];
 } NVM_generic_data_blk_st;
 
 

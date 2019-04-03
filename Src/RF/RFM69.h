@@ -1268,8 +1268,8 @@ typedef struct
 void          RFM69_init( void );
 void          RFM69_tick( void );
 void          RFM69_setup_receive_mode( void );
-pass_fail_et  RFM69_read_registers( RFM69_instruction_et instruction, RFM69_registers_et address, u8_t read_data[], u8_t num_bytes );
-pass_fail_et  RFM69_write_registers( RFM69_instruction_et instruction, RFM69_registers_et address, u8_t write_data[], u8_t num_bytes );
+pass_fail_et  RFM69_read_registers( RFM69_instruction_et instruction, RFM69_registers_et address, u8_t* read_data, u8_t num_bytes );
+pass_fail_et  RFM69_write_registers( RFM69_instruction_et instruction, RFM69_registers_et address, u8_t* write_data, u8_t num_bytes );
 pass_fail_et  RFM69_set_configuration( RFM69_static_configuration_et config );
 void 		  RFM69_get_configuration( RFM69_static_configuration_et config, RFM69_register_data_st* data_p );
 void          RFM69_set_reset_pin_state( low_high_et state );
