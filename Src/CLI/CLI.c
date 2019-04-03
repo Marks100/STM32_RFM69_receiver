@@ -77,6 +77,7 @@ STATIC const CLI_Command_st CLI_commands[] =
 	 {"wlremove",     &wl_remove_handler,	HELP_WL_REM,			SUPPORTED_FOR_ALL_MODES, ENABLE, 1, WL_REMOVE_CMD_PARAM_LIST  },
 	 {"wldisplay",    &wl_display_handler,	HELP_WL_DISPLAY,	    SUPPORTED_FOR_ALL_MODES, ENABLE, 0, NULL_PARAM_LIST  },
 	 {"test",    	  &test_handler,	    HELP_TEST,	            SUPPORTED_FOR_ALL_MODES, ENABLE, 0, NULL_PARAM_LIST  },
+	 {"savenvm",      &savenvm_handler,	    HELP_SAVEMEVM,	        SUPPORTED_FOR_ALL_MODES, ENABLE, 0, NULL_PARAM_LIST  },
 	 {NULL,			  NULL,					NULL,					SUPPORTED_FOR_ALL_MODES, ENABLE, 0, NULL_PARAM_LIST  }
 };
 
@@ -948,6 +949,21 @@ CLI_error_et wl_display_handler( u8_t aArgCount, char *aArgVector[] )
 		CLI_send_newline();
 		data_p ++;
 	}
+
+	return( error );
+}
+
+
+CLI_error_et savenvm_handler( u8_t aArgCount, char *aArgVector[] )
+{
+	CLI_error_et error = CLI_ERROR_NONE;
+	char output_string[200];
+
+	NVM_request_flush();
+
+	sprintf( output_string, "NVM flush has been completed" );
+	CLI_send_data( output_string, strlen(output_string));
+	CLI_send_newline();
 
 	return( error );
 }

@@ -45,6 +45,7 @@
 #define HELP_WL_REM              "wlremove:          Removes the selected pos from the RF whitelist\r\n"
 #define HELP_WL_DISPLAY          "wldispaly:         Displays the entire RF whitelist\r\n"
 #define HELP_TEST                "test:              Used for random tests\r\n"
+#define HELP_SAVEMEVM            "savenvm:           Requests a flush of the NVM data into flash memory\r\n"
 
 #define NULL_PARAM_LIST { { 0, (u32_t)0x0000, (u32_t)0x0000 } }
 
@@ -152,6 +153,7 @@ CLI_error_et wl_add_handler( u8_t aArgCount, char *aArgVector[] );
 CLI_error_et wl_remove_handler( u8_t aArgCount, char *aArgVector[] );
 CLI_error_et wl_display_handler( u8_t aArgCount, char *aArgVector[] );
 CLI_error_et test_handler( u8_t aArgCount, char *aArgVector[] );
+CLI_error_et savenvm_handler( u8_t aArgCount, char *aArgVector[] );
 
 
 #endif
