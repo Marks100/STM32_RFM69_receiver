@@ -161,8 +161,8 @@ void RF_MGR_handle_early_prototype_sed( u16_t sensor_id, u8_t* data_p, u32_t pac
     RF_MGR_sed_data_s.temperature  = ( data_p[3] << 8u );
     RF_MGR_sed_data_s.temperature |= ( data_p[4] );
     RF_MGR_sed_data_s.packet_ctr  = packet_count;
-    RF_MGR_sed_data_s.pressure    = data_p[6];
-    RF_MGR_sed_data_s.tx_interval_secs = STDC_make_16_bit( data_p[7], data_p[8] );
+    //RF_MGR_sed_data_s.pressure    = data_p[6];
+    RF_MGR_sed_data_s.tx_interval_secs = STDC_make_16_bit( data_p[5], data_p[6] );
 
     RF_MGR_display_sed_data();
 }
