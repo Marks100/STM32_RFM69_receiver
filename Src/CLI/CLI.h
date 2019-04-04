@@ -46,6 +46,7 @@
 #define HELP_WL_DISPLAY          "wldispaly:         Displays the entire RF whitelist\r\n"
 #define HELP_WL_STATE            "wlstate:           Sets the state of the switelist < 0-Disable, 1-Enable >\r\n"
 #define HELP_TEST                "test:              Used for random tests\r\n"
+#define HELP_SAVEMEVM            "savenvm:           Requests a flush of the NVM data into flash memory\r\n"
 
 #define NULL_PARAM_LIST { { 0, (u32_t)0x0000, (u32_t)0x0000 } }
 
@@ -137,7 +138,7 @@ void 		 CLI_store_history( void );
 
 
 
-/* CLI handler functios */
+/* CLI handler functions */
 CLI_error_et help_handler( u8_t aArgCount, char *aArgVector[] );
 CLI_error_et ver_handler( u8_t aArgCount, char *aArgVector[] );
 CLI_error_et setmode_handler( u8_t aArgCount, char *aArgVector[] );
@@ -156,6 +157,7 @@ CLI_error_et wl_remove_handler( u8_t aArgCount, char *aArgVector[] );
 CLI_error_et wl_display_handler( u8_t aArgCount, char *aArgVector[] );
 CLI_error_et test_handler( u8_t aArgCount, char *aArgVector[] );
 CLI_error_et wl_state_handler( u8_t aArgCount, char *aArgVector[] );
+CLI_error_et savenvm_handler( u8_t aArgCount, char *aArgVector[] );
 
 
 #endif

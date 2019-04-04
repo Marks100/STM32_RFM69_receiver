@@ -42,7 +42,7 @@
 **                              Default NVM values                                                **
 ***************************************************************************************************/
 
-const NVM_generic_data_blk_st      NVM_DEFAULT_GENERIC_DATA_BLK_s =
+const NVM_generic_data_blk_st NVM_DEFAULT_GENERIC_DATA_BLK_s =
 {
 	RTC_EXT_DEFAULT_WAKEUP_TIME_SEC,						//Sleep time
 	RFM69_DEFAULT_TX_POWER_LEVEL,				      		//Tx power level
