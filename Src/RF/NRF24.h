@@ -7,7 +7,7 @@
 *
 *               $HeadURL: https://selacvs01.schrader.local:8443/svn/ECU_Software/LF_TOOL_GEN2/trunk/Src/HAL/RF/RF.h $
 *
-*   \brief      Public header file for RF module.
+*   \brief      Public header file for NRF24 module.
 */
 /* COPYRIGHT NOTICE
 * ==================================================================================================
@@ -22,8 +22,8 @@
 *
 ****************************************************************************************************
 */
-#ifndef RF_H
-#define RF_H
+#ifndef NRF24_H
+#define NRF24_H
 
 /***************************************************************************************************
 **                              Includes                                                          **
@@ -112,11 +112,6 @@
 
 #define NRF24_TICK_RATE_MS          20u
 #define NRF24_TIMEOUT_VAL_SEC       ( 60u * 60u * ( 1000u / NRF24_TICK_RATE_MS ) )
-
-
-#define RF_MGR_RF_DATA_HANDLER_SIZE  40u
-#define EARLY_PROTOTYPE_SED          1u
-
 
 
 /***************************************************************************************************
@@ -323,41 +318,8 @@ typedef struct
 
 
 
-typedef struct
-{
-    u8_t  sensor_type;
-    u16_t node_id;
-    u8_t  payload[32];
-    u32_t packet_counter;
-    false_true_et updated;
-} data_packet_st;
 
 
-
-typedef struct
-{
-    data_packet_st data_packet_s[RF_MGR_RF_DATA_HANDLER_SIZE];
-}RF_MGR_rf_data_store_st;
-
-
-typedef struct
-{
-	u16_t node_id;
-	u8_t  packet_type;
-	u8_t  mode_type;
-	u16_t packet_ctr;
-	u8_t  status;
-	s16_t  temperature;
-	u16_t pressure;
-} RF_MGR_sed_data_st;
-
-
-
-typedef struct
-{
-	u16_t id[RF_MGR_RF_DATA_HANDLER_SIZE];
-	disable_enable_et state;
-} RF_MGR_whitelist_st;
 
 /***************************************************************************************************
 **                              Exported Globals                                                  **
@@ -413,20 +375,9 @@ void                 NRF24_set_state( NRF24_state_et state );
 void                 NRF24_spi_slave_select( low_high_et state );
 void                 NRF24_ce_select( low_high_et state );
 void 				 NRF24_handle_supervisor_reset( void );
+false_true_et        NRF24_check_for_packet_received( void );
 
-void                 RF_MGR_packet_received_event( u8_t* rf_data, u8_t rf_data_size );
-void                 RF_MGR_tick( void );
 void 				 NRF24_handle_packet_stats( u8_t type );
-void                 RF_MGR_analyse_received_packets( void );
-void                 RF_MGR_handle_early_prototype_sed( u16_t sensor_id, u8_t* data_p, u32_t packet_count );
-void                 RF_MGR_get_all_decoded_IDs( u16_t* data_p );
-pass_fail_et 		 RF_MGR_remove_wl_node( u8_t pos );
-pass_fail_et 		 RF_MGR_add_wl_node( u16_t node_id );
-void 				 RF_MGR_display_sed_data( void );
-RF_MGR_whitelist_st* RF_MGR_get_whitelist_addres( void );
-false_true_et 		 RF_MGR_check_ID_in_whitelist( u16_t id );
-void 				 RF_MGR_set_whitelist_state( disable_enable_et state );
-
 
 #endif /* RF_H multiple inclusion guard */
 

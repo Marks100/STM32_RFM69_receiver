@@ -22,7 +22,6 @@ extern NVM_info_st NVM_info_s;
 
 
 
-
 void MODE_MGR_init( void )
 {
 	MODE_MGR_tick_timer_msecs_s = MODE_MGR_TICK_RATE_MSECS;

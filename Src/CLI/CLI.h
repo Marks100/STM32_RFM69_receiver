@@ -58,9 +58,9 @@
 
 #define WL_ADD_CMD_PARAM_LIST { { 4, (u32_t)1,(u32_t)(0xFFFF) } }
 
-#define WL_REMOVE_CMD_PARAM_LIST { { 2,(u32_t)0x0000,(u32_t)RF_MGR_RF_DATA_HANDLER_SIZE } }
+#define WL_REMOVE_CMD_PARAM_LIST { { 4,(u32_t)0x0000,(u32_t)RF_MGR_RF_DATA_HANDLER_SIZE } }
 
-#define WL_STATE_CMD_PARAM_LIST { { 2,(u32_t)DISABLE_,(u32_t)ENABLE_ } }
+#define WL_STATE_CMD_PARAM_LIST { { 1,(u32_t)DISABLE_,(u32_t)ENABLE_ } }
 
 typedef enum
 {

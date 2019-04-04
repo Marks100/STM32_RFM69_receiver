@@ -18,8 +18,8 @@
 #include "HAL_I2C.h"
 #include "HAL_TIM.h"
 #include "MODE_MGR.h"
+#include "RF_MGR.h"
 #include "nvm.h"
-#include "RFM69.h"
 #include "main.h"
 
 
@@ -52,11 +52,8 @@ int main(void)
     /* Start the timer to keep track of reception count */
 	HAL_TIM_1_init();
 
-	/* Initialise the RFM69 variables */
-	RFM69_init();
-
-	/* Initialise the NRF24 variables */
-	NRF24_init();
+	/* Initialise the RF MGR */
+	RF_MGR_init();
 
 	MODE_MGR_init();
 
