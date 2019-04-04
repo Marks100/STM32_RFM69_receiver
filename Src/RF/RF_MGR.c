@@ -63,7 +63,7 @@ void RF_MGR_init( void )
     /* Copy the whitelist from NVM */
     for( i = 0; i < RF_MGR_RF_DATA_HANDLER_SIZE; i++ )
     {
-    	STDC_memcpy( &RF_MGR_whitelist_s.id[i], &NVM_info_s.NVM_generic_data_blk_s.rf_whitelist[i], sizeof( RF_MGR_whitelist_s.id ) );
+    	STDC_memcpy( &RF_MGR_whitelist_s.id[i], &NVM_info_s.NVM_generic_data_blk_s.rf_whitelist[i], sizeof( RF_MGR_whitelist_s.id )/RF_MGR_RF_DATA_HANDLER_SIZE );
     }
 
     RF_MGR_whitelist_s.state = NVM_info_s.NVM_generic_data_blk_s.whitelist_state;
@@ -361,15 +361,18 @@ pass_fail_et RF_MGR_remove_wl_node( u16_t node_id )
 	{
 		if( node_id == RF_MGR_whitelist_s.id[pos] )
 		{
-			/* We have found the pos of the ID in question */
-			id_found = TRUE;
-			break;
+			if( node_id != 0x0000 )
+			{
+				/* We have found the pos of the ID in question */
+				id_found = TRUE;
+				break;
+			}
 		}
 	}
 
 	if( id_found == TRUE )
 	{
-		STDC_memset( &RF_MGR_whitelist_s.id[pos], 0x00, sizeof( RF_MGR_whitelist_s.id ) );
+		STDC_memset( &RF_MGR_whitelist_s.id[pos], 0x00, ( sizeof( RF_MGR_whitelist_s.id )/ RF_MGR_RF_DATA_HANDLER_SIZE ) );
 
 		/* Now that we have removed that ID and its 0, we want to shift the IDs that are above it
 		 * in the array down to fill the empty spot */
