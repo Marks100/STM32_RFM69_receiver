@@ -155,7 +155,6 @@ void RF_MGR_handle_early_prototype_sed( u16_t sensor_id, u8_t* data_p, u32_t pac
 {
 
     RF_MGR_sed_data_s.node_id     = sensor_id;
-
     RF_MGR_sed_data_s.packet_type = data_p[0];
     RF_MGR_sed_data_s.mode_type   = data_p[1];
     RF_MGR_sed_data_s.status      = data_p[2];
@@ -163,6 +162,7 @@ void RF_MGR_handle_early_prototype_sed( u16_t sensor_id, u8_t* data_p, u32_t pac
     RF_MGR_sed_data_s.temperature |= ( data_p[4] );
     RF_MGR_sed_data_s.packet_ctr  = packet_count;
     RF_MGR_sed_data_s.pressure    = data_p[6];
+    RF_MGR_sed_data_s.tx_interval_secs = STDC_make_16_bit( data_p[7], data_p[8] );
 
     RF_MGR_display_sed_data();
 }
@@ -199,7 +199,7 @@ void RF_MGR_packet_received_event( u8_t* rf_data, u8_t rf_data_size )
     false_true_et id_allowed = TRUE;
 
     sensor_type = rf_data[0];
-    node_id = ( rf_data[1] << 8u | rf_data[2] ) ;
+    node_id = STDC_make_16_bit( rf_data[1], rf_data[2]);
 
     if( RF_MGR_whitelist_s.state == ENABLE_ )
     {
@@ -221,13 +221,20 @@ void RF_MGR_packet_received_event( u8_t* rf_data, u8_t rf_data_size )
 				if( sensor_type != 0u )
 				{
 					RF_MGR_rf_data_store_s.data_packet_s[node_index].sensor_type = rf_data[0];
-					RF_MGR_rf_data_store_s.data_packet_s[node_index].node_id     = ( rf_data[1] << 8u | rf_data[2] ) ;
+					RF_MGR_rf_data_store_s.data_packet_s[node_index].node_id     = node_id;
 
 					/* Copy in the payload */
 					STDC_memcpy( RF_MGR_rf_data_store_s.data_packet_s[node_index].payload, &rf_data[3], rf_data_size - 3 );
 
 					/* increment the packet counter for the individual node id */
-					RF_MGR_rf_data_store_s.data_packet_s[node_index].packet_counter++;
+					if( RF_MGR_rf_data_store_s.data_packet_s[node_index].packet_counter < U16_T_MAX )
+					{
+						RF_MGR_rf_data_store_s.data_packet_s[node_index].packet_counter++;
+					}
+					else
+					{
+						RF_MGR_rf_data_store_s.data_packet_s[node_index].packet_counter = 0u;
+					}
 
 					/* Updated frame received */
 					RF_MGR_rf_data_store_s.data_packet_s[node_index].updated = TRUE;
@@ -328,8 +335,8 @@ void RF_MGR_display_sed_data( void )
 	u8_t remainder = ( abs( RF_MGR_sed_data_s.temperature ) - ( abs(temp_whole) * 10 ) );
 
 
-	sprintf( display_data, "Packet ctr:\t%d\r\nTemperature:\t%d.%d degree c\r\n",
-			 RF_MGR_sed_data_s.packet_ctr, temp_whole, remainder );
+	sprintf( display_data, "Packet ctr:\t%d\r\nTemperature:\t%d.%d degree c\r\nTX rate secs:\t%d",
+			 RF_MGR_sed_data_s.packet_ctr, temp_whole, remainder, RF_MGR_sed_data_s.tx_interval_secs  );
 	CLI_send_data( display_data, strlen( display_data ) );
 	STDC_memset( display_data, 0x00, sizeof( display_data ) );
 	CLI_send_newline();
