@@ -217,8 +217,6 @@ void RF_MGR_packet_received_event( u8_t* rf_data, u8_t rf_data_size )
 			if( ( ( RF_MGR_rf_data_store_s.data_packet_s[node_index].node_id == 0u ) ||
 				  ( RF_MGR_rf_data_store_s.data_packet_s[node_index].node_id == node_id ) ) )
 			{
-				/* free space or an existing id in that space so lets fill it, if the whitelist permitts :) */
-
 				/* Check for valid sensor type */
 				if( sensor_type != 0u )
 				{
