@@ -44,7 +44,9 @@
 #define HELP_WL_ADD              "wladd:             Adds the ID of a node to the RF whitelist\r\n"
 #define HELP_WL_REM              "wlremove:          Removes the selected pos from the RF whitelist\r\n"
 #define HELP_WL_DISPLAY          "wldispaly:         Displays the entire RF whitelist\r\n"
+#define HELP_WL_STATE            "wlstate:           Sets the state of the switelist < 0-Disable, 1-Enable >\r\n"
 #define HELP_TEST                "test:              Used for random tests\r\n"
+#define HELP_SAVEMEVM            "savenvm:           Requests a flush of the NVM data into flash memory\r\n"
 
 #define NULL_PARAM_LIST { { 0, (u32_t)0x0000, (u32_t)0x0000 } }
 
@@ -57,6 +59,8 @@
 #define WL_ADD_CMD_PARAM_LIST { { 4, (u32_t)1,(u32_t)(0xFFFF) } }
 
 #define WL_REMOVE_CMD_PARAM_LIST { { 2,(u32_t)0x0000,(u32_t)RF_MGR_RF_DATA_HANDLER_SIZE } }
+
+#define WL_STATE_CMD_PARAM_LIST { { 2,(u32_t)DISABLE_,(u32_t)ENABLE_ } }
 
 typedef enum
 {
@@ -134,7 +138,7 @@ void 		 CLI_store_history( void );
 
 
 
-/* CLI handler functios */
+/* CLI handler functions */
 CLI_error_et help_handler( u8_t aArgCount, char *aArgVector[] );
 CLI_error_et ver_handler( u8_t aArgCount, char *aArgVector[] );
 CLI_error_et setmode_handler( u8_t aArgCount, char *aArgVector[] );
@@ -152,6 +156,8 @@ CLI_error_et wl_add_handler( u8_t aArgCount, char *aArgVector[] );
 CLI_error_et wl_remove_handler( u8_t aArgCount, char *aArgVector[] );
 CLI_error_et wl_display_handler( u8_t aArgCount, char *aArgVector[] );
 CLI_error_et test_handler( u8_t aArgCount, char *aArgVector[] );
+CLI_error_et wl_state_handler( u8_t aArgCount, char *aArgVector[] );
+CLI_error_et savenvm_handler( u8_t aArgCount, char *aArgVector[] );
 
 
 #endif

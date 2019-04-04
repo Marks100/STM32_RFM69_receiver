@@ -74,9 +74,11 @@ STATIC const CLI_Command_st CLI_commands[] =
 	 {"listnodes",    &listnodes_handler,	HELP_LISTNODES,		    SUPPORTED_FOR_ALL_MODES, ENABLE, 0, NULL_PARAM_LIST },
 	 {"led",   		  &led_handler,         HELP_LED,               SUPPORTED_FOR_ALL_MODES, ENABLE, 2, LED_CMD_PARAM_LIST  },
 	 {"wladd", 		  &wl_add_handler,      HELP_WL_ADD, 			SUPPORTED_FOR_ALL_MODES, ENABLE, 1, WL_ADD_CMD_PARAM_LIST  },
-	 {"wlremove",     &wl_remove_handler,	HELP_WL_REM,			SUPPORTED_FOR_ALL_MODES, ENABLE, 1, WL_REMOVE_CMD_PARAM_LIST  },
+	 {"wlremove",     &wl_remove_handler,	HELP_WL_REM,			SUPPORTED_FOR_ALL_MODES, ENABLE, 1, WL_REMOVE_CMD_PARAM_LIST },
 	 {"wldisplay",    &wl_display_handler,	HELP_WL_DISPLAY,	    SUPPORTED_FOR_ALL_MODES, ENABLE, 0, NULL_PARAM_LIST  },
 	 {"test",    	  &test_handler,	    HELP_TEST,	            SUPPORTED_FOR_ALL_MODES, ENABLE, 0, NULL_PARAM_LIST  },
+	 {"wlstate",      &wl_state_handler,	HELP_WL_STATE,	        SUPPORTED_FOR_ALL_MODES, ENABLE, 1, WL_STATE_CMD_PARAM_LIST },
+	 {"savenvm",      &savenvm_handler,	    HELP_SAVEMEVM,	        SUPPORTED_FOR_ALL_MODES, ENABLE, 0, NULL_PARAM_LIST  },
 	 {NULL,			  NULL,					NULL,					SUPPORTED_FOR_ALL_MODES, ENABLE, 0, NULL_PARAM_LIST  }
 };
 
@@ -943,11 +945,48 @@ CLI_error_et wl_display_handler( u8_t aArgCount, char *aArgVector[] )
 
 	for( i = 0; i < RF_MGR_RF_DATA_HANDLER_SIZE ; i++ )
 	{
-		sprintf( output_string, "Node %02d ID:\t0x%04X", i, data_p->id );
+		sprintf( output_string, "Node %02d ID:\t0x%04X", i, data_p->id[i] );
 		CLI_send_data( output_string, strlen(output_string));
 		CLI_send_newline();
-		data_p ++;
 	}
+
+	return( error );
+}
+
+
+CLI_error_et wl_state_handler( u8_t aArgCount, char *aArgVector[] )
+{
+	CLI_error_et error = CLI_ERROR_NONE;
+	char output_string[200];
+	disable_enable_et state;
+
+	state = strtoul( aArgVector[1], NULL, 10 );
+
+	CLI_send_newline();
+
+	NVM_info_s.NVM_generic_data_blk_s.whitelist_state = state;
+	RF_MGR_set_whitelist_state( state );
+
+	NVM_request_flush();
+
+	sprintf( output_string, "New whitelist state - %d", state );
+	CLI_send_data( output_string, strlen(output_string));
+	CLI_send_newline();
+	
+	return( error );
+}
+	
+
+CLI_error_et savenvm_handler( u8_t aArgCount, char *aArgVector[] )
+{
+	CLI_error_et error = CLI_ERROR_NONE;
+	char output_string[200];
+
+	NVM_request_flush();
+
+	sprintf( output_string, "NVM flush has been completed" );
+	CLI_send_data( output_string, strlen(output_string));
+	CLI_send_newline();
 
 	return( error );
 }
