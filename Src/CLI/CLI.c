@@ -745,25 +745,19 @@ CLI_error_et listnodes_handler( u8_t aArgCount, char *aArgVector[] )
 	char output_string[200];
 
 	u8_t num_node = 0u;
-	u16_t node_ids[RF_MGR_RF_DATA_HANDLER_SIZE];
+	RF_MGR_rf_data_store_st* node_id_p;
 
 	CLI_send_newline();
 
-	RF_MGR_get_all_decoded_IDs( node_ids );
+	node_id_p = RF_MGR_get_all_decoded_IDs_address();
 
 	for( num_node = 0; num_node < RF_MGR_RF_DATA_HANDLER_SIZE; num_node++ )
 	{
-		if( node_ids[num_node] != 0u )
-		{
-			sprintf( output_string, "Node ID %02d:\t0x%04X\r\n", num_node, node_ids[num_node] );
-			CLI_send_data( output_string, strlen(output_string));
-			STDC_memset( output_string, 0x20, sizeof( output_string ) );
-		}
-		else
-		{
-			break;
-		}
+		sprintf( output_string, "Node ID %02d:\t0x%04X\r\n", num_node, node_id_p->data_packet_s[num_node].node_id );
+		CLI_send_data( output_string, strlen(output_string));
+		STDC_memset( output_string, 0x20, sizeof( output_string ) );
 	}
+
 	sprintf( output_string, "Num Free Nodes:\t%02d\r\n", ( RF_MGR_RF_DATA_HANDLER_SIZE - num_node ) );
 	CLI_send_data( output_string, strlen(output_string));
 	CLI_send_newline();
@@ -777,64 +771,49 @@ CLI_error_et remove_wl_node_handler( u8_t aArgCount, char *aArgVector[] )
 {
 	CLI_error_et error = CLI_ERROR_NONE;
 	char output_string[200];
-	false_true_et node_located = FALSE;
+	pass_fail_et status = FAIL;
 	u16_t id = 0u;
-
-	CLI_send_newline();
-
-	/* Lets read all the nodes first to ensure that the one being deleted is actually on the list */
-	u8_t num_node = 0u;
-	u16_t node_ids[RF_MGR_RF_DATA_HANDLER_SIZE];
-
-	RF_MGR_get_all_decoded_IDs( node_ids );
+	RF_MGR_whitelist_st* data_p;
+	u8_t nodes;
 
 	/* What ID is the user trying to remove */
 	id = strtoul( aArgVector[1], NULL, 16 );
 
-	/* Is that node actually on the list */
-	for( num_node = 0; num_node < RF_MGR_RF_DATA_HANDLER_SIZE; num_node++ )
-	{
-		if( node_ids[num_node] == id )
-		{
-			node_located = TRUE;
-			break;
-		}
-	}
+	/* This function should handle everything */
+	status = RF_MGR_remove_wl_node( id );
 
-	if( node_located == TRUE )
+	CLI_send_newline();
+
+	if( status == PASS )
 	{
-		RF_MGR_remove_wl_node( 0 );
-		sprintf( output_string, "Node 0x%04X has been located in the current list and will be deleted...", id );
+		sprintf( output_string, "Node 0x%04X was located in the current whitelist and has now been removed...", id );
 		CLI_send_data( output_string, strlen(output_string));
 		CLI_send_newline();
 		STDC_memset( output_string, 0x20, sizeof( output_string ) );
 	}
 	else
 	{
-		sprintf( output_string, "Node 0x%04X has not been located in the current list!!!,\r\nHere is the current list of nodes..", id );
+		sprintf( output_string, "Node 0x%04X has not been located in the whitelist!!!,\r\nHere is the current whitelist..", id );
 		CLI_send_data( output_string, strlen(output_string));
 		CLI_send_newline();
 		STDC_memset( output_string, 0x20, sizeof( output_string ) );
 
+		data_p = RF_MGR_get_whitelist_address();
+
 		/* Print the current list to the user so that they can see them and delete the correct node */
-		for( num_node = 0; num_node < RF_MGR_RF_DATA_HANDLER_SIZE; num_node++ )
+		for( nodes = 0; nodes < RF_MGR_RF_DATA_HANDLER_SIZE; nodes++ )
 		{
-			if( node_ids[num_node] != 0u )
-			{
-				sprintf( output_string, "Node ID %02d:\t0x%04X\r\n", num_node, node_ids[num_node] );
-				CLI_send_data( output_string, strlen(output_string));
-				CLI_send_newline();
-				STDC_memset( output_string, 0x20, sizeof( output_string ) );
-			}
-			else
-			{
-				break;
-			}
+			sprintf( output_string, "Node ID %02d:\t0x%04X\r\n", nodes, data_p->id[nodes] );
+			CLI_send_data( output_string, strlen(output_string));
+			CLI_send_newline();
+			STDC_memset( output_string, 0x20, sizeof( output_string ) );
 		}
 	}
 
 	return( error );
 }
+
+
 
 
 CLI_error_et led_handler( u8_t aArgCount, char *aArgVector[] )
@@ -939,7 +918,7 @@ CLI_error_et wl_display_handler( u8_t aArgCount, char *aArgVector[] )
 	u8_t i = 0u;
 	RF_MGR_whitelist_st *data_p;
 
-	data_p = RF_MGR_get_whitelist_addres();
+	data_p = RF_MGR_get_whitelist_address();
 
 	CLI_send_newline();
 

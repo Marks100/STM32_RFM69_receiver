@@ -5,6 +5,7 @@
 #include "COMPILER_config.h"
 #include "C_defs.h"
 #include "CLI.h"
+#include "RF_MGR.h"
 #include "NRF24.h"
 #include "RFM69.h"
 
