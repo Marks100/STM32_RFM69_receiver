@@ -528,6 +528,8 @@ void RF_MGR_set_whitelist_state( disable_enable_et state )
 
 void RF_MGR_monitor_room_temp( u16_t id, s16_t temperature )
 {
+	float temp = ( temperature / 10.0 );
+
 	/* Check that the feature is enabled */
 	if( RF_MGR_room_temp_mon_s.enabled == TRUE )
 	{
@@ -538,12 +540,12 @@ void RF_MGR_monitor_room_temp( u16_t id, s16_t temperature )
 			if( RF_MGR_room_temp_mon_s.heat_mode == TRUE )
 			{
 				/* We are in heat mode */
-				if( temperature < RF_MGR_room_temp_mon_s.heat_min_temp_c )
+				if( temp < RF_MGR_room_temp_mon_s.heat_min_temp_c )
 				{
 					/* Start heating */
 					HAL_BRD_set_heater_state( ON );
 				}
-				else if ( temperature > RF_MGR_room_temp_mon_s.heat_max_temp_c )
+				else if ( temp > RF_MGR_room_temp_mon_s.heat_max_temp_c )
 				{
 					/* Stop heating */
 					HAL_BRD_set_heater_state( OFF );
@@ -556,12 +558,12 @@ void RF_MGR_monitor_room_temp( u16_t id, s16_t temperature )
 			else
 			{
 				/* We are in Cool mode */
-				if( temperature > RF_MGR_room_temp_mon_s.cool_max_temp_c )
+				if( temp > RF_MGR_room_temp_mon_s.cool_max_temp_c )
 				{
 					/* Start cooling */
 					HAL_BRD_set_cooler_state( ON );
 				}
-				else if ( temperature < RF_MGR_room_temp_mon_s.cool_min_temp_c )
+				else if ( temp < RF_MGR_room_temp_mon_s.cool_min_temp_c )
 				{
 					/* Stop cooling */
 					HAL_BRD_set_cooler_state( OFF );
