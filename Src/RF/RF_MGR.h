@@ -76,6 +76,7 @@ typedef struct
 	u8_t  status;
 	s16_t  temperature;
 	u16_t pressure;
+	u16_t tx_interval_secs;
 } RF_MGR_sed_data_st;
 
 
