@@ -173,6 +173,8 @@ void RF_MGR_handle_early_prototype_sed( u16_t sensor_id, u8_t* data_p, u32_t pac
     RF_MGR_sed_data_s.packet_ctr  = packet_count;
     RF_MGR_sed_data_s.tx_interval_secs = STDC_make_16_bit( data_p[5], data_p[6] );
 
+    RF_MGR_monitor_room_temp( RF_MGR_sed_data_s.node_id, RF_MGR_sed_data_s.temperature );
+
     RF_MGR_display_sed_data();
 }
 
@@ -275,46 +277,46 @@ void RF_MGR_display_sed_data( void )
 {
 	u8_t display_data[200];
 
-	STDC_memset( display_data, 0x20, sizeof( display_data ) );
-
-	CLI_send_newline();
-	sprintf( display_data, "**------------------------------------------------**");
-	CLI_send_data( display_data, strlen( display_data ) );
 	STDC_memset( display_data, 0x00, sizeof( display_data ) );
 
 	CLI_send_newline();
-	sprintf( display_data, "Sensor ID:\t0x%04X\r\n",
-			RF_MGR_sed_data_s.node_id );
+	//sprintf( display_data, "**------------------------------------------------**");
 	CLI_send_data( display_data, strlen( display_data ) );
 	STDC_memset( display_data, 0x00, sizeof( display_data ) );
+//
+	//CLI_send_newline();
+//	sprintf( display_data, "Sensor ID:\t0x%04X\r\n",
+//			RF_MGR_sed_data_s.node_id );
+	//CLI_send_data( display_data, strlen( display_data ) );
+	//STDC_memset( display_data, 0x00, sizeof( display_data ) );
 
-	switch( RF_MGR_sed_data_s.packet_type )
-	{
-		case 0:
-			sprintf( display_data, "Sensor Type: \t1\r\n");
-			break;
-
-		case 1:
-			sprintf( display_data, "Sensor Type: \t2\r\n");
-			break;
-
-		case 2:
-			sprintf( display_data, "Sensor Type: \t3\r\n");
-			break;
-
-		case 3:
-			sprintf( display_data, "Sensor Type: \t4\r\n");
-			break;
-
-		case 4:
-			sprintf( display_data, "Sensor Type: \t5\r\n");
-			break;
-
-		default:
-			sprintf( display_data, "Sensor Type: \t1st Gen Sleepy Sensor Device\r\n");
-			break;
-	}
-
+//	switch( RF_MGR_sed_data_s.packet_type )
+//	{
+//		case 0:
+//			sprintf( display_data, "Sensor Type: \t1\r\n");
+//			break;
+//
+//		case 1:
+//			sprintf( display_data, "Sensor Type: \t2\r\n");
+//			break;
+//
+//		case 2:
+//			sprintf( display_data, "Sensor Type: \t3\r\n");
+//			break;
+//
+//		case 3:
+//			sprintf( display_data, "Sensor Type: \t4\r\n");
+//			break;
+//
+//		case 4:
+//			sprintf( display_data, "Sensor Type: \t5\r\n");
+//			break;
+//
+//		default:
+//			sprintf( display_data, "Sensor Type: \t1st Gen Sleepy Sensor Device\r\n");
+//			break;
+//	}
+//
 	CLI_send_data( display_data, strlen( display_data ) );
 	STDC_memset( display_data, 0x00, sizeof( display_data ) );
 
@@ -531,7 +533,7 @@ void RF_MGR_monitor_room_temp( u16_t id, s16_t temperature )
 	float temp = ( temperature / 10.0 );
 
 	/* Check that the feature is enabled */
-	if( RF_MGR_room_temp_mon_s.enabled == TRUE )
+	if( RF_MGR_room_temp_mon_s.enabled == ENABLE_ )
 	{
 		/* Now check that the ID we are using is one that we want to use */
 		if( id == RF_MGR_room_temp_mon_s.id )

@@ -89,6 +89,8 @@ void HAL_BRD_set_onboard_LED( off_on_et state );
 false_true_et HAL_BRD_get_rtc_trigger_status( void );
 void HAL_BRD_set_rtc_trigger_status( false_true_et state );
 disable_enable_et HAL_BRD_read_debug_pin( void );
+void HAL_BRD_set_cooler_state( off_on_et state );
+void HAL_BRD_set_heater_state( off_on_et state );
 
 void HAL_BRD_get_SW_version_num( u8_t *version_num_p );
 void HAL_BRD_get_HW_version_num( u8_t *version_num_p );
