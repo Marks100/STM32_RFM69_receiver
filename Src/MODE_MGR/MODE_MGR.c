@@ -8,6 +8,7 @@
 #include "HAL_BRD.h"
 #include "HAL_TIM.h"
 #include "MAIN.h"
+#include "HEATING.h"
 #include "CLI.h"
 #include "RFM69.h"
 #include "HAL_UART.h"
@@ -68,6 +69,7 @@ void MODE_MGR_action_schedule_normal( void )
 {
     NRF24_tick();
     CLI_message_handler();
+    HEATING_tick();
 
     switch( MODE_MGR_tick_timer_msecs_s )
     {

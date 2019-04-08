@@ -19,6 +19,7 @@
 #include "HAL_TIM.h"
 #include "MODE_MGR.h"
 #include "RF_MGR.h"
+#include "HEATING.h"
 #include "nvm.h"
 #include "main.h"
 
@@ -56,6 +57,8 @@ int main(void)
 	RF_MGR_init();
 
 	MODE_MGR_init();
+
+	HEATIING_init();
 
 	/* Init the systick timer */
 	MAIN_SYSTICK_init();

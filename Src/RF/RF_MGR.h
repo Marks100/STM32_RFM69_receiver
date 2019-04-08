@@ -87,17 +87,6 @@ typedef struct
 } RF_MGR_whitelist_st;
 
 
-typedef struct
-{
-	u16_t id;
-	s16_t cool_min_temp_c;
-	s16_t cool_max_temp_c;
-	s16_t heat_min_temp_c;
-	s16_t heat_max_temp_c;
-	false_true_et heat_mode;
-	disable_enable_et enabled;
-	float hysteresis;
-} RF_MGR_room_temp_mon_st;
 /***************************************************************************************************
 **                              Exported Globals                                                  **
 ***************************************************************************************************/
@@ -120,8 +109,6 @@ void 				 	 RF_MGR_display_sed_data( void );
 RF_MGR_whitelist_st* 	 RF_MGR_get_whitelist_address( void );
 false_true_et 		 	 RF_MGR_check_ID_in_whitelist( u16_t id );
 void 				 	 RF_MGR_set_whitelist_state( disable_enable_et state );
-
-void 					 RF_MGR_monitor_room_temp( u16_t id, s16_t temperature );
 
 
 #endif /* RF_H multiple inclusion guard */
