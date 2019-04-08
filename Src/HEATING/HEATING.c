@@ -55,8 +55,8 @@ void HEATIING_init( void )
 	HEATING_room_temp_mon_s.heat_mode = TRUE;
 	HEATING_room_temp_mon_s.cool_max_temp_c = 19;
 	HEATING_room_temp_mon_s.cool_min_temp_c = 15;
-	HEATING_room_temp_mon_s.heat_max_temp_c = 20;
-	HEATING_room_temp_mon_s.heat_min_temp_c = 18;
+	HEATING_room_temp_mon_s.heat_max_temp_c = 19.2;
+	HEATING_room_temp_mon_s.heat_min_temp_c = 18.0;
 	HEATING_room_temp_mon_s.enabled = ENABLE_;
 }
 
@@ -72,7 +72,6 @@ void HEATING_tick( void )
 			/* Now check the mode that we want to be in */
 			if( HEATING_room_temp_mon_s.heat_mode == TRUE )
 			{
-
 				/* We are in heat mode */
 				if( HEATING_room_temp_mon_s.oat_c < HEATING_room_temp_mon_s.heat_min_temp_c )
 				{

@@ -24,10 +24,10 @@
 typedef struct
 {
 	float oat_c;
-	s16_t cool_min_temp_c;
-	s16_t cool_max_temp_c;
-	s16_t heat_min_temp_c;
-	s16_t heat_max_temp_c;
+	float cool_min_temp_c;
+	float cool_max_temp_c;
+	float heat_min_temp_c;
+	float heat_max_temp_c;
 	false_true_et heat_mode;
 	disable_enable_et enabled;
 	float hysteresis;
