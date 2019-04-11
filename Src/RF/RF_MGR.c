@@ -269,6 +269,21 @@ void RF_MGR_display_sed_data( void )
 {
 	u8_t display_data[200];
 
+	const char* sensor_type[5] =
+	{
+		"1st Gen Sleepy Sensor Device",
+		"2",
+		"3",
+		"4",
+		"5"
+	};
+
+	const char* mode_type[2] =
+	{
+		"NORMAL MODE",
+		"DEBUG MODE",
+	};
+
 	STDC_memset( display_data, 0x00, sizeof( display_data ) );
 
 	CLI_send_newline();
@@ -282,50 +297,11 @@ void RF_MGR_display_sed_data( void )
 	CLI_send_data( display_data, strlen( display_data ) );
 	STDC_memset( display_data, 0x00, sizeof( display_data ) );
 
-	switch( RF_MGR_sed_data_s.packet_type )
-	{
-		case 0:
-			sprintf( display_data, "Sensor Type: \t1\r\n");
-			break;
-
-		case 1:
-			sprintf( display_data, "Sensor Type: \t2\r\n");
-			break;
-
-		case 2:
-			sprintf( display_data, "Sensor Type: \t3\r\n");
-			break;
-
-		case 3:
-			sprintf( display_data, "Sensor Type: \t4\r\n");
-			break;
-
-		case 4:
-			sprintf( display_data, "Sensor Type: \t5\r\n");
-			break;
-
-		default:
-			sprintf( display_data, "Sensor Type: \t1st Gen Sleepy Sensor Device\r\n");
-			break;
-	}
-
+	sprintf( display_data, "Sensor Type: \t%s\r\n", sensor_type[ RF_MGR_sed_data_s.packet_type ]);
 	CLI_send_data( display_data, strlen( display_data ) );
 	STDC_memset( display_data, 0x00, sizeof( display_data ) );
 
-	switch( RF_MGR_sed_data_s.mode_type )
-	{
-		case 0:
-			sprintf( display_data, "Mode Type:\tNORMAL MODE\r\n");
-			break;
-
-		case 1:
-			sprintf( display_data, "Mode Type:\tDEBUG MODE\r\n");
-			break;
-
-		default:
-			sprintf( display_data, "Mode Type:\tNORMAL MODE\r\n");
-			break;
-	}
+	sprintf( display_data, "Mode Type:\t%s\r\n", mode_type[ RF_MGR_sed_data_s.mode_type ]);
 	CLI_send_data( display_data, strlen( display_data ) );
 	STDC_memset( display_data, 0x00, sizeof( display_data ) );
 
@@ -336,7 +312,6 @@ void RF_MGR_display_sed_data( void )
 	/* The temperature needs to be divided by 10 */
 	s16_t temp_whole = ( RF_MGR_sed_data_s.temperature/10 );
 	u8_t remainder = ( abs( RF_MGR_sed_data_s.temperature ) - ( abs(temp_whole) * 10 ) );
-
 
 	sprintf( display_data, "Packet ctr:\t%d\r\nTemperature:\t%d.%d degree c\r\nTX rate secs:\t%d",
 			 RF_MGR_sed_data_s.packet_ctr, temp_whole, remainder, RF_MGR_sed_data_s.tx_interval_secs  );
