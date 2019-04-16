@@ -269,13 +269,14 @@ void RF_MGR_display_sed_data( void )
 {
 	u8_t display_data[200];
 
-	const char* sensor_type[5] =
+	const char* sensor_type[6] =
 	{
-		"1st Gen Sleepy Sensor Device",
+		"1",
 		"2",
 		"3",
 		"4",
-		"5"
+		"5",
+		"1st Gen Sleepy Sensor Device"
 	};
 
 	const char* mode_type[2] =
