@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "assert.h"
 
 #include "C_defs.h"
 #include "STDC.h"
@@ -132,6 +133,7 @@ void RF_MGR_analyse_received_packets( void )
                     break;
 
                 default:
+                	assert(1);
                     break;
             }
         }
@@ -155,7 +157,6 @@ void RF_MGR_analyse_received_packets( void )
 ***************************************************************************************************/
 void RF_MGR_handle_early_prototype_sed( u16_t sensor_id, u8_t* data_p, u32_t packet_count )
 {
-
     RF_MGR_sed_data_s.node_id     = sensor_id;
     RF_MGR_sed_data_s.packet_type = data_p[0];
     RF_MGR_sed_data_s.mode_type   = data_p[1];
