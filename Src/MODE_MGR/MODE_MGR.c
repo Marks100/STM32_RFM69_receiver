@@ -17,8 +17,9 @@
 STATIC false_true_et 		   MODE_MGR_system_init_s;
 STATIC u32_t 			       MODE_MGR_tick_timer_msecs_s;
 STATIC MODE_MGR_mode_et        MODE_MGR_mode_s;
-STATIC u8_t                    MODE_MGR_selector_switch_state_s;
 STATIC u8_t                    MODE_MGR_debounce_ctr_s;
+
+STATIC MODE_MGR_user_input_st MODE_MGR_user_input_s[MODE_MGR_NUM_SLIDER_IMPUTS];
 extern NVM_info_st NVM_info_s;
 
 
@@ -28,8 +29,9 @@ void MODE_MGR_init( void )
 	MODE_MGR_tick_timer_msecs_s = MODE_MGR_TICK_RATE_MSECS;
 	MODE_MGR_mode_s = MODE_MGR_MODE_NORMAL;
 	MODE_MGR_system_init_s = FALSE;
-	MODE_MGR_selector_switch_state_s = 0u;
 	MODE_MGR_debounce_ctr_s = 0xFF;
+
+	STDC_memset( &MODE_MGR_user_input_s, 0x00, sizeof( MODE_MGR_user_input_s ) );
 }
 
 
@@ -70,6 +72,7 @@ void MODE_MGR_action_schedule_normal( void )
     NRF24_tick();
     CLI_message_handler();
     HEATING_tick();
+    MODE_MGR_check_user_input();
 
     switch( MODE_MGR_tick_timer_msecs_s )
     {
@@ -336,58 +339,69 @@ void MODE_MGR_change_mode( void )
 
 
 
-void MODE_MGR_analyse_switches( void )
+
+void MODE_MGR_action_selector_switch_changes( HAL_BRD_switch_slider_et slider, low_high_et state )
 {
-    u8_t i;
-    u8_t slider_mask = 0;
+	switch ( slider )
+	{
+		case SLIDER_1:
+			if( state == HIGH )
+			{
+				HEATING_set_mode( HEATING_HEAT_MODE );
+			}
+			else
+			{
+				HEATING_set_mode( HEATING_COOL_MODE );
+			}
+			break;
 
-    /* Loop through all the positions and analyse them */
-    for( i = SLIDER_1; i < SLIDER_MAX; i ++ )
-    {
-        slider_mask |= ( HAL_BRD_read_selector_switch_pin( (HAL_BRD_switch_slider_et)i ) << i );
-    }
+		case SLIDER_2:
+			break;
 
-    if( ( MODE_MGR_selector_switch_state_s & SELECTOR_MODE_BIT_MASK ) != ( slider_mask & SELECTOR_MODE_BIT_MASK ) )
-    {
-        /* selector switch positions have changed */
-        MODE_MGR_selector_switch_state_s = slider_mask;
-
-        MODE_MGR_debounce_ctr_s = 0u;
-    }
-
-    /* Rudementary debounce mechanism */
-    if( MODE_MGR_debounce_ctr_s != 0xFF )
-    {
-        if( MODE_MGR_debounce_ctr_s >= 4 )
-        {
-            MODE_MGR_debounce_ctr_s = 0xFF;
-
-            MODE_MGR_action_selector_switch_changes( MODE_MGR_selector_switch_state_s );
-        }
-        else
-        {
-        	MODE_MGR_debounce_ctr_s ++;
-        }
-    }
+		default:
+			break;
+	}
 }
 
 
 
 
-void MODE_MGR_action_selector_switch_changes( u8_t MODE_MGR_selector_switch_state_s )
+void MODE_MGR_check_user_input( void )
 {
-    switch( MODE_MGR_selector_switch_state_s )
-    {
-        case COMMAND_1:
-            HAL_BRD_toggle_debug_pin();
-            break;
+	u8_t i = 0u;
 
-        default:
-            HAL_BRD_toggle_debug_pin();
-            break;
-    }
+	/* First read the low level state eof the pins */
+	for( i = 0u; i < MODE_MGR_NUM_SLIDER_IMPUTS; i++ )
+	{
+		MODE_MGR_user_input_s[i].slider_state_ll = HAL_BRD_read_selector_switch_pin( (HAL_BRD_switch_slider_et)i );
+
+		/* If the low level state is != the high level state then start the debounce */
+		if( MODE_MGR_user_input_s[i].slider_state_ll != MODE_MGR_user_input_s[i].slider_state_hl )
+		{
+			if( MODE_MGR_user_input_s[i].slider_debounce_time < U8_T_MAX )
+			{
+				MODE_MGR_user_input_s[i].slider_debounce_time++;
+			}
+		}
+		else
+		{
+			MODE_MGR_user_input_s[i].slider_debounce_time = 0u;
+		}
+	}
+
+	/* Now check if the debounce times have been elapsed */
+	for( i = 0u; i < MODE_MGR_NUM_SLIDER_IMPUTS; i++ )
+	{
+		if( MODE_MGR_user_input_s[i].slider_debounce_time >= MODE_MGR_SLIDER_DB_TICKS )
+		{
+			/* Toggle the high level state */
+			MODE_MGR_user_input_s[i].slider_state_hl ^= 1;
+			MODE_MGR_user_input_s[i].slider_debounce_time = 0u;
+
+			MODE_MGR_action_selector_switch_changes( (HAL_BRD_switch_slider_et)i, MODE_MGR_user_input_s[i].slider_state_hl );
+		}
+	}
 }
-
 
 
 

@@ -49,10 +49,10 @@ STATIC HEATING_room_temp_mon_st HEATING_room_temp_mon_s;
 **                              Public Functions                                                  **
 ***************************************************************************************************/
 
-void HEATIING_init( void )
+void HEATING_init( void )
 {
 	HEATING_room_temp_mon_s.oat_c = TMPERATURE_INVALID;
-	HEATING_room_temp_mon_s.heat_mode = TRUE;
+	HEATING_room_temp_mon_s.heat_mode = HEATING_COOL_MODE;
 	HEATING_room_temp_mon_s.cool_max_temp_c = 19;
 	HEATING_room_temp_mon_s.cool_min_temp_c = 15;
 	HEATING_room_temp_mon_s.heat_max_temp_c = 19.2;
@@ -70,7 +70,7 @@ void HEATING_tick( void )
 		if( HEATING_room_temp_mon_s.oat_c != TMPERATURE_INVALID )
 		{
 			/* Now check the mode that we want to be in */
-			if( HEATING_room_temp_mon_s.heat_mode == TRUE )
+ 			if( HEATING_room_temp_mon_s.heat_mode == HEATING_HEAT_MODE )
 			{
 				/* We are in heat mode */
 				if( HEATING_room_temp_mon_s.oat_c < HEATING_room_temp_mon_s.heat_min_temp_c )
@@ -113,9 +113,27 @@ void HEATING_tick( void )
 			HAL_BRD_set_cooler_state( OFF );
 			HAL_BRD_set_heater_state( OFF );
 		}
+
+
+		/* still display what mode we are in, heating or cooling */
+		if( HEATING_room_temp_mon_s.heat_mode == HEATING_HEAT_MODE )
+		{
+			HAL_BRD_set_LED_state( LED_0, HIGH );
+			HAL_BRD_set_LED_state( LED_2, LOW );
+		}
+		else
+		{
+			HAL_BRD_set_LED_state( LED_0, LOW );
+			HAL_BRD_set_LED_state( LED_2, HIGH );
+		}
 	}
 }
 
+
+void HEATING_set_mode( HEATING_mode_et mode )
+{
+	HEATING_room_temp_mon_s.heat_mode = mode;
+}
 
 
 void HEATING_set_oat( float temperature )

@@ -46,7 +46,7 @@ int main(void)
 
 	/* Init the HW */
 	HAL_BRD_init();
-	HAL_I2C_init();
+	//HAL_I2C_init();
 	HAL_SPI_init();
 	CLI_init();
 
@@ -58,7 +58,7 @@ int main(void)
 
 	MODE_MGR_init();
 
-	HEATIING_init();
+	HEATING_init();
 
 	/* Init the systick timer */
 	MAIN_SYSTICK_init();

@@ -64,8 +64,8 @@ void HAL_BRD_init( void )
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
 	GPIO_Init(GPIOB, &GPIO_InitStructure);
 
-	/* Setup the Selector mode switches( PB15, PB14, PB13, PB12 ) */
-	GPIO_InitStructure.GPIO_Pin = ( GPIO_Pin_15 | GPIO_Pin_14 | GPIO_Pin_13 | GPIO_Pin_12 );
+	/* Setup the Selector mode switches( PB6, PB7, PB8, PB9 ) */
+	GPIO_InitStructure.GPIO_Pin = ( GPIO_Pin_6 | GPIO_Pin_7 | GPIO_Pin_8 | GPIO_Pin_9 );
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;
 	GPIO_Init(GPIOB, &GPIO_InitStructure);
@@ -506,19 +506,19 @@ low_high_et HAL_BRD_read_selector_switch_pin( HAL_BRD_switch_slider_et slider )
     switch ( slider )
     {
         case SLIDER_1:
-            state = HAL_BRD_read_pin_state( GPIOB, GPIO_Pin_12 );
+            state = HAL_BRD_read_pin_state( GPIOB, GPIO_Pin_6 );
         break;
 
         case SLIDER_2:
-            state = HAL_BRD_read_pin_state( GPIOB, GPIO_Pin_13 );
+            state = HAL_BRD_read_pin_state( GPIOB, GPIO_Pin_7 );
         break;
 
         case SLIDER_3:
-            state = HAL_BRD_read_pin_state( GPIOB, GPIO_Pin_14 );
+            state = HAL_BRD_read_pin_state( GPIOB, GPIO_Pin_8 );
         break;
 
         case SLIDER_4:
-            state = HAL_BRD_read_pin_state( GPIOB, GPIO_Pin_15 );
+            state = HAL_BRD_read_pin_state( GPIOB, GPIO_Pin_9 );
         break;
 
         default:
@@ -570,7 +570,7 @@ void HAL_BRD_set_rtc_trigger_status( false_true_et state )
 
 void HAL_BRD_set_heater_state( off_on_et state )
 {
-	HAL_BRD_set_LED_state( LED_0, state );
+	HAL_BRD_set_LED_state( LED_1, state );
 }
 
 

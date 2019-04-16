@@ -21,6 +21,13 @@
 #define TMPERATURE_INVALID	( 65535.0f )
 
 
+typedef enum
+{
+	HEATING_HEAT_MODE = 0u,
+	HEATING_COOL_MODE
+
+} HEATING_mode_et ;
+
 typedef struct
 {
 	float oat_c;
@@ -28,7 +35,7 @@ typedef struct
 	float cool_max_temp_c;
 	float heat_min_temp_c;
 	float heat_max_temp_c;
-	false_true_et heat_mode;
+	HEATING_mode_et heat_mode;
 	disable_enable_et enabled;
 	float hysteresis;
 } HEATING_room_temp_mon_st;
@@ -46,6 +53,7 @@ void  HEATING_init( void );
 void  HEATING_tick( void );
 void  HEATING_set_oat( float temperature );
 float HEATING_get_oat( void );
+void  HEATING_set_mode( HEATING_mode_et mode );
 
 
 #endif /* HEATING_H multiple inclusion guard */

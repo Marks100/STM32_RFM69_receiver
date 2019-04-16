@@ -78,12 +78,14 @@
     <Component id="440" name="RCC" path="" type="2"/>
     <Component id="449" name="IWDG" path="" type="2"/>
     <Component id="450" name="WWDG" path="" type="2"/>
+    <Component id="454" name="DBGMCU" path="" type="2"/>
     <Component id="456" name="TIM" path="" type="2"/>
   </Components>
   <Files>
     <File name="Src/RF/RF_MGR.h" path="../Src/RF/RF_MGR.h" type="1"/>
     <File name="stm_lib/src/stm32f10x_usart.o" path="stm_lib/src/stm32f10x_usart.o" type="1"/>
     <File name="Src/MODE_MGR/MODE_MGR.o" path="../Src/MODE_MGR/MODE_MGR.o" type="1"/>
+    <File name="stm_lib/src/stm32f10x_dbgmcu.c" path="stm_lib/src/stm32f10x_dbgmcu.c" type="1"/>
     <File name="Src/RF/NRF24.c" path="../Src/RF/NRF24.c" type="1"/>
     <File name="Src/NVM/NVM.c" path="../Src/NVM/NVM.c" type="1"/>
     <File name="Src/PROJ_CONFIG/PROJ_config.h" path="../Src/PROJ_CONFIG/PROJ_config.h" type="1"/>
@@ -97,14 +99,15 @@
     <File name="cmsis/core_cmFunc.h" path="cmsis/core_cmFunc.h" type="1"/>
     <File name="stm_lib/src/misc.c" path="stm_lib/src/misc.c" type="1"/>
     <File name="cmsis_boot/stm32f10x.h" path="cmsis_boot/stm32f10x.h" type="1"/>
+    <File name="stm_lib/inc/stm32f10x_dbgmcu.h" path="stm_lib/inc/stm32f10x_dbgmcu.h" type="1"/>
     <File name="Src/COMMON_MODULES/xINC/SELMATH/SELMATH_pri.h" path="../Src/COMMON_MODULES/xINC/SELMATH/SELMATH_pri.h" type="1"/>
     <File name="cmsis_boot/stm32f10x_conf.h" path="cmsis_boot/stm32f10x_conf.h" type="1"/>
     <File name="Src/HAL/HAL_I2C" path="" type="2"/>
     <File name="Src/COMMON_MODULES/xINC" path="" type="2"/>
     <File name="stm_lib/inc/stm32f10x_flash.h" path="stm_lib/inc/stm32f10x_flash.h" type="1"/>
     <File name="cmsis_boot/system_stm32f10x.o" path="cmsis_boot/system_stm32f10x.o" type="1"/>
-    <File name="Src/HAL/HAL_SPI/HAL_SPI.o" path="../Src/HAL/HAL_SPI/HAL_SPI.o" type="1"/>
     <File name="stm_lib/inc/stm32f10x_spi.h" path="stm_lib/inc/stm32f10x_spi.h" type="1"/>
+    <File name="Src/HAL/HAL_SPI/HAL_SPI.o" path="../Src/HAL/HAL_SPI/HAL_SPI.o" type="1"/>
     <File name="stm_lib/src/stm32f10x_adc.c" path="stm_lib/src/stm32f10x_adc.c" type="1"/>
     <File name="stm_lib/inc/stm32f10x_iwdg.h" path="stm_lib/inc/stm32f10x_iwdg.h" type="1"/>
     <File name="stm32f10x_iwdg.h" path="stm_lib/inc/stm32f10x_iwdg.h" type="1"/>
@@ -177,8 +180,8 @@
     <File name="stm_lib/src/stm32f10x_iwdg.c" path="stm_lib/src/stm32f10x_iwdg.c" type="1"/>
     <File name="stm_lib/src/stm32f10x_crc.o" path="stm_lib/src/stm32f10x_crc.o" type="1"/>
     <File name="Src/PROJ_CONFIG/STDC_config.h" path="../Src/PROJ_CONFIG/STDC_config.h" type="1"/>
-    <File name="Src/COMMON_MODULES/xLIBS/CHKSUM/CHKSUM.h" path="../Src/COMMON_MODULES/xLIBS/CHKSUM/CHKSUM.h" type="1"/>
     <File name="Src/COMMON_MODULES/xINC/SELMATH/SELMATH.c" path="../Src/COMMON_MODULES/xINC/SELMATH/SELMATH.c" type="1"/>
+    <File name="Src/COMMON_MODULES/xLIBS/CHKSUM/CHKSUM.h" path="../Src/COMMON_MODULES/xLIBS/CHKSUM/CHKSUM.h" type="1"/>
     <File name="stm_lib/src/stm32f10x_rcc.o" path="stm_lib/src/stm32f10x_rcc.o" type="1"/>
     <File name="Src/COMMON_MODULES/xLIBS/CHKSUM" path="" type="2"/>
     <File name="Src/MODE_MGR/MODE_MGR.c" path="../Src/MODE_MGR/MODE_MGR.c" type="1"/>
