@@ -133,7 +133,7 @@ void RF_MGR_analyse_received_packets( void )
                     break;
 
                 default:
-                	assert(1);
+                	assert(0);
                     break;
             }
         }
