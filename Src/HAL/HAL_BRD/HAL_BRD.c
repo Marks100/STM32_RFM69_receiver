@@ -76,12 +76,6 @@ void HAL_BRD_init( void )
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
     GPIO_Init(GPIOC, &GPIO_InitStructure);
 
-    /* Configure the DEBUG output pin */
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
-	GPIO_Init(GPIOA, &GPIO_InitStructure);
-
 	/* Configure the NRF24 NCS pin */
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
@@ -95,10 +89,10 @@ void HAL_BRD_init( void )
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
 
 	/* Configure the LED pins */
-	GPIO_InitStructure.GPIO_Pin = ( GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15 );
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
-	GPIO_Init(GPIOB, &GPIO_InitStructure);
+//	GPIO_InitStructure.GPIO_Pin = ( GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15 );
+//	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+//	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
+//	GPIO_Init(GPIOB, &GPIO_InitStructure);
 
 	/* Enable the "RFM69 packet received" interrupt on pin A1 */
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1;
@@ -237,19 +231,19 @@ void HAL_BRD_set_LED_state( HAL_BRD_led_et led, off_on_et state )
 	switch( led )
 	{
 		case LED_0:
-			HAL_BRD_set_pin_state( GPIOB, GPIO_Pin_12, state );
+			//HAL_BRD_set_pin_state( GPIOB, GPIO_Pin_12, state );
 			break;
 
 		case LED_1:
-			HAL_BRD_set_pin_state( GPIOB, GPIO_Pin_13, state );
+			//HAL_BRD_set_pin_state( GPIOB, GPIO_Pin_13, state );
 			break;
 
 		case LED_2:
-			HAL_BRD_set_pin_state( GPIOB, GPIO_Pin_14, state );
+			//HAL_BRD_set_pin_state( GPIOB, GPIO_Pin_14, state );
 			break;
 
 		case LED_3:
-			HAL_BRD_set_pin_state( GPIOB, GPIO_Pin_15, state );
+			//HAL_BRD_set_pin_state( GPIOB, GPIO_Pin_15, state );
 			break;
 
 		default:

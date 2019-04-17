@@ -62,17 +62,19 @@
 /***************************************************************************************************
 **                              Function Prototypes                                               **
 ***************************************************************************************************/
-void HAL_SPI_init( void );
-void HAL_SPI_de_init( void );
-false_true_et HAL_SPI_get_init_status( void );
-u8_t HAL_SPI_write_and_read_data( u8_t tx_data );
-void HAL_SPI_disable_rx_interrupt( void );
-void HAL_SPI_enable_rx_interrupt( void );
-void HAL_SPI_disable_tx_interrupt( void );
-void HAL_SPI_enable_tx_interrupt( void );
-void HAL_SPI_reset_lpm_exit_flag( void );
-u8_t* HAL_SPI_get_bluetooth_cmd_buffer( void );
-void HAL_SPI_clear_receive_spi_buffer( void );
+void HAL_SPI1_init( void );
+void HAL_SPI2_init( void );
+void HAL_SPI1_de_init( void );
+void HAL_SPI2_de_init( void );
+false_true_et HAL_SPI1_get_init_status( void );
+false_true_et HAL_SPI2_get_init_status( void );
+u8_t  HAL_SPI1_write_and_read_data( u8_t tx_data );
+u8_t  HAL_SPI2_write_and_read_data( u8_t tx_data );
+void  HAL_SPI1_disable_rx_interrupt( void );
+void  HAL_SPI1_enable_rx_interrupt( void );
+void  HAL_SPI1_disable_tx_interrupt( void );
+void  HAL_SPI1_enable_tx_interrupt( void );
+void  HAL_SPI1_clear_receive_spi_buffer( void );
 
 
 #endif /* HAL_SPI_PUB_H multiple inclusion guard */

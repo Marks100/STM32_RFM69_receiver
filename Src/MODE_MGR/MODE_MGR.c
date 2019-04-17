@@ -80,6 +80,36 @@ void MODE_MGR_action_schedule_normal( void )
     NRF24_tick();
     CLI_message_handler();
     MODE_MGR_check_user_input();
+    u8_t i = 0u;
+
+    //for( i = 0u; i < 12; i++)
+    //{
+		HAL_SPI2_write_and_read_data( 0xee );
+		HAL_SPI2_write_and_read_data( 0xee );
+		HAL_SPI2_write_and_read_data( 0xee );
+				HAL_SPI2_write_and_read_data( 0xee );
+				HAL_SPI2_write_and_read_data( 0xee );
+						HAL_SPI2_write_and_read_data( 0xee );
+						HAL_SPI2_write_and_read_data( 0xff );
+								HAL_SPI2_write_and_read_data( 0xff );
+								HAL_SPI2_write_and_read_data( 0xff );
+										HAL_SPI2_write_and_read_data( 0xff );
+										HAL_SPI2_write_and_read_data( 0xff );
+												HAL_SPI2_write_and_read_data( 0xff );
+												HAL_SPI2_write_and_read_data( 0xff );
+														HAL_SPI2_write_and_read_data( 0xff );
+														HAL_SPI2_write_and_read_data( 0xff );
+																HAL_SPI2_write_and_read_data( 0xff );
+																HAL_SPI2_write_and_read_data( 0xff );
+																		HAL_SPI2_write_and_read_data( 0xff );
+																		HAL_SPI2_write_and_read_data( 0xff );
+																				HAL_SPI2_write_and_read_data( 0xff );
+																				HAL_SPI2_write_and_read_data( 0xff );
+																						HAL_SPI2_write_and_read_data( 0xff );
+																						HAL_SPI2_write_and_read_data( 0xff );
+																								HAL_SPI2_write_and_read_data( 0xff );
+
+    //}
 
     switch( MODE_MGR_tick_timer_msecs_s )
     {
@@ -327,13 +357,13 @@ void MODE_MGR_action_selector_switch_changes( HAL_BRD_switch_slider_et slider, l
 	switch ( slider )
 	{
 		case SLIDER_1:
-			if( HEATING_get_state() == ENABLE )
+			if( HEATING_get_state() == ENABLE_ )
 			{
-				HEATING_set_state( DISABLE );
+				HEATING_set_state( DISABLE_ );
 			}
 			else
 			{
-				HEATING_set_state( ENABLE );
+				HEATING_set_state( ENABLE_ );
 			}
 			break;
 
@@ -348,7 +378,6 @@ void MODE_MGR_action_selector_switch_changes( HAL_BRD_switch_slider_et slider, l
 			{
 				HEATING_set_mode( HEATING_HEAT_MODE );
 			}
-			break;
 			break;
 
 		default:

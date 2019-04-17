@@ -428,9 +428,6 @@ void RF_MGR_display_sed_data( void )
 ***************************************************************************************************/
 void RF_MGR_display_controller_data( void )
 {
-	u8_t display_data[200];
-
-
 }
 
 

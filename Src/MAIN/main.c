@@ -47,7 +47,8 @@ int main(void)
 	/* Init the HW */
 	HAL_BRD_init();
 	//HAL_I2C_init();
-	HAL_SPI_init();
+	HAL_SPI1_init();
+	HAL_SPI2_init();
 	CLI_init();
 
     /* Start the timer to keep track of reception count */

@@ -187,7 +187,7 @@ void HEATING_set_cooler_state( disable_enable_et state )
 void HEATING_update_outputs( void )
 {
 	/* Set the LED to indicate if the system is enabled or disabled */
-	if( HEATING_room_temp_mon_s.enabled == TRUE )
+	if( HEATING_room_temp_mon_s.enabled == ENABLE_ )
 	{
 		HAL_BRD_set_LED_state( LED_0, HIGH );
 
@@ -222,7 +222,7 @@ void HEATING_update_outputs( void )
 			break;
 		}
 
-		if( ( HEATING_room_temp_mon_s.heater_state == ENABLE ) || ( HEATING_room_temp_mon_s.cooler_state == ENABLE ) )
+		if( ( HEATING_room_temp_mon_s.heater_state == ENABLE_ ) || ( HEATING_room_temp_mon_s.cooler_state == ENABLE_ ) )
 		{
 			HAL_BRD_set_LED_state( LED_3, HIGH );
 		}

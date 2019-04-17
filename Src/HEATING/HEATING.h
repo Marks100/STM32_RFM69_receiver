@@ -59,6 +59,8 @@ float 			HEATING_get_oat( void );
 void  		    HEATING_set_mode( HEATING_mode_et mode );
 HEATING_mode_et HEATING_get_mode( void );
 void 			HEATING_update_outputs( void );
+void 			HEATING_set_heater_state( disable_enable_et state );
+void 			HEATING_set_cooler_state( disable_enable_et state );
 
 
 #endif /* HEATING_H multiple inclusion guard */
