@@ -128,8 +128,8 @@ void HEATING_tick( void )
 			HEATING_set_heater_state( OFF );
 			HEATING_set_cooler_state( OFF );
 		}
-		HEATING_update_outputs();
 	}
+	HEATING_update_outputs();
 }
 
 
@@ -187,46 +187,56 @@ void HEATING_set_cooler_state( disable_enable_et state )
 void HEATING_update_outputs( void )
 {
 	/* Set the LED to indicate if the system is enabled or disabled */
-	HAL_BRD_set_LED_state( LED_0, ( low_high_et)HEATING_room_temp_mon_s.enabled );
-
-	/* Set the LED to indicate if the system is in heat or cool mode */
-	switch( HEATING_get_mode() )
+	if( HEATING_room_temp_mon_s.enabled == TRUE )
 	{
-		case HEATING_COOL_MODE:
-		{
-			HAL_BRD_set_LED_state( LED_1, LOW );
-			HAL_BRD_set_LED_state( LED_2, HIGH );
-		}
-		break;
+		HAL_BRD_set_LED_state( LED_0, HIGH );
 
-		case HEATING_HEAT_MODE:
+		/* Set the LED to indicate if the system is in heat or cool mode */
+		switch( HEATING_get_mode() )
 		{
-			HAL_BRD_set_LED_state( LED_1, HIGH );
-			HAL_BRD_set_LED_state( LED_2, LOW );
-		}
-		break;
+			case HEATING_COOL_MODE:
+			{
+				HAL_BRD_set_LED_state( LED_1, LOW );
+				HAL_BRD_set_LED_state( LED_2, HIGH );
+			}
+			break;
 
-		case HEATING_OFF_MODE:
+			case HEATING_HEAT_MODE:
+			{
+				HAL_BRD_set_LED_state( LED_1, HIGH );
+				HAL_BRD_set_LED_state( LED_2, LOW );
+			}
+			break;
+
+			case HEATING_OFF_MODE:
+			{
+				HAL_BRD_set_LED_state( LED_1, LOW );
+				HAL_BRD_set_LED_state( LED_2, LOW );
+				HAL_BRD_set_LED_state( LED_3, LOW );
+			}
+			break;
+
+			default:
+				HAL_BRD_set_LED_state( LED_0, HIGH );
+				HAL_BRD_set_LED_state( LED_0, LOW );
+			break;
+		}
+
+		if( ( HEATING_room_temp_mon_s.heater_state == ENABLE ) || ( HEATING_room_temp_mon_s.cooler_state == ENABLE ) )
 		{
-			HAL_BRD_set_LED_state( LED_1, LOW );
-			HAL_BRD_set_LED_state( LED_2, LOW );
+			HAL_BRD_set_LED_state( LED_3, HIGH );
+		}
+		else
+		{
 			HAL_BRD_set_LED_state( LED_3, LOW );
 		}
-		break;
-
-		default:
-			HAL_BRD_set_LED_state( LED_0, HIGH );
-			HAL_BRD_set_LED_state( LED_0, LOW );
-		break;
-	}
-
-	if( ( HEATING_room_temp_mon_s.heater_state == ENABLE ) || ( HEATING_room_temp_mon_s.heater_state == ENABLE ) )
-	{
-		HAL_BRD_set_LED_state( LED_3, HIGH );
 	}
 	else
 	{
-		HAL_BRD_set_LED_state( LED_3, HIGH );
+		HAL_BRD_set_LED_state( LED_0, LOW );
+		HAL_BRD_set_LED_state( LED_1, LOW );
+		HAL_BRD_set_LED_state( LED_2, LOW );
+		HAL_BRD_set_LED_state( LED_3, LOW );
 	}
 }
 
