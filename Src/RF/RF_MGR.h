@@ -39,6 +39,7 @@
 
 #define RF_MGR_RF_DATA_HANDLER_SIZE  40u
 #define EARLY_PROTOTYPE_SED          1u
+#define EARLY_PROTOTYPE_CONTROLLER   2u
 
 
 /***************************************************************************************************
@@ -50,6 +51,18 @@
 /***************************************************************************************************
 **                              Data Types and Enums                                              **
 ***************************************************************************************************/
+
+typedef enum
+{
+	RF_MGR_CONT_HEAT_TOGGLE_STATE = 1u,
+	RF_MGR_CONT_HEAT_STATE_ON,
+	RF_MGR_CONT_HEAT_STATE_OFF,
+	RF_MGR_CONT_HEAT_TOGGLE_MODE,
+	RF_MGR_CONT_HEAT_MODE,
+	RF_MGR_CONT_COOL_MODE,
+	RF_MGR_CONT_OFF_MODE
+} RF_MGR_controller_packet_type ;
+
 
 typedef struct
 {
@@ -82,6 +95,16 @@ typedef struct
 
 typedef struct
 {
+	u16_t node_id;
+	RF_MGR_controller_packet_type packet_type;
+	u8_t  mode_type;
+	u16_t packet_ctr;
+	u8_t  status;
+} RF_MGR_controller_data_st;
+
+
+typedef struct
+{
 	u16_t id[RF_MGR_RF_DATA_HANDLER_SIZE];
 	disable_enable_et state;
 } RF_MGR_whitelist_st;
@@ -109,6 +132,9 @@ void 				 	 RF_MGR_display_sed_data( void );
 RF_MGR_whitelist_st* 	 RF_MGR_get_whitelist_address( void );
 false_true_et 		 	 RF_MGR_check_ID_in_whitelist( u16_t id );
 void 				 	 RF_MGR_set_whitelist_state( disable_enable_et state );
+
+void 					 RF_MGR_display_controller_data( void );
+void 					 RF_MGR_handle_early_prototype_controller( u16_t sensor_id, u8_t* data_p, u32_t packet_count );
 
 
 #endif /* RF_H multiple inclusion guard */

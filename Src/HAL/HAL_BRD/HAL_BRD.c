@@ -570,13 +570,13 @@ void HAL_BRD_set_rtc_trigger_status( false_true_et state )
 
 void HAL_BRD_set_heater_state( off_on_et state )
 {
-	HAL_BRD_set_LED_state( LED_1, state );
+	HAL_BRD_set_LED_state( LED_3, state );
 }
 
 
 void HAL_BRD_set_cooler_state( off_on_et state )
 {
-	HAL_BRD_set_LED_state( LED_1, state );
+	HAL_BRD_set_LED_state( LED_3, state );
 }
 
 

@@ -19,19 +19,27 @@ STATIC u32_t 			       MODE_MGR_tick_timer_msecs_s;
 STATIC MODE_MGR_mode_et        MODE_MGR_mode_s;
 STATIC u8_t                    MODE_MGR_debounce_ctr_s;
 
-STATIC MODE_MGR_user_input_st  MODE_MGR_user_input_s[MODE_MGR_NUM_SLIDER_IMPUTS];
+STATIC MODE_MGR_user_input_st  MODE_MGR_user_input_s[MODE_MGR_NUM_SLIDER_INPUTS];
 extern NVM_info_st NVM_info_s;
 
 
 
 void MODE_MGR_init( void )
 {
+	u8_t i = 0u;
+
 	MODE_MGR_tick_timer_msecs_s = MODE_MGR_TICK_RATE_MSECS;
 	MODE_MGR_mode_s = MODE_MGR_MODE_NORMAL;
 	MODE_MGR_system_init_s = FALSE;
 	MODE_MGR_debounce_ctr_s = 0xFF;
 
 	STDC_memset( &MODE_MGR_user_input_s, 0x00, sizeof( MODE_MGR_user_input_s ) );
+
+	for( i = 0u; i < MODE_MGR_NUM_SLIDER_INPUTS; i++ )
+	{
+		/* Need to set the high level state initial on reset, so just read the current state of the selector switches */
+		MODE_MGR_user_input_s[i].slider_state_hl = HAL_BRD_read_selector_switch_pin( (HAL_BRD_switch_slider_et)i );
+	}
 }
 
 
@@ -319,17 +327,28 @@ void MODE_MGR_action_selector_switch_changes( HAL_BRD_switch_slider_et slider, l
 	switch ( slider )
 	{
 		case SLIDER_1:
-			if( state == HIGH )
+			if( HEATING_get_state() == ENABLE )
 			{
-				HEATING_set_mode( HEATING_HEAT_MODE );
+				HEATING_set_state( DISABLE );
 			}
 			else
 			{
-				HEATING_set_mode( HEATING_COOL_MODE );
+				HEATING_set_state( ENABLE );
 			}
 			break;
 
+
 		case SLIDER_2:
+			/* This switch has changed state, we dont care what the actual state is ( high or low ) 0 as long as we detect a change */
+			if( HEATING_get_mode() == HEATING_HEAT_MODE )
+			{
+				HEATING_set_mode( HEATING_COOL_MODE );
+			}
+			else
+			{
+				HEATING_set_mode( HEATING_HEAT_MODE );
+			}
+			break;
 			break;
 
 		default:
@@ -344,8 +363,8 @@ void MODE_MGR_check_user_input( void )
 {
 	u8_t i = 0u;
 
-	/* First read the low level state eof the pins */
-	for( i = 0u; i < MODE_MGR_NUM_SLIDER_IMPUTS; i++ )
+	/* First read the low level state of the pins */
+	for( i = 0u; i < MODE_MGR_NUM_SLIDER_INPUTS; i++ )
 	{
 		MODE_MGR_user_input_s[i].slider_state_ll = HAL_BRD_read_selector_switch_pin( (HAL_BRD_switch_slider_et)i );
 
@@ -364,12 +383,12 @@ void MODE_MGR_check_user_input( void )
 	}
 
 	/* Now check if the debounce times have been elapsed */
-	for( i = 0u; i < MODE_MGR_NUM_SLIDER_IMPUTS; i++ )
+	for( i = 0u; i < MODE_MGR_NUM_SLIDER_INPUTS; i++ )
 	{
 		if( MODE_MGR_user_input_s[i].slider_debounce_time >= MODE_MGR_SLIDER_DB_TICKS )
 		{
 			/* Toggle the high level state */
-			MODE_MGR_user_input_s[i].slider_state_hl ^= 1;
+			MODE_MGR_user_input_s[i].slider_state_hl ^= 1u;
 			MODE_MGR_user_input_s[i].slider_debounce_time = 0u;
 
 			MODE_MGR_action_selector_switch_changes( (HAL_BRD_switch_slider_et)i, MODE_MGR_user_input_s[i].slider_state_hl );

@@ -31,6 +31,8 @@
 
 STATIC RF_MGR_rf_data_store_st RF_MGR_rf_data_store_s;
 STATIC RF_MGR_sed_data_st	   RF_MGR_sed_data_s;
+STATIC RF_MGR_sed_data_st	   RF_MGR_controller_data_s;
+
 STATIC RF_MGR_whitelist_st	   RF_MGR_whitelist_s;
 
 
@@ -128,9 +130,17 @@ void RF_MGR_analyse_received_packets( void )
             switch( sensor_type )
             {
                 case EARLY_PROTOTYPE_SED:
+                {
                     RF_MGR_handle_early_prototype_sed( sensor_id, (u8_t*)&RF_MGR_rf_data_store_s.data_packet_s[node_index].payload,
                                                        RF_MGR_rf_data_store_s.data_packet_s[node_index ].packet_counter );
-                    break;
+                }
+                break;
+
+                case EARLY_PROTOTYPE_CONTROLLER:
+                {
+
+                }
+                break;
 
                 default:
                 	//assert(0);
@@ -157,12 +167,21 @@ void RF_MGR_analyse_received_packets( void )
 ***************************************************************************************************/
 void RF_MGR_handle_early_prototype_sed( u16_t sensor_id, u8_t* data_p, u32_t packet_count )
 {
+	/* byte 0 - Sensor type - common
+	 * byte 1 Node ID MSB   - common
+	 * byte 2 Node ID LSB   - common
+	 * byte 3 packet type   - 1st SED
+	 * byte 4 mode type     - 1st SED
+	 * byte 5 status        - 1st SED
+	 * byte 6 temp 		    - 1st SED ( degree c )
+	 * byte 7 temp		    - 1st SED ( degree c remainder )
+	 */
+
     RF_MGR_sed_data_s.node_id     = sensor_id;
     RF_MGR_sed_data_s.packet_type = data_p[0];
     RF_MGR_sed_data_s.mode_type   = data_p[1];
     RF_MGR_sed_data_s.status      = data_p[2];
-    RF_MGR_sed_data_s.temperature  = ( data_p[3] << 8u );
-    RF_MGR_sed_data_s.temperature |= ( data_p[4] );
+    RF_MGR_sed_data_s.temperature = STDC_make_16_bit( data_p[3], data_p[4] );
     RF_MGR_sed_data_s.packet_ctr  = packet_count;
     RF_MGR_sed_data_s.tx_interval_secs = STDC_make_16_bit( data_p[5], data_p[6] );
 
@@ -172,16 +191,86 @@ void RF_MGR_handle_early_prototype_sed( u16_t sensor_id, u8_t* data_p, u32_t pac
 }
 
 
-/* byte 0 - Sensor type - common
- * byte 1 Node ID MSB   - common
- * byte 2 Node ID LSB   - common
- * byte 3 packet type   - 1st SED
- * byte 4 mode type     - 1st SED
- * byte 5 status        - 1st SED
- * byte 6 temp 		    - 1st SED ( degree c )
- * byte 7 temp		    - 1st SED ( degree c remainder )
- */
 
+
+
+
+/*!
+****************************************************************************************************
+*
+*   \brief         Handle a specific type of sensor
+*
+*   \author        MS
+*
+*   \return        none
+*
+*   \note
+*
+***************************************************************************************************/
+void RF_MGR_handle_early_prototype_controller( u16_t sensor_id, u8_t* data_p, u32_t packet_count )
+{
+	RF_MGR_controller_data_s.node_id     = sensor_id;
+	RF_MGR_controller_data_s.packet_type = data_p[0];
+	RF_MGR_controller_data_s.mode_type   = data_p[1];
+	RF_MGR_controller_data_s.status      = data_p[2];
+
+	switch( RF_MGR_controller_data_s.packet_type )
+	{
+		case RF_MGR_CONT_HEAT_TOGGLE_STATE:
+		{
+
+		}
+		break;
+
+		case RF_MGR_CONT_HEAT_STATE_ON:
+		{
+
+		}
+		break;
+
+		case RF_MGR_CONT_HEAT_STATE_OFF:
+		{
+
+		}
+		break;
+
+		case RF_MGR_CONT_HEAT_TOGGLE_MODE:
+		{
+			if( HEATING_get_mode() == HEATING_HEAT_MODE )
+			{
+				HEATING_set_mode( HEATING_COOL_MODE );
+			}
+			else
+			{
+				HEATING_set_mode( HEATING_HEAT_MODE );
+			}
+		}
+		break;
+
+		case RF_MGR_CONT_HEAT_MODE:
+		{
+			HEATING_set_mode( HEATING_HEAT_MODE );
+		}
+		break;
+
+		case RF_MGR_CONT_COOL_MODE:
+		{
+			HEATING_set_mode( HEATING_COOL_MODE );
+		}
+		break;
+
+		case RF_MGR_CONT_OFF_MODE:
+		{
+			HEATING_set_mode( HEATING_OFF_MODE );
+		}
+		break;
+
+		default:
+			break;
+	}
+
+    RF_MGR_display_controller_data();
+}
 
 /*!
 ****************************************************************************************************
@@ -321,6 +410,27 @@ void RF_MGR_display_sed_data( void )
 	STDC_memset( display_data, 0x00, sizeof( display_data ) );
 	CLI_send_newline();
 	CLI_send_newline();
+}
+
+
+
+/*!
+****************************************************************************************************
+*
+*   \brief         Displays the received sensor data
+*
+*   \author        MS
+*
+*   \return        none
+*
+*   \note
+*
+***************************************************************************************************/
+void RF_MGR_display_controller_data( void )
+{
+	u8_t display_data[200];
+
+
 }
 
 
