@@ -19,7 +19,7 @@ STATIC u32_t 			       MODE_MGR_tick_timer_msecs_s;
 STATIC MODE_MGR_mode_et        MODE_MGR_mode_s;
 STATIC u8_t                    MODE_MGR_debounce_ctr_s;
 
-STATIC MODE_MGR_user_input_st MODE_MGR_user_input_s[MODE_MGR_NUM_SLIDER_IMPUTS];
+STATIC MODE_MGR_user_input_st  MODE_MGR_user_input_s[MODE_MGR_NUM_SLIDER_IMPUTS];
 extern NVM_info_st NVM_info_s;
 
 
@@ -71,7 +71,6 @@ void MODE_MGR_action_schedule_normal( void )
 {
     NRF24_tick();
     CLI_message_handler();
-    HEATING_tick();
     MODE_MGR_check_user_input();
 
     switch( MODE_MGR_tick_timer_msecs_s )
@@ -80,16 +79,14 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 40u:
-            //RFM69_tick();
+            HEATING_tick();
         	break;
 
         case 60u:
-            //MODE_MGR_analyse_switches();
         	break;
 
         case 80u:
         	NVM_tick();
-        	//RFM69_tick();
         	break;
 
         case 100u:
@@ -98,15 +95,13 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 120u:
-            //RFM69_tick();
         	break;
 
         case 140u:
+            HEATING_tick();
         	break;
 
         case 160u:
-            //RFM69_tick();
-            //MODE_MGR_analyse_switches();
         	break;
 
         case 180u:
@@ -115,24 +110,21 @@ void MODE_MGR_action_schedule_normal( void )
 
         case 200u:
         	MAIN_WATCHDOG_kick();
-            //RFM69_tick();
             RF_MGR_tick();
         	break;
 
-        case 220u://RFM69_tick
+        case 220u:
         	break;
 
         case 240u:
-            //RFM69_tick();
+            HEATING_tick();
         	break;
 
         case 260u:
-            //MODE_MGR_analyse_switches();
         	break;
 
         case 280u:
         	NVM_tick();
-        	//RFM69_tick();
         	break;
 
         case 300u:
@@ -141,15 +133,13 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 320u:
-            //RFM69_tick();
         	break;
 
         case 340u:
+            HEATING_tick();
         	break;
 
         case 360u:
-            //RFM69_tick();
-            //MODE_MGR_analyse_switches();
         	break;
 
         case 380u:
@@ -159,23 +149,20 @@ void MODE_MGR_action_schedule_normal( void )
         case 400u:
         	MAIN_WATCHDOG_kick();
             RF_MGR_tick();
-            //RFM69_tick();
         	break;
 
         case 420u:
         	break;
 
         case 440u:
-            //RFM69_tick();
+            HEATING_tick();
         	break;
 
         case 460u:
-            //MODE_MGR_analyse_switches();
         	break;
 
         case 480u:
         	NVM_tick();
-        	//RFM69_tick();
         	break;
 
         case 500u:
@@ -184,15 +171,13 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 520u:
-            //RFM69_tick();
         	break;
 
         case 540u:
+            HEATING_tick();
         	break;
 
         case 560u:
-            //RFM69_tick();
-            //MODE_MGR_analyse_switches();
         	break;
 
         case 580u:
@@ -201,7 +186,6 @@ void MODE_MGR_action_schedule_normal( void )
 
         case 600u:
         	MAIN_WATCHDOG_kick();
-            //RFM69_tick();
             RF_MGR_tick();
         	break;
 
@@ -209,16 +193,14 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 640u:
-            //RFM69_tick();
+            HEATING_tick();
         	break;
 
         case 660u:
-           // MODE_MGR_analyse_switches();
         	break;
 
         case 680u:
         	NVM_tick();
-        	//RFM69_tick();
         	break;
 
         case 700u:
@@ -227,15 +209,13 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 720u:
-            //RFM69_tick();
         	break;
 
         case 740u:
+            HEATING_tick();
         	break;
 
         case 760u:
-            //RFM69_tick();
-            //MODE_MGR_analyse_switches();
         	break;
 
         case 780u:
@@ -245,23 +225,20 @@ void MODE_MGR_action_schedule_normal( void )
         case 800u:
         	MAIN_WATCHDOG_kick();
             RF_MGR_tick();
-            //RFM69_tick();
         	break;
 
         case 820u:
         	break;
 
         case 840u:
-            //RFM69_tick();
+            HEATING_tick();
         	break;
 
         case 860u:
-            //MODE_MGR_analyse_switches();
         	break;
 
         case 880u:
         	NVM_tick();
-        	//RFM69_tick();
         	break;
 
         case 900u:
@@ -270,15 +247,13 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 920u:
-            //RFM69_tick();
         	break;
 
         case 940u:
+            HEATING_tick();
         	break;
 
         case 960u:
-            //RFM69_tick();
-            //MODE_MGR_analyse_switches();
         	break;
 
         case 980u:
@@ -288,7 +263,6 @@ void MODE_MGR_action_schedule_normal( void )
         case 1000u:
         	MAIN_WATCHDOG_kick();
             RF_MGR_tick();
-            //RFM69_tick();
 
             /* keep track of time in secs */
             HAL_TIM_increment_secs();
