@@ -86,7 +86,7 @@ void MODE_MGR_action_schedule_normal( void )
     switch( MODE_MGR_tick_timer_msecs_s )
     {
         case 20u:
-        	NEOPIXEL_clear_all_leds();
+        	//NEOPIXEL_clear_all_leds();
         	break;
 
         case 40u:
@@ -133,7 +133,7 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 240u:
-        	NEOPIXEL_set_led( BV(NEOPIXEL_LED7) | BV(NEOPIXEL_LED8),0x0000FF00 );
+        	NEOPIXEL_set_led( BV(NEOPIXEL_LED6) | BV(NEOPIXEL_LED8),0x0000FF00 );
             HEATING_tick();
         	break;
 
@@ -151,7 +151,7 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 320u:
-        	NEOPIXEL_set_led( BV(NEOPIXEL_LED7) | BV(NEOPIXEL_LED8),0x0000FF00 );
+        	NEOPIXEL_set_led( BV(NEOPIXEL_LED6) | BV(NEOPIXEL_LED8),0x0000FF00 );
         	break;
 
         case 340u:
@@ -185,7 +185,7 @@ void MODE_MGR_action_schedule_normal( void )
 
         case 480u:
         	NVM_tick();
-        	NEOPIXEL_set_led( BV(NEOPIXEL_LED2) | BV(NEOPIXEL_LED10),0x0000FF00 );
+        	NEOPIXEL_set_led( BV(NEOPIXEL_LED2) | BV(NEOPIXEL_LED12),0x0000FF00 );
         	break;
 
         case 500u:
@@ -202,6 +202,7 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 560u:
+        	NEOPIXEL_clear_all_leds();
         	break;
 
         case 580u:

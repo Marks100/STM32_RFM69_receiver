@@ -11,7 +11,7 @@
 
 
 #pragma GCC push_options
-#pragma GCC optimize ("O0")
+#pragma GCC optimize ("O1")
 
 STATIC void NEOPIXEL_one_pulse_direct( void )
 {
@@ -25,10 +25,9 @@ STATIC void NEOPIXEL_one_pulse_direct( void )
 	asm("nop");asm("nop");asm("nop");asm("nop");
 	asm("nop");asm("nop");asm("nop");asm("nop");
 	asm("nop");asm("nop");asm("nop");asm("nop");
+	asm("nop");asm("nop");asm("nop");asm("nop");
 
 	GPIOA->ODR &= ~GPIO_Pin_12;
-	asm("nop");asm("nop");asm("nop");asm("nop");
-	asm("nop");asm("nop");asm("nop");asm("nop");
 }
 
 
@@ -38,10 +37,11 @@ STATIC void NEOPIXEL_zero_pulse_direct( void )
 	GPIOA->ODR |= GPIO_Pin_12;
 	asm("nop");asm("nop");asm("nop");asm("nop");
 	asm("nop");asm("nop");asm("nop");asm("nop");
+	asm("nop");asm("nop");asm("nop");asm("nop");
 
 	GPIOA->ODR &= ~GPIO_Pin_12;
 	asm("nop");asm("nop");asm("nop");asm("nop");
-	asm("nop");asm("nop");asm("nop");asm("nop");
+	asm("nop");asm("nop");
 }
 
 STATIC void NEOPIXEL_drive_colour( u32_t colour )
@@ -66,9 +66,9 @@ void NEOPIXEL_set_led( u32_t led_pos, u32_t colour )
 {
 	u8_t led_index = 0u;
 
-	for( led_index = 0; led_index < NEOPIXEL_LED_MAX; led_index++ )
+	for( led_index = 0; led_index < NEOPIXEL_LED_MAX + 1; led_index++ )
 	{
-		if( ( led_pos & (BV(NEOPIXEL_LED_MAX - ( led_index + 1) ) ) ) != 0 )
+		if( ( led_pos & (BV(led_index ) ) ) != 0 )
 		{
 			NEOPIXEL_drive_colour( colour );
 		}
@@ -77,9 +77,6 @@ void NEOPIXEL_set_led( u32_t led_pos, u32_t colour )
 			NEOPIXEL_drive_colour( NEOPIXEL_COLOUR_NONE );
 		}
 	}
-
-	/* Drive one more pulse just to get us back round to the start pos */
-	NEOPIXEL_drive_colour( NEOPIXEL_COLOUR_NONE );
 }
 
 
