@@ -89,7 +89,6 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 40u:
-        	NEOPIXEL_set_led( BV(NEOPIXEL_LED1), 0x0000FF00 );
             HEATING_tick();
         	break;
 
@@ -97,7 +96,6 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 80u:
-        	NEOPIXEL_set_led( BV(NEOPIXEL_LED2) | BV(NEOPIXEL_LED12) , 0x0000FF00 );
         	NVM_tick();
         	break;
 
@@ -107,7 +105,6 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 120u:
-        	NEOPIXEL_set_led( BV(NEOPIXEL_LED3) | BV(NEOPIXEL_LED11),0x0000FF00 );
         	break;
 
         case 140u:
@@ -115,7 +112,6 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 160u:
-        	NEOPIXEL_set_led( BV(NEOPIXEL_LED4) | BV(NEOPIXEL_LED10),0x0000FF00 );
         	break;
 
         case 180u:
@@ -125,14 +121,12 @@ void MODE_MGR_action_schedule_normal( void )
         case 200u:
         	MAIN_WATCHDOG_kick();
             RF_MGR_tick();
-            NEOPIXEL_set_led( BV(NEOPIXEL_LED5) | BV(NEOPIXEL_LED9),0x0000FF00 );
         	break;
 
         case 220u:
         	break;
 
         case 240u:
-        	NEOPIXEL_set_led( BV(NEOPIXEL_LED6) | BV(NEOPIXEL_LED8),0x0000FF00 );
             HEATING_tick();
         	break;
 
@@ -141,7 +135,6 @@ void MODE_MGR_action_schedule_normal( void )
 
         case 280u:
         	NVM_tick();
-        	NEOPIXEL_set_led( BV(NEOPIXEL_LED7),0x00FF0000 );
         	break;
 
         case 300u:
@@ -150,7 +143,6 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 320u:
-        	NEOPIXEL_set_led( BV(NEOPIXEL_LED6) | BV(NEOPIXEL_LED8),0x0000FF00 );
         	break;
 
         case 340u:
@@ -158,7 +150,6 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 360u:
-        	NEOPIXEL_set_led( BV(NEOPIXEL_LED5) | BV(NEOPIXEL_LED9),0x0000FF00 );
         	break;
 
         case 380u:
@@ -168,7 +159,6 @@ void MODE_MGR_action_schedule_normal( void )
         case 400u:
         	MAIN_WATCHDOG_kick();
             RF_MGR_tick();
-            NEOPIXEL_set_led( BV(NEOPIXEL_LED4) | BV(NEOPIXEL_LED10),0x0000FF00 );
         	break;
 
         case 420u:
@@ -176,7 +166,6 @@ void MODE_MGR_action_schedule_normal( void )
 
         case 440u:
             HEATING_tick();
-            NEOPIXEL_set_led( BV(NEOPIXEL_LED3) | BV(NEOPIXEL_LED11),0x0000FF00 );
         	break;
 
         case 460u:
@@ -184,7 +173,6 @@ void MODE_MGR_action_schedule_normal( void )
 
         case 480u:
         	NVM_tick();
-        	NEOPIXEL_set_led( BV(NEOPIXEL_LED2) | BV(NEOPIXEL_LED12),0x0000FF00 );
         	break;
 
         case 500u:
@@ -193,7 +181,6 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 520u:
-        	NEOPIXEL_set_led( BV(NEOPIXEL_LED1),0x00FF0000 );
         	break;
 
         case 540u:
@@ -201,7 +188,6 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 560u:
-        	NEOPIXEL_clear_all_leds();
         	break;
 
         case 580u:
@@ -290,6 +276,7 @@ void MODE_MGR_action_schedule_normal( void )
 
             /* keep track of time in secs */
             HAL_TIM_increment_secs();
+
         	break;
 
 			default:

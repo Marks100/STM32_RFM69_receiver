@@ -16,6 +16,8 @@
 #define NEOPIXEL_LED11	10
 #define NEOPIXEL_LED12	11
 
+#define NEOPIXEL_ALL_LED 0xFF
+
 #define NEOPIXEL_LED_MAX	12u
 #define NEOPIXEL_CMD_BITS	24u
 
@@ -27,6 +29,9 @@ typedef enum
 {
 	NEOPIXEL_NO_STATE = 0u,
 	NEOPIXEL_CENTRE_SWEEP,
+	NEOPIXEL_ALL_FLASH,
+	NEOPIXEL_CIRCLE_BUFFER
+
 } NEOPIXEL_hl_state_et;
 
 typedef enum
@@ -48,6 +53,9 @@ void NEOPIXEL_clear_all_leds( void );
 void NEOPIXEL_light_all_leds( u32_t colour );
 void NEOPIXEL_tick( void );
 NEOPIXEL_ll_state_et NEOPIXEL_handle_centre_sweep( u8_t* stage );
+NEOPIXEL_ll_state_et NEOPIXEL_handle_all_flash( u8_t* stage );
+NEOPIXEL_ll_state_et NEOPIXEL_handle_circle_buffer( u8_t* stage );
+void NEOPIXEL_set_hl_state( NEOPIXEL_hl_state_et state );
 
 
 
