@@ -87,27 +87,27 @@ void MODE_MGR_action_schedule_normal( void )
 		HAL_SPI2_write_and_read_data( 0xee );
 		HAL_SPI2_write_and_read_data( 0xee );
 		HAL_SPI2_write_and_read_data( 0xee );
-				HAL_SPI2_write_and_read_data( 0xee );
-				HAL_SPI2_write_and_read_data( 0xee );
-						HAL_SPI2_write_and_read_data( 0xee );
-						HAL_SPI2_write_and_read_data( 0xff );
-								HAL_SPI2_write_and_read_data( 0xff );
-								HAL_SPI2_write_and_read_data( 0xff );
-										HAL_SPI2_write_and_read_data( 0xff );
-										HAL_SPI2_write_and_read_data( 0xff );
-												HAL_SPI2_write_and_read_data( 0xff );
-												HAL_SPI2_write_and_read_data( 0xff );
-														HAL_SPI2_write_and_read_data( 0xff );
-														HAL_SPI2_write_and_read_data( 0xff );
-																HAL_SPI2_write_and_read_data( 0xff );
-																HAL_SPI2_write_and_read_data( 0xff );
-																		HAL_SPI2_write_and_read_data( 0xff );
-																		HAL_SPI2_write_and_read_data( 0xff );
-																				HAL_SPI2_write_and_read_data( 0xff );
-																				HAL_SPI2_write_and_read_data( 0xff );
-																						HAL_SPI2_write_and_read_data( 0xff );
-																						HAL_SPI2_write_and_read_data( 0xff );
-																								HAL_SPI2_write_and_read_data( 0xff );
+		HAL_SPI2_write_and_read_data( 0xee );
+		HAL_SPI2_write_and_read_data( 0xee );
+		HAL_SPI2_write_and_read_data( 0xee );
+		HAL_SPI2_write_and_read_data( 0xff );
+		HAL_SPI2_write_and_read_data( 0xff );
+		HAL_SPI2_write_and_read_data( 0xff );
+		HAL_SPI2_write_and_read_data( 0xff );
+		HAL_SPI2_write_and_read_data( 0xff );
+		HAL_SPI2_write_and_read_data( 0xff );
+		HAL_SPI2_write_and_read_data( 0xff );
+		HAL_SPI2_write_and_read_data( 0xff );
+		HAL_SPI2_write_and_read_data( 0xff );
+		HAL_SPI2_write_and_read_data( 0xff );
+		HAL_SPI2_write_and_read_data( 0xff );
+		HAL_SPI2_write_and_read_data( 0xff );
+		HAL_SPI2_write_and_read_data( 0xff );
+		HAL_SPI2_write_and_read_data( 0xff );
+		HAL_SPI2_write_and_read_data( 0xff );
+		HAL_SPI2_write_and_read_data( 0xff );
+		HAL_SPI2_write_and_read_data( 0xff );
+		HAL_SPI2_write_and_read_data( 0xff );
 
     //}
 
