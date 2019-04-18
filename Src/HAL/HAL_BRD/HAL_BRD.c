@@ -89,10 +89,16 @@ void HAL_BRD_init( void )
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
 
 	/* Configure the LED pins */
-//	GPIO_InitStructure.GPIO_Pin = ( GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15 );
-//	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-//	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
-//	GPIO_Init(GPIOB, &GPIO_InitStructure);
+	GPIO_InitStructure.GPIO_Pin = ( GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15 );
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
+	GPIO_Init(GPIOB, &GPIO_InitStructure);
+
+	/* Configure the NEO PIXEL pin */
+	GPIO_InitStructure.GPIO_Pin = ( GPIO_Pin_12 );
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
 
 	/* Enable the "RFM69 packet received" interrupt on pin A1 */
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1;
@@ -251,6 +257,31 @@ void HAL_BRD_set_LED_state( HAL_BRD_led_et led, off_on_et state )
 	}
 }
 
+
+/*!
+****************************************************************************************************
+*
+*   \brief         SETS the state of the NEO pixel pin
+*
+*   \author        MS
+*
+*   \return        None
+*
+***************************************************************************************************/
+#pragma GCC push_options
+#pragma GCC optimize ("O3")
+void HAL_BRD_set_NEOpixel_state( low_high_et state )
+{
+	if( state == HIGH )
+	{
+		HAL_BRD_set_pin_state( GPIOA, GPIO_Pin_12, state );
+	}
+	else
+	{
+		HAL_BRD_set_pin_state( GPIOA, GPIO_Pin_12, state );
+	}
+}
+#pragma GCC pop_options
 
 
 /*!

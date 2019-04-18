@@ -48,6 +48,20 @@
 <part id="30"/>
 <part id="31"/>
 <part id="32"/>
+<part id="33"/>
+<part id="34"/>
+<part id="35"/>
+<part id="36"/>
+<part id="37"/>
+<part id="38"/>
+<part id="39"/>
+<part id="40"/>
+<part id="41"/>
+<part id="42"/>
+<part id="43"/>
+<part id="44"/>
+<part id="45"/>
+<part id="46"/>
 </presentation>
 </folder>
 </info>
@@ -58,15 +72,15 @@
 </editor>
 <editor id="org.eclipse.cdt.ui.editor.CEditor" name="NRF24.c" partName="NRF24.c" path="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/RF/NRF24.c" title="NRF24.c" tooltip="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/RF/NRF24.c" workbook="DefaultEditorWorkbook">
 <input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STM32_RF_HUB/Src/RF/NRF24.c"/>
-<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="41170" selectionTopPixel="22604"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="37100" selectionTopPixel="20820"/>
 </editor>
 <editor id="org.eclipse.cdt.ui.editor.CEditor" name="RFM69.c" partName="RFM69.c" path="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/RF/RFM69.c" title="RFM69.c" tooltip="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/RF/RFM69.c" workbook="DefaultEditorWorkbook">
 <input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STM32_RF_HUB/Src/RF/RFM69.c"/>
-<editorState selectionHorizontalPixel="0" selectionLength="30" selectionOffset="25861" selectionTopPixel="14550"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="12755" selectionTopPixel="6720"/>
 </editor>
 <editor id="org.eclipse.cdt.ui.editor.CEditor" name="MODE_MGR.c" partName="MODE_MGR.c" path="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/MODE_MGR/MODE_MGR.c" title="MODE_MGR.c" tooltip="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/MODE_MGR/MODE_MGR.c" workbook="DefaultEditorWorkbook">
 <input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STM32_RF_HUB/Src/MODE_MGR/MODE_MGR.c"/>
-<editorState selectionHorizontalPixel="0" selectionLength="2" selectionOffset="2373" selectionTopPixel="1575"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="2063" selectionTopPixel="1005"/>
 </editor>
 <editor id="org.eclipse.cdt.ui.editor.CEditor" name="CLI.h" partName="CLI.h" path="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/CLI/CLI.h" title="CLI.h" tooltip="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/CLI/CLI.h" workbook="DefaultEditorWorkbook">
 <input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STM32_RF_HUB/Src/CLI/CLI.h"/>
@@ -78,18 +92,19 @@
 </editor>
 <editor id="org.eclipse.cdt.ui.editor.CEditor" name="HAL_BRD.h" partName="HAL_BRD.h" path="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/HAL/HAL_BRD/HAL_BRD.h" title="HAL_BRD.h" tooltip="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/HAL/HAL_BRD/HAL_BRD.h" workbook="DefaultEditorWorkbook">
 <input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STM32_RF_HUB/Src/HAL/HAL_BRD/HAL_BRD.h"/>
-<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="3649" selectionTopPixel="965"/>
+<editorState selectionHorizontalPixel="0" selectionLength="5" selectionOffset="1742" selectionTopPixel="525"/>
 </editor>
 <editor id="org.eclipse.cdt.ui.editor.CEditor" name="HAL_BRD.c" partName="HAL_BRD.c" path="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/HAL/HAL_BRD/HAL_BRD.c" title="HAL_BRD.c" tooltip="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/HAL/HAL_BRD/HAL_BRD.c" workbook="DefaultEditorWorkbook">
 <input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STM32_RF_HUB/Src/HAL/HAL_BRD/HAL_BRD.c"/>
-<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="14053" selectionTopPixel="8205"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="1522" selectionTopPixel="1297"/>
 </editor>
 <editor id="org.eclipse.cdt.ui.editor.CEditor" name="stdio.h" partName="stdio.h" title="stdio.h" tooltip="C:\SVN_source\Tools\gcc-arm\arm-none-eabi\include\stdio.h" workbook="DefaultEditorWorkbook">
 <input factoryID="org.eclipse.cdt.ui.ExternalEditorInputFactory" path="C:\SVN_source\Tools\gcc-arm\arm-none-eabi\include\stdio.h" project="STM32_RF_HUB"/>
 <editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="5584" selectionTopPixel="2610"/>
 </editor>
 <editor id="org.coocox.builder.ui.editors.repository.RepositoryBrowser" name="Repository" partName="Repository" title="Repository" tooltip="Repository" workbook="DefaultEditorWorkbook">
-<input factoryID="org.coocox.component.ui.editors.repository.RepositoryElementFactory">&#x0A;<subPage horizontalPosition="0" selectedItemId="0" subPageIndex="2" verticalPosition="0"/>
+<input factoryID="org.coocox.component.ui.editors.repository.RepositoryElementFactory">
+<subPage horizontalPosition="0" selectedItemId="446" subPageIndex="2" verticalPosition="132"/>
 </input>
 </editor>
 <editor id="org.eclipse.cdt.ui.editor.CEditor" name="printf.c" partName="printf.c" path="C:/Users/mark/Desktop/STM32_RFM69_receiver/Workspace/stdio/printf.c" title="printf.c" tooltip="C:/Users/mark/Desktop/STM32_RFM69_receiver/Workspace/stdio/printf.c" workbook="DefaultEditorWorkbook">
@@ -114,11 +129,11 @@
 </editor>
 <editor id="org.eclipse.cdt.ui.editor.CEditor" name="NVM.h" partName="NVM.h" path="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/NVM/NVM.h" title="NVM.h" tooltip="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/NVM/NVM.h" workbook="DefaultEditorWorkbook">
 <input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STM32_RF_HUB/Src/NVM/NVM.h"/>
-<editorState selectionHorizontalPixel="0" selectionLength="12" selectionOffset="2112" selectionTopPixel="780"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="2308" selectionTopPixel="780"/>
 </editor>
 <editor id="org.eclipse.cdt.ui.editor.CEditor" name="NVM_defaults.h" partName="NVM_defaults.h" path="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/NVM/NVM_defaults.h" title="NVM_defaults.h" tooltip="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/NVM/NVM_defaults.h" workbook="DefaultEditorWorkbook">
 <input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STM32_RF_HUB/Src/NVM/NVM_defaults.h"/>
-<editorState selectionHorizontalPixel="0" selectionLength="94" selectionOffset="2517" selectionTopPixel="530"/>
+<editorState selectionHorizontalPixel="0" selectionLength="94" selectionOffset="2517" selectionTopPixel="500"/>
 </editor>
 <editor id="org.eclipse.cdt.ui.editor.CEditor" name="NRF24.h" partName="NRF24.h" path="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/RF/NRF24.h" title="NRF24.h" tooltip="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/RF/NRF24.h" workbook="DefaultEditorWorkbook">
 <input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STM32_RF_HUB/Src/RF/NRF24.h"/>
@@ -146,7 +161,7 @@
 </editor>
 <editor id="org.eclipse.cdt.ui.editor.CEditor" name="NVM.c" partName="NVM.c" path="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/NVM/NVM.c" title="NVM.c" tooltip="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/NVM/NVM.c" workbook="DefaultEditorWorkbook">
 <input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STM32_RF_HUB/Src/NVM/NVM.c"/>
-<editorState selectionHorizontalPixel="0" selectionLength="127" selectionOffset="5750" selectionTopPixel="2775"/>
+<editorState selectionHorizontalPixel="0" selectionLength="17" selectionOffset="3189" selectionTopPixel="1205"/>
 </editor>
 <editor id="org.eclipse.cdt.ui.editor.CEditor" name="STDC.c" partName="STDC.c" path="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/COMMON_MODULES/xINC/STDC/STDC.c" title="STDC.c" tooltip="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/COMMON_MODULES/xINC/STDC/STDC.c" workbook="DefaultEditorWorkbook">
 <input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STM32_RF_HUB/Src/COMMON_MODULES/xINC/STDC/STDC.c"/>
@@ -154,7 +169,7 @@
 </editor>
 <editor id="org.eclipse.cdt.ui.editor.CEditor" name="HAL_I2C.c" partName="HAL_I2C.c" path="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/HAL/HAL_I2C/HAL_I2C.c" title="HAL_I2C.c" tooltip="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/HAL/HAL_I2C/HAL_I2C.c" workbook="DefaultEditorWorkbook">
 <input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STM32_RF_HUB/Src/HAL/HAL_I2C/HAL_I2C.c"/>
-<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="8400" selectionTopPixel="3705"/>
+<editorState selectionHorizontalPixel="0" selectionLength="12" selectionOffset="3024" selectionTopPixel="1110"/>
 </editor>
 <editor id="org.eclipse.cdt.ui.editor.CEditor" name="stm32f10x_iwdg.c" partName="stm32f10x_iwdg.c" path="C:/Users/mark/Desktop/STM32_RFM69_receiver/Workspace/stm_lib/src/stm32f10x_iwdg.c" title="stm32f10x_iwdg.c" tooltip="C:/Users/mark/Desktop/STM32_RFM69_receiver/Workspace/stm_lib/src/stm32f10x_iwdg.c" workbook="DefaultEditorWorkbook">
 <input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STM32_RF_HUB/stm32f10x_iwdg.c"/>
@@ -168,9 +183,9 @@
 <input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STM32_RF_HUB/Src/COMMON_MODULES/xINC/C_defs.h"/>
 <editorState selectionHorizontalPixel="0" selectionLength="17" selectionOffset="4024" selectionTopPixel="1815"/>
 </editor>
-<editor activePart="true" focus="true" id="org.eclipse.cdt.ui.editor.CEditor" name="RF_MGR.c" partName="RF_MGR.c" path="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/RF/RF_MGR.c" title="RF_MGR.c" tooltip="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/RF/RF_MGR.c" workbook="DefaultEditorWorkbook">
+<editor id="org.eclipse.cdt.ui.editor.CEditor" name="RF_MGR.c" partName="RF_MGR.c" path="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/RF/RF_MGR.c" title="RF_MGR.c" tooltip="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/RF/RF_MGR.c" workbook="DefaultEditorWorkbook">
 <input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STM32_RF_HUB/Src/RF/RF_MGR.c"/>
-<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="10198" selectionTopPixel="4820"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="12262" selectionTopPixel="6300"/>
 </editor>
 <editor id="org.eclipse.cdt.ui.editor.CEditor" name="RF_MGR.h" partName="RF_MGR.h" path="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/RF/RF_MGR.h" title="RF_MGR.h" tooltip="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/RF/RF_MGR.h" workbook="DefaultEditorWorkbook">
 <input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STM32_RF_HUB/Src/RF/RF_MGR.h"/>
@@ -180,9 +195,65 @@
 <input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STM32_RF_HUB/Src/COMMON_MODULES/xINC/STDC/STDC.h"/>
 <editorState selectionHorizontalPixel="0" selectionLength="16" selectionOffset="4376" selectionTopPixel="1425"/>
 </editor>
-<editor id="org.eclipse.cdt.ui.editor.CEditor" name="main.c" partName="main.c" path="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/MAIN/main.c" title="main.c" tooltip="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/MAIN/main.c" workbook="DefaultEditorWorkbook">
+<editor id="org.eclipse.cdt.ui.editor.CEditor" name="HEATING.c" partName="HEATING.c" path="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/HEATING/HEATING.c" title="HEATING.c" tooltip="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/HEATING/HEATING.c" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STM32_RF_HUB/Src/HEATING/HEATING.c"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="5005" selectionTopPixel="2685"/>
+</editor>
+<editor id="org.eclipse.cdt.ui.editor.CEditor" name="HEATING.h" partName="HEATING.h" path="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/HEATING/HEATING.h" title="HEATING.h" tooltip="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/HEATING/HEATING.h" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STM32_RF_HUB/Src/HEATING/HEATING.h"/>
+<editorState selectionHorizontalPixel="0" selectionLength="24" selectionOffset="1129" selectionTopPixel="410"/>
+</editor>
+<editor id="org.eclipse.cdt.ui.editor.CEditor" name="stm32f10x_dbgmcu.h" partName="stm32f10x_dbgmcu.h" path="C:/Users/mark/Desktop/STM32_RFM69_receiver/Workspace/stm_lib/inc/stm32f10x_dbgmcu.h" title="stm32f10x_dbgmcu.h" tooltip="C:/Users/mark/Desktop/STM32_RFM69_receiver/Workspace/stm_lib/inc/stm32f10x_dbgmcu.h" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STM32_RF_HUB/stm_lib/inc/stm32f10x_dbgmcu.h"/>
+<editorState selectionHorizontalPixel="0" selectionLength="14" selectionOffset="1716" selectionTopPixel="725"/>
+</editor>
+<editor id="org.eclipse.cdt.ui.editor.CEditor" name="stm32f10x_dbgmcu.c" partName="stm32f10x_dbgmcu.c" path="C:/Users/mark/Desktop/STM32_RFM69_receiver/Workspace/stm_lib/src/stm32f10x_dbgmcu.c" title="stm32f10x_dbgmcu.c" tooltip="C:/Users/mark/Desktop/STM32_RFM69_receiver/Workspace/stm_lib/src/stm32f10x_dbgmcu.c" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STM32_RF_HUB/stm_lib/src/stm32f10x_dbgmcu.c"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="5023" selectionTopPixel="1650"/>
+</editor>
+<editor id="org.eclipse.cdt.ui.editor.CEditor" name="MODE_MGR.h" partName="MODE_MGR.h" path="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/MODE_MGR/MODE_MGR.h" title="MODE_MGR.h" tooltip="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/MODE_MGR/MODE_MGR.h" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STM32_RF_HUB/Src/MODE_MGR/MODE_MGR.h"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="62" selectionTopPixel="0"/>
+</editor>
+<editor id="org.eclipse.ui.DefaultTextEditor" name="MODE_MGR.o" partName="MODE_MGR.o" path="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/MODE_MGR/MODE_MGR.o" title="MODE_MGR.o" tooltip="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/MODE_MGR/MODE_MGR.o" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STM32_RF_HUB/Src/MODE_MGR/MODE_MGR.o"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="0" selectionTopPixel="0"/>
+</editor>
+<editor id="org.eclipse.cdt.ui.editor.CEditor" name="stm32f10x_gpio.h" partName="stm32f10x_gpio.h" path="C:/Users/mark/Desktop/STM32_RFM69_receiver/Workspace/stm_lib/inc/stm32f10x_gpio.h" title="stm32f10x_gpio.h" tooltip="C:/Users/mark/Desktop/STM32_RFM69_receiver/Workspace/stm_lib/inc/stm32f10x_gpio.h" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STM32_RF_HUB/stm_lib/inc/stm32f10x_gpio.h"/>
+<editorState selectionHorizontalPixel="0" selectionLength="13" selectionOffset="2429" selectionTopPixel="930"/>
+</editor>
+<editor id="org.eclipse.cdt.ui.editor.CEditor" name="HAL_SPI.c" partName="HAL_SPI.c" path="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/HAL/HAL_SPI/HAL_SPI.c" title="HAL_SPI.c" tooltip="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/HAL/HAL_SPI/HAL_SPI.c" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STM32_RF_HUB/Src/HAL/HAL_SPI/HAL_SPI.c"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="9582" selectionTopPixel="0"/>
+</editor>
+<editor id="org.eclipse.cdt.ui.editor.CEditor" name="HAL_SPI.h" partName="HAL_SPI.h" path="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/HAL/HAL_SPI/HAL_SPI.h" title="HAL_SPI.h" tooltip="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/HAL/HAL_SPI/HAL_SPI.h" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STM32_RF_HUB/Src/HAL/HAL_SPI/HAL_SPI.h"/>
+<editorState selectionHorizontalPixel="0" selectionLength="1002" selectionOffset="2434" selectionTopPixel="690"/>
+</editor>
+<editor id="org.eclipse.cdt.ui.editor.CEditor" name="stm32f10x_spi.h" partName="stm32f10x_spi.h" path="C:/Users/mark/Desktop/STM32_RFM69_receiver/Workspace/stm_lib/inc/stm32f10x_spi.h" title="stm32f10x_spi.h" tooltip="C:/Users/mark/Desktop/STM32_RFM69_receiver/Workspace/stm_lib/inc/stm32f10x_spi.h" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STM32_RF_HUB/stm_lib/inc/stm32f10x_spi.h"/>
+<editorState selectionHorizontalPixel="0" selectionLength="24" selectionOffset="7654" selectionTopPixel="2880"/>
+</editor>
+<editor id="org.eclipse.cdt.ui.editor.CEditor" name="stm32f10x_rcc.c" partName="stm32f10x_rcc.c" path="C:/Users/mark/Desktop/STM32_RFM69_receiver/Workspace/stm_lib/src/stm32f10x_rcc.c" title="stm32f10x_rcc.c" tooltip="C:/Users/mark/Desktop/STM32_RFM69_receiver/Workspace/stm_lib/src/stm32f10x_rcc.c" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STM32_RF_HUB/stm_lib/src/stm32f10x_rcc.c"/>
+<editorState selectionHorizontalPixel="0" selectionLength="22" selectionOffset="39225" selectionTopPixel="16380"/>
+</editor>
+<editor id="org.eclipse.cdt.ui.editor.CEditor" name="stm32f10x_rcc.h" partName="stm32f10x_rcc.h" path="C:/Users/mark/Desktop/STM32_RFM69_receiver/Workspace/stm_lib/inc/stm32f10x_rcc.h" title="stm32f10x_rcc.h" tooltip="C:/Users/mark/Desktop/STM32_RFM69_receiver/Workspace/stm_lib/inc/stm32f10x_rcc.h" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STM32_RF_HUB/stm_lib/inc/stm32f10x_rcc.h"/>
+<editorState selectionHorizontalPixel="0" selectionLength="19" selectionOffset="23027" selectionTopPixel="7350"/>
+</editor>
+<editor id="org.eclipse.cdt.ui.editor.CEditor" name="stm32f10x_dma.h" partName="stm32f10x_dma.h" path="C:/Users/mark/Desktop/STM32_RFM69_receiver/Workspace/stm_lib/inc/stm32f10x_dma.h" title="stm32f10x_dma.h" tooltip="C:/Users/mark/Desktop/STM32_RFM69_receiver/Workspace/stm_lib/inc/stm32f10x_dma.h" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STM32_RF_HUB/stm_lib/inc/stm32f10x_dma.h"/>
+<editorState selectionHorizontalPixel="0" selectionLength="23" selectionOffset="6596" selectionTopPixel="2070"/>
+</editor>
+<editor id="org.eclipse.cdt.ui.editor.CEditor" name="stm32f10x_spi.c" partName="stm32f10x_spi.c" path="C:/Users/mark/Desktop/STM32_RFM69_receiver/Workspace/stm_lib/src/stm32f10x_spi.c" title="stm32f10x_spi.c" tooltip="C:/Users/mark/Desktop/STM32_RFM69_receiver/Workspace/stm_lib/src/stm32f10x_spi.c" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STM32_RF_HUB/stm_lib/src/stm32f10x_spi.c"/>
+<editorState selectionHorizontalPixel="0" selectionLength="16" selectionOffset="18423" selectionTopPixel="6600"/>
+</editor>
+<editor activePart="true" focus="true" id="org.eclipse.cdt.ui.editor.CEditor" name="main.c" partName="main.c" path="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/MAIN/main.c" title="main.c" tooltip="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/MAIN/main.c" workbook="DefaultEditorWorkbook">
 <input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STM32_RF_HUB/Src/MAIN/main.c"/>
-<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="686" selectionTopPixel="300"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="771" selectionTopPixel="375"/>
 </editor>
 </editors>
 <views>
@@ -191,26 +262,30 @@
 </view>
 <view id="org.eclipse.search.ui.views.SearchView" partName="Search">
 <viewState isPinned="false">
+<view IMemento.internal.id="org.eclipse.search.text.FileSearchResultPage" org.eclipse.search.lastActivation="1" org.eclipse.search.resultpage.layout="2" org.eclipse.search.resultpage.limit="1000" org.eclipse.search.resultpage.sorting="2"/>
 <view IMemento.internal.id="" org.eclipse.search.lastActivation="0"/>
 </viewState>
 </view>
 <view id="org.coocox.codebugger.trace.ui.traceview" partName="Semihosting">
 <viewState/>
 </view>
+<view id="org.eclipse.cdt.ui.typeHierarchy" partName="Type Hierarchy">
+<viewState filterFields="false" filterNonPublic="false" filterStatic="false" showFilesInLabels="false" showInheritedMembers="false" splitterWeight1="350" splitterWeight2="650" viewOrientation="0"/>
+</view>
 <view id="org.eclipse.debug.ui.DebugView" partName="Debug">
 <viewState/>
 </view>
 <view id="org.eclipse.cdt.debug.ui.memory.memorybrowser.MemoryBrowser" partName="Memory Browser">
 <viewState>
-<MemoryBroser ComboItemsValue="0x08008000;" FocuseTabIndex="0" TabsValue="" TextValue="0x08008000" horizontalPosition="0" verticalPosition="0"/>
+<MemoryBroser ComboItemsValue="0x801E800;0x801E400;" FocuseTabIndex="0" TabsValue="" TextValue="0x801E400" horizontalPosition="0" verticalPosition="0"/>
 </viewState>
 </view>
 <view id="org.coocox.coassistant.view.CoAssistantView_debug" partName="Peripherals">
-<viewState horizontalPosition="0" verticalPosition="8">
+<viewState horizontalPosition="0" verticalPosition="3">
 <selection>
-<element name="GPIOA"/>
+<element name="GPIOB"/>
 </selection>
-<registerValues baseAddress="Base Address: 0x40010800" description="Description:  General Purpose I/O A"/>
+<registerValues baseAddress="Base Address: 0x40010C00" description="Description:  General Purpose I/O B"/>
 </viewState>
 </view>
 <view id="org.eclipse.debug.ui.BreakpointView" partName="Breakpoints">
@@ -224,32 +299,35 @@
 </view>
 <view id="org.eclipse.debug.ui.ExpressionView" partName="Expressions">
 <viewState>
-<ExpressionKeySet ExpKeys="NVM_info_s,RF_MGR_whitelist_s,data_p,CLI_cmd_history_s,fifo,status,NRF24_rf_frame_s,data_p,sizeof( RF_MGR_whitelist_s.id ),data_p + i,i,output_string,NRF24_rf_frame_s,RF_MGR_sed_data_s,"/>
+<ExpressionKeySet ExpKeys="NVM_info_s,RF_MGR_whitelist_s,data_p,CLI_cmd_history_s,fifo,status,NRF24_rf_frame_s,data_p,sizeof( RF_MGR_whitelist_s.id ),data_p + i,i,output_string,NRF24_rf_frame_s,RF_MGR_sed_data_s,NVM_info_s,pointer_struct_p,HEATING_room_temp_mon_s,sensor_type,mode_type,MODE_MGR_user_input_s,i,"/>
 </viewState>
 </view>
 <view id="org.coocox.component.ui.ComponentView" partName="Components">
 <viewState/>
 </view>
 <view id="org.coocox.builder.ui.views.ProjectView" partName="Project">
-<viewState CommonNavigator.LINKING_ENABLED="0" horizontalPosition="0" org.eclipse.ui.navigator.resources.workingSets.showTopLevelWorkingSets="0" verticalPosition="30">
+<viewState CommonNavigator.LINKING_ENABLED="0" horizontalPosition="0" org.eclipse.ui.navigator.resources.workingSets.showTopLevelWorkingSets="0" verticalPosition="18">
 <expanded>
 <element path="/STM32_RF_HUB"/>
-<element path="/STM32_RF_HUB/CLI"/>
 <element path="/STM32_RF_HUB/cmsis"/>
 <element path="/STM32_RF_HUB/cmsis_boot"/>
 <element path="/STM32_RF_HUB/Src"/>
 <element path="/STM32_RF_HUB/Src/HAL"/>
 <element path="/STM32_RF_HUB/Src/HAL/HAL_BRD"/>
+<element path="/STM32_RF_HUB/Src/HAL/HAL_SPI"/>
 <element path="/STM32_RF_HUB/Src/HAL/HAL_TIM"/>
+<element path="/STM32_RF_HUB/Src/HEATING"/>
 <element path="/STM32_RF_HUB/Src/MAIN"/>
 <element path="/STM32_RF_HUB/Src/MODE_MGR"/>
 <element path="/STM32_RF_HUB/Src/NVM"/>
 <element path="/STM32_RF_HUB/Src/RF"/>
 <element path="/STM32_RF_HUB/stdio"/>
 <element path="/STM32_RF_HUB/stm_lib"/>
+<element path="/STM32_RF_HUB/stm_lib/inc"/>
+<element path="/STM32_RF_HUB/stm_lib/src"/>
 </expanded>
 <selection>
-<element path="/STM32_RF_HUB/Src/RF/RF_MGR.c"/>
+<element path="/STM32_RF_HUB/Src/HAL/HAL_SPI/HAL_SPI.c"/>
 </selection>
 </viewState>
 </view>
@@ -273,7 +351,7 @@
 </viewState>
 </view>
 </views>
-<perspectives activePart="org.eclipse.ui.console.ConsoleView" activePerspective="org.coocox.builder.perspective.CoBuilder">
+<perspectives activePart="org.eclipse.cdt.ui.editor.CEditor" activePerspective="org.coocox.builder.perspective.CoBuilder">
 <perspective editorAreaTrimState="2" editorAreaVisible="1" fixed="0" version="0.016">
 <descriptor class="org.coocox.builder.ui.PerspectiveCoBuilder" id="org.coocox.builder.perspective.CoBuilder" label="CooCox CoBuilder"/>
 <alwaysOnActionSet id="org.coocox.component.ui.actionSet"/>
@@ -330,7 +408,7 @@
 </info>
 <info part="org.coocox.builder.ui.exampleView" ratio="0.18225293" ratioLeft="343" ratioRight="1539" relationship="2" relative="org.eclipse.ui.internal.ViewStack@4651bf"/>
 <info folder="true" part="org.eclipse.ui.internal.ViewStack@5db088" ratio="0.8656476" ratioLeft="1076" ratioRight="167" relationship="2" relative="org.coocox.builder.ui.exampleView">
-<folder activePageID="org.eclipse.ui.views.ContentOutline" appearance="2" expanded="2">
+<folder activePageID="org.coocox.component.ui.Help" appearance="2" expanded="2">
 <page content="org.coocox.component.ui.Help" label="Help"/>
 <page content="org.eclipse.ui.views.ContentOutline" label="Outline"/>
 <page content="org.eclipse.debug.ui.BreakpointView" label="LabelNotFound"/>
@@ -410,17 +488,18 @@
 <hide_toolbar_item_id id="org.eclipse.ui.edit.text.toggleShowSelectedElementOnly"/>
 <hide_toolbar_item_id id="org.coocox.builder.ui.build"/>
 <hide_toolbar_item_id id="org.coocox.welcome.ui.action.welcome"/>
-<hide_toolbar_item_id id="org.coocox.codebugger.configuration.coideProgramDownloadAction"/>
 <hide_toolbar_item_id id="org.coocox.component.ui.ShowRepositoryAction"/>
+<hide_toolbar_item_id id="org.coocox.codebugger.configuration.coideProgramDownloadAction"/>
 <view id="org.eclipse.ui.console.ConsoleView"/>
-<view id="org.eclipse.debug.ui.DebugView"/>
 <view id="org.eclipse.debug.ui.BreakpointView"/>
+<view id="org.eclipse.debug.ui.DebugView"/>
 <view id="org.coocox.codebugger.trace.ui.traceview"/>
 <view id="org.eclipse.debug.ui.VariableView"/>
 <view id="org.eclipse.debug.ui.ExpressionView"/>
 <view id="org.eclipse.cdt.debug.ui.memory.memorybrowser.MemoryBrowser"/>
 <view id="org.coocox.coassistant.view.CoAssistantView_debug"/>
 <view id="org.eclipse.search.ui.views.SearchView"/>
+<view id="org.eclipse.cdt.ui.typeHierarchy"/>
 <view id="org.coocox.builder.ui.views.ProjectView"/>
 <view id="org.eclipse.debug.ui.RegisterView"/>
 <view id="org.eclipse.ui.views.ContentOutline"/>
@@ -444,10 +523,10 @@
 </folder>
 </info>
 <info folder="true" part="org.eclipse.ui.internal.ViewStack@9abe1b" ratio="0.72715896" ratioLeft="581" ratioRight="218" relationship="4" relative="org.eclipse.ui.internal.ViewStack@cacb75">
-<folder activePageID="org.eclipse.ui.console.ConsoleView" appearance="2" expanded="2">
+<folder activePageID="org.eclipse.debug.ui.DebugView" appearance="2" expanded="2">
 <page content="org.eclipse.ui.console.ConsoleView" label="Console"/>
-<page content="org.eclipse.debug.ui.DebugView" label="Debug"/>
 <page content="org.eclipse.debug.ui.BreakpointView" label="Breakpoints"/>
+<page content="org.eclipse.debug.ui.DebugView" label="Debug"/>
 <presentation id="org.eclipse.ui.presentations.WorkbenchPresentationFactory">
 <part id="0"/>
 <part id="1"/>
@@ -455,7 +534,7 @@
 </presentation>
 </folder>
 </info>
-<info folder="true" part="org.eclipse.ui.internal.ViewStack@1371965" ratio="0.6098175" ratioLeft="969" ratioRight="620" relationship="2" relative="org.eclipse.ui.internal.ViewStack@9abe1b">
+<info folder="true" part="org.eclipse.ui.internal.ViewStack@1371965" ratio="0.43549404" ratioLeft="692" ratioRight="897" relationship="2" relative="org.eclipse.ui.internal.ViewStack@9abe1b">
 <folder activePageID="org.eclipse.search.ui.views.SearchView" appearance="2" expanded="2">
 <page content="org.coocox.codebugger.trace.ui.traceview" label="Semihosting"/>
 <page content="org.eclipse.debug.ui.VariableView" label="Variables"/>
@@ -463,6 +542,7 @@
 <page content="org.eclipse.cdt.debug.ui.memory.memorybrowser.MemoryBrowser" label="Memory Browser"/>
 <page content="org.coocox.coassistant.view.CoAssistantView_debug" label="Peripherals"/>
 <page content="org.eclipse.search.ui.views.SearchView" label="Search"/>
+<page content="org.eclipse.cdt.ui.typeHierarchy" label="Type Hierarchy"/>
 <page content="org.eclipse.debug.ui.MemoryView" label="LabelNotFound"/>
 <presentation id="org.eclipse.ui.presentations.WorkbenchPresentationFactory">
 <part id="0"/>
@@ -471,6 +551,7 @@
 <part id="3"/>
 <part id="4"/>
 <part id="5"/>
+<part id="6"/>
 </presentation>
 </folder>
 </info>
@@ -494,161 +575,174 @@
 <workingSets/>
 <navigationHistory>
 <editors>
-<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/STM32_RF_HUB/Src/RF/RF_MGR.c"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/STM32_RF_HUB/Src/MODE_MGR/MODE_MGR.c"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/STM32_RF_HUB/Src/HAL/HAL_SPI/HAL_SPI.c"/>
 <editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/STM32_RF_HUB/Src/MAIN/main.c"/>
-<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/STM32_RF_HUB/stm_lib/src/stm32f10x_usart.c"/>
 <editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/STM32_RF_HUB/Src/MAIN/main.c"/>
-<editor factoryID="org.coocox.builder.ui.persistent.PersistentElementFactory" id="org.coocox.builder.ui.editors.ConfigEditor">
-<org.coocox.builder.ui.editors.ConfigEditor/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/STM32_RF_HUB/Src/MAIN/main.c"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/STM32_RF_HUB/Src/MAIN/main.c"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/STM32_RF_HUB/Src/MAIN/main.c"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/STM32_RF_HUB/Src/MAIN/main.c"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/STM32_RF_HUB/Src/MAIN/main.c"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/STM32_RF_HUB/Src/MAIN/main.c"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/STM32_RF_HUB/Src/MAIN/main.c"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/STM32_RF_HUB/Src/MAIN/main.c"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/STM32_RF_HUB/Src/MAIN/main.c"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/STM32_RF_HUB/Src/MAIN/main.c"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/STM32_RF_HUB/Src/MAIN/main.c"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/STM32_RF_HUB/Src/MAIN/main.c"/>
+<editor factoryID="org.coocox.component.ui.editors.repository.RepositoryElementFactory" id="org.coocox.builder.ui.editors.repository.RepositoryBrowser">
+<subPage horizontalPosition="0" selectedItemId="446" subPageIndex="2" verticalPosition="132"/>
 </editor>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/STM32_RF_HUB/Src/MAIN/main.c"/>
 </editors>
-<item historyLabel="RF_MGR.c" index="0">
-<position info="not_deleted" x="9160" y="0"/>
+<item historyLabel="MODE_MGR.c" index="0">
+<position/>
 </item>
-<item historyLabel="main.c" index="1">
-<position info="not_deleted" x="606" y="0"/>
+<item historyLabel="MODE_MGR.c" index="0">
+<position/>
 </item>
-<item historyLabel="RF_MGR.c" index="0">
-<position info="not_deleted" x="8869" y="22"/>
+<item historyLabel="MODE_MGR.c" index="0">
+<position/>
 </item>
-<item historyLabel="main.c" index="1">
-<position info="not_deleted" x="708" y="0"/>
+<item historyLabel="MODE_MGR.c" index="0">
+<position info="not_deleted" x="3289" y="0"/>
 </item>
-<item historyLabel="main.c" index="1">
-<position info="not_deleted" x="606" y="0"/>
+<item historyLabel="MODE_MGR.c" index="0">
+<position info="not_deleted" x="3285" y="0"/>
 </item>
-<item historyLabel="RF_MGR.c" index="0">
-<position info="not_deleted" x="8963" y="226"/>
+<item historyLabel="main.c" index="2">
+<position info="not_deleted" x="628" y="0"/>
 </item>
-<item historyLabel="main.c" index="1">
-<position info="not_deleted" x="606" y="0"/>
+<item historyLabel="HAL_SPI.c" index="1">
+<position/>
 </item>
-<item historyLabel="main.c" index="1">
-<position info="not_deleted" x="649" y="0"/>
-</item>
-<item historyLabel="RF_MGR.c" index="0">
-<position info="not_deleted" x="8672" y="285"/>
-</item>
-<item historyLabel="main.c" index="1">
-<position info="not_deleted" x="606" y="0"/>
-</item>
-<item historyLabel="RF_MGR.c" index="0">
-<position info="not_deleted" x="8733" y="0"/>
-</item>
-<item historyLabel="main.c" index="1">
-<position info="not_deleted" x="606" y="0"/>
-</item>
-<item historyLabel="RF_MGR.c" index="0">
-<position info="not_deleted" x="8839" y="0"/>
-</item>
-<item historyLabel="main.c" index="1">
-<position info="not_deleted" x="585" y="0"/>
-</item>
-<item historyLabel="RF_MGR.c" index="0">
-<position info="not_deleted" x="8840" y="0"/>
-</item>
-<item historyLabel="main.c" index="1">
-<position info="not_deleted" x="674" y="0"/>
-</item>
-<item historyLabel="RF_MGR.c" index="0">
-<position info="not_deleted" x="8898" y="0"/>
-</item>
-<item historyLabel="main.c" index="1">
-<position info="not_deleted" x="660" y="0"/>
-</item>
-<item historyLabel="RF_MGR.c" index="0">
-<position info="not_deleted" x="8899" y="0"/>
-</item>
-<item historyLabel="main.c" index="1">
-<position info="not_deleted" x="685" y="0"/>
-</item>
-<item historyLabel="RF_MGR.c" index="0">
-<position info="not_deleted" x="9040" y="0"/>
-</item>
-<item historyLabel="main.c" index="1">
-<position info="not_deleted" x="717" y="0"/>
-</item>
-<item historyLabel="RF_MGR.c" index="0">
-<position info="not_deleted" x="9131" y="0"/>
-</item>
-<item historyLabel="main.c" index="1">
-<position info="not_deleted" x="869" y="0"/>
-</item>
-<item historyLabel="RF_MGR.c" index="0">
-<position info="not_deleted" x="8758" y="0"/>
-</item>
-<item historyLabel="main.c" index="1">
-<position info="not_deleted" x="606" y="0"/>
-</item>
-<item historyLabel="RF_MGR.c" index="0">
-<position info="not_deleted" x="8672" y="57"/>
-</item>
-<item historyLabel="main.c" index="1">
-<position info="not_deleted" x="606" y="0"/>
-</item>
-<item historyLabel="stm32f10x_usart.c" index="2">
-<position info="not_deleted" x="31987" y="0"/>
-</item>
-<item historyLabel="RF_MGR.c" index="0">
-<position info="not_deleted" x="9043" y="0"/>
-</item>
-<item historyLabel="main.c" index="1">
-<position info="not_deleted" x="606" y="0"/>
-</item>
-<item historyLabel="RF_MGR.c" index="0">
-<position info="not_deleted" x="8672" y="0"/>
-</item>
-<item historyLabel="main.c" index="1">
-<position info="not_deleted" x="606" y="0"/>
-</item>
-<item historyLabel="RF_MGR.c" index="0">
-<position info="not_deleted" x="9131" y="0"/>
-</item>
-<item historyLabel="main.c" index="1">
-<position info="not_deleted" x="813" y="0"/>
-</item>
-<item historyLabel="RF_MGR.c" index="0">
-<position info="not_deleted" x="9010" y="0"/>
-</item>
-<item historyLabel="main.c" index="1">
-<position info="not_deleted" x="606" y="0"/>
-</item>
-<item historyLabel="RF_MGR.c" index="0">
-<position info="not_deleted" x="8733" y="0"/>
-</item>
-<item historyLabel="main.c" index="1">
-<position info="not_deleted" x="606" y="0"/>
-</item>
-<item historyLabel="RF_MGR.c" index="0">
-<position info="not_deleted" x="8839" y="0"/>
-</item>
-<item historyLabel="main.c" index="1">
-<position info="not_deleted" x="606" y="0"/>
-</item>
-<item historyLabel="RF_MGR.c" index="0">
-<position info="not_deleted" x="8758" y="0"/>
-</item>
-<item historyLabel="main.c" index="1">
-<position info="not_deleted" x="606" y="0"/>
-</item>
-<item historyLabel="RF_MGR.c" index="0">
-<position info="not_deleted" x="9130" y="0"/>
-</item>
-<item historyLabel="main.c" index="1">
-<position info="not_deleted" x="606" y="0"/>
-</item>
-<item historyLabel="RF_MGR.c" index="0">
-<position info="not_deleted" x="9130" y="0"/>
+<item historyLabel="MODE_MGR.c" index="0">
+<position/>
 </item>
 <item historyLabel="main.c" index="3">
-<position info="not_deleted" x="686" y="0"/>
+<position info="not_deleted" x="628" y="0"/>
 </item>
-<item historyLabel="RF_MGR.c" index="0">
-<position info="not_deleted" x="10104" y="0"/>
+<item historyLabel="HAL_SPI.c" index="1">
+<position/>
 </item>
-<item historyLabel="Configuration" index="4"/>
-<item active="true" historyLabel="RF_MGR.c" index="0">
-<position info="not_deleted" x="8959" y="1867"/>
+<item historyLabel="main.c" index="4">
+<position info="not_deleted" x="628" y="0"/>
+</item>
+<item historyLabel="HAL_SPI.c" index="1">
+<position/>
+</item>
+<item historyLabel="MODE_MGR.c" index="0">
+<position/>
+</item>
+<item historyLabel="MODE_MGR.c" index="0">
+<position info="not_deleted" x="2129" y="0"/>
+</item>
+<item historyLabel="main.c" index="5">
+<position info="not_deleted" x="628" y="0"/>
+</item>
+<item historyLabel="MODE_MGR.c" index="0">
+<position info="not_deleted" x="2129" y="0"/>
+</item>
+<item historyLabel="main.c" index="6">
+<position info="not_deleted" x="628" y="0"/>
+</item>
+<item historyLabel="MODE_MGR.c" index="0">
+<position info="not_deleted" x="2129" y="0"/>
+</item>
+<item historyLabel="main.c" index="7">
+<position info="not_deleted" x="628" y="0"/>
+</item>
+<item historyLabel="MODE_MGR.c" index="0">
+<position info="not_deleted" x="3285" y="0"/>
+</item>
+<item historyLabel="main.c" index="8">
+<position info="not_deleted" x="571" y="0"/>
+</item>
+<item historyLabel="HAL_SPI.c" index="1">
+<position info="not_deleted" x="5226" y="0"/>
+</item>
+<item historyLabel="main.c" index="9">
+<position info="not_deleted" x="547" y="0"/>
+</item>
+<item historyLabel="HAL_SPI.c" index="1">
+<position info="not_deleted" x="5227" y="0"/>
+</item>
+<item historyLabel="main.c" index="10">
+<position info="not_deleted" x="628" y="0"/>
+</item>
+<item historyLabel="MODE_MGR.c" index="0">
+<position info="not_deleted" x="3285" y="0"/>
+</item>
+<item historyLabel="MODE_MGR.c" index="0">
+<position info="not_deleted" x="2050" y="0"/>
+</item>
+<item historyLabel="main.c" index="11">
+<position info="not_deleted" x="628" y="0"/>
+</item>
+<item historyLabel="MODE_MGR.c" index="0">
+<position info="not_deleted" x="2088" y="0"/>
+</item>
+<item historyLabel="HAL_SPI.c" index="1">
+<position/>
+</item>
+<item historyLabel="MODE_MGR.c" index="0">
+<position info="not_deleted" x="3276" y="0"/>
+</item>
+<item historyLabel="main.c" index="12">
+<position info="not_deleted" x="605" y="0"/>
+</item>
+<item historyLabel="MODE_MGR.c" index="0">
+<position info="not_deleted" x="3284" y="0"/>
+</item>
+<item historyLabel="main.c" index="13">
+<position info="not_deleted" x="628" y="0"/>
+</item>
+<item historyLabel="MODE_MGR.c" index="0">
+<position info="not_deleted" x="2921" y="0"/>
+</item>
+<item historyLabel="main.c" index="14">
+<position info="not_deleted" x="949" y="0"/>
+</item>
+<item historyLabel="MODE_MGR.c" index="0">
+<position info="not_deleted" x="3273" y="0"/>
+</item>
+<item historyLabel="main.c" index="15">
+<position info="not_deleted" x="628" y="0"/>
+</item>
+<item historyLabel="MODE_MGR.c" index="0">
+<position info="not_deleted" x="2924" y="0"/>
+</item>
+<item historyLabel="HAL_SPI.c" index="1">
+<position info="not_deleted" x="5227" y="0"/>
+</item>
+<item historyLabel="Repository" index="16"/>
+<item historyLabel="HAL_SPI.c" index="1">
+<position info="not_deleted" x="6621" y="0"/>
+</item>
+<item historyLabel="MODE_MGR.c" index="0">
+<position info="not_deleted" x="2063" y="0"/>
+</item>
+<item historyLabel="HAL_SPI.c" index="1">
+<position info="not_deleted" x="9582" y="0"/>
+</item>
+<item historyLabel="main.c" index="17">
+<position info="not_deleted" x="628" y="0"/>
+</item>
+<item historyLabel="main.c" index="17">
+<position info="not_deleted" x="640" y="0"/>
+</item>
+<item historyLabel="main.c" index="17">
+<position info="not_deleted" x="660" y="0"/>
+</item>
+<item historyLabel="main.c" index="17">
+<position info="not_deleted" x="684" y="0"/>
+</item>
+<item historyLabel="main.c" index="17">
+<position info="not_deleted" x="700" y="0"/>
+</item>
+<item active="true" historyLabel="main.c" index="17">
+<position info="not_deleted" x="718" y="0"/>
 </item>
 </navigationHistory>
 <input factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/" type="8"/>
@@ -657,52 +751,47 @@
 <actionBarAdvisor/>
 </window>
 <mruList>
-<file factoryID="org.coocox.builder.ui.persistent.PersistentElementFactory" id="org.coocox.builder.ui.editors.ConfigEditor" name="" tooltip="">
-<persistable>
-<org.coocox.builder.ui.editors.ConfigEditor/>
-</persistable>
-</file>
-<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="stm32f10x_usart.c" tooltip="STM32_RF_HUB/stm_lib/src/stm32f10x_usart.c">
-<persistable path="/STM32_RF_HUB/stm_lib/src/stm32f10x_usart.c"/>
-</file>
-<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="startup_stm32f10x_md.c" tooltip="STM32_RF_HUB/cmsis_boot/startup/startup_stm32f10x_md.c">
-<persistable path="/STM32_RF_HUB/cmsis_boot/startup/startup_stm32f10x_md.c"/>
-</file>
 <file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="main.c" tooltip="STM32_RF_HUB/Src/MAIN/main.c">
 <persistable path="/STM32_RF_HUB/Src/MAIN/main.c"/>
 </file>
-<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="HAL_UART.c" tooltip="STM32_RF_HUB/Src/HAL/HAL_UART/HAL_UART.c">
-<persistable path="/STM32_RF_HUB/Src/HAL/HAL_UART/HAL_UART.c"/>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="stm32f10x_spi.c" tooltip="STM32_RF_HUB/stm_lib/src/stm32f10x_spi.c">
+<persistable path="/STM32_RF_HUB/stm_lib/src/stm32f10x_spi.c"/>
 </file>
-<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="HAL_UART.c" tooltip="STM32_Interface/HAL/HAL_UART/HAL_UART.c">
-<persistable path="/STM32_Interface/HAL/HAL_UART/HAL_UART.c"/>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="stm32f10x_dma.h" tooltip="STM32_RF_HUB/stm_lib/inc/stm32f10x_dma.h">
+<persistable path="/STM32_RF_HUB/stm_lib/inc/stm32f10x_dma.h"/>
 </file>
-<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="SERIAL.c" tooltip="STM32_Interface/SERIAL/SERIAL.c">
-<persistable path="/STM32_Interface/SERIAL/SERIAL.c"/>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="stm32f10x_rcc.h" tooltip="STM32_RF_HUB/stm_lib/inc/stm32f10x_rcc.h">
+<persistable path="/STM32_RF_HUB/stm_lib/inc/stm32f10x_rcc.h"/>
 </file>
-<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="main.c" tooltip="STM32_sleepy_sensors/Src/MAIN/main.c">
-<persistable path="/STM32_sleepy_sensors/Src/MAIN/main.c"/>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="stm32f10x_rcc.c" tooltip="STM32_RF_HUB/stm_lib/src/stm32f10x_rcc.c">
+<persistable path="/STM32_RF_HUB/stm_lib/src/stm32f10x_rcc.c"/>
 </file>
-<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="STDC.h" tooltip="STM32_sleepy_sensors/Src/COMMON_MODULES/xINC/STDC/STDC.h">
-<persistable path="/STM32_sleepy_sensors/Src/COMMON_MODULES/xINC/STDC/STDC.h"/>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="stm32f10x_spi.h" tooltip="STM32_RF_HUB/stm_lib/inc/stm32f10x_spi.h">
+<persistable path="/STM32_RF_HUB/stm_lib/inc/stm32f10x_spi.h"/>
 </file>
-<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="NRF24.c" tooltip="STM32_sleepy_sensors/Src/RF/NRF24.c">
-<persistable path="/STM32_sleepy_sensors/Src/RF/NRF24.c"/>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="HAL_SPI.h" tooltip="STM32_RF_HUB/Src/HAL/HAL_SPI/HAL_SPI.h">
+<persistable path="/STM32_RF_HUB/Src/HAL/HAL_SPI/HAL_SPI.h"/>
 </file>
-<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="RF_MGR.h" tooltip="STM32_RF_HUB/Src/RF/RF_MGR.h">
-<persistable path="/STM32_RF_HUB/Src/RF/RF_MGR.h"/>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="HAL_SPI.c" tooltip="STM32_RF_HUB/Src/HAL/HAL_SPI/HAL_SPI.c">
+<persistable path="/STM32_RF_HUB/Src/HAL/HAL_SPI/HAL_SPI.c"/>
 </file>
-<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="RF_MGR.c" tooltip="STM32_RF_HUB/Src/RF/RF_MGR.c">
-<persistable path="/STM32_RF_HUB/Src/RF/RF_MGR.c"/>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="stm32f10x_gpio.h" tooltip="STM32_RF_HUB/stm_lib/inc/stm32f10x_gpio.h">
+<persistable path="/STM32_RF_HUB/stm_lib/inc/stm32f10x_gpio.h"/>
 </file>
-<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="C_defs.h" tooltip="STM32_RF_HUB/Src/COMMON_MODULES/xINC/C_defs.h">
-<persistable path="/STM32_RF_HUB/Src/COMMON_MODULES/xINC/C_defs.h"/>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.ui.DefaultTextEditor" name="MODE_MGR.o" tooltip="STM32_RF_HUB/Src/MODE_MGR/MODE_MGR.o">
+<persistable path="/STM32_RF_HUB/Src/MODE_MGR/MODE_MGR.o"/>
 </file>
-<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="stm32f10x.h" tooltip="STM32_RF_HUB/cmsis_boot/stm32f10x.h">
-<persistable path="/STM32_RF_HUB/cmsis_boot/stm32f10x.h"/>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="MODE_MGR.h" tooltip="STM32_RF_HUB/Src/MODE_MGR/MODE_MGR.h">
+<persistable path="/STM32_RF_HUB/Src/MODE_MGR/MODE_MGR.h"/>
 </file>
-<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="stm32f10x_usart.c" tooltip="STM32_RF_HUB/stm_lib/src/stm32f10x_usart.c">
-<persistable path="/STM32_RF_HUB/stm_lib/src/stm32f10x_usart.c"/>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="stm32f10x_dbgmcu.c" tooltip="STM32_RF_HUB/stm_lib/src/stm32f10x_dbgmcu.c">
+<persistable path="/STM32_RF_HUB/stm_lib/src/stm32f10x_dbgmcu.c"/>
+</file>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="stm32f10x_dbgmcu.h" tooltip="STM32_RF_HUB/stm_lib/inc/stm32f10x_dbgmcu.h">
+<persistable path="/STM32_RF_HUB/stm_lib/inc/stm32f10x_dbgmcu.h"/>
+</file>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="HEATING.h" tooltip="STM32_RF_HUB/Src/HEATING/HEATING.h">
+<persistable path="/STM32_RF_HUB/Src/HEATING/HEATING.h"/>
 </file>
 </mruList>
 </workbench>
