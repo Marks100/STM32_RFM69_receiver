@@ -21,11 +21,33 @@
 
 #define NEOPIXEL_COLOUR_NONE 0u
 
-#define BV(x) 			(1u<<x)
+#define BV(x) 			(1u<<(x))
+
+typedef enum
+{
+	NEOPIXEL_NO_STATE = 0u,
+	NEOPIXEL_CENTRE_SWEEP,
+} NEOPIXEL_hl_state_et;
+
+typedef enum
+{
+	NEOPIXEL_IDLE = 0u,
+	NEOPIXEL_RUNNING,
+	NEOPIXEL_FINISHED,
+} NEOPIXEL_ll_state_et;
+
+typedef struct
+{
+	NEOPIXEL_hl_state_et hl_state;
+	NEOPIXEL_ll_state_et ll_state;
+	u8_t 				 stage;
+} NEOPIXEL_data_st;
 
 void NEOPIXEL_set_led( u32_t led_pos, u32_t colour );
 void NEOPIXEL_clear_all_leds( void );
 void NEOPIXEL_light_all_leds( u32_t colour );
+void NEOPIXEL_tick( void );
+NEOPIXEL_ll_state_et NEOPIXEL_handle_centre_sweep( u8_t* stage );
 
 
 

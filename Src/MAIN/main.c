@@ -21,6 +21,7 @@
 #include "RF_MGR.h"
 #include "HEATING.h"
 #include "nvm.h"
+#include "NEOPIXEL.h"
 #include "main.h"
 
 
@@ -58,6 +59,8 @@ int main(void)
 	MODE_MGR_init();
 
 	HEATING_init();
+
+	NEOPIXEL_int();
 
 	/* Init the systick timer */
 	MAIN_SYSTICK_init();

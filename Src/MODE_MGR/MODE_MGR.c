@@ -81,12 +81,11 @@ void MODE_MGR_action_schedule_normal( void )
     NRF24_tick();
     CLI_message_handler();
     MODE_MGR_check_user_input();
-
+    NEOPIXEL_tick();
 
     switch( MODE_MGR_tick_timer_msecs_s )
     {
         case 20u:
-        	//NEOPIXEL_clear_all_leds();
         	break;
 
         case 40u:
