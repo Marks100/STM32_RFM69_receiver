@@ -3,7 +3,6 @@
 
 #include "HAL_BRD.h"
 
-
 #define MODE_MGR_MAX_TICK_CYCLE_VALUE 	1000u
 #define MODE_MGR_TICK_RATE_MSECS		20u
 #define MODE_MGR_NUM_SLIDER_INPUTS		4u
@@ -25,24 +24,6 @@
 #define COMMAND_14 ( 13 )
 #define COMMAND_15 ( 14 )
 #define COMMAND_16 ( 15 )
-
-
-#define NEOPIXEL_LED1	0
-#define NEOPIXEL_LED2	1
-#define NEOPIXEL_LED3	2
-#define NEOPIXEL_LED4	3
-#define NEOPIXEL_LED5	4
-#define NEOPIXEL_LED6	5
-#define NEOPIXEL_LED7	6
-#define NEOPIXEL_LED8	7
-#define NEOPIXEL_LED9	8
-#define NEOPIXEL_LED10	9
-#define NEOPIXEL_LED11	10
-#define NEOPIXEL_LED12	11
-
-#define NEOPIXEL_LED_MAX	12
-
-#define BV(x) 			(1<<x)
 
 typedef enum
 {

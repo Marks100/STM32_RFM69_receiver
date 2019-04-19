@@ -12,6 +12,7 @@
 #include "CLI.h"
 #include "RFM69.h"
 #include "HAL_UART.h"
+#include "NEOPIXEL.h"
 
 
 STATIC false_true_et 		   MODE_MGR_system_init_s;
@@ -22,125 +23,6 @@ STATIC u8_t                    MODE_MGR_debounce_ctr_s;
 STATIC MODE_MGR_user_input_st  MODE_MGR_user_input_s[MODE_MGR_NUM_SLIDER_INPUTS];
 extern NVM_info_st NVM_info_s;
 
-
-
-
-#pragma GCC push_options
-#pragma GCC optimize ("O0")
-
-void one_pulse_direct( void )
-{
-	/* This is soo time critical that instead of abstracting with function calls ill go direct to the hardware */
-	GPIOA->ODR |= GPIO_Pin_12;
-	asm("nop");asm("nop");asm("nop");asm("nop");
-	asm("nop");asm("nop");asm("nop");asm("nop");
-	asm("nop");asm("nop");asm("nop");asm("nop");
-	asm("nop");asm("nop");asm("nop");asm("nop");
-	asm("nop");asm("nop");asm("nop");asm("nop");
-	asm("nop");asm("nop");asm("nop");asm("nop");
-	asm("nop");asm("nop");asm("nop");asm("nop");
-	asm("nop");asm("nop");asm("nop");asm("nop");
-
-	GPIOA->ODR &= ~GPIO_Pin_12;
-	asm("nop");asm("nop");asm("nop");asm("nop");
-	asm("nop");asm("nop");asm("nop");asm("nop");
-}
-
-
-void zero_pulse_direct( void )
-{
-	/* This is soo time critical that instead of abstracting with function calls ill go direct to the hardware */
-	GPIOA->ODR |= GPIO_Pin_12;
-	asm("nop");asm("nop");asm("nop");asm("nop");
-	asm("nop");asm("nop");asm("nop");asm("nop");
-
-	GPIOA->ODR &= ~GPIO_Pin_12;
-	asm("nop");asm("nop");asm("nop");asm("nop");
-	asm("nop");asm("nop");asm("nop");asm("nop");
-}
-
-
-
-void NEOpixel_set_led( u32_t led_pos, u32_t colour )
-{
-	u8_t bit = 0u;
-	u8_t led_index = 0u;
-
-	for( led_index = 0; led_index < NEOPIXEL_LED_MAX; led_index++ )
-	{
-		if( ( led_pos & (BV(NEOPIXEL_LED_MAX - led_index - 1) ) ) != 0 )
-		{
-			for ( bit = 0; bit < 24; bit++ )
-			{
-				if( ( colour & (0x800000>>bit) ) == 0x800000>>bit )
-				{
-					one_pulse_direct();
-				}
-				else
-				{
-					zero_pulse_direct();
-				}
-			}
-		}
-		else
-		{
-			for ( bit = 0; bit < 24; bit++ )
-			{
-				zero_pulse_direct();
-			}
-		}
-	}
-}
-
-void NEOpixel_latch( void )
-{
-	u16_t bit = 0u;
-
-	GPIOA->ODR &= ~GPIO_Pin_12;
-	for ( bit = 0; bit < 500; bit++ )
-	{
-		asm("nop");
-	}
-}
-
-void NEOpixel_clear_all_leds( void )
-{
-	u8_t led_pos = 0;
-	u8_t bit = 0u;
-
-	for ( led_pos = 0; led_pos < NEOPIXEL_LED_MAX; led_pos ++ )
-	{
-		for ( bit = 0; bit < 24; bit++ )
-		{
-			zero_pulse_direct();
-		}
-	}
-	NEOpixel_latch();
-}
-
-void NEOpixel_light_all_leds( u32_t colour )
-{
-	u8_t led_pos = 0;
-	u8_t bit = 0u;
-
-	for ( led_pos = 0; led_pos < NEOPIXEL_LED_MAX; led_pos ++ )
-	{
-		for ( bit = 0; bit < 24; bit++ )
-		{
-			if( ( colour & (0x800000>>bit) ) == 0x800000>>bit )
-			{
-				one_pulse_direct();
-			}
-			else
-			{
-				zero_pulse_direct();
-			}
-		}
-	}
-	NEOpixel_latch();
-}
-
-#pragma GCC pop_options
 
 
 void MODE_MGR_init( void )
@@ -199,22 +81,16 @@ void MODE_MGR_action_schedule_normal( void )
     NRF24_tick();
     CLI_message_handler();
     MODE_MGR_check_user_input();
-    u8_t i = 0u;
-
-
-
-
-
 
 
     switch( MODE_MGR_tick_timer_msecs_s )
     {
         case 20u:
-        	NEOpixel_clear_all_leds();
+        	NEOPIXEL_clear_all_leds();
         	break;
 
         case 40u:
-        	NEOpixel_set_led( BV(NEOPIXEL_LED1), 0x0000FF00 );
+        	NEOPIXEL_set_led( BV(NEOPIXEL_LED1), 0x0000FF00 );
             HEATING_tick();
         	break;
 
@@ -222,7 +98,7 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 80u:
-        	NEOpixel_set_led( BV(NEOPIXEL_LED2) | BV(NEOPIXEL_LED12) , 0x0000FF00 );
+        	NEOPIXEL_set_led( BV(NEOPIXEL_LED2) | BV(NEOPIXEL_LED12) , 0x0000FF00 );
         	NVM_tick();
         	break;
 
@@ -232,7 +108,7 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 120u:
-        	NEOpixel_set_led( BV(NEOPIXEL_LED3) | BV(NEOPIXEL_LED11),0x0000FF00 );
+        	NEOPIXEL_set_led( BV(NEOPIXEL_LED3) | BV(NEOPIXEL_LED11),0x0000FF00 );
         	break;
 
         case 140u:
@@ -240,7 +116,7 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 160u:
-        	NEOpixel_set_led( BV(NEOPIXEL_LED4) | BV(NEOPIXEL_LED10),0x0000FF00 );
+        	NEOPIXEL_set_led( BV(NEOPIXEL_LED4) | BV(NEOPIXEL_LED10),0x0000FF00 );
         	break;
 
         case 180u:
@@ -250,14 +126,14 @@ void MODE_MGR_action_schedule_normal( void )
         case 200u:
         	MAIN_WATCHDOG_kick();
             RF_MGR_tick();
-            NEOpixel_set_led( BV(NEOPIXEL_LED5) | BV(NEOPIXEL_LED9),0x0000FF00 );
+            NEOPIXEL_set_led( BV(NEOPIXEL_LED5) | BV(NEOPIXEL_LED9),0x0000FF00 );
         	break;
 
         case 220u:
         	break;
 
         case 240u:
-        	NEOpixel_set_led( BV(NEOPIXEL_LED7) | BV(NEOPIXEL_LED8),0x0000FF00 );
+        	NEOPIXEL_set_led( BV(NEOPIXEL_LED7) | BV(NEOPIXEL_LED8),0x0000FF00 );
             HEATING_tick();
         	break;
 
@@ -266,7 +142,7 @@ void MODE_MGR_action_schedule_normal( void )
 
         case 280u:
         	NVM_tick();
-        	NEOpixel_set_led( BV(NEOPIXEL_LED7),0x00FF0000 );
+        	NEOPIXEL_set_led( BV(NEOPIXEL_LED7),0x00FF0000 );
         	break;
 
         case 300u:
@@ -275,7 +151,7 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 320u:
-        	NEOpixel_set_led( BV(NEOPIXEL_LED7) | BV(NEOPIXEL_LED8),0x0000FF00 );
+        	NEOPIXEL_set_led( BV(NEOPIXEL_LED7) | BV(NEOPIXEL_LED8),0x0000FF00 );
         	break;
 
         case 340u:
@@ -283,7 +159,7 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 360u:
-        	NEOpixel_set_led( BV(NEOPIXEL_LED5) | BV(NEOPIXEL_LED9),0x0000FF00 );
+        	NEOPIXEL_set_led( BV(NEOPIXEL_LED5) | BV(NEOPIXEL_LED9),0x0000FF00 );
         	break;
 
         case 380u:
@@ -293,7 +169,7 @@ void MODE_MGR_action_schedule_normal( void )
         case 400u:
         	MAIN_WATCHDOG_kick();
             RF_MGR_tick();
-            NEOpixel_set_led( BV(NEOPIXEL_LED4) | BV(NEOPIXEL_LED10),0x0000FF00 );
+            NEOPIXEL_set_led( BV(NEOPIXEL_LED4) | BV(NEOPIXEL_LED10),0x0000FF00 );
         	break;
 
         case 420u:
@@ -301,7 +177,7 @@ void MODE_MGR_action_schedule_normal( void )
 
         case 440u:
             HEATING_tick();
-            NEOpixel_set_led( BV(NEOPIXEL_LED3) | BV(NEOPIXEL_LED11),0x0000FF00 );
+            NEOPIXEL_set_led( BV(NEOPIXEL_LED3) | BV(NEOPIXEL_LED11),0x0000FF00 );
         	break;
 
         case 460u:
@@ -309,7 +185,7 @@ void MODE_MGR_action_schedule_normal( void )
 
         case 480u:
         	NVM_tick();
-        	NEOpixel_set_led( BV(NEOPIXEL_LED2) | BV(NEOPIXEL_LED10),0x0000FF00 );
+        	NEOPIXEL_set_led( BV(NEOPIXEL_LED2) | BV(NEOPIXEL_LED10),0x0000FF00 );
         	break;
 
         case 500u:
@@ -318,7 +194,7 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 520u:
-        	NEOpixel_set_led( BV(NEOPIXEL_LED1),0x00FF0000 );
+        	NEOPIXEL_set_led( BV(NEOPIXEL_LED1),0x00FF0000 );
         	break;
 
         case 540u:
