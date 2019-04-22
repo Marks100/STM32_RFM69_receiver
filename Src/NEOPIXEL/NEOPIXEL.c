@@ -10,6 +10,7 @@
 
 NEOPIXEL_data_st NEOPIXEL_data_s;
 u16_t            NEOPIXEL_tick_ctr_s;
+u32_t 			 NEOPIXEL_colour_tracker;
 
 #pragma GCC push_options
 #pragma GCC optimize ("O1")
@@ -78,16 +79,20 @@ STATIC void NEOPIXEL_latch( void )
 
 void NEOPIXEL_int( void )
 {
-	NEOPIXEL_data_s.hl_state = NEOPIXEL_CENTRE_SWEEP;
+	NEOPIXEL_data_s.hl_state = NEOPIXEL_FLOW;
 	NEOPIXEL_data_s.ll_state = NEOPIXEL_IDLE;
-	NEOPIXEL_data_s.stage = 0u;
+	NEOPIXEL_data_s.ticks = 0u;
+	NEOPIXEL_data_s.led_num = 0u;
 
 	NEOPIXEL_tick_ctr_s = 0u;
+	NEOPIXEL_colour_tracker = 0x00FF0000;
 
 	NEOPIXEL_clear_all_leds();
 }
 
 
+
+/* Sets a specif number of leds, all others are turned off */
 void NEOPIXEL_set_led( u32_t led_pos, u32_t colour )
 {
 	u8_t led_index = 0u;
@@ -143,32 +148,48 @@ void NEOPIXEL_light_all_leds( u32_t colour )
 
 void NEOPIXEL_tick( void )
 {
-	switch( NEOPIXEL_tick_ctr_s )
+	if( ( NEOPIXEL_tick_ctr_s % 500 ) == 0u )
 	{
-		case 500:
-			NEOPIXEL_set_hl_state( NEOPIXEL_ALL_FLASH );
-			break;
-		case 1000:
-			NEOPIXEL_set_hl_state( NEOPIXEL_CIRCLE_BUFFER );
-			break;
-		case 1500:
-			NEOPIXEL_set_hl_state( NEOPIXEL_CENTRE_SWEEP );
-			NEOPIXEL_tick_ctr_s = 0;
-			break;
+		switch( NEOPIXEL_data_s.hl_state )
+		{
+			case NEOPIXEL_ALL_FLASH:
+				NEOPIXEL_set_hl_state( NEOPIXEL_CIRCLE_BUFFER );
+				break;
+			case NEOPIXEL_CIRCLE_BUFFER:
+				NEOPIXEL_set_hl_state( NEOPIXEL_FLOW );
+				break;
+			case NEOPIXEL_FLOW:
+				NEOPIXEL_set_hl_state( NEOPIXEL_CENTRE_SWEEP );
+				break;
+			case NEOPIXEL_CENTRE_SWEEP:
+				NEOPIXEL_set_hl_state( NEOPIXEL_TEMPERATURE );
+				break;
+			case NEOPIXEL_TEMPERATURE:
+				NEOPIXEL_set_hl_state( NEOPIXEL_ALL_FLASH );
+				break;
+		}
 	}
 
 	switch( NEOPIXEL_data_s.hl_state )
 	{
 		case NEOPIXEL_CENTRE_SWEEP:
-				NEOPIXEL_data_s.ll_state = NEOPIXEL_handle_centre_sweep( &NEOPIXEL_data_s.stage );
+			NEOPIXEL_data_s.ll_state = NEOPIXEL_handle_centre_sweep( &NEOPIXEL_data_s.ticks );
 			break;
 
 		case NEOPIXEL_ALL_FLASH:
-				NEOPIXEL_data_s.ll_state = NEOPIXEL_handle_all_flash( &NEOPIXEL_data_s.stage );
+			NEOPIXEL_data_s.ll_state = NEOPIXEL_handle_all_flash( &NEOPIXEL_data_s.ticks );
 			break;
 
 		case NEOPIXEL_CIRCLE_BUFFER:
-			NEOPIXEL_data_s.ll_state = NEOPIXEL_handle_circle_buffer( &NEOPIXEL_data_s.stage );
+			NEOPIXEL_data_s.ll_state = NEOPIXEL_handle_circle_buffer( &NEOPIXEL_data_s.ticks );
+			break;
+
+		case NEOPIXEL_FLOW:
+			NEOPIXEL_data_s.ll_state = NEOPIXEL_handle_flow( &NEOPIXEL_data_s.ticks );
+			break;
+
+		case NEOPIXEL_TEMPERATURE:
+			NEOPIXEL_data_s.ll_state = NEOPIXEL_handle_temperature_control( &NEOPIXEL_data_s.ticks );
 			break;
 
 		default:
@@ -182,139 +203,140 @@ void NEOPIXEL_tick( void )
 }
 
 
-NEOPIXEL_ll_state_et NEOPIXEL_handle_centre_sweep( u8_t* stage )
+NEOPIXEL_ll_state_et NEOPIXEL_handle_centre_sweep( u8_t* ticks )
 {
 	NEOPIXEL_ll_state_et state = NEOPIXEL_RUNNING;
-	u16_t temp_state = (*stage)++;
 
-	switch( temp_state )
+	if( ( (*ticks) % 4u ) == 0u )
 	{
-		case 0:
-			NEOPIXEL_set_led( BV(NEOPIXEL_LED1), 0x0000FF00 );
-			break;
-		case 2:
-			NEOPIXEL_set_led( BV(NEOPIXEL_LED2) | BV(NEOPIXEL_LED12), 0x0000FF00 );
-			break;
-		case 4:
-			NEOPIXEL_set_led( BV(NEOPIXEL_LED3) | BV(NEOPIXEL_LED11), 0x0000FF00 );
-			break;
-		case 6:
-			NEOPIXEL_set_led( BV(NEOPIXEL_LED4) | BV(NEOPIXEL_LED10), 0x0000FF00 );
-			break;
-		case 8:
-			NEOPIXEL_set_led( BV(NEOPIXEL_LED5) | BV(NEOPIXEL_LED9), 0x0000FF00 );
-			break;
-		case 10:
-			NEOPIXEL_set_led( BV(NEOPIXEL_LED6) | BV(NEOPIXEL_LED8), 0x0000FF00 );
-			break;
-		case 12:
-			NEOPIXEL_set_led( BV(NEOPIXEL_LED7), 0x00FF0000 );
-			break;
-		case 14:
-			NEOPIXEL_set_led( BV(NEOPIXEL_LED6) | BV(NEOPIXEL_LED8), 0x0000FF00 );
-			break;
-		case 16:
-			NEOPIXEL_set_led( BV(NEOPIXEL_LED5) | BV(NEOPIXEL_LED9), 0x0000FF00 );
-			break;
-		case 18:
-			NEOPIXEL_set_led( BV(NEOPIXEL_LED4) | BV(NEOPIXEL_LED10), 0x0000FF00 );
-			break;
-		case 20:
-			NEOPIXEL_set_led( BV(NEOPIXEL_LED3) | BV(NEOPIXEL_LED11), 0x0000FF00 );
-			break;
-		case 22:
-			NEOPIXEL_set_led( BV(NEOPIXEL_LED2) | BV(NEOPIXEL_LED12), 0x0000FF00 );
-			break;
-		case 24:
-			NEOPIXEL_set_led( BV(NEOPIXEL_LED1), 0x0000FF00 );
-			break;
-		case 26:
-			NEOPIXEL_clear_all_leds();
-			(*stage) = 0u;
-			break;
-
-		default:
-			break;
+		if( NEOPIXEL_data_s.led_num == 0u )
+		{
+			NEOPIXEL_set_led( BV(NEOPIXEL_data_s.led_num), NEOPIXEL_RED );
+		}
+		else if( NEOPIXEL_data_s.led_num == ( NEOPIXEL_LED_MAX/2) )
+		{
+			NEOPIXEL_set_led( BV(NEOPIXEL_data_s.led_num), NEOPIXEL_GREEN );
+		}
+		else
+		{
+			NEOPIXEL_set_led( BV(NEOPIXEL_data_s.led_num) | BV(NEOPIXEL_LED_MAX - NEOPIXEL_data_s.led_num ), NEOPIXEL_RED );
+		}
+		NEOPIXEL_data_s.led_num ++;
 	}
+
+	if( NEOPIXEL_data_s.led_num >= NEOPIXEL_LED_MAX )
+	{
+		NEOPIXEL_data_s.led_num = 0u;
+	}
+
+	(*ticks)++;
 
 	return( state );
 }
 
 
 
-NEOPIXEL_ll_state_et NEOPIXEL_handle_all_flash( u8_t* stage )
+NEOPIXEL_ll_state_et NEOPIXEL_handle_all_flash( u8_t* ticks )
 {
 	NEOPIXEL_ll_state_et state = NEOPIXEL_RUNNING;
 
-	switch( *stage )
+	if( (*ticks) == 0 )
 	{
-		case 0:
-			NEOPIXEL_set_led( NEOPIXEL_ALL_LED, 0x0000FF00 );
-			(*stage)++;
-			break;
-
-		default:
-			break;
+		NEOPIXEL_set_led( NEOPIXEL_ALL_LED, NEOPIXEL_RED );
 	}
+
+	(*ticks)++;
 
 	return( state );
 }
 
 
-NEOPIXEL_ll_state_et NEOPIXEL_handle_circle_buffer( u8_t* stage )
+NEOPIXEL_ll_state_et NEOPIXEL_handle_circle_buffer( u8_t* ticks )
 {
 	NEOPIXEL_ll_state_et state = NEOPIXEL_RUNNING;
-	u16_t temp_state = (*stage)++;
 
-	switch( temp_state )
+	if( ( (*ticks) % 4u ) == 0u )
 	{
-		case 0:
-			NEOPIXEL_set_led( BV(NEOPIXEL_LED1), 0x000000FF );
-			break;
-		case 2:
-			NEOPIXEL_set_led( BV(NEOPIXEL_LED2), 0x000000FF );
-			break;
-		case 4:
-			NEOPIXEL_set_led( BV(NEOPIXEL_LED3), 0x000000FF );
-			break;
-		case 6:
-			NEOPIXEL_set_led( BV(NEOPIXEL_LED4), 0x000000FF );
-			break;
-		case 8:
-			NEOPIXEL_set_led( BV(NEOPIXEL_LED5), 0x000000FF );
-			break;
-		case 10:
-			NEOPIXEL_set_led( BV(NEOPIXEL_LED6), 0x000000FF );
-			break;
-		case 12:
-			NEOPIXEL_set_led( BV(NEOPIXEL_LED7), 0x000000FF );
-			break;
-		case 14:
-			NEOPIXEL_set_led( BV(NEOPIXEL_LED6), 0x000000FF );
-			break;
-		case 16:
-			NEOPIXEL_set_led( BV(NEOPIXEL_LED8), 0x000000FF );
-			break;
-		case 18:
-			NEOPIXEL_set_led( BV(NEOPIXEL_LED9), 0x000000FF );
-			break;
-		case 20:
-			NEOPIXEL_set_led( BV(NEOPIXEL_LED10), 0x000000FF );
-			break;
-		case 22:
-			NEOPIXEL_set_led( BV(NEOPIXEL_LED11), 0x000000FF );
-			break;
-		case 24:
-			NEOPIXEL_set_led( BV(NEOPIXEL_LED12), 0x000000FF );
-			(*stage) = 0u;
-			break;
-
-		default:
-			break;
+		NEOPIXEL_set_led( BV(NEOPIXEL_data_s.led_num), NEOPIXEL_BLUE );
+		NEOPIXEL_data_s.led_num ++;
 	}
+
+	if( NEOPIXEL_data_s.led_num >= NEOPIXEL_LED_MAX )
+	{
+		NEOPIXEL_data_s.led_num = 0u;
+	}
+
+	(*ticks)++;
 
 	return( state );
 }
+
+NEOPIXEL_ll_state_et NEOPIXEL_handle_flow( u8_t* ticks )
+{
+	NEOPIXEL_ll_state_et state = NEOPIXEL_RUNNING;
+	u8_t led_index = 0u;
+
+
+	if( ( (*ticks) % 200u ) == 0u )
+	{
+		for( led_index = 0; led_index < NEOPIXEL_LED_MAX; led_index++ )
+		{
+			NEOPIXEL_drive_colour( NEOPIXEL_colour_tracker += 100 );
+		}
+	}
+
+	if( NEOPIXEL_colour_tracker > NEOPIXEL_WHITE )
+	{
+		NEOPIXEL_colour_tracker = NEOPIXEL_WHITE;
+	}
+
+	(*ticks)++;
+
+	return( state );
+}
+
+
+NEOPIXEL_ll_state_et NEOPIXEL_handle_temperature_control( u8_t* ticks )
+{
+	NEOPIXEL_ll_state_et state = NEOPIXEL_RUNNING;
+	u8_t led_index = 0u;
+
+	u32_t colour;
+
+	if( ( (*ticks) % 10u ) == 0u )
+	{
+		if( NEOPIXEL_data_s.led_num <= 4u )
+		{
+			colour = NEOPIXEL_BLUE;
+		}
+		else if( ( NEOPIXEL_data_s.led_num > 4u ) && ( NEOPIXEL_data_s.led_num < 9u ) )
+		{
+			colour = NEOPIXEL_GREEN;
+		}
+		else
+		{
+			colour = NEOPIXEL_RED;
+		}
+
+		NEOPIXEL_set_led( BV(NEOPIXEL_data_s.led_num), colour );
+		NEOPIXEL_data_s.led_num++;
+	}
+
+	if( NEOPIXEL_colour_tracker > NEOPIXEL_WHITE )
+	{
+		NEOPIXEL_colour_tracker = NEOPIXEL_WHITE;
+	}
+
+	if( NEOPIXEL_data_s.led_num >= NEOPIXEL_LED_MAX )
+	{
+		NEOPIXEL_data_s.led_num = 0u;
+	}
+
+	(*ticks)++;
+
+	return( state );
+}
+
 
 
 
@@ -322,7 +344,8 @@ void NEOPIXEL_set_hl_state( NEOPIXEL_hl_state_et state )
 {
 	NEOPIXEL_data_s.hl_state = state;
 	NEOPIXEL_data_s.ll_state = NEOPIXEL_FINISHED;
-	NEOPIXEL_data_s.stage = 0u;
+	NEOPIXEL_data_s.ticks = 0u;
+	NEOPIXEL_data_s.led_num = 0u;
 }
 
 
