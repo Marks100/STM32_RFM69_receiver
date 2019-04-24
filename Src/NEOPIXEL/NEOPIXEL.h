@@ -27,6 +27,7 @@
 #define NEOPIXEL_LIME	 0xFF0000
 #define NEOPIXEL_BLUE	 0x0000FF
 #define NEOPIXEL_YELLOW	 0xFFFF00
+#define NEOPIXEL_ORANGE	 0xd7ff00
 #define NEOPIXEL_CYAN	 0xFF00FF
 #define NEOPIXEL_MAGENTA 0x00FFFF
 #define NEOPIXEL_SILVER	 0xC0C0C0
@@ -47,7 +48,8 @@ typedef enum
 	NEOPIXEL_ALL_FLASH,
 	NEOPIXEL_CIRCLE_BUFFER,
 	NEOPIXEL_FLOW,
-	NEOPIXEL_TEMPERATURE
+	NEOPIXEL_TEMPERATURE,
+	NEOPIXEL_INDICATOR
 } NEOPIXEL_hl_state_et;
 
 typedef enum
@@ -63,6 +65,7 @@ typedef struct
 	NEOPIXEL_ll_state_et ll_state;
 	u8_t 				 ticks;
 	u8_t 				 led_num;
+	u8_t 				 state_num;
 } NEOPIXEL_data_st;
 
 void NEOPIXEL_set_led( u32_t led_pos, u32_t colour );
@@ -75,6 +78,7 @@ NEOPIXEL_ll_state_et NEOPIXEL_handle_all_flash( u8_t* stage );
 NEOPIXEL_ll_state_et NEOPIXEL_handle_circle_buffer( u8_t* ticks );
 NEOPIXEL_ll_state_et NEOPIXEL_handle_flow( u8_t* ticks );
 NEOPIXEL_ll_state_et NEOPIXEL_handle_temperature_control( u8_t* ticks );
+NEOPIXEL_ll_state_et NEOPIXEL_handle_audi_indicator( u8_t* ticks );
 void NEOPIXEL_set_hl_state( NEOPIXEL_hl_state_et state );
 
 

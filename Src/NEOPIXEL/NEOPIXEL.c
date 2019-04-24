@@ -79,10 +79,11 @@ STATIC void NEOPIXEL_latch( void )
 
 void NEOPIXEL_int( void )
 {
-	NEOPIXEL_data_s.hl_state = NEOPIXEL_FLOW;
+	NEOPIXEL_data_s.hl_state = NEOPIXEL_INDICATOR;
 	NEOPIXEL_data_s.ll_state = NEOPIXEL_IDLE;
 	NEOPIXEL_data_s.ticks = 0u;
 	NEOPIXEL_data_s.led_num = 0u;
+	NEOPIXEL_data_s.state_num = 0u;
 
 	NEOPIXEL_tick_ctr_s = 0u;
 	NEOPIXEL_colour_tracker = 0x00FF0000;
@@ -165,8 +166,11 @@ void NEOPIXEL_tick( void )
 				NEOPIXEL_set_hl_state( NEOPIXEL_TEMPERATURE );
 				break;
 			case NEOPIXEL_TEMPERATURE:
-				NEOPIXEL_set_hl_state( NEOPIXEL_ALL_FLASH );
+				NEOPIXEL_set_hl_state( NEOPIXEL_INDICATOR );
 				break;
+			case NEOPIXEL_INDICATOR:
+				NEOPIXEL_set_hl_state( NEOPIXEL_INDICATOR );
+			break;
 		}
 	}
 
@@ -190,6 +194,10 @@ void NEOPIXEL_tick( void )
 
 		case NEOPIXEL_TEMPERATURE:
 			NEOPIXEL_data_s.ll_state = NEOPIXEL_handle_temperature_control( &NEOPIXEL_data_s.ticks );
+			break;
+
+		case NEOPIXEL_INDICATOR:
+			NEOPIXEL_data_s.ll_state = NEOPIXEL_handle_audi_indicator( &NEOPIXEL_data_s.ticks );
 			break;
 
 		default:
@@ -276,7 +284,6 @@ NEOPIXEL_ll_state_et NEOPIXEL_handle_flow( u8_t* ticks )
 	NEOPIXEL_ll_state_et state = NEOPIXEL_RUNNING;
 	u8_t led_index = 0u;
 
-
 	if( ( (*ticks) % 200u ) == 0u )
 	{
 		for( led_index = 0; led_index < NEOPIXEL_LED_MAX; led_index++ )
@@ -305,31 +312,71 @@ NEOPIXEL_ll_state_et NEOPIXEL_handle_temperature_control( u8_t* ticks )
 
 	if( ( (*ticks) % 10u ) == 0u )
 	{
-		if( NEOPIXEL_data_s.led_num <= 4u )
+		switch ( NEOPIXEL_data_s.led_num )
 		{
-			colour = NEOPIXEL_BLUE;
-		}
-		else if( ( NEOPIXEL_data_s.led_num > 4u ) && ( NEOPIXEL_data_s.led_num < 9u ) )
-		{
-			colour = NEOPIXEL_GREEN;
-		}
-		else
-		{
-			colour = NEOPIXEL_RED;
-		}
+			case 0 ... 4:
+				colour = NEOPIXEL_BLUE;
+			break;
 
+			case 5 ... 8:
+				colour = NEOPIXEL_GREEN;
+			break;
+
+			default:
+				colour = NEOPIXEL_RED;
+				break;
+		}
 		NEOPIXEL_set_led( BV(NEOPIXEL_data_s.led_num), colour );
 		NEOPIXEL_data_s.led_num++;
-	}
-
-	if( NEOPIXEL_colour_tracker > NEOPIXEL_WHITE )
-	{
-		NEOPIXEL_colour_tracker = NEOPIXEL_WHITE;
 	}
 
 	if( NEOPIXEL_data_s.led_num >= NEOPIXEL_LED_MAX )
 	{
 		NEOPIXEL_data_s.led_num = 0u;
+	}
+
+	(*ticks)++;
+
+	return( state );
+}
+
+
+NEOPIXEL_ll_state_et NEOPIXEL_handle_audi_indicator( u8_t* ticks )
+{
+	NEOPIXEL_ll_state_et state = NEOPIXEL_RUNNING;
+	u8_t led_index = 0u;
+	u8_t i = NEOPIXEL_data_s.state_num;
+
+	u32_t colour = NEOPIXEL_ORANGE;
+
+	if( ( (*ticks) % 2u ) == 0u )
+	{
+		switch ( NEOPIXEL_data_s.state_num )
+		{
+			case 0: NEOPIXEL_set_led( BV(0), colour ); break;
+			case 1: NEOPIXEL_set_led( BV(0) | BV(1), colour ); break;
+			case 2: NEOPIXEL_set_led( BV(0) | BV(1) | BV(2), colour ); break;
+
+			case 3:  NEOPIXEL_set_led( BV(1) | BV(2) | BV(3), colour ); break;
+			case 4:  NEOPIXEL_set_led( BV(2) | BV(3) | BV(4), colour ); break;
+			case 5:  NEOPIXEL_set_led( BV(3) | BV(4) | BV(5), colour ); break;
+			case 6:  NEOPIXEL_set_led( BV(4) | BV(5) | BV(6), colour ); break;
+			case 7:  NEOPIXEL_set_led( BV(5) | BV(6) | BV(7), colour ); break;
+			case 8:  NEOPIXEL_set_led( BV(6) | BV(7) | BV(8), colour ); break;
+			case 9:  NEOPIXEL_set_led( BV(7) | BV(8) | BV(9), colour ); break;
+			case 10: NEOPIXEL_set_led( BV(8) | BV(9) | BV(10), colour ); break;
+			case 11: NEOPIXEL_set_led( BV(9) | BV(10) | BV(11), colour ); break;
+			case 12: NEOPIXEL_set_led( BV(10) | BV(11) , colour ); break;
+			case 13: NEOPIXEL_set_led( BV(11) , colour ); break;
+
+			default: NEOPIXEL_clear_all_leds(); break;
+		}
+		NEOPIXEL_data_s.state_num++;
+	}
+
+	if( NEOPIXEL_data_s.state_num > 25 )
+	{
+		NEOPIXEL_data_s.state_num = 0u;
 	}
 
 	(*ticks)++;
@@ -346,6 +393,7 @@ void NEOPIXEL_set_hl_state( NEOPIXEL_hl_state_et state )
 	NEOPIXEL_data_s.ll_state = NEOPIXEL_FINISHED;
 	NEOPIXEL_data_s.ticks = 0u;
 	NEOPIXEL_data_s.led_num = 0u;
+	NEOPIXEL_data_s.state_num = 0u;
 }
 
 
