@@ -27,8 +27,7 @@ STATIC void NEOPIXEL_one_pulse_direct( void )
 	asm("nop");asm("nop");asm("nop");asm("nop");
 	asm("nop");asm("nop");asm("nop");asm("nop");
 	asm("nop");asm("nop");asm("nop");asm("nop");
-	asm("nop");asm("nop");asm("nop");asm("nop");
-
+	asm("nop");asm("nop");
 	GPIOA->ODR &= ~GPIO_Pin_12;
 }
 
@@ -39,11 +38,9 @@ STATIC void NEOPIXEL_zero_pulse_direct( void )
 	GPIOA->ODR |= GPIO_Pin_12;
 	asm("nop");asm("nop");asm("nop");asm("nop");
 	asm("nop");asm("nop");asm("nop");asm("nop");
-	asm("nop");asm("nop");asm("nop");asm("nop");
+	asm("nop");asm("nop");
 
 	GPIOA->ODR &= ~GPIO_Pin_12;
-	asm("nop");asm("nop");asm("nop");asm("nop");
-	asm("nop");asm("nop");
 }
 
 
@@ -346,37 +343,38 @@ NEOPIXEL_ll_state_et NEOPIXEL_handle_audi_indicator( u8_t* ticks )
 	NEOPIXEL_ll_state_et state = NEOPIXEL_RUNNING;
 	u8_t led_index = 0u;
 	u8_t i = NEOPIXEL_data_s.state_num;
+	u32_t led_to_set = 0u;
 
 	u32_t colour = NEOPIXEL_ORANGE;
 
-	if( ( (*ticks) % 2u ) == 0u )
+	if( ( (*ticks) % 1u ) == 0u )
 	{
 		switch ( NEOPIXEL_data_s.state_num )
 		{
-			case 0: NEOPIXEL_set_led( BV(0), colour ); break;
-			case 1: NEOPIXEL_set_led( BV(0) | BV(1), colour ); break;
-			case 2: NEOPIXEL_set_led( BV(0) | BV(1) | BV(2), colour ); break;
+			case 0 ... 11:
+			{
+				for( led_index = 0u; led_index < NEOPIXEL_data_s.state_num+1; led_index++ )
+				{
+					led_to_set |= (BV(led_index));
+				}
+				NEOPIXEL_set_led( led_to_set, colour ); break;
+			}
+			break;
 
-			case 3:  NEOPIXEL_set_led( BV(1) | BV(2) | BV(3), colour ); break;
-			case 4:  NEOPIXEL_set_led( BV(2) | BV(3) | BV(4), colour ); break;
-			case 5:  NEOPIXEL_set_led( BV(3) | BV(4) | BV(5), colour ); break;
-			case 6:  NEOPIXEL_set_led( BV(4) | BV(5) | BV(6), colour ); break;
-			case 7:  NEOPIXEL_set_led( BV(5) | BV(6) | BV(7), colour ); break;
-			case 8:  NEOPIXEL_set_led( BV(6) | BV(7) | BV(8), colour ); break;
-			case 9:  NEOPIXEL_set_led( BV(7) | BV(8) | BV(9), colour ); break;
-			case 10: NEOPIXEL_set_led( BV(8) | BV(9) | BV(10), colour ); break;
-			case 11: NEOPIXEL_set_led( BV(9) | BV(10) | BV(11), colour ); break;
-			case 12: NEOPIXEL_set_led( BV(10) | BV(11) , colour ); break;
-			case 13: NEOPIXEL_set_led( BV(11) , colour ); break;
+			case 18:
+				NEOPIXEL_clear_all_leds();
+				break;
 
-			default: NEOPIXEL_clear_all_leds(); break;
+			default:
+				break;
 		}
 		NEOPIXEL_data_s.state_num++;
 	}
 
-	if( NEOPIXEL_data_s.state_num > 25 )
+	if( NEOPIXEL_data_s.state_num > 35 )
 	{
 		NEOPIXEL_data_s.state_num = 0u;
+
 	}
 
 	(*ticks)++;
