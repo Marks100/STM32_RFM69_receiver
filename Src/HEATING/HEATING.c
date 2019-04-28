@@ -22,9 +22,7 @@
 #endif // GCC_TEST
 
 #include "PROJ_config.h"
-#include "C_defs.h"
 #include "STDC.h"
-#include "COMPILER_defs.h"
 #include "HAL_BRD.h"
 #include "main.h"
 #include "nvm.h"

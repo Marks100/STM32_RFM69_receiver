@@ -7,7 +7,6 @@
 **                              Includes                                                          **
 ***************************************************************************************************/
 #include "C_defs.h"
-#include "COMPILER_defs.h"
 
 #if(UNIT_TEST == 0)
     #include "stm32f10x_gpio.h"

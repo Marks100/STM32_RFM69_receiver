@@ -1,8 +1,6 @@
 #ifndef NVM_H
 #define NVM_H
 
-#include "COMPILER_defs.h"
-#include "COMPILER_config.h"
 #include "C_defs.h"
 #include "CLI.h"
 #include "RF_MGR.h"

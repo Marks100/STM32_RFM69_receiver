@@ -15,7 +15,6 @@
 **                              Includes                                                          **
 ***************************************************************************************************/
 #include "C_defs.h"
-#include "COMPILER_defs.h"
 
 
 #define TMPERATURE_INVALID	( 65535.0f )

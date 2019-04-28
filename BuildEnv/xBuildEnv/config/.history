@@ -6,3 +6,8 @@ ping
 call
 cmd
 cmd --help
+dir
+ls
+sh -l
+cmd --help
+sh -l
