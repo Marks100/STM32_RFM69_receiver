@@ -303,7 +303,6 @@ NEOPIXEL_ll_state_et NEOPIXEL_handle_flow( u8_t* ticks )
 NEOPIXEL_ll_state_et NEOPIXEL_handle_temperature_control( u8_t* ticks )
 {
 	NEOPIXEL_ll_state_et state = NEOPIXEL_RUNNING;
-	u8_t led_index = 0u;
 
 	u32_t colour;
 
@@ -342,7 +341,6 @@ NEOPIXEL_ll_state_et NEOPIXEL_handle_audi_indicator( u8_t* ticks )
 {
 	NEOPIXEL_ll_state_et state = NEOPIXEL_RUNNING;
 	u8_t led_index = 0u;
-	u8_t i = NEOPIXEL_data_s.state_num;
 	u32_t led_to_set = 0u;
 
 	u32_t colour = NEOPIXEL_ORANGE;
