@@ -13,6 +13,10 @@
 false_true_et HAL_BRD_rtc_triggered_s;
 false_true_et debug_mode;
 
+low_high_et HAL_BRD_rotary_clock;
+low_high_et HAL_BRD_rotary_data;
+EXTITrigger_TypeDef trigger = EXTI_Trigger_Falling;
+
 
 /*!
 ****************************************************************************************************
@@ -106,22 +110,29 @@ void HAL_BRD_init( void )
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
 
-	GPIO_EXTILineConfig(GPIO_PortSourceGPIOA, GPIO_PinSource1 );
+	/* Configure the rotary clock and data pins */
+	GPIO_InitStructure.GPIO_Pin = ( GPIO_Pin_8 | GPIO_Pin_11 );
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
 
-	EXTI_InitTypeDef EXTI_InitStruct;
-
-	EXTI_InitStruct.EXTI_Line = EXTI_Line1 ;
-	EXTI_InitStruct.EXTI_LineCmd = ENABLE;
-	EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt ;
-	EXTI_InitStruct.EXTI_Trigger = EXTI_Trigger_Rising;
-	EXTI_Init(&EXTI_InitStruct);
 
 	NVIC_InitTypeDef NVIC_InitStruct;
 
+	GPIO_EXTILineConfig(GPIO_PortSourceGPIOA, GPIO_PinSource11 );
+
+    EXTI_InitTypeDef EXTI_InitStruct;
+
+	EXTI_InitStruct.EXTI_Line = EXTI_Line11 ;
+	EXTI_InitStruct.EXTI_LineCmd = ENABLE;
+	EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt ;
+	EXTI_InitStruct.EXTI_Trigger = EXTI_Trigger_Rising_Falling;
+	EXTI_Init(&EXTI_InitStruct);
+
 	/* Add IRQ vector to NVIC */
-	NVIC_InitStruct.NVIC_IRQChannel = EXTI1_IRQn;
+	NVIC_InitStruct.NVIC_IRQChannel = EXTI15_10_IRQn;
 	/* Set priority */
-	NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 0x00;
+	NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = NVIC_PriorityGroup_4;
 	/* Set sub priority */
 	NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0x00;
 	/* Enable interrupt */
@@ -514,6 +525,49 @@ disable_enable_et HAL_BRD_read_debug_pin( void )
 
 
 
+
+/*!
+****************************************************************************************************
+*
+*   \brief         Reads the state of the rotary clock pin
+*
+*   \author        MS
+*
+*   \return        low_high_et state of the pin
+*
+***************************************************************************************************/
+low_high_et HAL_BRD_read_rotary_clock_pin( void )
+{
+    low_high_et state = LOW;
+
+    state = HAL_BRD_read_pin_state( GPIOA, GPIO_Pin_11 );
+
+    return( state );
+}
+
+/*!
+****************************************************************************************************
+*
+*   \brief         Reads the state of the rotary data pin
+*
+*   \author        MS
+*
+*   \return        low_high_et state of the pin
+*
+***************************************************************************************************/
+low_high_et HAL_BRD_read_rotary_data_pin( void )
+{
+    low_high_et state = LOW;
+
+    state = HAL_BRD_read_pin_state( GPIOA, GPIO_Pin_8 );
+
+    return( state );
+}
+
+
+
+
+
 /*!
 ****************************************************************************************************
 *
@@ -552,6 +606,54 @@ low_high_et HAL_BRD_read_selector_switch_pin( HAL_BRD_switch_slider_et slider )
     return ( state );
 }
 
+
+
+/*!
+****************************************************************************************************
+*
+*   \brief         This gets called after the timer has debounced the LOGIC for the Rotary encoder
+*
+*   \author        MS
+*
+*   \return        low_high_et
+*
+***************************************************************************************************/
+void HAL_BRD_debounce_completed( void )
+{
+	HAL_BRD_rotary_clock = HAL_BRD_read_rotary_clock_pin();
+	HAL_BRD_rotary_data = HAL_BRD_read_rotary_data_pin();
+
+	EXTI_InitTypeDef EXTI_InitStruct;
+//
+//	if( pin_a == previous_pin_a )
+//	{
+//		/* Both the previous state and the current state are the same value and have been
+//		 * for at least 1ms so this is a valid pin transition
+//		 */
+		if( trigger == EXTI_Trigger_Falling )
+		{
+			trigger = EXTI_Trigger_Rising;
+			ROTARY_evaluate_signals( HAL_BRD_rotary_clock, HAL_BRD_rotary_data );
+		}
+    	else
+		{
+    		trigger = EXTI_Trigger_Falling;
+		}
+//	}
+//	else
+//	{
+//		/* The pins are not the same state for at least 1ms so this
+//		 * is probably a glitch that needs debounced ta fuck */
+//	}
+
+	EXTI_ClearITPendingBit(EXTI_Line11);
+
+	EXTI_InitStruct.EXTI_Line = EXTI_Line11 ;
+	EXTI_InitStruct.EXTI_LineCmd = ENABLE;
+	EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt ;
+	EXTI_InitStruct.EXTI_Trigger = trigger;
+	EXTI_Init(&EXTI_InitStruct);
+}
 
 /*!
 ****************************************************************************************************
@@ -702,6 +804,86 @@ void EXTI15_10_IRQHandler(void)
 		/* Clear interrupt flag */
 		EXTI_ClearITPendingBit(EXTI_Line15);
 	}
+
+	if ( EXTI_GetFlagStatus(EXTI_Line11) != RESET )
+	{
+		/* Now we keep track of the interrupt edge */
+
+		EXTI_InitTypeDef EXTI_InitStruct;
+//
+//		EXTI_InitStruct.EXTI_Line = EXTI_Line11 ;
+//		EXTI_InitStruct.EXTI_LineCmd = DISABLE;
+//		EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt;
+//		EXTI_Init(&EXTI_InitStruct);
+
+		/* Clear interrupt flag */
+		EXTI_ClearITPendingBit(EXTI_Line11);
+
+		/* start the debounce timer */
+		//HAL_TIM2_start();
+
+		HAL_BRD_toggle_led();
+	}
 }
 
 
+
+
+void EXTI9_5_IRQHandler(void)
+{
+	/* Make sure that interrupt flag is set */
+	if ( EXTI_GetFlagStatus(EXTI_Line5) != RESET )
+	{
+		/* Now we keep track of the interrupt edge */
+		/* Clear interrupt flag */
+		EXTI_ClearITPendingBit(EXTI_Line5);
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+u16_t plus = 0u;
+u16_t minus = 0u;
+
+
+void ROTARY_evaluate_signals( low_high_et clock, low_high_et data )
+{
+	//ROTARY_scroll_type_et diff = ROTARY_NO_CHANGE;
+
+	if( ( clock == LOW ) && ( data == HIGH ) )
+	{
+		plus ++;
+        //diff = ROTARY_RIGHT_SCROLL;
+	}
+	else if( ( clock == LOW ) && ( data == LOW ) )
+	{
+		minus ++;
+        //diff = ROTARY_LEFT_SCROLL;
+	}
+	else
+	{
+	    /* Do Nothing */
+	    //diff = ROTARY_NO_CHANGE;
+	}
+
+//	if( diff != ROTARY_NO_CHANGE )
+//    {
+//        /* Lets go and see what we can do with this information */
+//        ROTARY_tick( diff );
+//    }
+
+	//return ( diff );
+}

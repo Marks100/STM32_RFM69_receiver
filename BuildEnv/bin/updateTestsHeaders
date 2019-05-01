@@ -1,3 +1,0 @@
-#!/bin/sh
-cd $PTLD
-update_integration_includes.rb ./TPMS_SWC/test ./TPMS_SWC/src

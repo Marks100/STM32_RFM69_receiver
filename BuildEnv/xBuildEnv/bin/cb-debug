@@ -1,5 +1,0 @@
-#!/bin/bash
-
-cb-conf
-
-codeblocks --personality="$PROJ_TITLE" "$@"

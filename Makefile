@@ -25,9 +25,7 @@ STM32_MEM_OUTPUT_FILE := memory_analysis.txt
 RELEASE_PACKAGE_NAME  := Release_package
 STM32_MEM_OUTPUT_FILE := memory_analysis.txt
 
-MAJOR_SW = `awk '/VERSION_MAJOR/ { print $$4+0 }' Src/autoversion.h`
-MINOR_SW = `awk '/VERSION_PATCH/ { print $$4+0 }' Src/autoversion.h`
-VERIFICATION_SW = `awk '/VERSION_VERIFICATION/ { print $$4+0 }' Src/autoversion.h`
+SW_VER := $(subst .,_,$(shell sVersion -l))
 
 # Various test reports
 CEEDLING_TEST_XML_TEST_REPORT_ORIGIN   := test/build/artifacts/test/
@@ -252,15 +250,26 @@ memory_stats: $(GCC_ARM_OUT_DIR)/$(STM32_MAP_FILE)
 	-------------------------------------------------------\n\n", $(ROM_SIZE), FlashUsed, ( FlashUsed/$(ROM_SIZE) * 100 ); }' $(GCC_ARM_OUT_DIR)/$(STM32_MEM_OUTPUT_FILE) | tee -a $(GCC_ARM_OUT_DIR)/$(STM32_MEM_OUTPUT_FILE)
 	@echo "Output file \"$(STM32_MEM_OUTPUT_FILE)\" created @ $(PROJECT_NAME)/$(GCC_ARM_OUT_DIR)/"
 
-
+strings := names ages weights heights
 
 chksum:
 	@find Src -type f -print0 | xargs -0 sha1sum > output.txt
 
 
+.PHONY: test
+test:
+	@echo $(strip      ttty u s             sdd f )
+	@echo $(filter names ages, $(strings))
+	@echo $(sort $(strings))
+	@echo $(sort $(INCLUDES))
+	@echo $(notdir $(INCLUDES))
+	@echo $(words $(INCLUDES))
+	@echo $(origin $(strings))
+	@echo $(origin $(INCLUDES))
 
 .PHONY: release_package
 release_package:
+	@echo $(SW_VER)
 	@echo Creating release package
 	@-rm -fr $(RELEASE_PACKAGE_NAME)
 	@mkdir -p $(RELEASE_PACKAGE_NAME)
@@ -270,11 +279,10 @@ release_package:
 	@echo "Copying build output to $(RELEASE_PACKAGE_NAME) folder.."
 	@cp -r $(GCC_ARM_OUT_DIR)/. $(RELEASE_PACKAGE_NAME)
 	@echo "Copying version file info"
-	@cp -f $(AUTOVERS_HEADER) $(RELEASE_PACKAGE_NAME)
-	@touch $(RELEASE_PACKAGE_NAME)/SW_V$(MAJOR_SW).$(MINOR_SW).$(VERIFICATION_SW)_BETA
+	@touch $(RELEASE_PACKAGE_NAME)/$(SW_VER)_BETA
 	@find  $(RELEASE_PACKAGE_NAME) -type f -print0 | sort -z | xargs -0 sha1sum > $(RELEASE_PACKAGE_NAME)/chksum.txt
 	@echo "Checksum file generated.."
 	@echo "zipping up the release package.."
-	@-7za a "$(RELEASE_PACKAGE_NAME)/$(RELEASE_PACKAGE_NAME)_V$(MAJOR_SW).$(MINOR_SW).$(VERIFICATION_SW)_BETA.zip" $(RELEASE_PACKAGE_NAME)/* > /dev/null
+	@-7za a "$(RELEASE_PACKAGE_NAME)/$(RELEASE_PACKAGE_NAME)_$(SW_VER)_BETA.zip" $(RELEASE_PACKAGE_NAME)/* > /dev/null
 	@find $(RELEASE_PACKAGE_NAME) ! -name '$(RELEASE_PACKAGE_NAME)*' -print0 | xargs -0 rm -fr
-	@echo "Release package created V$(MAJOR_SW).$(MINOR_SW).$(VERIFICATION_SW)_BETA"
+	@echo "Release package created $(SW_VER)_BETA"

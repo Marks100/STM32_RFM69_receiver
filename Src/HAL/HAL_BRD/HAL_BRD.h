@@ -90,9 +90,15 @@ void HAL_BRD_set_rtc_trigger_status( false_true_et state );
 disable_enable_et HAL_BRD_read_debug_pin( void );
 void HAL_BRD_set_cooler_state( off_on_et state );
 void HAL_BRD_set_heater_state( off_on_et state );
+low_high_et HAL_BRD_read_rotary_clock_pin( void );
+low_high_et HAL_BRD_read_rotary_data_pin( void );
 
 void HAL_BRD_get_SW_version_num( u8_t *version_num_p );
 void HAL_BRD_get_HW_version_num( u8_t *version_num_p );
 
+
+
+
+void ROTARY_evaluate_signals( low_high_et clock, low_high_et data );
 
 #endif

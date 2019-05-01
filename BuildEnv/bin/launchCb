@@ -1,3 +1,0 @@
-#!/bin/bash
-
-cb $PTLD/Workspace/STM32_RF_HUB.cbp &

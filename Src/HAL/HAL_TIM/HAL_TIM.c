@@ -8,6 +8,7 @@
 #include "HAL_BRD.h"
 
 u32_t HAL_TIM_seconds_ctr_s;
+low_high_et state = LOW;
 
 
 void HAL_TIM1_init( void )
@@ -50,6 +51,9 @@ void HAL_TIM1_init( void )
 
 void HAL_TIM2_init(void)
 {
+	/* Enable the TIM2 clock */
+	RCC_APB1PeriphClockCmd( RCC_APB1Periph_TIM2, ENABLE_);
+
 	/* TIM2 */
 	TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
 
@@ -57,10 +61,10 @@ void HAL_TIM2_init(void)
 	TIM_TimeBaseStructInit (&TIM_TimeBaseStructure);
 
 	/* try and setup a 1ms period/count */
-	TIM_TimeBaseStructure.TIM_Prescaler = 7200;
+	TIM_TimeBaseStructure.TIM_Prescaler = 1800;
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
-	TIM_TimeBaseStructure.TIM_Period = 10-1;
-	TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
+	TIM_TimeBaseStructure.TIM_Period = 200-1;
+	TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV4;
 	TIM_TimeBaseStructure.TIM_RepetitionCounter = 0;
 	TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure);
 	TIM_ITConfig( TIM2, TIM_IT_Update, ENABLE );
@@ -83,6 +87,9 @@ void HAL_TIM2_init(void)
 
 void HAL_TIM3_init(void)
 {
+	/* Enable the TIM3 clock */
+	RCC_APB1PeriphClockCmd( RCC_APB1Periph_TIM3, ENABLE_);
+
 	/* TIM3 */
 	TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
 
@@ -274,9 +281,10 @@ void TIM2_IRQHandler ( void )
 	if( TIM_GetITStatus( TIM2, TIM_IT_Update ) )
 	{
 		TIM_ClearITPendingBit( TIM2, TIM_IT_Update );
-		//HAL_TIM_2_stop();
+		HAL_TIM2_stop();
 
-		//HAL_BRD_debounce_completed();
+		/* The debounce timer has finished, execute the callback */
+		HAL_BRD_debounce_completed();
 	}
 }
 

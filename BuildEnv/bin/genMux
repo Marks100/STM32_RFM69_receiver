@@ -1,4 +1,0 @@
-#!/bin/sh
-mkdir -p $PTLD/CANoe/Mux
-cd $PTLD/TPMS_SWC/src
-ruby _common/xMUX/mux_generator.rb -m153 -d ../../CANoe/Mux/MUX_ID.dbc -o MUX_packer/MUX_packer.h -i _common/mux_inc.txt -x _common -e STDC_QM.c

@@ -9,4 +9,3 @@ alias ll='ls -lahF'
 alias make='mingw32-make'
 alias e.='explorer .'
 alias cdp='cd $PTLD'
-alias tree="ls -R | grep ":$" | sed -e 's/:$//' -e 's/[^-][^\/]*\//--/g' -e 's/^/   /' -e 's/-/|/'"
