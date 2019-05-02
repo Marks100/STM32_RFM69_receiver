@@ -10,6 +10,7 @@
 #include "RFM69.h"
 #include "autoversion.h"
 
+EXTI_InitTypeDef EXTI_InitStruct;
 false_true_et HAL_BRD_rtc_triggered_s;
 false_true_et debug_mode;
 
@@ -121,8 +122,6 @@ void HAL_BRD_init( void )
 
 	GPIO_EXTILineConfig(GPIO_PortSourceGPIOA, GPIO_PinSource11 );
 
-    EXTI_InitTypeDef EXTI_InitStruct;
-
 	EXTI_InitStruct.EXTI_Line = EXTI_Line11 ;
 	EXTI_InitStruct.EXTI_LineCmd = ENABLE;
 	EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt ;
@@ -132,7 +131,7 @@ void HAL_BRD_init( void )
 	/* Add IRQ vector to NVIC */
 	NVIC_InitStruct.NVIC_IRQChannel = EXTI15_10_IRQn;
 	/* Set priority */
-	NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = NVIC_PriorityGroup_4;
+	NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = NVIC_PriorityGroup_0;
 	/* Set sub priority */
 	NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0x00;
 	/* Enable interrupt */
@@ -620,39 +619,50 @@ low_high_et HAL_BRD_read_selector_switch_pin( HAL_BRD_switch_slider_et slider )
 ***************************************************************************************************/
 void HAL_BRD_debounce_completed( void )
 {
-	HAL_BRD_rotary_clock = HAL_BRD_read_rotary_clock_pin();
-	HAL_BRD_rotary_data = HAL_BRD_read_rotary_data_pin();
-
-	EXTI_InitTypeDef EXTI_InitStruct;
-//
-//	if( pin_a == previous_pin_a )
-//	{
-//		/* Both the previous state and the current state are the same value and have been
-//		 * for at least 1ms so this is a valid pin transition
-//		 */
-		if( trigger == EXTI_Trigger_Falling )
-		{
-			trigger = EXTI_Trigger_Rising;
-			ROTARY_evaluate_signals( HAL_BRD_rotary_clock, HAL_BRD_rotary_data );
-		}
-    	else
-		{
-    		trigger = EXTI_Trigger_Falling;
-		}
-//	}
-//	else
-//	{
-//		/* The pins are not the same state for at least 1ms so this
-//		 * is probably a glitch that needs debounced ta fuck */
-//	}
+	HAL_BRD_toggle_led();
 
 	EXTI_ClearITPendingBit(EXTI_Line11);
 
 	EXTI_InitStruct.EXTI_Line = EXTI_Line11 ;
 	EXTI_InitStruct.EXTI_LineCmd = ENABLE;
-	EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt ;
-	EXTI_InitStruct.EXTI_Trigger = trigger;
+	EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt;
+	EXTI_InitStruct.EXTI_Trigger = EXTI_Trigger_Rising_Falling;
 	EXTI_Init(&EXTI_InitStruct);
+
+
+//	HAL_BRD_rotary_clock = HAL_BRD_read_rotary_clock_pin();
+//	HAL_BRD_rotary_data = HAL_BRD_read_rotary_data_pin();
+//
+//	EXTI_InitTypeDef EXTI_InitStruct;
+////
+////	if( pin_a == previous_pin_a )
+////	{
+////		/* Both the previous state and the current state are the same value and have been
+////		 * for at least 1ms so this is a valid pin transition
+////		 */
+//		if( trigger == EXTI_Trigger_Falling )
+//		{
+//			trigger = EXTI_Trigger_Rising;
+//			ROTARY_evaluate_signals( HAL_BRD_rotary_clock, HAL_BRD_rotary_data );
+//		}
+//    	else
+//		{
+//    		trigger = EXTI_Trigger_Falling;
+//		}
+////	}
+////	else
+////	{
+////		/* The pins are not the same state for at least 1ms so this
+////		 * is probably a glitch that needs debounced ta fuck */
+////	}
+//
+//	EXTI_ClearITPendingBit(EXTI_Line11);
+//
+//	EXTI_InitStruct.EXTI_Line = EXTI_Line11 ;
+//	EXTI_InitStruct.EXTI_LineCmd = ENABLE;
+//	EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt ;
+//	EXTI_InitStruct.EXTI_Trigger = trigger;
+//	EXTI_Init(&EXTI_InitStruct);
 }
 
 /*!
@@ -809,20 +819,16 @@ void EXTI15_10_IRQHandler(void)
 	{
 		/* Now we keep track of the interrupt edge */
 
-		EXTI_InitTypeDef EXTI_InitStruct;
-//
-//		EXTI_InitStruct.EXTI_Line = EXTI_Line11 ;
-//		EXTI_InitStruct.EXTI_LineCmd = DISABLE;
-//		EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt;
-//		EXTI_Init(&EXTI_InitStruct);
+		EXTI_InitStruct.EXTI_Line = EXTI_Line11 ;
+		EXTI_InitStruct.EXTI_LineCmd = DISABLE;
+		EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt;
+		EXTI_Init(&EXTI_InitStruct);
 
 		/* Clear interrupt flag */
 		EXTI_ClearITPendingBit(EXTI_Line11);
 
 		/* start the debounce timer */
-		//HAL_TIM2_start();
-
-		HAL_BRD_toggle_led();
+		HAL_TIM2_start();
 	}
 }
 

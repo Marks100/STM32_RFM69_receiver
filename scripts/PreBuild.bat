@@ -1,11 +1,13 @@
-@echo OFF
+@echo off
 
 REM handle being called by COIDE and by user manually :)
 if "%1"=="COIDE" (
-    call %2\..\BuildEnv\xBuildEnv\setCmdEnv.cmd
+    cd %2\..\BuildEnv\
 ) ELSE (
-    call ..\xBuildEnv\setCmdEnv.cmd
+    cd ..\BuildEnv\
 )
 
-cd %PTLD%\BuildEnv\xBuildEnv\bin\
+call SetCmdEnv.bat
+
+cd %PTLD%\BuildEnv\bin\
 ruby.exe sVersion -a %PTLD%\Src\

@@ -50,8 +50,7 @@ int main(void)
 	HAL_SPI1_init();
 	CLI_init();
 
-    /* Start the timer to keep track of reception count */
-	HAL_TIM1_init();
+	HAL_TIM2_init();
 
 	/* Initialise the RF MGR */
 	RF_MGR_init();
