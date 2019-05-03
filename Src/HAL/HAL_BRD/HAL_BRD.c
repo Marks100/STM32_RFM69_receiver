@@ -113,7 +113,7 @@ void HAL_BRD_init( void )
 
 	/* Configure the rotary clock and data pins */
 	GPIO_InitStructure.GPIO_Pin = ( GPIO_Pin_8 | GPIO_Pin_11 );
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
 
@@ -125,7 +125,7 @@ void HAL_BRD_init( void )
 	EXTI_InitStruct.EXTI_Line = EXTI_Line11 ;
 	EXTI_InitStruct.EXTI_LineCmd = ENABLE;
 	EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt ;
-	EXTI_InitStruct.EXTI_Trigger = EXTI_Trigger_Rising_Falling;
+	EXTI_InitStruct.EXTI_Trigger = EXTI_Trigger_Falling;
 	EXTI_Init(&EXTI_InitStruct);
 
 	/* Add IRQ vector to NVIC */
@@ -619,16 +619,40 @@ low_high_et HAL_BRD_read_selector_switch_pin( HAL_BRD_switch_slider_et slider )
 ***************************************************************************************************/
 void HAL_BRD_debounce_completed( void )
 {
+	u16_t i;
+	false_true_et valid_transition = TRUE;
+
 	HAL_BRD_toggle_led();
+	for( i = 0u; i < 50; i++ )
+	{
+		HAL_BRD_rotary_clock = HAL_BRD_read_rotary_clock_pin();
+
+		if( HAL_BRD_rotary_clock == HIGH )
+		{
+			valid_transition = FALSE;
+			break;
+		}
+	}
+	HAL_BRD_toggle_led();
+
+	if( valid_transition == TRUE )
+	{
+		HAL_BRD_rotary_data = HAL_BRD_read_rotary_data_pin();
+
+		if( HAL_BRD_rotary_data == HIGH )
+		{
+			HAL_BRD_rotary_data = HAL_BRD_rotary_data;
+		}
+		ROTARY_evaluate_signals( HAL_BRD_rotary_clock, HAL_BRD_rotary_data );
+	}
 
 	EXTI_ClearITPendingBit(EXTI_Line11);
 
 	EXTI_InitStruct.EXTI_Line = EXTI_Line11 ;
 	EXTI_InitStruct.EXTI_LineCmd = ENABLE;
 	EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt;
-	EXTI_InitStruct.EXTI_Trigger = EXTI_Trigger_Rising_Falling;
+	EXTI_InitStruct.EXTI_Trigger = EXTI_Trigger_Falling;
 	EXTI_Init(&EXTI_InitStruct);
-
 
 //	HAL_BRD_rotary_clock = HAL_BRD_read_rotary_clock_pin();
 //	HAL_BRD_rotary_data = HAL_BRD_read_rotary_data_pin();

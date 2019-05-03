@@ -63,7 +63,7 @@ void HAL_TIM2_init(void)
 	/* try and setup a 1ms period/count */
 	TIM_TimeBaseStructure.TIM_Prescaler = 1800;
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
-	TIM_TimeBaseStructure.TIM_Period = 200-1;
+	TIM_TimeBaseStructure.TIM_Period = 10-1;
 	TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV4;
 	TIM_TimeBaseStructure.TIM_RepetitionCounter = 0;
 	TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure);
@@ -167,6 +167,8 @@ void HAL_TIM1_stop( void )
 void HAL_TIM2_start( void )
 {
 	NVIC_InitTypeDef NVIC_InitStruct;
+
+	TIM_ClearITPendingBit( TIM2, TIM_IT_Update );
 
 	TIM_SetCounter(TIM2, 0);
 
