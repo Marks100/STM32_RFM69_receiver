@@ -12,6 +12,8 @@ NEOPIXEL_data_st NEOPIXEL_data_s;
 u16_t            NEOPIXEL_tick_ctr_s;
 u32_t 			 NEOPIXEL_colour_tracker;
 
+u16_t 			 NEOPIXEL_manual_pos_s;
+
 #pragma GCC push_options
 #pragma GCC optimize ("O1")
 
@@ -76,7 +78,7 @@ STATIC void NEOPIXEL_latch( void )
 
 void NEOPIXEL_int( void )
 {
-	NEOPIXEL_data_s.hl_state = NEOPIXEL_INDICATOR;
+	NEOPIXEL_data_s.hl_state = NEOPIXEL_MANUAL;
 	NEOPIXEL_data_s.ll_state = NEOPIXEL_IDLE;
 	NEOPIXEL_data_s.ticks = 0u;
 	NEOPIXEL_data_s.led_num = 0u;
@@ -84,6 +86,8 @@ void NEOPIXEL_int( void )
 
 	NEOPIXEL_tick_ctr_s = 0u;
 	NEOPIXEL_colour_tracker = 0x00FF0000;
+
+	NEOPIXEL_manual_pos_s = 1u;
 
 	NEOPIXEL_clear_all_leds();
 }
@@ -168,6 +172,13 @@ void NEOPIXEL_tick( void )
 			case NEOPIXEL_INDICATOR:
 				NEOPIXEL_set_hl_state( NEOPIXEL_INDICATOR );
 			break;
+
+			case NEOPIXEL_MANUAL:
+				NEOPIXEL_set_hl_state( NEOPIXEL_MANUAL );
+				break;
+
+			default:
+				break;
 		}
 	}
 
@@ -195,6 +206,10 @@ void NEOPIXEL_tick( void )
 
 		case NEOPIXEL_INDICATOR:
 			NEOPIXEL_data_s.ll_state = NEOPIXEL_handle_audi_indicator( &NEOPIXEL_data_s.ticks );
+			break;
+
+		case NEOPIXEL_MANUAL:
+			NEOPIXEL_data_s.ll_state =  NEOPIXEL_handle_manual( &NEOPIXEL_data_s.ticks );
 			break;
 
 		default:
@@ -382,6 +397,23 @@ NEOPIXEL_ll_state_et NEOPIXEL_handle_audi_indicator( u8_t* ticks )
 
 
 
+NEOPIXEL_ll_state_et NEOPIXEL_handle_manual( u8_t* ticks )
+{
+	NEOPIXEL_ll_state_et state = NEOPIXEL_RUNNING;
+	u8_t led_index = 0u;
+	u32_t led_to_set = 0u;
+
+	u32_t colour = NEOPIXEL_BLUE;
+
+	for( led_index = 0u; led_index <NEOPIXEL_manual_pos_s; led_index++ )
+	{
+		led_to_set |= (BV(led_index));
+	}
+
+	NEOPIXEL_set_led( led_to_set, colour );
+}
+
+
 
 void NEOPIXEL_set_hl_state( NEOPIXEL_hl_state_et state )
 {
@@ -390,6 +422,25 @@ void NEOPIXEL_set_hl_state( NEOPIXEL_hl_state_et state )
 	NEOPIXEL_data_s.ticks = 0u;
 	NEOPIXEL_data_s.led_num = 0u;
 	NEOPIXEL_data_s.state_num = 0u;
+}
+
+
+void NEOPIXEL_handle_rotary_input( ROTARY_scroll_type_et scroll )
+{
+	if( scroll == ROTARY_LEFT_SCROLL )
+	{
+		if( NEOPIXEL_manual_pos_s > 1 )
+		{
+			NEOPIXEL_manual_pos_s --;
+		}
+	}
+	else if( scroll == ROTARY_RIGHT_SCROLL )
+	{
+		if( NEOPIXEL_manual_pos_s < NEOPIXEL_LED_MAX )
+		{
+			NEOPIXEL_manual_pos_s ++;
+		}
+	}
 }
 
 

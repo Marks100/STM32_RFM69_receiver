@@ -49,7 +49,8 @@ typedef enum
 	NEOPIXEL_CIRCLE_BUFFER,
 	NEOPIXEL_FLOW,
 	NEOPIXEL_TEMPERATURE,
-	NEOPIXEL_INDICATOR
+	NEOPIXEL_INDICATOR,
+	NEOPIXEL_MANUAL
 } NEOPIXEL_hl_state_et;
 
 typedef enum
@@ -68,6 +69,7 @@ typedef struct
 	u8_t 				 state_num;
 } NEOPIXEL_data_st;
 
+void NEOPIXEL_int( void );
 void NEOPIXEL_set_led( u32_t led_pos, u32_t colour );
 void NEOPIXEL_shiftt_led( u32_t colour );
 void NEOPIXEL_clear_all_leds( void );
@@ -79,7 +81,9 @@ NEOPIXEL_ll_state_et NEOPIXEL_handle_circle_buffer( u8_t* ticks );
 NEOPIXEL_ll_state_et NEOPIXEL_handle_flow( u8_t* ticks );
 NEOPIXEL_ll_state_et NEOPIXEL_handle_temperature_control( u8_t* ticks );
 NEOPIXEL_ll_state_et NEOPIXEL_handle_audi_indicator( u8_t* ticks );
+NEOPIXEL_ll_state_et NEOPIXEL_handle_manual( u8_t* ticks );
 void NEOPIXEL_set_hl_state( NEOPIXEL_hl_state_et state );
+void NEOPIXEL_handle_rotary_input( ROTARY_scroll_type_et scroll );
 
 
 

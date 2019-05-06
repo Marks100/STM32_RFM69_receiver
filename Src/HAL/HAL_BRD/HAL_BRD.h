@@ -55,6 +55,14 @@ typedef enum
 } HAL_BRD_led_et;
 
 
+
+typedef enum
+{
+    ROTARY_LEFT_SCROLL = 0u,
+    ROTARY_RIGHT_SCROLL,
+    ROTARY_NO_CHANGE
+} ROTARY_scroll_type_et;
+
 /***************************************************************************************************
 **                              Exported Globals                                                  **
 ***************************************************************************************************/
@@ -100,5 +108,6 @@ void HAL_BRD_get_HW_version_num( u8_t *version_num_p );
 
 
 void ROTARY_evaluate_signals( low_high_et clock, low_high_et data );
+void ROTARY_tick( void );
 
 #endif

@@ -63,7 +63,7 @@ void HAL_TIM2_init(void)
 	/* try and setup a 1ms period/count */
 	TIM_TimeBaseStructure.TIM_Prescaler = 1800;
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
-	TIM_TimeBaseStructure.TIM_Period = 10-1;
+	TIM_TimeBaseStructure.TIM_Period = 15-1;
 	TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV4;
 	TIM_TimeBaseStructure.TIM_RepetitionCounter = 0;
 	TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure);
@@ -280,14 +280,16 @@ void TIM1_UP_IRQHandler( void )
 
 void TIM2_IRQHandler ( void )
 {
+	HAL_BRD_toggle_led();
 	if( TIM_GetITStatus( TIM2, TIM_IT_Update ) )
 	{
-		TIM_ClearITPendingBit( TIM2, TIM_IT_Update );
 		HAL_TIM2_stop();
+		TIM_ClearITPendingBit( TIM2, TIM_IT_Update );
 
 		/* The debounce timer has finished, execute the callback */
 		HAL_BRD_debounce_completed();
 	}
+	HAL_BRD_toggle_led();
 }
 
 

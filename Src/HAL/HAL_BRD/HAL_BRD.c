@@ -3,6 +3,7 @@
 #include "stm32f10x_rcc.h"
 #include "stm32f10x.h"
 #include "misc.h"
+#include "assert.h"
 
 #include "HAL_BRD.h"
 #include "STDC.h"
@@ -16,7 +17,14 @@ false_true_et debug_mode;
 
 low_high_et HAL_BRD_rotary_clock;
 low_high_et HAL_BRD_rotary_data;
-EXTITrigger_TypeDef trigger = EXTI_Trigger_Falling;
+low_high_et HAL_BRD_prev_rotary_clock;
+low_high_et HAL_BRD_prev_rotary_data;
+EXTITrigger_TypeDef trigger;
+
+
+
+u16_t ROTARY_plus_cnt_s;
+u16_t ROTARY_minus_cnt_s;
 
 
 /*!
@@ -146,6 +154,22 @@ void HAL_BRD_init( void )
 
     /* Turn the led off straight away to save power */
     HAL_BRD_set_onboard_LED( OFF );
+
+
+
+	HAL_BRD_rotary_clock = HIGH;
+	HAL_BRD_rotary_data = HIGH;
+	HAL_BRD_prev_rotary_clock = HIGH;
+	HAL_BRD_prev_rotary_data = HIGH;
+    trigger = EXTI_Trigger_Falling;
+
+
+
+
+
+    ROTARY_plus_cnt_s = 0u;
+    ROTARY_minus_cnt_s = 0u;
+
 }
 
 
@@ -619,74 +643,48 @@ low_high_et HAL_BRD_read_selector_switch_pin( HAL_BRD_switch_slider_et slider )
 ***************************************************************************************************/
 void HAL_BRD_debounce_completed( void )
 {
-	u16_t i;
-	false_true_et valid_transition = TRUE;
+	/* Read the clock and data pin again */
+	HAL_BRD_rotary_data = HAL_BRD_read_rotary_data_pin();
+	HAL_BRD_rotary_clock = HAL_BRD_read_rotary_clock_pin();
 
-	HAL_BRD_toggle_led();
-	for( i = 0u; i < 50; i++ )
+	/* Check to make sure that the pin is the same state as it was in the ISR */
+	if( HAL_BRD_prev_rotary_clock == HAL_BRD_rotary_clock )
 	{
-		HAL_BRD_rotary_clock = HAL_BRD_read_rotary_clock_pin();
-
-		if( HAL_BRD_rotary_clock == HIGH )
+		/* Both the previous state and the current state are the same value and have been
+		 * for at least 1ms so this is a valid pin transition
+		 */
+		if( trigger == EXTI_Trigger_Falling )
 		{
-			valid_transition = FALSE;
-			break;
+			trigger = EXTI_Trigger_Rising;
+
+			/* Check to make sure that the pin is the same state as it was in the ISR */
+			if( HAL_BRD_rotary_data == HAL_BRD_prev_rotary_data )
+			{
+				ROTARY_evaluate_signals( HAL_BRD_rotary_clock, HAL_BRD_rotary_data );
+			}
+			else
+			{
+				/* do nothing */
+				assert(1);
+			}
+		}
+		else
+		{
+			trigger = EXTI_Trigger_Falling;
 		}
 	}
-	HAL_BRD_toggle_led();
-
-	if( valid_transition == TRUE )
+	else
 	{
-		HAL_BRD_rotary_data = HAL_BRD_read_rotary_data_pin();
-
-		if( HAL_BRD_rotary_data == HIGH )
-		{
-			HAL_BRD_rotary_data = HAL_BRD_rotary_data;
-		}
-		ROTARY_evaluate_signals( HAL_BRD_rotary_clock, HAL_BRD_rotary_data );
+		/* The pins are not the same state for at least 1ms so this
+		 * is probably a glitch that needs debounced ta fuck */
 	}
-
-	EXTI_ClearITPendingBit(EXTI_Line11);
 
 	EXTI_InitStruct.EXTI_Line = EXTI_Line11 ;
 	EXTI_InitStruct.EXTI_LineCmd = ENABLE;
-	EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt;
-	EXTI_InitStruct.EXTI_Trigger = EXTI_Trigger_Falling;
+	EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt ;
+	EXTI_InitStruct.EXTI_Trigger = trigger;
 	EXTI_Init(&EXTI_InitStruct);
 
-//	HAL_BRD_rotary_clock = HAL_BRD_read_rotary_clock_pin();
-//	HAL_BRD_rotary_data = HAL_BRD_read_rotary_data_pin();
-//
-//	EXTI_InitTypeDef EXTI_InitStruct;
-////
-////	if( pin_a == previous_pin_a )
-////	{
-////		/* Both the previous state and the current state are the same value and have been
-////		 * for at least 1ms so this is a valid pin transition
-////		 */
-//		if( trigger == EXTI_Trigger_Falling )
-//		{
-//			trigger = EXTI_Trigger_Rising;
-//			ROTARY_evaluate_signals( HAL_BRD_rotary_clock, HAL_BRD_rotary_data );
-//		}
-//    	else
-//		{
-//    		trigger = EXTI_Trigger_Falling;
-//		}
-////	}
-////	else
-////	{
-////		/* The pins are not the same state for at least 1ms so this
-////		 * is probably a glitch that needs debounced ta fuck */
-////	}
-//
-//	EXTI_ClearITPendingBit(EXTI_Line11);
-//
-//	EXTI_InitStruct.EXTI_Line = EXTI_Line11 ;
-//	EXTI_InitStruct.EXTI_LineCmd = ENABLE;
-//	EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt ;
-//	EXTI_InitStruct.EXTI_Trigger = trigger;
-//	EXTI_Init(&EXTI_InitStruct);
 }
 
 /*!
@@ -841,17 +839,28 @@ void EXTI15_10_IRQHandler(void)
 
 	if ( EXTI_GetFlagStatus(EXTI_Line11) != RESET )
 	{
+		/* Clear interrupt flag */
+		EXTI_ClearITPendingBit(EXTI_Line11);
+
+		/* grab the currect state of the data pin */
+		HAL_BRD_prev_rotary_data = HAL_BRD_read_rotary_data_pin();
+
 		/* Now we keep track of the interrupt edge */
+		if( trigger == EXTI_Trigger_Falling )
+		{
+			HAL_BRD_prev_rotary_clock = LOW;
+		}
+		else
+		{
+			HAL_BRD_prev_rotary_clock = HIGH;
+		}
 
 		EXTI_InitStruct.EXTI_Line = EXTI_Line11 ;
 		EXTI_InitStruct.EXTI_LineCmd = DISABLE;
 		EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt;
 		EXTI_Init(&EXTI_InitStruct);
 
-		/* Clear interrupt flag */
-		EXTI_ClearITPendingBit(EXTI_Line11);
-
-		/* start the debounce timer */
+		/* Start a timer to generate a callback in xms to debounce the LOGIC */
 		HAL_TIM2_start();
 	}
 }
@@ -885,35 +894,52 @@ void EXTI9_5_IRQHandler(void)
 
 
 
-u16_t plus = 0u;
-u16_t minus = 0u;
+
 
 
 void ROTARY_evaluate_signals( low_high_et clock, low_high_et data )
 {
-	//ROTARY_scroll_type_et diff = ROTARY_NO_CHANGE;
-
-	if( ( clock == LOW ) && ( data == HIGH ) )
+ 	if( ( clock == LOW ) && ( data == HIGH ) )
 	{
-		plus ++;
-        //diff = ROTARY_RIGHT_SCROLL;
+ 		ROTARY_minus_cnt_s ++;
 	}
 	else if( ( clock == LOW ) && ( data == LOW ) )
 	{
-		minus ++;
-        //diff = ROTARY_LEFT_SCROLL;
+		ROTARY_plus_cnt_s ++;
 	}
-	else
+}
+
+
+/*!
+****************************************************************************************************
+*
+*   \brief         This is USER configurable and should call out to all modules that are relevant
+*                  to inform them of the current
+*
+*   \author        MS
+*
+*   \return        None
+*
+***************************************************************************************************/
+void ROTARY_tick( void )
+{
+	u16_t i = 0u;
+	u16_t left = ROTARY_minus_cnt_s;
+	u16_t right = ROTARY_plus_cnt_s;
+
+	/* Reset the current counts */
+	ROTARY_minus_cnt_s = 0u;
+	ROTARY_plus_cnt_s = 0u;
+
+	/* Handle all the left scrolls */
+	for( i = 0u; i < left; i++ )
 	{
-	    /* Do Nothing */
-	    //diff = ROTARY_NO_CHANGE;
+		NEOPIXEL_handle_rotary_input( ROTARY_LEFT_SCROLL );
 	}
 
-//	if( diff != ROTARY_NO_CHANGE )
-//    {
-//        /* Lets go and see what we can do with this information */
-//        ROTARY_tick( diff );
-//    }
-
-	//return ( diff );
+	/* Handle all the left scrolls */
+	for( i = 0u; i < right; i++ )
+	{
+		NEOPIXEL_handle_rotary_input( ROTARY_RIGHT_SCROLL );
+	}
 }

@@ -86,6 +86,7 @@ void MODE_MGR_action_schedule_normal( void )
     switch( MODE_MGR_tick_timer_msecs_s )
     {
         case 20u:
+        	ROTARY_tick();
         	break;
 
         case 40u:
@@ -105,6 +106,7 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 120u:
+        	ROTARY_tick();
         	break;
 
         case 140u:
@@ -124,6 +126,7 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 220u:
+        	ROTARY_tick();
         	break;
 
         case 240u:
@@ -143,6 +146,7 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 320u:
+        	ROTARY_tick();
         	break;
 
         case 340u:
@@ -162,6 +166,7 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 420u:
+        	ROTARY_tick();
         	break;
 
         case 440u:
@@ -181,6 +186,7 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 520u:
+        	ROTARY_tick();
         	break;
 
         case 540u:
@@ -200,6 +206,7 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 620u:
+        	ROTARY_tick();
         	break;
 
         case 640u:
@@ -219,6 +226,7 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 720u:
+        	ROTARY_tick();
         	break;
 
         case 740u:
@@ -238,6 +246,7 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 820u:
+        	ROTARY_tick();
         	break;
 
         case 840u:
@@ -257,6 +266,7 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 920u:
+        	ROTARY_tick();
         	break;
 
         case 940u:
