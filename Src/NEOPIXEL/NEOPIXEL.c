@@ -78,7 +78,7 @@ STATIC void NEOPIXEL_latch( void )
 
 void NEOPIXEL_int( void )
 {
-	NEOPIXEL_data_s.hl_state = NEOPIXEL_MANUAL;
+	NEOPIXEL_data_s.hl_state = NEOPIXEL_TEMPERATURE;
 	NEOPIXEL_data_s.ll_state = NEOPIXEL_IDLE;
 	NEOPIXEL_data_s.ticks = 0u;
 	NEOPIXEL_data_s.led_num = 0u;
@@ -167,7 +167,7 @@ void NEOPIXEL_tick( void )
 				NEOPIXEL_set_hl_state( NEOPIXEL_TEMPERATURE );
 				break;
 			case NEOPIXEL_TEMPERATURE:
-				NEOPIXEL_set_hl_state( NEOPIXEL_INDICATOR );
+				NEOPIXEL_set_hl_state( NEOPIXEL_TEMPERATURE );
 				break;
 			case NEOPIXEL_INDICATOR:
 				NEOPIXEL_set_hl_state( NEOPIXEL_INDICATOR );
@@ -321,30 +321,26 @@ NEOPIXEL_ll_state_et NEOPIXEL_handle_temperature_control( u8_t* ticks )
 
 	u32_t colour;
 
-	if( ( (*ticks) % 10u ) == 0u )
+	switch ( NEOPIXEL_manual_pos_s )
 	{
-		switch ( NEOPIXEL_data_s.led_num )
-		{
-			case 0 ... 4:
-				colour = NEOPIXEL_BLUE;
-			break;
+		case 0 ... 3:
+			colour = NEOPIXEL_BLUE;
+		break;
 
-			case 5 ... 8:
-				colour = NEOPIXEL_GREEN;
-			break;
+		case 4 ... 7:
+			colour = NEOPIXEL_GREEN;
+		break;
 
-			default:
-				colour = NEOPIXEL_RED;
-				break;
-		}
-		NEOPIXEL_set_led( BV(NEOPIXEL_data_s.led_num), colour );
-		NEOPIXEL_data_s.led_num++;
+		case 8 ... 11:
+			colour = NEOPIXEL_RED;
+		break;
+
+		default:
+			colour = NEOPIXEL_RED;
+			break;
 	}
 
-	if( NEOPIXEL_data_s.led_num >= NEOPIXEL_LED_MAX )
-	{
-		NEOPIXEL_data_s.led_num = 0u;
-	}
+	NEOPIXEL_set_led( BV( NEOPIXEL_manual_pos_s ), colour );
 
 	(*ticks)++;
 
@@ -405,10 +401,11 @@ NEOPIXEL_ll_state_et NEOPIXEL_handle_manual( u8_t* ticks )
 
 	u32_t colour = NEOPIXEL_BLUE;
 
-	for( led_index = 0u; led_index <NEOPIXEL_manual_pos_s; led_index++ )
-	{
-		led_to_set |= (BV(led_index));
-	}
+//	for( led_index = 0u; led_index <NEOPIXEL_manual_pos_s; led_index++ )
+//	{
+//		led_to_set |= (BV(led_index));
+//	}
+	led_to_set = (BV( NEOPIXEL_manual_pos_s - 1 ) );
 
 	NEOPIXEL_set_led( led_to_set, colour );
 }
@@ -429,14 +426,14 @@ void NEOPIXEL_handle_rotary_input( ROTARY_scroll_type_et scroll )
 {
 	if( scroll == ROTARY_LEFT_SCROLL )
 	{
-		if( NEOPIXEL_manual_pos_s > 1 )
+		if( NEOPIXEL_manual_pos_s > 0 )
 		{
 			NEOPIXEL_manual_pos_s --;
 		}
 	}
 	else if( scroll == ROTARY_RIGHT_SCROLL )
 	{
-		if( NEOPIXEL_manual_pos_s < NEOPIXEL_LED_MAX )
+		if( NEOPIXEL_manual_pos_s < NEOPIXEL_LED_MAX - 1u )
 		{
 			NEOPIXEL_manual_pos_s ++;
 		}

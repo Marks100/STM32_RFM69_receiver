@@ -94,6 +94,7 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 60u:
+        	ROTARY_tick();
         	break;
 
         case 80u:
@@ -103,14 +104,15 @@ void MODE_MGR_action_schedule_normal( void )
         case 100u:
         	MAIN_WATCHDOG_kick();
             RF_MGR_tick();
+        	ROTARY_tick();
         	break;
 
         case 120u:
-        	ROTARY_tick();
         	break;
 
         case 140u:
             HEATING_tick();
+        	ROTARY_tick();
         	break;
 
         case 160u:
@@ -118,6 +120,7 @@ void MODE_MGR_action_schedule_normal( void )
 
         case 180u:
         	NVM_tick();
+        	ROTARY_tick();
         	break;
 
         case 200u:
@@ -134,6 +137,7 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 260u:
+        	ROTARY_tick();
         	break;
 
         case 280u:
@@ -143,14 +147,15 @@ void MODE_MGR_action_schedule_normal( void )
         case 300u:
         	MAIN_WATCHDOG_kick();
             RF_MGR_tick();
+        	ROTARY_tick();
         	break;
 
         case 320u:
-        	ROTARY_tick();
         	break;
 
         case 340u:
             HEATING_tick();
+        	ROTARY_tick();
         	break;
 
         case 360u:
@@ -158,6 +163,7 @@ void MODE_MGR_action_schedule_normal( void )
 
         case 380u:
         	NVM_tick();
+        	ROTARY_tick();
         	break;
 
         case 400u:
@@ -174,6 +180,7 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 460u:
+        	ROTARY_tick();
         	break;
 
         case 480u:
@@ -183,14 +190,15 @@ void MODE_MGR_action_schedule_normal( void )
         case 500u:
         	MAIN_WATCHDOG_kick();
             RF_MGR_tick();
+        	ROTARY_tick();
         	break;
 
         case 520u:
-        	ROTARY_tick();
         	break;
 
         case 540u:
             HEATING_tick();
+        	ROTARY_tick();
         	break;
 
         case 560u:
@@ -198,6 +206,7 @@ void MODE_MGR_action_schedule_normal( void )
 
         case 580u:
         	NVM_tick();
+        	ROTARY_tick();
         	break;
 
         case 600u:
@@ -214,6 +223,7 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 660u:
+        	ROTARY_tick();
         	break;
 
         case 680u:
@@ -223,14 +233,15 @@ void MODE_MGR_action_schedule_normal( void )
         case 700u:
         	MAIN_WATCHDOG_kick();
             RF_MGR_tick();
+        	ROTARY_tick();
         	break;
 
         case 720u:
-        	ROTARY_tick();
         	break;
 
         case 740u:
             HEATING_tick();
+        	ROTARY_tick();
         	break;
 
         case 760u:
@@ -238,6 +249,7 @@ void MODE_MGR_action_schedule_normal( void )
 
         case 780u:
         	NVM_tick();
+        	ROTARY_tick();
         	break;
 
         case 800u:
@@ -254,6 +266,7 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 860u:
+        	ROTARY_tick();
         	break;
 
         case 880u:
@@ -263,14 +276,15 @@ void MODE_MGR_action_schedule_normal( void )
         case 900u:
         	MAIN_WATCHDOG_kick();
             RF_MGR_tick();
+        	ROTARY_tick();
         	break;
 
         case 920u:
-        	ROTARY_tick();
         	break;
 
         case 940u:
             HEATING_tick();
+        	ROTARY_tick();
         	break;
 
         case 960u:
@@ -278,6 +292,7 @@ void MODE_MGR_action_schedule_normal( void )
 
         case 980u:
         	NVM_tick();
+        	ROTARY_tick();
         	break;
 
         case 1000u:
@@ -286,7 +301,6 @@ void MODE_MGR_action_schedule_normal( void )
 
             /* keep track of time in secs */
             HAL_TIM_increment_secs();
-
         	break;
 
 			default:
