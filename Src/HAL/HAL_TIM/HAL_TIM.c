@@ -280,7 +280,6 @@ void TIM1_UP_IRQHandler( void )
 
 void TIM2_IRQHandler ( void )
 {
-	HAL_BRD_toggle_led();
 	if( TIM_GetITStatus( TIM2, TIM_IT_Update ) )
 	{
 		HAL_TIM2_stop();
@@ -289,7 +288,6 @@ void TIM2_IRQHandler ( void )
 		/* The debounce timer has finished, execute the callback */
 		HAL_BRD_debounce_completed();
 	}
-	HAL_BRD_toggle_led();
 }
 
 

@@ -934,7 +934,9 @@ void ROTARY_tick( void )
 	/* Handle all the left scrolls */
 	for( i = 0u; i < left; i++ )
 	{
+		HAL_BRD_toggle_led();
 		NEOPIXEL_handle_rotary_input( ROTARY_LEFT_SCROLL );
+		HAL_BRD_toggle_led();
 	}
 
 	/* Handle all the left scrolls */

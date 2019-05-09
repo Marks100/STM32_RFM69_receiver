@@ -1521,8 +1521,6 @@ void NRF24_tick( void )
 				/* The first byte in every RF frame is random and needs to be discarded */
 				RF_MGR_packet_received_event( &NRF24_tx_rx_payload_info_s.NRF24_rx_rf_payload[1], 31u );
 
-                HAL_BRD_toggle_led();
-
 				/* we may have received a packet !!!!!!*/
 				NRF24_status_register_clr_bit( RX_DR );
 
@@ -1549,8 +1547,6 @@ void NRF24_tick( void )
                     NRF24_tx_rx_payload_info_s.NRF24_rx_payload_ctr = 0u;
                     NRF24_tx_rx_payload_info_s.NRF24_rx_missed_packets = 0u;
                 }
-
-                 HAL_BRD_toggle_led();
             }
         }
         break;
@@ -1738,8 +1734,6 @@ void NRF24_handle_acks_and_tx_failures( void )
     {
         /* Clear the Data sent bit or else we cant send any more data */
         NRF24_status_register_clr_bit( TX_DS );
-
-        HAL_BRD_toggle_led();
 
         NRF24_handle_packet_stats( 1 );
     }
