@@ -21,14 +21,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "C_defs.h"
 #include "STDC.h"
-#include "COMPILER_defs.h"
 #include "HAL_BRD.h"
 #include "HAL_SPI.h"
 #include "NVM.h"
 #include "CLI.h"
-#include "main.h"
 #include "RF_MGR.h"
 #include "NRF24.h"
 #include "NRF24_Registers.h"

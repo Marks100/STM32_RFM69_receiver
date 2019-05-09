@@ -178,6 +178,25 @@ define check_test_result
 endef
 
 
+####################################################################################################
+#                                  Doxygen targets & rules                                         #
+####################################################################################################
+DOXYGEN_EXE := doxygen.exe
+DOXYGEN_OUTPUT := doc/doxygen/
+
+.PHONY: doxygen
+doxygen:
+	@mkdir -p $(DOXYGEN_OUTPUT)
+	@$(DOXYGEN_EXE) -b Tool_Cfg/Doxygen/Doxygen_config
+	@cd $(DOXYGEN_OUTPUT) && find -type f \( -name '*.md5' -o -name '*.map' -o -name '*globals*' -o -name '*dir_*' \) -print0 | xargs -0 rm -f
+
+# Cleans up any generated files from doxygen
+.PHONY: doxygen_clean
+doxygen_clean:
+	@echo "Cleaning doxygen..."
+	@rm -rf $(DOXYGEN_OUTPUT)/*
+
+
 
 ####################################################################################################
 #                                  Miscellaneous targets & rules                                   #
@@ -197,7 +216,6 @@ $(AUTOVERS_HEADER):
 $(GCC_ARM_OUT_DIR)/$(STM32_MAP_FILE):
 	@echo "$(STM32_MAP_FILE) does not exist, generating now"
 	@$(MAKE) -s GCC_ARM
-
 
 .PHONY: total_clean
 total_clean: build_clean
@@ -278,10 +296,15 @@ release_package:
 	@$(MAKE) -s memory_stats > /dev/null
 	@echo "Copying build output to $(RELEASE_PACKAGE_NAME) folder.."
 	@cp -r $(GCC_ARM_OUT_DIR)/. $(RELEASE_PACKAGE_NAME)
-	@echo "Copying version file info"
+	@echo "running doxygen..."
+	@$(MAKE) -s doxygen
+	@echo "copying doxygen output to $(RELEASE_PACKAGE_NAME) folder.."
+	@mkdir -p $(RELEASE_PACKAGE_NAME)/doxygen
+	@cp -r $(DOXYGEN_OUTPUT)/* $(RELEASE_PACKAGE_NAME)/doxygen
+	@echo "Copying version file info to $(RELEASE_PACKAGE_NAME) folder.."
 	@touch $(RELEASE_PACKAGE_NAME)/$(SW_VER)_BETA
 	@find  $(RELEASE_PACKAGE_NAME) -type f -print0 | sort -z | xargs -0 sha1sum > $(RELEASE_PACKAGE_NAME)/chksum.txt
-	@echo "Checksum file generated.."
+	@echo "Checksum file generated for $(RELEASE_PACKAGE_NAME)"
 	@echo "zipping up the release package.."
 	@-7za a "$(RELEASE_PACKAGE_NAME)/$(RELEASE_PACKAGE_NAME)_$(SW_VER)_BETA.zip" $(RELEASE_PACKAGE_NAME)/* > /dev/null
 	@find $(RELEASE_PACKAGE_NAME) ! -name '$(RELEASE_PACKAGE_NAME)*' -print0 | xargs -0 rm -fr

@@ -8,10 +8,7 @@
 	#include "stm32f10x_iwdg.h"
 #endif
 
-#include "C_defs.h"
-#include "PROJ_config.h"
-#include "COMPILER_defs.h"
-#include "COMPILER_config.h"
+#include "STDC.h"
 #include "HAL_BRD.h"
 #include "HAL_ADC.h"
 #include "HAL_SPI.h"

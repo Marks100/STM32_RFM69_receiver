@@ -1,7 +1,7 @@
 #ifndef CLI_H
 #define CLI_H
 
-#include "C_defs.h"
+
 
 
 #define CLI_MAX_INPUT_CHARS           40u

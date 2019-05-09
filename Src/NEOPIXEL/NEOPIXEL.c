@@ -1,22 +1,35 @@
+/*! \file
+*
+*   \brief
+*/
+
+/***************************************************************************************************
+**                              Includes                                                          **
+***************************************************************************************************/
 /* STM32 specific includes */
-#include "C_defs.h"
-#include "COMPILER_defs.h"
 #include "STDC.h"
-#include "NVM.h"
-#include "HAL_BRD.h"
-#include "MAIN.h"
 #include "NEOPIXEL.h"
 
 
 NEOPIXEL_data_st NEOPIXEL_data_s;
 u16_t            NEOPIXEL_tick_ctr_s;
 u32_t 			 NEOPIXEL_colour_tracker;
-
 u16_t 			 NEOPIXEL_manual_pos_s;
 
 #pragma GCC push_options
 #pragma GCC optimize ("O1")
 
+
+/*!
+****************************************************************************************************
+*
+*   \brief          Generates a "1" pulse
+*
+*   \author
+*
+*   \return         none
+*
+***************************************************************************************************/
 STATIC void NEOPIXEL_one_pulse_direct( void )
 {
 	/* This is soo time critical that instead of abstracting with function calls ill go direct to the hardware */
@@ -34,6 +47,17 @@ STATIC void NEOPIXEL_one_pulse_direct( void )
 }
 
 
+
+/*!
+****************************************************************************************************
+*
+*   \brief          Generates a "0" pulse
+*
+*   \author
+*
+*   \return         none
+*
+***************************************************************************************************/
 STATIC void NEOPIXEL_zero_pulse_direct( void )
 {
 	/* This is soo time critical that instead of abstracting with function calls ill go direct to the hardware */
@@ -46,6 +70,17 @@ STATIC void NEOPIXEL_zero_pulse_direct( void )
 }
 
 
+
+/*!
+****************************************************************************************************
+*
+*   \brief          Drives the NEOPIXEL with a specific colour
+*
+*   \author
+*
+*   \return         none
+*
+***************************************************************************************************/
 STATIC void NEOPIXEL_drive_colour( u32_t colour )
 {
 	u8_t bit = 0u;
@@ -63,6 +98,18 @@ STATIC void NEOPIXEL_drive_colour( u32_t colour )
 	}
 }
 
+
+
+/*!
+****************************************************************************************************
+*
+*   \brief          Latches the NEOPIXEL state
+*
+*   \author
+*
+*   \return         none
+*
+***************************************************************************************************/
 STATIC void NEOPIXEL_latch( void )
 {
 	u16_t bit = 0u;
@@ -76,6 +123,16 @@ STATIC void NEOPIXEL_latch( void )
 
 
 
+/*!
+****************************************************************************************************
+*
+*   \brief          Initialisation function
+*
+*   \author
+*
+*   \return         none
+*
+***************************************************************************************************/
 void NEOPIXEL_int( void )
 {
 	NEOPIXEL_data_s.hl_state = NEOPIXEL_TEMPERATURE;
@@ -94,7 +151,16 @@ void NEOPIXEL_int( void )
 
 
 
-/* Sets a specif number of leds, all others are turned off */
+/*!
+****************************************************************************************************
+*
+*   \brief          Sets a specif NEOPIXEL led depending on position
+*
+*   \author
+*
+*   \return         none
+*
+***************************************************************************************************/
 void NEOPIXEL_set_led( u32_t led_pos, u32_t colour )
 {
 	u8_t led_index = 0u;
@@ -121,6 +187,17 @@ void NEOPIXEL_set_led( u32_t led_pos, u32_t colour )
 }
 
 
+
+/*!
+****************************************************************************************************
+*
+*   \brief          Clears all the leds
+*
+*   \author
+*
+*   \return         none
+*
+***************************************************************************************************/
 void NEOPIXEL_clear_all_leds( void )
 {
 	u8_t led_pos = 0;
@@ -133,6 +210,16 @@ void NEOPIXEL_clear_all_leds( void )
 }
 
 
+/*!
+****************************************************************************************************
+*
+*   \brief         Lights all the leds with a specific colour
+*
+*   \author
+*
+*   \return         none
+*
+***************************************************************************************************/
 void NEOPIXEL_light_all_leds( u32_t colour )
 {
 	u8_t led_pos = 0;
@@ -148,6 +235,16 @@ void NEOPIXEL_light_all_leds( u32_t colour )
 
 
 
+/*!
+****************************************************************************************************
+*
+*   \brief          NEOPIXEL tick
+*
+*   \author
+*
+*   \return         none
+*
+***************************************************************************************************/
 void NEOPIXEL_tick( void )
 {
 	if( ( NEOPIXEL_tick_ctr_s % 500 ) == 0u )
@@ -223,6 +320,17 @@ void NEOPIXEL_tick( void )
 }
 
 
+
+/*!
+****************************************************************************************************
+*
+*   \brief          specific handler
+*
+*   \author
+*
+*   \return         none
+*
+***************************************************************************************************/
 NEOPIXEL_ll_state_et NEOPIXEL_handle_centre_sweep( u8_t* ticks )
 {
 	NEOPIXEL_ll_state_et state = NEOPIXEL_RUNNING;
@@ -256,6 +364,16 @@ NEOPIXEL_ll_state_et NEOPIXEL_handle_centre_sweep( u8_t* ticks )
 
 
 
+/*!
+****************************************************************************************************
+*
+*   \brief          specific handler
+*
+*   \author
+*
+*   \return         none
+*
+***************************************************************************************************/
 NEOPIXEL_ll_state_et NEOPIXEL_handle_all_flash( u8_t* ticks )
 {
 	NEOPIXEL_ll_state_et state = NEOPIXEL_RUNNING;
@@ -271,6 +389,16 @@ NEOPIXEL_ll_state_et NEOPIXEL_handle_all_flash( u8_t* ticks )
 }
 
 
+/*!
+****************************************************************************************************
+*
+*   \brief          specific handler
+*
+*   \author
+*
+*   \return         none
+*
+***************************************************************************************************/
 NEOPIXEL_ll_state_et NEOPIXEL_handle_circle_buffer( u8_t* ticks )
 {
 	NEOPIXEL_ll_state_et state = NEOPIXEL_RUNNING;
@@ -291,6 +419,17 @@ NEOPIXEL_ll_state_et NEOPIXEL_handle_circle_buffer( u8_t* ticks )
 	return( state );
 }
 
+
+/*!
+****************************************************************************************************
+*
+*   \brief          specific handler
+*
+*   \author
+*
+*   \return         none
+*
+***************************************************************************************************/
 NEOPIXEL_ll_state_et NEOPIXEL_handle_flow( u8_t* ticks )
 {
 	NEOPIXEL_ll_state_et state = NEOPIXEL_RUNNING;
@@ -315,6 +454,17 @@ NEOPIXEL_ll_state_et NEOPIXEL_handle_flow( u8_t* ticks )
 }
 
 
+
+/*!
+****************************************************************************************************
+*
+*   \brief          specific handler
+*
+*   \author
+*
+*   \return         none
+*
+***************************************************************************************************/
 NEOPIXEL_ll_state_et NEOPIXEL_handle_temperature_control( u8_t* ticks )
 {
 	NEOPIXEL_ll_state_et state = NEOPIXEL_RUNNING;
@@ -348,6 +498,17 @@ NEOPIXEL_ll_state_et NEOPIXEL_handle_temperature_control( u8_t* ticks )
 }
 
 
+
+/*!
+****************************************************************************************************
+*
+*   \brief          specific handler
+*
+*   \author
+*
+*   \return         none
+*
+***************************************************************************************************/
 NEOPIXEL_ll_state_et NEOPIXEL_handle_audi_indicator( u8_t* ticks )
 {
 	NEOPIXEL_ll_state_et state = NEOPIXEL_RUNNING;
@@ -393,6 +554,17 @@ NEOPIXEL_ll_state_et NEOPIXEL_handle_audi_indicator( u8_t* ticks )
 
 
 
+
+/*!
+****************************************************************************************************
+*
+*   \brief          specific handler
+*
+*   \author
+*
+*   \return         none
+*
+***************************************************************************************************/
 NEOPIXEL_ll_state_et NEOPIXEL_handle_manual( u8_t* ticks )
 {
 	NEOPIXEL_ll_state_et state = NEOPIXEL_RUNNING;
@@ -412,6 +584,16 @@ NEOPIXEL_ll_state_et NEOPIXEL_handle_manual( u8_t* ticks )
 
 
 
+/*!
+****************************************************************************************************
+*
+*   \brief          Sets the specific high level state
+*
+*   \author
+*
+*   \return         none
+*
+***************************************************************************************************/
 void NEOPIXEL_set_hl_state( NEOPIXEL_hl_state_et state )
 {
 	NEOPIXEL_data_s.hl_state = state;
@@ -422,6 +604,17 @@ void NEOPIXEL_set_hl_state( NEOPIXEL_hl_state_et state )
 }
 
 
+
+/*!
+****************************************************************************************************
+*
+*   \brief          Handles the rotary input
+*
+*   \author
+*
+*   \return         none
+*
+***************************************************************************************************/
 void NEOPIXEL_handle_rotary_input( ROTARY_scroll_type_et scroll )
 {
 	if( scroll == ROTARY_LEFT_SCROLL )

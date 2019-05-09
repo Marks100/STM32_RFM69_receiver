@@ -21,10 +21,8 @@
 #include <string.h>
 #endif // GCC_TEST
 
-#include "PROJ_config.h"
 #include "STDC.h"
 #include "HAL_BRD.h"
-#include "main.h"
 #include "nvm.h"
 #include "HEATING.h"
 

@@ -25,8 +25,6 @@
 #ifndef NVM_DEFAULTS_H
 #define NVM_DEFAULTS_H
 
-#include "PROJ_config.h"
-#include "NVM.h"
 
 /***************************************************************************************************
 **                              Defines                                                          **

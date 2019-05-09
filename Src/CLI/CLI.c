@@ -1,9 +1,19 @@
+/*! \file
+*               $Revision: 16923 $
+*
+*               $Author: mstewart $
+*
+*               $Date: 2014-01-16 15:40:40 +0000 (Thu, 16 Jan 2014) $
+*
+*               $HeadURL:
+*
+*   \brief      RF module
+*/
 /***************************************************************************************************
 **                              Includes                                                          **
 ***************************************************************************************************/
-#include "stm32f10x_rcc.h"
+
 #include "stm32f10x_usart.h"
-#include "stm32f10x_gpio.h"
 #include "misc.h"
 
 #include <stdint.h>
@@ -12,12 +22,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "C_defs.h"
 #include "STDC.h"
 #include "NVM.h"
 #include "NRF24.h"
 #include "HAL_BRD.h"
-#include "COMPILER_defs.h"
+
 
 #include "HAL_UART.h"
 #include "CLI.h"
