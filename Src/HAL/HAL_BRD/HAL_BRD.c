@@ -643,6 +643,8 @@ low_high_et HAL_BRD_read_selector_switch_pin( HAL_BRD_switch_slider_et slider )
 ***************************************************************************************************/
 void HAL_BRD_debounce_completed( void )
 {
+	//HAL_BRD_toggle_led();
+
 	/* Read the clock and data pin again */
 	HAL_BRD_rotary_data = HAL_BRD_read_rotary_data_pin();
 	HAL_BRD_rotary_clock = HAL_BRD_read_rotary_clock_pin();
@@ -684,6 +686,8 @@ void HAL_BRD_debounce_completed( void )
 	EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt ;
 	EXTI_InitStruct.EXTI_Trigger = trigger;
 	EXTI_Init(&EXTI_InitStruct);
+
+	//HAL_BRD_toggle_led();
 
 }
 
@@ -829,6 +833,8 @@ void EXTI1_IRQHandler(void)
 /* Handle PB12 interrupt */
 void EXTI15_10_IRQHandler(void)
 {
+	HAL_BRD_toggle_led();
+
 	/* Make sure that interrupt flag is set */
 	if ( EXTI_GetFlagStatus(EXTI_Line15) != RESET )
 	{
@@ -862,6 +868,7 @@ void EXTI15_10_IRQHandler(void)
 
 		/* Start a timer to generate a callback in xms to debounce the LOGIC */
 		HAL_TIM2_start();
+		HAL_BRD_toggle_led();
 	}
 }
 
@@ -934,9 +941,7 @@ void ROTARY_tick( void )
 	/* Handle all the left scrolls */
 	for( i = 0u; i < left; i++ )
 	{
-		HAL_BRD_toggle_led();
 		NEOPIXEL_handle_rotary_input( ROTARY_LEFT_SCROLL );
-		HAL_BRD_toggle_led();
 	}
 
 	/* Handle all the left scrolls */

@@ -670,6 +670,18 @@ CLI_error_et nvm_handler( u8_t aArgCount, char *aArgVector[] )
 	char output_string[200];
 	u8_t i = 0u;
 	u16_t* data_p;
+	u16_t temp_val;
+	u16_t divisor;
+	u8_t divident;
+	float* temp_data_p;
+	u8_t* strings[4] =
+	{
+		"cool mode max temp",
+		"cool mode min temp",
+		"heat mode max temp",
+		"heat mode min temp"
+	};
+
 
 	STDC_memset( output_string, 0x00, sizeof( output_string ) );
 
@@ -719,6 +731,35 @@ CLI_error_et nvm_handler( u8_t aArgCount, char *aArgVector[] )
 				(i*4), *(data_p + (i*4)), ((i*4) + 1), *(data_p + (i*4) + 1), ((i*4) + 2), *(data_p + (i*4) + 2), ((i*4) + 3), *(data_p + (i*4) + 3) );
 		CLI_send_data( output_string, strlen(output_string));
 		CLI_send_newline();
+	}
+
+	STDC_memset( output_string, 0x00, sizeof( output_string ) );
+	sprintf( output_string, "/* Thermostat */" );
+	CLI_send_data( output_string, strlen(output_string));
+	CLI_send_newline();
+	CLI_send_newline();
+
+
+	/* setup the pointer */
+	temp_data_p = &NVM_info_s.NVM_generic_data_blk_s.cool_max_temp;
+
+	for( i = 0; i < 4; i++ )
+	{
+		temp_val = ( ( (*temp_data_p) * 10u ) );
+		divisor = ( temp_val / 10u );
+		divident = ( temp_val - ( divisor ) * 10 );
+
+		temp_data_p++;
+
+		STDC_memset( output_string, 0x00, sizeof( output_string ) );
+		sprintf( output_string, "%s:\t%d.%d",
+				strings[i],
+				(divisor),
+				(divident) );
+
+		CLI_send_data( output_string, strlen(output_string));
+		CLI_send_newline();
+
 	}
 
 	return( error );

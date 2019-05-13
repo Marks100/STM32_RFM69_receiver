@@ -48,11 +48,11 @@ STATIC HEATING_room_temp_mon_st HEATING_room_temp_mon_s;
 void HEATING_init( void )
 {
 	HEATING_room_temp_mon_s.oat_c = TMPERATURE_INVALID;
-	HEATING_room_temp_mon_s.heat_mode = HEATING_COOL_MODE;
-	HEATING_room_temp_mon_s.cool_max_temp_c = 19;
-	HEATING_room_temp_mon_s.cool_min_temp_c = 15;
-	HEATING_room_temp_mon_s.heat_max_temp_c = 19.2;
-	HEATING_room_temp_mon_s.heat_min_temp_c = 18.0;
+	HEATING_room_temp_mon_s.heat_mode = NVM_info_s.NVM_generic_data_blk_s.heating_mode;
+	HEATING_room_temp_mon_s.cool_max_temp_c = NVM_info_s.NVM_generic_data_blk_s.cool_max_temp;
+	HEATING_room_temp_mon_s.cool_min_temp_c = NVM_info_s.NVM_generic_data_blk_s.cool_min_temp;
+	HEATING_room_temp_mon_s.heat_max_temp_c = NVM_info_s.NVM_generic_data_blk_s.heat_max_temp;
+	HEATING_room_temp_mon_s.heat_min_temp_c = NVM_info_s.NVM_generic_data_blk_s.heat_min_temp;
 	HEATING_room_temp_mon_s.enabled = ENABLE_;
 }
 
