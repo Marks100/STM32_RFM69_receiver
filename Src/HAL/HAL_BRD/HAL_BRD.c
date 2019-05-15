@@ -743,6 +743,25 @@ void HAL_BRD_set_cooler_state( off_on_et state )
 }
 
 
+void HAL_BRD_set_ROTARY_interrupt_state( disable_enable_et state )
+{
+	if( state == ENABLE_ )
+	{
+		EXTI_InitStruct.EXTI_Line = EXTI_Line11 ;
+		EXTI_InitStruct.EXTI_LineCmd = ENABLE;
+		EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt ;
+		EXTI_InitStruct.EXTI_Trigger = trigger;
+		EXTI_Init(&EXTI_InitStruct);
+	}
+	else
+	{
+		EXTI_InitStruct.EXTI_Line = EXTI_Line11 ;
+		EXTI_InitStruct.EXTI_LineCmd = DISABLE;
+		EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt;
+		EXTI_Init(&EXTI_InitStruct);
+	}
+}
+
 
 /*!
 ****************************************************************************************************

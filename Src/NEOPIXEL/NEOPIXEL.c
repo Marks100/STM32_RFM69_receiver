@@ -279,6 +279,8 @@ void NEOPIXEL_tick( void )
 		}
 	}
 
+	HAL_BRD_set_ROTARY_interrupt_state( DISABLE_ );
+
 	switch( NEOPIXEL_data_s.hl_state )
 	{
 		case NEOPIXEL_CENTRE_SWEEP:
@@ -317,6 +319,8 @@ void NEOPIXEL_tick( void )
 	{
 		NEOPIXEL_tick_ctr_s++;
 	}
+
+	HAL_BRD_set_ROTARY_interrupt_state( ENABLE_ );
 }
 
 
