@@ -11,7 +11,6 @@ AR        := $(ARM)-ar
 NM        := $(ARM)-nm
 STRIP     := $(ARM)-strip
 
-
 PROJECT_NAME	:= STM32_RFM69_receiver
 STM32_SRC_DIRS  := Src Workspace
 
@@ -27,12 +26,16 @@ STM32_MEM_OUTPUT_FILE := memory_analysis.txt
 
 SW_VER := $(subst .,_,$(shell sVersion -l))
 
+VERSION := $(SW_VER)
+
+export VERSION
+
 # Various test reports
-CEEDLING_TEST_XML_TEST_REPORT_ORIGIN   := test/build/artifacts/test/
-CEEDLING_TEST_XML_TEST_REPORT_DEST 	   := CodeCoverage/Test_Report/
-CEEDLING_GCOV_XML_TEST_REPORT_ORIGIN   := test/build/artifacts/gcov/
-CEEDLING_GCOV_XML_TEST_REPORT_DEST     := CodeCoverage/GCOV/
-CEEDLING_LCOV_XML_TEST_REPORT_DEST	   := CodeCoverage/LCOV/
+CEEDLING_GCOV_DIR					   := test/CodeCoverage
+CEEDLING_TEST_XML_TEST_REPORT_ORIGIN   := test/build/artifacts/gcov
+CEEDLING_TEST_XML_TEST_REPORT_DEST 	   := $(CEEDLING_GCOV_DIR)/Test_Report
+CEEDLING_LCOV_XML_TEST_REPORT_DEST	   := $(CEEDLING_GCOV_DIR)/LCOV
+
 
 # Output files
 GCOV_OUTPUT_DIR := test/build/gcov/out
@@ -113,7 +116,6 @@ GCC_ARM: build_clean $(AUTOVERS_HEADER) $(OBJS)
 	@$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@  2>&1 | tee -a $(STM32_COMPILER_OUTPUT)
 
 
-
 # Creates Ceedling environment if it does not exist
 test/vendor:
 	@createCeedlingEnv
@@ -136,17 +138,15 @@ test/vendor:
 .PHONY: test_all
 test_all: test/vendor
 	cd test && rake test:all
-	@mkdir -p test/CodeCoverage/{Test_Report,LCOV,GCOV}
-	#@mv $(CEEDLING_TEST_XML_TEST_REPORT_ORIGIN)report.xml $(CEEDLING_TEST_XML_TEST_REPORT_DEST)
+	@mv $(CEEDLING_TEST_XML_TEST_REPORT_ORIGIN)/report.xml $(CEEDLING_TEST_XML_TEST_REPORT_DEST)
 	#@ceedling-gen-report $(CEEDLING_TEST_XML_TEST_REPORT_DEST)report.xml $(CEEDLING_TEST_XML_TEST_REPORT_DEST)SoftwareCeedlingTestReport.html
 	#@$(call check_test_result)
 
-
-.PHONY: test_all_with_coverage
+	
 test_all_with_coverage: test/vendor
+	@mkdir -p $(CEEDLING_GCOV_DIR)/{Test_Report,LCOV}
 	@cd test/unit_test && rake gcov:all
-	@mkdir -p test/CodeCoverage/{Test_Report,LCOV,GCOV}
-	#@mv -f $(CEEDLING_GCOV_XML_TEST_REPORT_ORIGIN)report.xml $(CEEDLING_TEST_XML_TEST_REPORT_DEST)
+	@mv $(CEEDLING_TEST_XML_TEST_REPORT_ORIGIN)/report.xml $(CEEDLING_TEST_XML_TEST_REPORT_DEST)
 	#@ceedling-gen-report $(CEEDLING_TEST_XML_TEST_REPORT_DEST)report.xml $(CEEDLING_TEST_XML_TEST_REPORT_DEST)SoftwareCeedlingTestReport.html
 	@-rm -f $(UNWANTED_GEN_COVERAGE)
 
@@ -161,7 +161,7 @@ gen_lcov_report: test_all_with_coverage
 ifdef ConEmuDir
 	@cd $(CEEDLING_LCOV_XML_TEST_REPORT_DEST) && start index.html
 endif
-	@$(call check_test_result)
+	#@$(call check_test_result)
 
 
 
@@ -181,8 +181,8 @@ endef
 ####################################################################################################
 #                                  Doxygen targets & rules                                         #
 ####################################################################################################
-DOXYGEN_EXE := doxygen.exe
-DOXYGEN_OUTPUT := doc/doxygen/
+DOXYGEN_EXE    := doxygen.exe
+DOXYGEN_OUTPUT := doc/doxygen
 
 .PHONY: doxygen
 doxygen:
@@ -268,22 +268,17 @@ memory_stats: $(GCC_ARM_OUT_DIR)/$(STM32_MAP_FILE)
 	-------------------------------------------------------\n\n", $(ROM_SIZE), FlashUsed, ( FlashUsed/$(ROM_SIZE) * 100 ); }' $(GCC_ARM_OUT_DIR)/$(STM32_MEM_OUTPUT_FILE) | tee -a $(GCC_ARM_OUT_DIR)/$(STM32_MEM_OUTPUT_FILE)
 	@echo "Output file \"$(STM32_MEM_OUTPUT_FILE)\" created @ $(PROJECT_NAME)/$(GCC_ARM_OUT_DIR)/"
 
-strings := names ages weights heights
 
 chksum:
 	@find Src -type f -print0 | xargs -0 sha1sum > output.txt
 
-
 .PHONY: test
 test:
-	@echo $(strip      ttty u s             sdd f )
-	@echo $(filter names ages, $(strings))
-	@echo $(sort $(strings))
-	@echo $(sort $(INCLUDES))
-	@echo $(notdir $(INCLUDES))
-	@echo $(words $(INCLUDES))
-	@echo $(origin $(strings))
-	@echo $(origin $(INCLUDES))
+	cd scripts && echo $(shell pwd)
+	cd scripts && echo $(PWD)
+	cd scripts; echo $(PWD)
+	cd scripts; echo `pwd`
+	cd scripts && echo `pwd`
 
 .PHONY: release_package
 release_package:
@@ -296,11 +291,14 @@ release_package:
 	@$(MAKE) -s memory_stats > /dev/null
 	@echo "Copying build output to $(RELEASE_PACKAGE_NAME) folder.."
 	@cp -r $(GCC_ARM_OUT_DIR)/. $(RELEASE_PACKAGE_NAME)
-	@echo "running doxygen..."
+	@echo "Running tests..."
+	@$(MAKE) gen_lcov_report
+	@echo "Copying test results to $(RELEASE_PACKAGE_NAME) folder.."
+	@cp -r $(CEEDLING_GCOV_DIR) $(RELEASE_PACKAGE_NAME)
+	@echo "Running doxygen..."
 	@$(MAKE) -s doxygen
 	@echo "copying doxygen output to $(RELEASE_PACKAGE_NAME) folder.."
-	@mkdir -p $(RELEASE_PACKAGE_NAME)/doxygen
-	@cp -r $(DOXYGEN_OUTPUT)/* $(RELEASE_PACKAGE_NAME)/doxygen
+	@cp -r $(DOXYGEN_OUTPUT) $(RELEASE_PACKAGE_NAME)
 	@echo "Copying version file info to $(RELEASE_PACKAGE_NAME) folder.."
 	@touch $(RELEASE_PACKAGE_NAME)/$(SW_VER)_BETA
 	@find  $(RELEASE_PACKAGE_NAME) -type f -print0 | sort -z | xargs -0 sha1sum > $(RELEASE_PACKAGE_NAME)/chksum.txt

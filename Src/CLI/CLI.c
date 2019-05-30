@@ -732,13 +732,12 @@ CLI_error_et nvm_handler( u8_t aArgCount, char *aArgVector[] )
 		CLI_send_data( output_string, strlen(output_string));
 		CLI_send_newline();
 	}
+	CLI_send_newline();
 
 	STDC_memset( output_string, 0x00, sizeof( output_string ) );
 	sprintf( output_string, "/* Thermostat */" );
 	CLI_send_data( output_string, strlen(output_string));
 	CLI_send_newline();
-	CLI_send_newline();
-
 
 	/* setup the pointer */
 	temp_data_p = &NVM_info_s.NVM_generic_data_blk_s.cool_max_temp;

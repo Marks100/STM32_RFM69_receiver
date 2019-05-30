@@ -288,6 +288,7 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 960u:
+        	RF_MGR_analyse_fault_conditions();
         	break;
 
         case 980u:

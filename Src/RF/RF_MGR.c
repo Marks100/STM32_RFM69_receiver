@@ -66,6 +66,8 @@ void RF_MGR_init( void )
     for( i = 0; i < RF_MGR_RF_DATA_HANDLER_SIZE; i++ )
     {
     	STDC_memcpy( &RF_MGR_whitelist_s.id[i], &NVM_info_s.NVM_generic_data_blk_s.rf_whitelist[i], sizeof( RF_MGR_whitelist_s.id )/RF_MGR_RF_DATA_HANDLER_SIZE );
+
+    	RF_MGR_rf_data_store_s.data_packet_s[i].watchdog_timeout = RF_WATCHDOG_TIMEOUT;
     }
 
     RF_MGR_whitelist_s.state = NVM_info_s.NVM_generic_data_blk_s.whitelist_state;
@@ -121,6 +123,9 @@ void RF_MGR_analyse_received_packets( void )
         {
             RF_MGR_rf_data_store_s.data_packet_s[node_index].updated = FALSE;
 
+            /* Reset the watchdog timeout for that node ID */
+            RF_MGR_rf_data_store_s.data_packet_s[node_index].watchdog_timeout = RF_WATCHDOG_TIMEOUT;
+
             sensor_type = RF_MGR_rf_data_store_s.data_packet_s[node_index].sensor_type;
             sensor_id = RF_MGR_rf_data_store_s.data_packet_s[node_index].node_id;
 
@@ -145,6 +150,55 @@ void RF_MGR_analyse_received_packets( void )
             }
         }
     }
+}
+
+
+/*!
+****************************************************************************************************
+*
+*   \brief         Analyse the fault conditions
+*
+*   \author        MS
+*
+*   \return        none
+*
+*   \note
+*
+***************************************************************************************************/
+void RF_MGR_analyse_fault_conditions( void )
+{
+    /* Handle different sensor types */
+	false_true_et fault_present = FALSE;
+    u8_t node_index;
+
+    /* Run through the RF data structure and decrement the watchdog times */
+    for( node_index = 0u; node_index < RF_MGR_RF_DATA_HANDLER_SIZE; node_index++ )
+    {
+        if( RF_MGR_rf_data_store_s.data_packet_s[node_index].node_id != 0u )
+        {
+            /* Decrement the watchdog timer for that node ID */
+        	if( RF_MGR_rf_data_store_s.data_packet_s[node_index].watchdog_timeout > 0u )
+        	{
+        		RF_MGR_rf_data_store_s.data_packet_s[node_index].watchdog_timeout --;
+        	}
+        }
+    }
+
+
+    /* Run through the RF data structure and check if the watchdog has timed out */
+	for( node_index = 0u; node_index < RF_MGR_RF_DATA_HANDLER_SIZE; node_index++ )
+	{
+		if( RF_MGR_rf_data_store_s.data_packet_s[node_index].watchdog_timeout == 0u )
+		{
+			/* We have a problem here */
+			RF_MGR_set_dtc_state( node_index, RF_MGR_MISSING_SENSOR, FAIL );
+		}
+		else
+		{
+			/* We dont have a problem, OR we had a problem that has now cleared */
+			RF_MGR_set_dtc_state( node_index, RF_MGR_MISSING_SENSOR, PASS );
+		}
+	}
 }
 
 
@@ -596,6 +650,21 @@ RF_MGR_whitelist_st* RF_MGR_get_whitelist_address( void )
 void RF_MGR_set_whitelist_state( disable_enable_et state )
 {
 	RF_MGR_whitelist_s.state = state;
+}
+
+
+
+void RF_MGR_set_dtc_state( u16_t node_index, RF_MGR_generic_dtc_et dtc, pass_fail_et state )
+{
+
+	if( state == PASS )
+	{
+		RF_MGR_rf_data_store_s.data_packet_s[node_index].generic_dtc_mask &= ~( 1u << dtc );
+	}
+	else
+	{
+		RF_MGR_rf_data_store_s.data_packet_s[node_index].generic_dtc_mask != ( 1u << dtc );
+	}
 }
 
 
