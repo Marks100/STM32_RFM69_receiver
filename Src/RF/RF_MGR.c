@@ -168,7 +168,7 @@ void RF_MGR_analyse_received_packets( void )
 void RF_MGR_analyse_fault_conditions( void )
 {
     /* Handle different sensor types */
-	false_true_et fault_present = FALSE;
+	//false_true_et fault_present = FALSE;
     u8_t node_index;
 
     /* Run through the RF data structure and decrement the watchdog times */

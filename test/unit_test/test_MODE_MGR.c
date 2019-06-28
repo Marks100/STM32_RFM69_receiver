@@ -82,7 +82,6 @@ void MAIN_WATCHDOG_kick( void ){}
 void RF_MGR_tick( void ){}
 void NEOPIXEL_tick( void ){}
 void RF_MGR_analyse_fault_conditions( void ){}
-disable_enable_et HEATING_get_state( void ){}
 void HEATING_set_mode( void ){}
 void HEATING_get_mode( void ){}
 
@@ -95,6 +94,11 @@ low_high_et HAL_BRD_read_selector_switch_pin( HAL_BRD_switch_slider_et slider )
 {
 	(void)slider;
 	
+	return( 0 );
+}
+
+disable_enable_et HEATING_get_state( void )
+{
 	return( 0 );
 }
 

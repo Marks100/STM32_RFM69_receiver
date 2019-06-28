@@ -7,8 +7,10 @@
 
 #include "HAL_BRD.h"
 #include "STDC.h"
+#include "HAL_TIM.h"
 #include "main.h"
 #include "RFM69.h"
+#include "NEOPIXEL.h"
 #include "autoversion.h"
 
 EXTI_InitTypeDef EXTI_InitStruct;

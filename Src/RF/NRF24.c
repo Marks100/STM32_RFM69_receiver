@@ -27,6 +27,7 @@
 #include "NVM.h"
 #include "CLI.h"
 #include "RF_MGR.h"
+#include "main.h"
 #include "NRF24.h"
 #include "NRF24_Registers.h"
 

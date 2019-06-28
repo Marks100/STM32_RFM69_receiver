@@ -369,7 +369,7 @@ false_true_et HAL_SPI1_get_init_status( void )
 void HAL_SPI1_init( void )
 {
     address_index_s = 0u;
-    STDC_memset( register_data_s, 0x00, sizeof( register_data_s ) );
+    STDC_memset( &register_data_s, 0x00, sizeof( register_data_s ) );
 }
 
 void HAL_BRD_NRF24_spi_slave_select( low_high_et state )
@@ -380,10 +380,18 @@ void HAL_BRD_NRF24_spi_slave_select( low_high_et state )
 }
 
 
-void HAL_BRD_NRF24_set_ce_pin_state( low_high_et state ){}
+void HAL_BRD_NRF24_set_ce_pin_state( low_high_et state )
+{
+	(void)state;
+}
+
 void HAL_BRD_toggle_led( void ){}
 void HAL_BRD_toggle_debug_pin( void ){}
-void RF_MGR_packet_received_event(  u8_t* rf_data, u8_t rf_data_size ){}
+void RF_MGR_packet_received_event(  u8_t* rf_data, u8_t rf_data_size )
+{
+	(void)rf_data;
+	(void)rf_data_size;
+}
 
 
 

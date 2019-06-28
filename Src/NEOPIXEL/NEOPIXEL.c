@@ -572,18 +572,15 @@ NEOPIXEL_ll_state_et NEOPIXEL_handle_audi_indicator( u8_t* ticks )
 NEOPIXEL_ll_state_et NEOPIXEL_handle_manual( u8_t* ticks )
 {
 	NEOPIXEL_ll_state_et state = NEOPIXEL_RUNNING;
-	u8_t led_index = 0u;
 	u32_t led_to_set = 0u;
 
 	u32_t colour = NEOPIXEL_BLUE;
 
-//	for( led_index = 0u; led_index <NEOPIXEL_manual_pos_s; led_index++ )
-//	{
-//		led_to_set |= (BV(led_index));
-//	}
 	led_to_set = (BV( NEOPIXEL_manual_pos_s - 1 ) );
 
 	NEOPIXEL_set_led( led_to_set, colour );
+
+	return( state);
 }
 
 

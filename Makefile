@@ -36,7 +36,8 @@ RELEASE_PACKAGE_NAME     := $(RELEASE_PACKAGE_BASE_DIR)/$(RELEASE_PACKAGE_BASE_D
 
 # Various test reports
 CEEDLING_GCOV_DIR					   := test/CodeCoverage
-CEEDLING_TEST_XML_TEST_REPORT_ORIGIN   := test/build/artifacts/gcov
+CEEDLING_TEST_XML_TEST_REPORT_ORIGIN   := test/build/artifacts/test
+CEEDLING_GCOV_XML_TEST_REPORT_ORIGIN   := test/build/artifacts/gcov
 CEEDLING_TEST_XML_TEST_REPORT_DEST 	   := $(CEEDLING_GCOV_DIR)/Test_Report
 CEEDLING_LCOV_XML_TEST_REPORT_DEST	   := $(CEEDLING_GCOV_DIR)/LCOV
 
@@ -125,7 +126,7 @@ test/vendor:
 
 # Wild card test will allow any test to run once the name is provided
 %.test: test/vendor
-	@$(eval TEST_FILE := $(subst .test,.c,$@))
+	@TEST_FILE := $(subst .test,.c,$@)
 	@echo Testing $(TEST_FILE)...
 	cd test && rake test:$(TEST_FILE)
 
@@ -135,7 +136,6 @@ test/vendor:
 	@$(eval TEST_FILE := $(subst .test_with_coverage,.c,$@))
 	@echo "--> Testing $(TEST_FILE)..."
 	cd test && rake gcov:$(TEST_FILE)
-
 
 
 .PHONY: test_all
@@ -149,7 +149,7 @@ test_all: test/vendor
 test_all_with_coverage: test/vendor
 	@mkdir -p $(CEEDLING_GCOV_DIR)/{Test_Report,LCOV}
 	@cd test/unit_test && rake gcov:all
-	@mv $(CEEDLING_TEST_XML_TEST_REPORT_ORIGIN)/report.xml $(CEEDLING_TEST_XML_TEST_REPORT_DEST)
+	#@mv $(CEEDLING_TEST_XML_GCOV_REPORT_ORIGIN)/report.xml $(CEEDLING_TEST_XML_TEST_REPORT_DEST)
 	#@ceedling-gen-report $(CEEDLING_TEST_XML_TEST_REPORT_DEST)report.xml $(CEEDLING_TEST_XML_TEST_REPORT_DEST)SoftwareCeedlingTestReport.html
 	@-rm -f $(UNWANTED_GEN_COVERAGE)
 
@@ -265,22 +265,38 @@ memory_stats: $(GCC_ARM_OUT_DIR)/$(STM32_MAP_FILE)
 	@awk 'BEGIN{ printf "\n=======================================================\n\
 	==================== FLASH STATS ======================\n\
 	=======================================================\n\n"; } \
-	/$(STM32_ELF_FILE)/ { FlashUsed = ($$1) ;} \
+	/$(STM32_ELF_FILE)/ { FlashUsed = ($$1);} \
 	END{ printf "Available Flash in Bytes: %-6d\nFlash used in Bytes:      %-6d\n%%Flash used:              %-3.0f%\n\
 	-------------------------------------------------------\n\n", $(ROM_SIZE), FlashUsed, ( FlashUsed/$(ROM_SIZE) * 100 ); }' $(GCC_ARM_OUT_DIR)/$(STM32_MEM_OUTPUT_FILE) | tee -a $(GCC_ARM_OUT_DIR)/$(STM32_MEM_OUTPUT_FILE)
+	
+	@awk 'BEGIN{ printf "\n=======================================================\n\
+	====================== NVM STATS ======================\n\
+	=======================================================\n\n"; } \
+	/NVM_info_s/ { NVM_used = strtonum($$2); exit; } \
+	END{ printf "NVM used in Bytes: %-6d\n\
+	-------------------------------------------------------\n\n", NVM_used; }' $(GCC_ARM_OUT_DIR)/$(STM32_MAP_FILE) | tee -a $(GCC_ARM_OUT_DIR)/$(STM32_MEM_OUTPUT_FILE)
 	@echo "--> Output file \"$(STM32_MEM_OUTPUT_FILE)\" created @ $(PROJECT_NAME)/$(GCC_ARM_OUT_DIR)/"
 
 
 chksum:
 	@find Src -type f -print0 | xargs -0 sha1sum > output.txt
 
+	
+ttt:= Build_output/STM32_RFM69_receiver.map
+
 .PHONY: test
 test:
-	cd scripts && echo $(shell pwd)
-	cd scripts && echo $(PWD)
-	cd scripts; echo $(PWD)
-	cd scripts; echo `pwd`
-	cd scripts && echo `pwd`
+	@echo "dir = $(dir $(ttt))"
+	@echo "notdir = $(notdir $(ttt))"
+	@echo "suffix = $(suffix $(ttt))"
+	@echo "basename = $(basename $(ttt))"
+	@echo "realpath = $(realpath $(ttt))"
+	@echo "abspath = $(abspath $(ttt))"
+	@echo "name = $(basename $(notdir $(ttt)))"
+	test_MODE_MGR.test
+
+	
+
 
 .PHONY: release_package
 release_package:

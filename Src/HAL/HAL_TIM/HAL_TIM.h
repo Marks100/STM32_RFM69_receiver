@@ -38,6 +38,7 @@
 **                              Function Prototypes                                               **
 ***************************************************************************************************/
 void HAL_TIM1_init( void );
+void HAL_TIM2_init( void );
 void HAL_TIM1_start( void );
 void HAL_TIM1_stop( void );
 void HAL_TIM2_stop( void );
