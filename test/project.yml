@@ -20,7 +20,7 @@
 :environment:
 
 :extension:
-  :executable: .exe
+  :executable: .cexe
 
 :paths:
   :test:
