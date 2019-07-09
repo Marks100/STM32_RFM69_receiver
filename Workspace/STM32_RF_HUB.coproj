@@ -124,9 +124,9 @@
     <File name="stm_lib/src/stm32f10x_bkp.c" path="stm_lib/src/stm32f10x_bkp.c" type="1"/>
     <File name="cmsis_boot/startup/startup_stm32f10x_md.c" path="cmsis_boot/startup/startup_stm32f10x_md.c" type="1"/>
     <File name="stm_lib/src/stm32f10x_tim.o" path="stm_lib/src/stm32f10x_tim.o" type="1"/>
-    <File name="Src/NEOPIXEL" path="" type="2"/>
     <File name="stm_lib/src/stm32f10x_gpio.c" path="stm_lib/src/stm32f10x_gpio.c" type="1"/>
     <File name="Src/VERSIONS/VERSIONS.h" path="../Src/VERSIONS/VERSIONS.h" type="1"/>
+    <File name="Src/NEOPIXEL" path="" type="2"/>
     <File name="stm_lib/inc/stm32f10x_usart.h" path="stm_lib/inc/stm32f10x_usart.h" type="1"/>
     <File name="cmsis_boot/system_stm32f10x.c" path="cmsis_boot/system_stm32f10x.c" type="1"/>
     <File name="Src/MAIN/main.c" path="../Src/MAIN/main.c" type="1"/>
@@ -183,9 +183,9 @@
     <File name="stm_lib/src/stm32f10x_spi.c" path="stm_lib/src/stm32f10x_spi.c" type="1"/>
     <File name="stm_lib/src/stm32f10x_iwdg.c" path="stm_lib/src/stm32f10x_iwdg.c" type="1"/>
     <File name="stm_lib/src/stm32f10x_crc.o" path="stm_lib/src/stm32f10x_crc.o" type="1"/>
-    <File name="Src/COMMON_MODULES/xINC/SELMATH/SELMATH.c" path="../Src/COMMON_MODULES/xINC/SELMATH/SELMATH.c" type="1"/>
     <File name="Src/COMMON_MODULES/xLIBS/CHKSUM/CHKSUM.h" path="../Src/COMMON_MODULES/xLIBS/CHKSUM/CHKSUM.h" type="1"/>
     <File name="Src/PROJ_CONFIG/STDC_config.h" path="../Src/PROJ_CONFIG/STDC_config.h" type="1"/>
+    <File name="Src/COMMON_MODULES/xINC/SELMATH/SELMATH.c" path="../Src/COMMON_MODULES/xINC/SELMATH/SELMATH.c" type="1"/>
     <File name="Src/COMMON_MODULES/xLIBS/CHKSUM" path="" type="2"/>
     <File name="stm_lib/src/stm32f10x_rcc.o" path="stm_lib/src/stm32f10x_rcc.o" type="1"/>
     <File name="Src/MODE_MGR/MODE_MGR.c" path="../Src/MODE_MGR/MODE_MGR.c" type="1"/>
@@ -214,9 +214,9 @@
     <File name="Src/PROJ_CONFIG" path="" type="2"/>
     <File name="Src/COMMON_MODULES/xINC/COMPILER_defs.h" path="../Src/COMMON_MODULES/xINC/COMPILER_defs.h" type="1"/>
     <File name="Src/HAL/HAL_UART/HAL_UART.c" path="../Src/HAL/HAL_UART/HAL_UART.c" type="1"/>
-    <File name="stm_lib/src/stm32f10x_gpio.o" path="stm_lib/src/stm32f10x_gpio.o" type="1"/>
     <File name="Src/COMMON_MODULES/xINC/STDC/STDC_svn_rev.tmpl" path="../Src/COMMON_MODULES/xINC/STDC/STDC_svn_rev.tmpl" type="1"/>
     <File name="Src/HEATING/HEATING.c" path="../Src/HEATING/HEATING.c" type="1"/>
+    <File name="stm_lib/src/stm32f10x_gpio.o" path="stm_lib/src/stm32f10x_gpio.o" type="1"/>
     <File name="Src/NEOPIXEL/NEOPIXEL.c" path="../Src/NEOPIXEL/NEOPIXEL.c" type="1"/>
     <File name="Src/PROJ_CONFIG/SEL_RTOS_config.h" path="../Src/PROJ_CONFIG/SEL_RTOS_config.h" type="1"/>
     <File name="stm_lib/src/stm32f10x_pwr.o" path="stm_lib/src/stm32f10x_pwr.o" type="1"/>
@@ -240,9 +240,9 @@
     <File name="Src" path="" type="2"/>
     <File name="stm_lib/inc" path="" type="2"/>
     <File name="stm_lib/inc/stm32f10x_crc.h" path="stm_lib/inc/stm32f10x_crc.h" type="1"/>
-    <File name="Src/HEATING/HEATING.h" path="../Src/HEATING/HEATING.h" type="1"/>
     <File name="stm_lib/src/stm32f10x_spi.o" path="stm_lib/src/stm32f10x_spi.o" type="1"/>
     <File name="Src/VERSIONS/VERSIONS.o" path="../Src/VERSIONS/VERSIONS.o" type="1"/>
+    <File name="Src/HEATING/HEATING.h" path="../Src/HEATING/HEATING.h" type="1"/>
     <File name="stm_lib/inc/stm32f10x_wwdg.h" path="stm_lib/inc/stm32f10x_wwdg.h" type="1"/>
   </Files>
 </Project>

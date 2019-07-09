@@ -11,11 +11,11 @@
 /***************************************************************************************************
 **                              Defines                                                          **
 ***************************************************************************************************/
-//#define NVM_FLASH_PTR_START_ADDR     ((u32_t)0x800FC00)
-//#define NVM_FLASH_PTR_END_ADDR		 ((u32_t)0x8010000)
+//#define NVM_FLASH_PTR_START_ADDR     ((u32_t)0x801E800)
+//#define NVM_FLASH_PTR_END_ADDR		 ((u32_t)0x801EC00)
 
-#define NVM_FLASH_PTR_START_ADDR     ((u32_t)0x801C800)
-#define NVM_FLASH_PTR_END_ADDR		 ((u32_t)0x801CC00)
+#define NVM_FLASH_PTR_START_ADDR     ((u32_t)0x801FC00)
+#define NVM_FLASH_PTR_END_ADDR		 ((u32_t)0x801FFFF)
 
 #define MAX_NUM_FLASH_BYTES       256u
 #define CRC_BYTE                  255u
