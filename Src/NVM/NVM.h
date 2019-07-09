@@ -100,6 +100,7 @@ extern NVM_info_st NVM_info_s;
 void NVM_init(void);
 void NVM_request_flush(void);
 NVM_module_state_et NVM_get_status( void );
+void NVM_set_override_state( void );
 void NVM_tick( void );
 ok_nok_et NVM_check_blk_crc_and_version( void );
 false_true_et NVM_populate_blk_crc_and_version( void );

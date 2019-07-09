@@ -1039,6 +1039,8 @@ CLI_error_et savenvm_handler( u8_t aArgCount, char *aArgVector[] )
 	CLI_error_et error = CLI_ERROR_NONE;
 	char output_string[200];
 
+	/* Force a write to nvm */
+	NVM_set_override_state();
 	NVM_request_flush();
 
 	sprintf( output_string, "NVM flush has been completed" );

@@ -24,6 +24,7 @@
 
 
 STATIC false_true_et            NVM_write_request_s = FALSE;
+STATIC false_true_et            NVM_write_request_override_s = FALSE;
 STATIC NVM_module_state_et      NVM_module_state_s;
 NVM_info_st                     NVM_info_s;
 
@@ -58,6 +59,8 @@ void NVM_init(void)
         NVM_write_request_s = TRUE;
      }
 
+     NVM_write_request_override_s = FALSE;
+
      /* Setup the state as NVM has now been initialised */
      NVM_module_state_s = NVM_STATE_INITIALISED;
 
@@ -84,6 +87,24 @@ void NVM_request_flush(void)
         NVM_write_request_s = TRUE;
         NVM_tick();
     }
+}
+
+
+
+/*!
+****************************************************************************************************
+*
+*   \brief         Function to override the normal status of the NVM diver, use this
+*   			   API if you want to force 1 NVM write
+*
+*   \author        MS
+*
+*
+*   \return        None
+***************************************************************************************************/
+void NVM_set_override_state( void )
+{
+	NVM_write_request_override_s = TRUE;
 }
 
 
@@ -127,11 +148,21 @@ void NVM_tick( void )
         {
             if( NVM_write_request_s == TRUE )
             {
-                /*
-                    Have we got something to write?
-                    Has the data changed?
-                */
-                write_required = NVM_populate_blk_crc_and_version();
+                if( NVM_write_request_override_s == TRUE )
+                {
+                	write_required = TRUE;
+
+                	/* Set back to false again after every forced write */
+                	NVM_write_request_override_s = FALSE;
+                }
+                else
+                {
+                	/*
+						Have we got something to write?
+						Has the data changed?
+					*/
+					write_required = NVM_populate_blk_crc_and_version();
+                }
 
                 if( write_required == TRUE )
                 {
