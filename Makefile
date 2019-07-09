@@ -11,7 +11,7 @@ AR        := $(ARM)-ar
 NM        := $(ARM)-nm
 STRIP     := $(ARM)-strip
 
-PROJECT_NAME	:= STM32_RFM69_receiver
+PROJECT_NAME	:= STM32_RF_HUB
 STM32_SRC_DIRS  := Src Workspace
 
 SW_VER := $(subst .,_,$(shell sVersion -l))
@@ -21,6 +21,7 @@ export VERSION
 GCC_ARM_OUT_DIR          := Build_output
 GCC_ARM_OBJ_OUT_DIR      := $(GCC_ARM_OUT_DIR)/object_files
 BUILD_SUPPORT            := Workspace/build
+STM32_LINKER_SCRIPT 	 := $(BUILD_SUPPORT)/arm-gcc-link.ld
 STM32_ELF_FILE           := $(PROJECT_NAME).elf
 STM32_MAP_FILE  	     := $(PROJECT_NAME).map
 STM32_COMPILER_OUTPUT    := compile_log.txt
@@ -90,7 +91,7 @@ LDFLAGS := \
 		-O0 \
 		-Wl,--gc-sections \
 		-L$(BUILD_SUPPORT)/ \
-		-Wl,-T$(BUILD_SUPPORT)/arm-gcc-link.ld -g -o $(GCC_ARM_OUT_DIR)/$(PROJECT_NAME).elf \
+		-Wl,-T$(STM32_LINKER_SCRIPT) -g -o $(GCC_ARM_OUT_DIR)/$(PROJECT_NAME).elf \
 
 
 .PHONY: all
@@ -241,12 +242,12 @@ build_clean:
 # Set memory limits to match the Resource Usage in the Software Integration Spec
 
 # ROM limits
-ROM_SIZE := 65536
+ROM_SIZE := $(shell awk '/rom/ { rom = strtonum($$9); exit; } END { print rom } ' $(STM32_LINKER_SCRIPT) )
 ROM_PERC_LIMIT := 80
 ROM_CALC_LIMIT := $(shell echo $$(($(ROM_SIZE) * $(ROM_PERC_LIMIT) / 100 )))
 
 # RAM limits
-RAM_SIZE := 20480
+RAM_SIZE := $(shell awk '/ram/ { ram = strtonum($$9); exit; } END { print ram } ' $(STM32_LINKER_SCRIPT) )
 RAM_PERC_LIMIT := 80
 RAM_CALC_LIMIT := $(shell echo $$(($(RAM_SIZE) * $(RAM_PERC_LIMIT) / 100 )))
 

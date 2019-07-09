@@ -11,9 +11,6 @@
 /***************************************************************************************************
 **                              Defines                                                          **
 ***************************************************************************************************/
-//#define NVM_FLASH_PTR_START_ADDR     ((u32_t)0x801E800)
-//#define NVM_FLASH_PTR_END_ADDR		 ((u32_t)0x801EC00)
-
 #define NVM_FLASH_PTR_START_ADDR     ((u32_t)0x801FC00)
 #define NVM_FLASH_PTR_END_ADDR		 ((u32_t)0x801FFFF)
 
