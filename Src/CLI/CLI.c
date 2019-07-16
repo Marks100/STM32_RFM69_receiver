@@ -1,9 +1,19 @@
+/*! \file
+*               $Revision: 16923 $
+*
+*               $Author: mstewart $
+*
+*               $Date: 2014-01-16 15:40:40 +0000 (Thu, 16 Jan 2014) $
+*
+*               $HeadURL:
+*
+*   \brief      RF module
+*/
 /***************************************************************************************************
 **                              Includes                                                          **
 ***************************************************************************************************/
-#include "stm32f10x_rcc.h"
+
 #include "stm32f10x_usart.h"
-#include "stm32f10x_gpio.h"
 #include "misc.h"
 
 #include <stdint.h>
@@ -12,12 +22,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "C_defs.h"
 #include "STDC.h"
 #include "NVM.h"
 #include "NRF24.h"
 #include "HAL_BRD.h"
-#include "COMPILER_defs.h"
+
 
 #include "HAL_UART.h"
 #include "CLI.h"
@@ -661,6 +670,18 @@ CLI_error_et nvm_handler( u8_t aArgCount, char *aArgVector[] )
 	char output_string[200];
 	u8_t i = 0u;
 	u16_t* data_p;
+	u16_t temp_val;
+	u16_t divisor;
+	u8_t divident;
+	float* temp_data_p;
+	u8_t* strings[4] =
+	{
+		"cool mode max temp",
+		"cool mode min temp",
+		"heat mode max temp",
+		"heat mode min temp"
+	};
+
 
 	STDC_memset( output_string, 0x00, sizeof( output_string ) );
 
@@ -710,6 +731,34 @@ CLI_error_et nvm_handler( u8_t aArgCount, char *aArgVector[] )
 				(i*4), *(data_p + (i*4)), ((i*4) + 1), *(data_p + (i*4) + 1), ((i*4) + 2), *(data_p + (i*4) + 2), ((i*4) + 3), *(data_p + (i*4) + 3) );
 		CLI_send_data( output_string, strlen(output_string));
 		CLI_send_newline();
+	}
+	CLI_send_newline();
+
+	STDC_memset( output_string, 0x00, sizeof( output_string ) );
+	sprintf( output_string, "/* Thermostat */" );
+	CLI_send_data( output_string, strlen(output_string));
+	CLI_send_newline();
+
+	/* setup the pointer */
+	temp_data_p = &NVM_info_s.NVM_generic_data_blk_s.cool_max_temp;
+
+	for( i = 0; i < 4; i++ )
+	{
+		temp_val = ( ( (*temp_data_p) * 10u ) );
+		divisor = ( temp_val / 10u );
+		divident = ( temp_val - ( divisor ) * 10 );
+
+		temp_data_p++;
+
+		STDC_memset( output_string, 0x00, sizeof( output_string ) );
+		sprintf( output_string, "%s:\t%d.%d",
+				strings[i],
+				(divisor),
+				(divident) );
+
+		CLI_send_data( output_string, strlen(output_string));
+		CLI_send_newline();
+
 	}
 
 	return( error );
@@ -767,71 +816,30 @@ CLI_error_et listnodes_handler( u8_t aArgCount, char *aArgVector[] )
 	CLI_error_et error = CLI_ERROR_NONE;
 	char output_string[200];
 
-	u8_t num_node = 0u;
+	u8_t node_idx = 0u;
+	u8_t num_nodes = 0u;
+
 	RF_MGR_rf_data_store_st* node_id_p;
 
 	CLI_send_newline();
 
 	node_id_p = RF_MGR_get_all_decoded_IDs_address();
 
-	for( num_node = 0; num_node < RF_MGR_RF_DATA_HANDLER_SIZE; num_node++ )
+	for( node_idx = 0; node_idx < RF_MGR_RF_DATA_HANDLER_SIZE; node_idx++ )
 	{
-		sprintf( output_string, "Node ID %02d:\t0x%04X\r\n", num_node, node_id_p->data_packet_s[num_node].node_id );
+		if( node_id_p->data_packet_s[node_idx].node_id != 0x0000 )
+		{
+			num_nodes ++;
+		}
+		sprintf( output_string, "Node ID %02d:\t0x%04X\r\n", node_idx, node_id_p->data_packet_s[node_idx].node_id );
 		CLI_send_data( output_string, strlen(output_string));
 		STDC_memset( output_string, 0x20, sizeof( output_string ) );
 	}
 
-	sprintf( output_string, "Num Free Nodes:\t%02d\r\n", ( RF_MGR_RF_DATA_HANDLER_SIZE - num_node ) );
+	sprintf( output_string, "Num Free Nodes:\t%02d\r\n", ( RF_MGR_RF_DATA_HANDLER_SIZE - num_nodes ) );
 	CLI_send_data( output_string, strlen(output_string));
 	CLI_send_newline();
 	STDC_memset( output_string, 0x20, sizeof( output_string ) );
-
-	return( error );
-}
-
-
-CLI_error_et remove_wl_node_handler( u8_t aArgCount, char *aArgVector[] )
-{
-	CLI_error_et error = CLI_ERROR_NONE;
-	char output_string[200];
-	pass_fail_et status = FAIL;
-	u16_t id = 0u;
-	RF_MGR_whitelist_st* data_p;
-	u8_t nodes;
-
-	/* What ID is the user trying to remove */
-	id = strtoul( aArgVector[1], NULL, 16 );
-
-	/* This function should handle everything */
-	status = RF_MGR_remove_wl_node( id );
-
-	CLI_send_newline();
-
-	if( status == PASS )
-	{
-		sprintf( output_string, "Node 0x%04X was located in the current whitelist and has now been removed...", id );
-		CLI_send_data( output_string, strlen(output_string));
-		CLI_send_newline();
-		STDC_memset( output_string, 0x20, sizeof( output_string ) );
-	}
-	else
-	{
-		sprintf( output_string, "Node 0x%04X has not been located in the whitelist!!!,\r\nHere is the current whitelist..", id );
-		CLI_send_data( output_string, strlen(output_string));
-		CLI_send_newline();
-		STDC_memset( output_string, 0x20, sizeof( output_string ) );
-
-		data_p = RF_MGR_get_whitelist_address();
-
-		/* Print the current list to the user so that they can see them and delete the correct node */
-		for( nodes = 0; nodes < RF_MGR_RF_DATA_HANDLER_SIZE; nodes++ )
-		{
-			sprintf( output_string, "Node ID %02d:\t0x%04X\r\n", nodes, data_p->id[nodes] );
-			CLI_send_data( output_string, strlen(output_string));
-			CLI_send_newline();
-			STDC_memset( output_string, 0x20, sizeof( output_string ) );
-		}
-	}
 
 	return( error );
 }
@@ -907,27 +915,32 @@ CLI_error_et wl_remove_handler( u8_t aArgCount, char *aArgVector[] )
 {
 	CLI_error_et error = CLI_ERROR_NONE;
 	char output_string[200];
-	pass_fail_et result;
-	u16_t id;
+	pass_fail_et status = FAIL;
+	u16_t id = 0u;
+	RF_MGR_whitelist_st* data_p;
+	u8_t nodes;
 
-	/* What ID are we trying to add */
+	/* What ID is the user trying to remove */
 	id = strtoul( aArgVector[1], NULL, 16 );
+
+	/* This function should handle everything */
+	status = RF_MGR_remove_wl_node( id );
 
 	CLI_send_newline();
 
-	result = RF_MGR_remove_wl_node( id );
-
-	if( result == PASS )
+	if( status == PASS )
 	{
-		sprintf( output_string, "Node ID 0x%04X successfully removed", id );
+		sprintf( output_string, "Node 0x%04X was located in the current whitelist and has now been removed...", id );
 		CLI_send_data( output_string, strlen(output_string));
 		CLI_send_newline();
+		STDC_memset( output_string, 0x20, sizeof( output_string ) );
 	}
 	else
 	{
-		sprintf( output_string, "Failed to remove node ID 0x%04X", id );
+		sprintf( output_string, "Node 0x%04X has not been located in the whitelist!!!", id );
 		CLI_send_data( output_string, strlen(output_string));
 		CLI_send_newline();
+		STDC_memset( output_string, 0x20, sizeof( output_string ) );
 	}
 
 	return( error );
@@ -990,7 +1003,11 @@ CLI_error_et savenvm_handler( u8_t aArgCount, char *aArgVector[] )
 	CLI_error_et error = CLI_ERROR_NONE;
 	char output_string[200];
 
+	/* Force a write to nvm */
+	NVM_set_override_state();
 	NVM_request_flush();
+
+	CLI_send_newline();
 
 	sprintf( output_string, "NVM flush has been completed" );
 	CLI_send_data( output_string, strlen(output_string));

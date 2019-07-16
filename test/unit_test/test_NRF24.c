@@ -302,6 +302,8 @@ void test_status_mask( void )
 {
     u8_t data;
     low_high_et state;
+	
+	(void)state;
 
     return_register_byte = 0xFF;
     state = NRF24_check_status_mask( RF24_RX_DATA_READY, &data );
@@ -341,7 +343,17 @@ void test_dynamic_payloads( void )
 
 
 
-u8_t HAL_SPI_write_and_read_data( u8_t tx_data )
+
+
+
+
+
+
+
+
+
+
+u8_t HAL_SPI1_write_and_read_data( u8_t tx_data )
 {
     register_data_s = tx_data;
     address_index_s ++;
@@ -349,19 +361,20 @@ u8_t HAL_SPI_write_and_read_data( u8_t tx_data )
     return ( return_register_byte );
 }
 
-false_true_et HAL_SPI_get_init_status( void )
+false_true_et HAL_SPI1_get_init_status( void )
 {
     return ( TRUE );
 }
 
-void HAL_SPI_init( void )
+void HAL_SPI1_init( void )
 {
     address_index_s = 0u;
-    STDC_memset( register_data_s, 0x00, sizeof( register_data_s ) );
+    STDC_memset( &register_data_s, 0x00, sizeof( register_data_s ) );
 }
 
 void HAL_BRD_NRF24_spi_slave_select( low_high_et state )
 {
+	(void)state;
     /* Reset the address index */
     address_index_s = 0u;
 }
@@ -369,17 +382,15 @@ void HAL_BRD_NRF24_spi_slave_select( low_high_et state )
 
 void HAL_BRD_NRF24_set_ce_pin_state( low_high_et state )
 {
-
+	(void)state;
 }
 
-void  HAL_BRD_toggle_led( void )
+void HAL_BRD_toggle_led( void ){}
+void HAL_BRD_toggle_debug_pin( void ){}
+void RF_MGR_packet_received_event(  u8_t* rf_data, u8_t rf_data_size )
 {
-
-}
-
-void HAL_BRD_toggle_debug_pin( void )
-{
-
+	(void)rf_data;
+	(void)rf_data_size;
 }
 
 

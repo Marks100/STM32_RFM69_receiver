@@ -7,7 +7,6 @@
 **                              Includes                                                          **
 ***************************************************************************************************/
 #include "C_defs.h"
-#include "COMPILER_defs.h"
 
 #if(UNIT_TEST == 0)
     #include "stm32f10x_gpio.h"
@@ -56,6 +55,14 @@ typedef enum
 } HAL_BRD_led_et;
 
 
+
+typedef enum
+{
+    ROTARY_LEFT_SCROLL = 0u,
+    ROTARY_RIGHT_SCROLL,
+    ROTARY_NO_CHANGE
+} ROTARY_scroll_type_et;
+
 /***************************************************************************************************
 **                              Exported Globals                                                  **
 ***************************************************************************************************/
@@ -85,15 +92,24 @@ void HAL_BRD_NRF24_spi_slave_select( low_high_et state );
 void HAL_BRD_NRF24_set_ce_pin_state( low_high_et state );
 void HAL_BRD_set_LED_state( HAL_BRD_led_et led, off_on_et state );
 void HAL_BRD_set_onboard_LED( off_on_et state );
+void HAL_BRD_set_ROTARY_interrupt_state( disable_enable_et state );
+void HAL_BRD_debounce_completed( void );
 
 false_true_et HAL_BRD_get_rtc_trigger_status( void );
 void HAL_BRD_set_rtc_trigger_status( false_true_et state );
 disable_enable_et HAL_BRD_read_debug_pin( void );
 void HAL_BRD_set_cooler_state( off_on_et state );
 void HAL_BRD_set_heater_state( off_on_et state );
+low_high_et HAL_BRD_read_rotary_clock_pin( void );
+low_high_et HAL_BRD_read_rotary_data_pin( void );
 
 void HAL_BRD_get_SW_version_num( u8_t *version_num_p );
 void HAL_BRD_get_HW_version_num( u8_t *version_num_p );
 
+
+
+
+void ROTARY_evaluate_signals( low_high_et clock, low_high_et data );
+void ROTARY_tick( void );
 
 #endif

@@ -14,15 +14,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "assert.h"
 
-#include "C_defs.h"
 #include "STDC.h"
-#include "COMPILER_defs.h"
 #include "HAL_BRD.h"
-#include "HAL_SPI.h"
 #include "NVM.h"
 #include "CLI.h"
-#include "main.h"
+
 #include "HEATING.h"
 #include "NRF24.h"
 #include "RF_MGR.h"
@@ -30,6 +28,8 @@
 
 STATIC RF_MGR_rf_data_store_st RF_MGR_rf_data_store_s;
 STATIC RF_MGR_sed_data_st	   RF_MGR_sed_data_s;
+STATIC RF_MGR_sed_data_st	   RF_MGR_controller_data_s;
+
 STATIC RF_MGR_whitelist_st	   RF_MGR_whitelist_s;
 
 
@@ -66,6 +66,8 @@ void RF_MGR_init( void )
     for( i = 0; i < RF_MGR_RF_DATA_HANDLER_SIZE; i++ )
     {
     	STDC_memcpy( &RF_MGR_whitelist_s.id[i], &NVM_info_s.NVM_generic_data_blk_s.rf_whitelist[i], sizeof( RF_MGR_whitelist_s.id )/RF_MGR_RF_DATA_HANDLER_SIZE );
+
+    	RF_MGR_rf_data_store_s.data_packet_s[i].watchdog_timeout = RF_WATCHDOG_TIMEOUT;
     }
 
     RF_MGR_whitelist_s.state = NVM_info_s.NVM_generic_data_blk_s.whitelist_state;
@@ -121,21 +123,82 @@ void RF_MGR_analyse_received_packets( void )
         {
             RF_MGR_rf_data_store_s.data_packet_s[node_index].updated = FALSE;
 
+            /* Reset the watchdog timeout for that node ID */
+            RF_MGR_rf_data_store_s.data_packet_s[node_index].watchdog_timeout = RF_WATCHDOG_TIMEOUT;
+
             sensor_type = RF_MGR_rf_data_store_s.data_packet_s[node_index].sensor_type;
             sensor_id = RF_MGR_rf_data_store_s.data_packet_s[node_index].node_id;
 
             switch( sensor_type )
             {
                 case EARLY_PROTOTYPE_SED:
+                {
                     RF_MGR_handle_early_prototype_sed( sensor_id, (u8_t*)&RF_MGR_rf_data_store_s.data_packet_s[node_index].payload,
                                                        RF_MGR_rf_data_store_s.data_packet_s[node_index ].packet_counter );
-                    break;
+                }
+                break;
+
+                case EARLY_PROTOTYPE_CONTROLLER:
+                {
+
+                }
+                break;
 
                 default:
+                	//assert(0);
                     break;
             }
         }
     }
+}
+
+
+/*!
+****************************************************************************************************
+*
+*   \brief         Analyse the fault conditions
+*
+*   \author        MS
+*
+*   \return        none
+*
+*   \note
+*
+***************************************************************************************************/
+void RF_MGR_analyse_fault_conditions( void )
+{
+    /* Handle different sensor types */
+	//false_true_et fault_present = FALSE;
+    u8_t node_index;
+
+    /* Run through the RF data structure and decrement the watchdog times */
+    for( node_index = 0u; node_index < RF_MGR_RF_DATA_HANDLER_SIZE; node_index++ )
+    {
+        if( RF_MGR_rf_data_store_s.data_packet_s[node_index].node_id != 0u )
+        {
+            /* Decrement the watchdog timer for that node ID */
+        	if( RF_MGR_rf_data_store_s.data_packet_s[node_index].watchdog_timeout > 0u )
+        	{
+        		RF_MGR_rf_data_store_s.data_packet_s[node_index].watchdog_timeout --;
+        	}
+        }
+    }
+
+
+    /* Run through the RF data structure and check if the watchdog has timed out */
+	for( node_index = 0u; node_index < RF_MGR_RF_DATA_HANDLER_SIZE; node_index++ )
+	{
+		if( RF_MGR_rf_data_store_s.data_packet_s[node_index].watchdog_timeout == 0u )
+		{
+			/* We have a problem here */
+			RF_MGR_set_dtc_state( node_index, RF_MGR_MISSING_SENSOR, FAIL );
+		}
+		else
+		{
+			/* We dont have a problem, OR we had a problem that has now cleared */
+			RF_MGR_set_dtc_state( node_index, RF_MGR_MISSING_SENSOR, PASS );
+		}
+	}
 }
 
 
@@ -155,13 +218,21 @@ void RF_MGR_analyse_received_packets( void )
 ***************************************************************************************************/
 void RF_MGR_handle_early_prototype_sed( u16_t sensor_id, u8_t* data_p, u32_t packet_count )
 {
+	/* byte 0 - Sensor type - common
+	 * byte 1 Node ID MSB   - common
+	 * byte 2 Node ID LSB   - common
+	 * byte 3 packet type   - 1st SED
+	 * byte 4 mode type     - 1st SED
+	 * byte 5 status        - 1st SED
+	 * byte 6 temp 		    - 1st SED ( degree c )
+	 * byte 7 temp		    - 1st SED ( degree c remainder )
+	 */
 
     RF_MGR_sed_data_s.node_id     = sensor_id;
     RF_MGR_sed_data_s.packet_type = data_p[0];
     RF_MGR_sed_data_s.mode_type   = data_p[1];
     RF_MGR_sed_data_s.status      = data_p[2];
-    RF_MGR_sed_data_s.temperature  = ( data_p[3] << 8u );
-    RF_MGR_sed_data_s.temperature |= ( data_p[4] );
+    RF_MGR_sed_data_s.temperature = STDC_make_16_bit( data_p[3], data_p[4] );
     RF_MGR_sed_data_s.packet_ctr  = packet_count;
     RF_MGR_sed_data_s.tx_interval_secs = STDC_make_16_bit( data_p[5], data_p[6] );
 
@@ -171,16 +242,86 @@ void RF_MGR_handle_early_prototype_sed( u16_t sensor_id, u8_t* data_p, u32_t pac
 }
 
 
-/* byte 0 - Sensor type - common
- * byte 1 Node ID MSB   - common
- * byte 2 Node ID LSB   - common
- * byte 3 packet type   - 1st SED
- * byte 4 mode type     - 1st SED
- * byte 5 status        - 1st SED
- * byte 6 temp 		    - 1st SED ( degree c )
- * byte 7 temp		    - 1st SED ( degree c remainder )
- */
 
+
+
+
+/*!
+****************************************************************************************************
+*
+*   \brief         Handle a specific type of sensor
+*
+*   \author        MS
+*
+*   \return        none
+*
+*   \note
+*
+***************************************************************************************************/
+void RF_MGR_handle_early_prototype_controller( u16_t sensor_id, u8_t* data_p, u32_t packet_count )
+{
+	RF_MGR_controller_data_s.node_id     = sensor_id;
+	RF_MGR_controller_data_s.packet_type = data_p[0];
+	RF_MGR_controller_data_s.mode_type   = data_p[1];
+	RF_MGR_controller_data_s.status      = data_p[2];
+
+	switch( RF_MGR_controller_data_s.packet_type )
+	{
+		case RF_MGR_CONT_HEAT_TOGGLE_STATE:
+		{
+
+		}
+		break;
+
+		case RF_MGR_CONT_HEAT_STATE_ON:
+		{
+
+		}
+		break;
+
+		case RF_MGR_CONT_HEAT_STATE_OFF:
+		{
+
+		}
+		break;
+
+		case RF_MGR_CONT_HEAT_TOGGLE_MODE:
+		{
+			if( HEATING_get_mode() == HEATING_HEAT_MODE )
+			{
+				HEATING_set_mode( HEATING_COOL_MODE );
+			}
+			else
+			{
+				HEATING_set_mode( HEATING_HEAT_MODE );
+			}
+		}
+		break;
+
+		case RF_MGR_CONT_HEAT_MODE:
+		{
+			HEATING_set_mode( HEATING_HEAT_MODE );
+		}
+		break;
+
+		case RF_MGR_CONT_COOL_MODE:
+		{
+			HEATING_set_mode( HEATING_COOL_MODE );
+		}
+		break;
+
+		case RF_MGR_CONT_OFF_MODE:
+		{
+			HEATING_set_mode( HEATING_OFF_MODE );
+		}
+		break;
+
+		default:
+			break;
+	}
+
+    RF_MGR_display_controller_data();
+}
 
 /*!
 ****************************************************************************************************
@@ -269,6 +410,22 @@ void RF_MGR_display_sed_data( void )
 {
 	u8_t display_data[200];
 
+	const char* sensor_type[6] =
+	{
+		"1",
+		"2",
+		"3",
+		"4",
+		"5",
+		"1st Gen Sleepy Sensor Device"
+	};
+
+	const char* mode_type[2] =
+	{
+		"NORMAL MODE",
+		"DEBUG MODE",
+	};
+
 	STDC_memset( display_data, 0x00, sizeof( display_data ) );
 
 	CLI_send_newline();
@@ -282,50 +439,11 @@ void RF_MGR_display_sed_data( void )
 	CLI_send_data( display_data, strlen( display_data ) );
 	STDC_memset( display_data, 0x00, sizeof( display_data ) );
 
-	switch( RF_MGR_sed_data_s.packet_type )
-	{
-		case 0:
-			sprintf( display_data, "Sensor Type: \t1\r\n");
-			break;
-
-		case 1:
-			sprintf( display_data, "Sensor Type: \t2\r\n");
-			break;
-
-		case 2:
-			sprintf( display_data, "Sensor Type: \t3\r\n");
-			break;
-
-		case 3:
-			sprintf( display_data, "Sensor Type: \t4\r\n");
-			break;
-
-		case 4:
-			sprintf( display_data, "Sensor Type: \t5\r\n");
-			break;
-
-		default:
-			sprintf( display_data, "Sensor Type: \t1st Gen Sleepy Sensor Device\r\n");
-			break;
-	}
-
+	sprintf( display_data, "Sensor Type: \t%s\r\n", sensor_type[ RF_MGR_sed_data_s.packet_type ]);
 	CLI_send_data( display_data, strlen( display_data ) );
 	STDC_memset( display_data, 0x00, sizeof( display_data ) );
 
-	switch( RF_MGR_sed_data_s.mode_type )
-	{
-		case 0:
-			sprintf( display_data, "Mode Type:\tNORMAL MODE\r\n");
-			break;
-
-		case 1:
-			sprintf( display_data, "Mode Type:\tDEBUG MODE\r\n");
-			break;
-
-		default:
-			sprintf( display_data, "Mode Type:\tNORMAL MODE\r\n");
-			break;
-	}
+	sprintf( display_data, "Mode Type:\t%s\r\n", mode_type[ RF_MGR_sed_data_s.mode_type ]);
 	CLI_send_data( display_data, strlen( display_data ) );
 	STDC_memset( display_data, 0x00, sizeof( display_data ) );
 
@@ -337,13 +455,30 @@ void RF_MGR_display_sed_data( void )
 	s16_t temp_whole = ( RF_MGR_sed_data_s.temperature/10 );
 	u8_t remainder = ( abs( RF_MGR_sed_data_s.temperature ) - ( abs(temp_whole) * 10 ) );
 
-
 	sprintf( display_data, "Packet ctr:\t%d\r\nTemperature:\t%d.%d degree c\r\nTX rate secs:\t%d",
 			 RF_MGR_sed_data_s.packet_ctr, temp_whole, remainder, RF_MGR_sed_data_s.tx_interval_secs  );
 	CLI_send_data( display_data, strlen( display_data ) );
 	STDC_memset( display_data, 0x00, sizeof( display_data ) );
 	CLI_send_newline();
 	CLI_send_newline();
+}
+
+
+
+/*!
+****************************************************************************************************
+*
+*   \brief         Displays the received sensor data
+*
+*   \author        MS
+*
+*   \return        none
+*
+*   \note
+*
+***************************************************************************************************/
+void RF_MGR_display_controller_data( void )
+{
 }
 
 
@@ -515,6 +650,21 @@ RF_MGR_whitelist_st* RF_MGR_get_whitelist_address( void )
 void RF_MGR_set_whitelist_state( disable_enable_et state )
 {
 	RF_MGR_whitelist_s.state = state;
+}
+
+
+
+void RF_MGR_set_dtc_state( u16_t node_index, RF_MGR_generic_dtc_et dtc, pass_fail_et state )
+{
+
+	if( state == PASS )
+	{
+		RF_MGR_rf_data_store_s.data_packet_s[node_index].generic_dtc_mask &= ~( 1u << dtc );
+	}
+	else
+	{
+		RF_MGR_rf_data_store_s.data_packet_s[node_index].generic_dtc_mask != ( 1u << dtc );
+	}
 }
 
 

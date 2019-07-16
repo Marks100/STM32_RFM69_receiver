@@ -3,15 +3,30 @@
 #include "stm32f10x_rcc.h"
 #include "stm32f10x.h"
 #include "misc.h"
+#include "assert.h"
 
 #include "HAL_BRD.h"
 #include "STDC.h"
+#include "HAL_TIM.h"
 #include "main.h"
 #include "RFM69.h"
+#include "NEOPIXEL.h"
 #include "autoversion.h"
 
+EXTI_InitTypeDef EXTI_InitStruct;
 false_true_et HAL_BRD_rtc_triggered_s;
 false_true_et debug_mode;
+
+low_high_et HAL_BRD_rotary_clock;
+low_high_et HAL_BRD_rotary_data;
+low_high_et HAL_BRD_prev_rotary_clock;
+low_high_et HAL_BRD_prev_rotary_data;
+EXTITrigger_TypeDef trigger;
+
+
+
+u16_t ROTARY_plus_cnt_s;
+u16_t ROTARY_minus_cnt_s;
 
 
 /*!
@@ -64,8 +79,8 @@ void HAL_BRD_init( void )
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
 	GPIO_Init(GPIOB, &GPIO_InitStructure);
 
-	/* Setup the Selector mode switches( PB15, PB14, PB13, PB12 ) */
-	GPIO_InitStructure.GPIO_Pin = ( GPIO_Pin_15 | GPIO_Pin_14 | GPIO_Pin_13 | GPIO_Pin_12 );
+	/* Setup the Selector mode switches( PB6, PB7, PB8, PB9 ) */
+	GPIO_InitStructure.GPIO_Pin = ( GPIO_Pin_6 | GPIO_Pin_7 | GPIO_Pin_8 | GPIO_Pin_9 );
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;
 	GPIO_Init(GPIOB, &GPIO_InitStructure);
@@ -75,12 +90,6 @@ void HAL_BRD_init( void )
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
     GPIO_Init(GPIOC, &GPIO_InitStructure);
-
-    /* Configure the DEBUG output pin */
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
-	GPIO_Init(GPIOA, &GPIO_InitStructure);
 
 	/* Configure the NRF24 NCS pin */
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;
@@ -100,28 +109,39 @@ void HAL_BRD_init( void )
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
 	GPIO_Init(GPIOB, &GPIO_InitStructure);
 
+	/* Configure the NEO PIXEL pin */
+	GPIO_InitStructure.GPIO_Pin = ( GPIO_Pin_12 );
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
+
 	/* Enable the "RFM69 packet received" interrupt on pin A1 */
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
 
-	GPIO_EXTILineConfig(GPIO_PortSourceGPIOA, GPIO_PinSource1 );
+	/* Configure the rotary clock and data pins */
+	GPIO_InitStructure.GPIO_Pin = ( GPIO_Pin_8 | GPIO_Pin_11 );
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
 
-	EXTI_InitTypeDef EXTI_InitStruct;
-
-	EXTI_InitStruct.EXTI_Line = EXTI_Line1 ;
-	EXTI_InitStruct.EXTI_LineCmd = ENABLE;
-	EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt ;
-	EXTI_InitStruct.EXTI_Trigger = EXTI_Trigger_Rising;
-	EXTI_Init(&EXTI_InitStruct);
 
 	NVIC_InitTypeDef NVIC_InitStruct;
 
+	GPIO_EXTILineConfig(GPIO_PortSourceGPIOA, GPIO_PinSource11 );
+
+	EXTI_InitStruct.EXTI_Line = EXTI_Line11 ;
+	EXTI_InitStruct.EXTI_LineCmd = ENABLE;
+	EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt ;
+	EXTI_InitStruct.EXTI_Trigger = EXTI_Trigger_Falling;
+	EXTI_Init(&EXTI_InitStruct);
+
 	/* Add IRQ vector to NVIC */
-	NVIC_InitStruct.NVIC_IRQChannel = EXTI1_IRQn;
+	NVIC_InitStruct.NVIC_IRQChannel = EXTI15_10_IRQn;
 	/* Set priority */
-	NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 0x00;
+	NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = NVIC_PriorityGroup_0;
 	/* Set sub priority */
 	NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0x00;
 	/* Enable interrupt */
@@ -136,6 +156,22 @@ void HAL_BRD_init( void )
 
     /* Turn the led off straight away to save power */
     HAL_BRD_set_onboard_LED( OFF );
+
+
+
+	HAL_BRD_rotary_clock = HIGH;
+	HAL_BRD_rotary_data = HIGH;
+	HAL_BRD_prev_rotary_clock = HIGH;
+	HAL_BRD_prev_rotary_data = HIGH;
+    trigger = EXTI_Trigger_Falling;
+
+
+
+
+
+    ROTARY_plus_cnt_s = 0u;
+    ROTARY_minus_cnt_s = 0u;
+
 }
 
 
@@ -237,19 +273,19 @@ void HAL_BRD_set_LED_state( HAL_BRD_led_et led, off_on_et state )
 	switch( led )
 	{
 		case LED_0:
-			HAL_BRD_set_pin_state( GPIOB, GPIO_Pin_12, state );
+			//HAL_BRD_set_pin_state( GPIOB, GPIO_Pin_12, state );
 			break;
 
 		case LED_1:
-			HAL_BRD_set_pin_state( GPIOB, GPIO_Pin_13, state );
+			//HAL_BRD_set_pin_state( GPIOB, GPIO_Pin_13, state );
 			break;
 
 		case LED_2:
-			HAL_BRD_set_pin_state( GPIOB, GPIO_Pin_14, state );
+			//HAL_BRD_set_pin_state( GPIOB, GPIO_Pin_14, state );
 			break;
 
 		case LED_3:
-			HAL_BRD_set_pin_state( GPIOB, GPIO_Pin_15, state );
+			//HAL_BRD_set_pin_state( GPIOB, GPIO_Pin_15, state );
 			break;
 
 		default:
@@ -257,6 +293,31 @@ void HAL_BRD_set_LED_state( HAL_BRD_led_et led, off_on_et state )
 	}
 }
 
+
+/*!
+****************************************************************************************************
+*
+*   \brief         SETS the state of the NEO pixel pin
+*
+*   \author        MS
+*
+*   \return        None
+*
+***************************************************************************************************/
+#pragma GCC push_options
+#pragma GCC optimize ("O3")
+void HAL_BRD_set_NEOpixel_state( low_high_et state )
+{
+	if( state == HIGH )
+	{
+		HAL_BRD_set_pin_state( GPIOA, GPIO_Pin_12, state );
+	}
+	else
+	{
+		HAL_BRD_set_pin_state( GPIOA, GPIO_Pin_12, state );
+	}
+}
+#pragma GCC pop_options
 
 
 /*!
@@ -489,6 +550,49 @@ disable_enable_et HAL_BRD_read_debug_pin( void )
 
 
 
+
+/*!
+****************************************************************************************************
+*
+*   \brief         Reads the state of the rotary clock pin
+*
+*   \author        MS
+*
+*   \return        low_high_et state of the pin
+*
+***************************************************************************************************/
+low_high_et HAL_BRD_read_rotary_clock_pin( void )
+{
+    low_high_et state = LOW;
+
+    state = HAL_BRD_read_pin_state( GPIOA, GPIO_Pin_11 );
+
+    return( state );
+}
+
+/*!
+****************************************************************************************************
+*
+*   \brief         Reads the state of the rotary data pin
+*
+*   \author        MS
+*
+*   \return        low_high_et state of the pin
+*
+***************************************************************************************************/
+low_high_et HAL_BRD_read_rotary_data_pin( void )
+{
+    low_high_et state = LOW;
+
+    state = HAL_BRD_read_pin_state( GPIOA, GPIO_Pin_8 );
+
+    return( state );
+}
+
+
+
+
+
 /*!
 ****************************************************************************************************
 *
@@ -506,19 +610,19 @@ low_high_et HAL_BRD_read_selector_switch_pin( HAL_BRD_switch_slider_et slider )
     switch ( slider )
     {
         case SLIDER_1:
-            state = HAL_BRD_read_pin_state( GPIOB, GPIO_Pin_12 );
+            state = HAL_BRD_read_pin_state( GPIOB, GPIO_Pin_6 );
         break;
 
         case SLIDER_2:
-            state = HAL_BRD_read_pin_state( GPIOB, GPIO_Pin_13 );
+            state = HAL_BRD_read_pin_state( GPIOB, GPIO_Pin_7 );
         break;
 
         case SLIDER_3:
-            state = HAL_BRD_read_pin_state( GPIOB, GPIO_Pin_14 );
+            state = HAL_BRD_read_pin_state( GPIOB, GPIO_Pin_8 );
         break;
 
         case SLIDER_4:
-            state = HAL_BRD_read_pin_state( GPIOB, GPIO_Pin_15 );
+            state = HAL_BRD_read_pin_state( GPIOB, GPIO_Pin_9 );
         break;
 
         default:
@@ -527,6 +631,67 @@ low_high_et HAL_BRD_read_selector_switch_pin( HAL_BRD_switch_slider_et slider )
     return ( state );
 }
 
+
+
+/*!
+****************************************************************************************************
+*
+*   \brief         This gets called after the timer has debounced the LOGIC for the Rotary encoder
+*
+*   \author        MS
+*
+*   \return        low_high_et
+*
+***************************************************************************************************/
+void HAL_BRD_debounce_completed( void )
+{
+	//HAL_BRD_toggle_led();
+
+	/* Read the clock and data pin again */
+	HAL_BRD_rotary_data = HAL_BRD_read_rotary_data_pin();
+	HAL_BRD_rotary_clock = HAL_BRD_read_rotary_clock_pin();
+
+	/* Check to make sure that the pin is the same state as it was in the ISR */
+	if( HAL_BRD_prev_rotary_clock == HAL_BRD_rotary_clock )
+	{
+		/* Both the previous state and the current state are the same value and have been
+		 * for at least 1ms so this is a valid pin transition
+		 */
+		if( trigger == EXTI_Trigger_Falling )
+		{
+			trigger = EXTI_Trigger_Rising;
+
+			/* Check to make sure that the pin is the same state as it was in the ISR */
+			if( HAL_BRD_rotary_data == HAL_BRD_prev_rotary_data )
+			{
+				ROTARY_evaluate_signals( HAL_BRD_rotary_clock, HAL_BRD_rotary_data );
+			}
+			else
+			{
+				/* do nothing */
+				assert(1);
+			}
+		}
+		else
+		{
+			trigger = EXTI_Trigger_Falling;
+		}
+	}
+	else
+	{
+		/* The pins are not the same state for at least 1ms so this
+		 * is probably a glitch that needs debounced ta fuck */
+	}
+
+	EXTI_InitStruct.EXTI_Line = EXTI_Line11 ;
+	EXTI_InitStruct.EXTI_LineCmd = ENABLE;
+	EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt ;
+	EXTI_InitStruct.EXTI_Trigger = trigger;
+	EXTI_Init(&EXTI_InitStruct);
+
+	//HAL_BRD_toggle_led();
+
+}
 
 /*!
 ****************************************************************************************************
@@ -570,15 +735,34 @@ void HAL_BRD_set_rtc_trigger_status( false_true_et state )
 
 void HAL_BRD_set_heater_state( off_on_et state )
 {
-	HAL_BRD_set_LED_state( LED_0, state );
+	HAL_BRD_set_LED_state( LED_3, state );
 }
 
 
 void HAL_BRD_set_cooler_state( off_on_et state )
 {
-	HAL_BRD_set_LED_state( LED_1, state );
+	HAL_BRD_set_LED_state( LED_3, state );
 }
 
+
+void HAL_BRD_set_ROTARY_interrupt_state( disable_enable_et state )
+{
+	if( state == ENABLE_ )
+	{
+		EXTI_InitStruct.EXTI_Line = EXTI_Line11 ;
+		EXTI_InitStruct.EXTI_LineCmd = ENABLE;
+		EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt ;
+		EXTI_InitStruct.EXTI_Trigger = trigger;
+		EXTI_Init(&EXTI_InitStruct);
+	}
+	else
+	{
+		EXTI_InitStruct.EXTI_Line = EXTI_Line11 ;
+		EXTI_InitStruct.EXTI_LineCmd = DISABLE;
+		EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt;
+		EXTI_Init(&EXTI_InitStruct);
+	}
+}
 
 
 /*!
@@ -670,6 +854,8 @@ void EXTI1_IRQHandler(void)
 /* Handle PB12 interrupt */
 void EXTI15_10_IRQHandler(void)
 {
+	HAL_BRD_toggle_led();
+
 	/* Make sure that interrupt flag is set */
 	if ( EXTI_GetFlagStatus(EXTI_Line15) != RESET )
 	{
@@ -677,6 +863,111 @@ void EXTI15_10_IRQHandler(void)
 		/* Clear interrupt flag */
 		EXTI_ClearITPendingBit(EXTI_Line15);
 	}
+
+	if ( EXTI_GetFlagStatus(EXTI_Line11) != RESET )
+	{
+		/* Clear interrupt flag */
+		EXTI_ClearITPendingBit(EXTI_Line11);
+
+		/* grab the currect state of the data pin */
+		HAL_BRD_prev_rotary_data = HAL_BRD_read_rotary_data_pin();
+
+		/* Now we keep track of the interrupt edge */
+		if( trigger == EXTI_Trigger_Falling )
+		{
+			HAL_BRD_prev_rotary_clock = LOW;
+		}
+		else
+		{
+			HAL_BRD_prev_rotary_clock = HIGH;
+		}
+
+		EXTI_InitStruct.EXTI_Line = EXTI_Line11 ;
+		EXTI_InitStruct.EXTI_LineCmd = DISABLE;
+		EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt;
+		EXTI_Init(&EXTI_InitStruct);
+
+		/* Start a timer to generate a callback in xms to debounce the LOGIC */
+		HAL_TIM2_start();
+		HAL_BRD_toggle_led();
+	}
 }
 
 
+
+
+void EXTI9_5_IRQHandler(void)
+{
+	/* Make sure that interrupt flag is set */
+	if ( EXTI_GetFlagStatus(EXTI_Line5) != RESET )
+	{
+		/* Now we keep track of the interrupt edge */
+		/* Clear interrupt flag */
+		EXTI_ClearITPendingBit(EXTI_Line5);
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+void ROTARY_evaluate_signals( low_high_et clock, low_high_et data )
+{
+ 	if( ( clock == LOW ) && ( data == HIGH ) )
+	{
+ 		ROTARY_minus_cnt_s ++;
+	}
+	else if( ( clock == LOW ) && ( data == LOW ) )
+	{
+		ROTARY_plus_cnt_s ++;
+	}
+}
+
+
+/*!
+****************************************************************************************************
+*
+*   \brief         This is USER configurable and should call out to all modules that are relevant
+*                  to inform them of the current
+*
+*   \author        MS
+*
+*   \return        None
+*
+***************************************************************************************************/
+void ROTARY_tick( void )
+{
+	u16_t i = 0u;
+	u16_t left = ROTARY_minus_cnt_s;
+	u16_t right = ROTARY_plus_cnt_s;
+
+	/* Reset the current counts */
+	ROTARY_minus_cnt_s = 0u;
+	ROTARY_plus_cnt_s = 0u;
+
+	/* Handle all the left scrolls */
+	for( i = 0u; i < left; i++ )
+	{
+		NEOPIXEL_handle_rotary_input( ROTARY_LEFT_SCROLL );
+	}
+
+	/* Handle all the left scrolls */
+	for( i = 0u; i < right; i++ )
+	{
+		NEOPIXEL_handle_rotary_input( ROTARY_RIGHT_SCROLL );
+	}
+}

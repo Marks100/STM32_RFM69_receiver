@@ -1,7 +1,7 @@
 #ifndef CLI_H
 #define CLI_H
 
-#include "C_defs.h"
+
 
 
 #define CLI_MAX_INPUT_CHARS           40u
@@ -33,7 +33,7 @@
 #define HELP_VER                 "ver:               Returns the SW and HW versions of the WES\r\n"
 #define HELP_SET_MODE            "setmode:           Sets the operating mode of the device\r\n"
 #define HELP_RESET               "reset:             Resets CPU\r\n"
-#define HELP_NVM                 "readnvm:           Returns the current NVM info\r\n"
+#define HELP_NVM                 "nvm:               Returns the current NVM info\r\n"
 #define HELP_SET_ID              "setid:             Sets the ID of the device\r\n"
 #define HELP_CLOCKS				 "clocks:            Reads the values of the internal clocks\r\n"
 #define HELP_TEMP				 "temp:              Reads the internal temperature value of the device\r\n"
@@ -150,7 +150,6 @@ CLI_error_et clocks_handler( u8_t aArgCount, char *aArgVector[] );
 CLI_error_et temp_handler( u8_t aArgCount, char *aArgVector[] );
 CLI_error_et batt_handler( u8_t aArgCount, char *aArgVector[] );
 CLI_error_et listnodes_handler( u8_t aArgCount, char *aArgVector[] );
-CLI_error_et removenode_handler( u8_t aArgCount, char *aArgVector[] );
 CLI_error_et led_handler( u8_t aArgCount, char *aArgVector[] );
 CLI_error_et wl_add_handler( u8_t aArgCount, char *aArgVector[] );
 CLI_error_et wl_remove_handler( u8_t aArgCount, char *aArgVector[] );

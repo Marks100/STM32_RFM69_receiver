@@ -1,9 +1,12 @@
 #ifndef MODE_MGR_H
 #define MODE_MGR_H
 
+#include "HAL_BRD.h"
 
 #define MODE_MGR_MAX_TICK_CYCLE_VALUE 	1000u
 #define MODE_MGR_TICK_RATE_MSECS		20u
+#define MODE_MGR_NUM_SLIDER_INPUTS		4u
+#define MODE_MGR_SLIDER_DB_TICKS		5u
 
 #define COMMAND_1  ( 0 )
 #define COMMAND_2  ( 1 )
@@ -22,7 +25,6 @@
 #define COMMAND_15 ( 14 )
 #define COMMAND_16 ( 15 )
 
-
 typedef enum
 {
     MODE_MGR_MODE_NORMAL = 0u,
@@ -31,15 +33,24 @@ typedef enum
 } MODE_MGR_mode_et;
 
 
+typedef struct
+{
+	low_high_et slider_state_ll;
+	low_high_et slider_state_hl;
+	u8_t slider_debounce_time;
+} MODE_MGR_user_input_st;
+
 
 void MODE_MGR_init( void );
 void MODE_MGR_20ms_tick( void );
 void MODE_MGR_action_schedule_normal( void );
-void MODE_MGR_analyse_switches( void );
+void MODE_MGR_check_user_input( void );
 void MODE_MGR_change_mode( void );
 void MODE_MGR_handle_settings( void );
 MODE_MGR_mode_et MODE_MGR_get_mode( void );
-void MODE_MGR_action_selector_switch_changes( u8_t MODE_MGR_selector_switch_state_s );
+void MODE_MGR_action_selector_switch_changes( HAL_BRD_switch_slider_et slider, low_high_et state );
+disable_enable_et HEATING_get_state( void );
+void HEATING_set_state( disable_enable_et state );
 
 
 

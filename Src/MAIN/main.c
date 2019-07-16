@@ -8,10 +8,7 @@
 	#include "stm32f10x_iwdg.h"
 #endif
 
-#include "C_defs.h"
-#include "PROJ_config.h"
-#include "COMPILER_defs.h"
-#include "COMPILER_config.h"
+#include "STDC.h"
 #include "HAL_BRD.h"
 #include "HAL_ADC.h"
 #include "HAL_SPI.h"
@@ -21,6 +18,7 @@
 #include "RF_MGR.h"
 #include "HEATING.h"
 #include "nvm.h"
+#include "NEOPIXEL.h"
 #include "main.h"
 
 
@@ -46,19 +44,19 @@ int main(void)
 
 	/* Init the HW */
 	HAL_BRD_init();
-	HAL_I2C_init();
-	HAL_SPI_init();
+	HAL_SPI1_init();
 	CLI_init();
 
-    /* Start the timer to keep track of reception count */
-	HAL_TIM_1_init();
+	HAL_TIM2_init();
 
 	/* Initialise the RF MGR */
 	RF_MGR_init();
 
 	MODE_MGR_init();
 
-	HEATIING_init();
+	HEATING_init();
+
+	NEOPIXEL_int();
 
 	/* Init the systick timer */
 	MAIN_SYSTICK_init();

@@ -19,3 +19,7 @@ test/rakefile.rb
 test/build/
 Workspace/STM32_RF_HUB/
 Workspace/STM32_RF_HUB.comarker
+Src/latex/
+Src/html/
+Tool_cfg/Doxygen/
+doc/doxygen/

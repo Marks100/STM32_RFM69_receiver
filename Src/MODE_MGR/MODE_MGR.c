@@ -12,24 +12,35 @@
 #include "CLI.h"
 #include "RFM69.h"
 #include "HAL_UART.h"
+#include "NEOPIXEL.h"
 
 
 STATIC false_true_et 		   MODE_MGR_system_init_s;
 STATIC u32_t 			       MODE_MGR_tick_timer_msecs_s;
 STATIC MODE_MGR_mode_et        MODE_MGR_mode_s;
-STATIC u8_t                    MODE_MGR_selector_switch_state_s;
 STATIC u8_t                    MODE_MGR_debounce_ctr_s;
+
+STATIC MODE_MGR_user_input_st  MODE_MGR_user_input_s[MODE_MGR_NUM_SLIDER_INPUTS];
 extern NVM_info_st NVM_info_s;
 
 
 
 void MODE_MGR_init( void )
 {
+	u8_t i = 0u;
+
 	MODE_MGR_tick_timer_msecs_s = MODE_MGR_TICK_RATE_MSECS;
 	MODE_MGR_mode_s = MODE_MGR_MODE_NORMAL;
 	MODE_MGR_system_init_s = FALSE;
-	MODE_MGR_selector_switch_state_s = 0u;
 	MODE_MGR_debounce_ctr_s = 0xFF;
+
+	STDC_memset( &MODE_MGR_user_input_s, 0x00, sizeof( MODE_MGR_user_input_s ) );
+
+	for( i = 0u; i < MODE_MGR_NUM_SLIDER_INPUTS; i++ )
+	{
+		/* Need to set the high level state initial on reset, so just read the current state of the selector switches */
+		MODE_MGR_user_input_s[i].slider_state_hl = HAL_BRD_read_selector_switch_pin( (HAL_BRD_switch_slider_et)i );
+	}
 }
 
 
@@ -69,223 +80,225 @@ void MODE_MGR_action_schedule_normal( void )
 {
     NRF24_tick();
     CLI_message_handler();
-    HEATING_tick();
+    MODE_MGR_check_user_input();
+    NEOPIXEL_tick();
 
     switch( MODE_MGR_tick_timer_msecs_s )
     {
         case 20u:
+        	ROTARY_tick();
         	break;
 
         case 40u:
-            //RFM69_tick();
+            HEATING_tick();
         	break;
 
         case 60u:
-            //MODE_MGR_analyse_switches();
+        	ROTARY_tick();
         	break;
 
         case 80u:
         	NVM_tick();
-        	//RFM69_tick();
         	break;
 
         case 100u:
         	MAIN_WATCHDOG_kick();
             RF_MGR_tick();
+        	ROTARY_tick();
         	break;
 
         case 120u:
-            //RFM69_tick();
         	break;
 
         case 140u:
+            HEATING_tick();
+        	ROTARY_tick();
         	break;
 
         case 160u:
-            //RFM69_tick();
-            //MODE_MGR_analyse_switches();
         	break;
 
         case 180u:
         	NVM_tick();
+        	ROTARY_tick();
         	break;
 
         case 200u:
         	MAIN_WATCHDOG_kick();
-            //RFM69_tick();
             RF_MGR_tick();
         	break;
 
-        case 220u://RFM69_tick
+        case 220u:
+        	ROTARY_tick();
         	break;
 
         case 240u:
-            //RFM69_tick();
+            HEATING_tick();
         	break;
 
         case 260u:
-            //MODE_MGR_analyse_switches();
+        	ROTARY_tick();
         	break;
 
         case 280u:
         	NVM_tick();
-        	//RFM69_tick();
         	break;
 
         case 300u:
         	MAIN_WATCHDOG_kick();
             RF_MGR_tick();
+        	ROTARY_tick();
         	break;
 
         case 320u:
-            //RFM69_tick();
         	break;
 
         case 340u:
+            HEATING_tick();
+        	ROTARY_tick();
         	break;
 
         case 360u:
-            //RFM69_tick();
-            //MODE_MGR_analyse_switches();
         	break;
 
         case 380u:
         	NVM_tick();
+        	ROTARY_tick();
         	break;
 
         case 400u:
         	MAIN_WATCHDOG_kick();
             RF_MGR_tick();
-            //RFM69_tick();
         	break;
 
         case 420u:
+        	ROTARY_tick();
         	break;
 
         case 440u:
-            //RFM69_tick();
+            HEATING_tick();
         	break;
 
         case 460u:
-            //MODE_MGR_analyse_switches();
+        	ROTARY_tick();
         	break;
 
         case 480u:
         	NVM_tick();
-        	//RFM69_tick();
         	break;
 
         case 500u:
         	MAIN_WATCHDOG_kick();
             RF_MGR_tick();
+        	ROTARY_tick();
         	break;
 
         case 520u:
-            //RFM69_tick();
         	break;
 
         case 540u:
+            HEATING_tick();
+        	ROTARY_tick();
         	break;
 
         case 560u:
-            //RFM69_tick();
-            //MODE_MGR_analyse_switches();
         	break;
 
         case 580u:
         	NVM_tick();
+        	ROTARY_tick();
         	break;
 
         case 600u:
         	MAIN_WATCHDOG_kick();
-            //RFM69_tick();
             RF_MGR_tick();
         	break;
 
         case 620u:
+        	ROTARY_tick();
         	break;
 
         case 640u:
-            //RFM69_tick();
+            HEATING_tick();
         	break;
 
         case 660u:
-           // MODE_MGR_analyse_switches();
+        	ROTARY_tick();
         	break;
 
         case 680u:
         	NVM_tick();
-        	//RFM69_tick();
         	break;
 
         case 700u:
         	MAIN_WATCHDOG_kick();
             RF_MGR_tick();
+        	ROTARY_tick();
         	break;
 
         case 720u:
-            //RFM69_tick();
         	break;
 
         case 740u:
+            HEATING_tick();
+        	ROTARY_tick();
         	break;
 
         case 760u:
-            //RFM69_tick();
-            //MODE_MGR_analyse_switches();
         	break;
 
         case 780u:
         	NVM_tick();
+        	ROTARY_tick();
         	break;
 
         case 800u:
         	MAIN_WATCHDOG_kick();
             RF_MGR_tick();
-            //RFM69_tick();
         	break;
 
         case 820u:
+        	ROTARY_tick();
         	break;
 
         case 840u:
-            //RFM69_tick();
+            HEATING_tick();
         	break;
 
         case 860u:
-            //MODE_MGR_analyse_switches();
+        	ROTARY_tick();
         	break;
 
         case 880u:
         	NVM_tick();
-        	//RFM69_tick();
         	break;
 
         case 900u:
         	MAIN_WATCHDOG_kick();
             RF_MGR_tick();
+        	ROTARY_tick();
         	break;
 
         case 920u:
-            //RFM69_tick();
         	break;
 
         case 940u:
+            HEATING_tick();
+        	ROTARY_tick();
         	break;
 
         case 960u:
-            //RFM69_tick();
-            //MODE_MGR_analyse_switches();
+        	RF_MGR_analyse_fault_conditions();
         	break;
 
         case 980u:
         	NVM_tick();
+        	ROTARY_tick();
         	break;
 
         case 1000u:
         	MAIN_WATCHDOG_kick();
             RF_MGR_tick();
-            //RFM69_tick();
 
             /* keep track of time in secs */
             HAL_TIM_increment_secs();
@@ -336,58 +349,79 @@ void MODE_MGR_change_mode( void )
 
 
 
-void MODE_MGR_analyse_switches( void )
+
+void MODE_MGR_action_selector_switch_changes( HAL_BRD_switch_slider_et slider, low_high_et state )
 {
-    u8_t i;
-    u8_t slider_mask = 0;
+	switch ( slider )
+	{
+		case SLIDER_1:
+			if( HEATING_get_state() == ENABLE_ )
+			{
+				HEATING_set_state( DISABLE_ );
+			}
+			else
+			{
+				HEATING_set_state( ENABLE_ );
+			}
+			break;
 
-    /* Loop through all the positions and analyse them */
-    for( i = SLIDER_1; i < SLIDER_MAX; i ++ )
-    {
-        slider_mask |= ( HAL_BRD_read_selector_switch_pin( (HAL_BRD_switch_slider_et)i ) << i );
-    }
 
-    if( ( MODE_MGR_selector_switch_state_s & SELECTOR_MODE_BIT_MASK ) != ( slider_mask & SELECTOR_MODE_BIT_MASK ) )
-    {
-        /* selector switch positions have changed */
-        MODE_MGR_selector_switch_state_s = slider_mask;
+		case SLIDER_2:
+			/* This switch has changed state, we dont care what the actual state is ( high or low ) 0 as long as we detect a change */
+			if( HEATING_get_mode() == HEATING_HEAT_MODE )
+			{
+				HEATING_set_mode( HEATING_COOL_MODE );
+			}
+			else
+			{
+				HEATING_set_mode( HEATING_HEAT_MODE );
+			}
+			break;
 
-        MODE_MGR_debounce_ctr_s = 0u;
-    }
-
-    /* Rudementary debounce mechanism */
-    if( MODE_MGR_debounce_ctr_s != 0xFF )
-    {
-        if( MODE_MGR_debounce_ctr_s >= 4 )
-        {
-            MODE_MGR_debounce_ctr_s = 0xFF;
-
-            MODE_MGR_action_selector_switch_changes( MODE_MGR_selector_switch_state_s );
-        }
-        else
-        {
-        	MODE_MGR_debounce_ctr_s ++;
-        }
-    }
+		default:
+			break;
+	}
 }
 
 
 
 
-void MODE_MGR_action_selector_switch_changes( u8_t MODE_MGR_selector_switch_state_s )
+void MODE_MGR_check_user_input( void )
 {
-    switch( MODE_MGR_selector_switch_state_s )
-    {
-        case COMMAND_1:
-            HAL_BRD_toggle_debug_pin();
-            break;
+	u8_t i = 0u;
 
-        default:
-            HAL_BRD_toggle_debug_pin();
-            break;
-    }
+	/* First read the low level state of the pins */
+	for( i = 0u; i < MODE_MGR_NUM_SLIDER_INPUTS; i++ )
+	{
+		MODE_MGR_user_input_s[i].slider_state_ll = HAL_BRD_read_selector_switch_pin( (HAL_BRD_switch_slider_et)i );
+
+		/* If the low level state is != the high level state then start the debounce */
+		if( MODE_MGR_user_input_s[i].slider_state_ll != MODE_MGR_user_input_s[i].slider_state_hl )
+		{
+			if( MODE_MGR_user_input_s[i].slider_debounce_time < U8_T_MAX )
+			{
+				MODE_MGR_user_input_s[i].slider_debounce_time++;
+			}
+		}
+		else
+		{
+			MODE_MGR_user_input_s[i].slider_debounce_time = 0u;
+		}
+	}
+
+	/* Now check if the debounce times have been elapsed */
+	for( i = 0u; i < MODE_MGR_NUM_SLIDER_INPUTS; i++ )
+	{
+		if( MODE_MGR_user_input_s[i].slider_debounce_time >= MODE_MGR_SLIDER_DB_TICKS )
+		{
+			/* Toggle the high level state */
+			MODE_MGR_user_input_s[i].slider_state_hl ^= 1u;
+			MODE_MGR_user_input_s[i].slider_debounce_time = 0u;
+
+			MODE_MGR_action_selector_switch_changes( (HAL_BRD_switch_slider_et)i, MODE_MGR_user_input_s[i].slider_state_hl );
+		}
+	}
 }
-
 
 
 
@@ -406,5 +440,14 @@ void MODE_MGR_set_system_init_status( false_true_et state )
 {
 	MODE_MGR_system_init_s = state;
 }
+
+
+
+
+
+
+
+
+
 
 

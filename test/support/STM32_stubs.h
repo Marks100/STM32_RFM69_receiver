@@ -1,3 +1,5 @@
+#ifndef STM32_STUBS_H
+#define STM32_STUBS_H
 
 typedef struct
 {
@@ -17,3 +19,6 @@ typedef enum
 typedef enum {DISABLE = 0, ENABLE = !DISABLE} FunctionalState;
 
 void asm( );
+
+
+#endif

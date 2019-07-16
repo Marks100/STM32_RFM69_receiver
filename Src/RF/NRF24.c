@@ -21,15 +21,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "C_defs.h"
 #include "STDC.h"
-#include "COMPILER_defs.h"
 #include "HAL_BRD.h"
 #include "HAL_SPI.h"
 #include "NVM.h"
 #include "CLI.h"
-#include "main.h"
 #include "RF_MGR.h"
+#include "main.h"
 #include "NRF24.h"
 #include "NRF24_Registers.h"
 
@@ -174,19 +172,19 @@ pass_fail_et NRF24_read_registers( NRF24_instruction_et instruction, NRF24_regis
     if( ( instruction == R_RX_PAYLOAD ) || ( instruction == R_RX_PL_WID ) )
     {
         /* Send the instruction as the address */
-        HAL_SPI_write_and_read_data( instruction );
+        HAL_SPI1_write_and_read_data( instruction );
     }
     else
     {
         /* Send the address */
-        HAL_SPI_write_and_read_data( address );
+        HAL_SPI1_write_and_read_data( address );
     }
 
     /* Writes data to chip */
     for( i = 0; i < num_bytes; i++ )
     {
         /* send dummy byte to force readback */
-        read_data[ i ] = (u8_t)HAL_SPI_write_and_read_data( 0xFF );
+        read_data[ i ] = (u8_t)HAL_SPI1_write_and_read_data( 0xFF );
     }
 
     /* pull NCS / Slave Select line high */
@@ -235,24 +233,24 @@ pass_fail_et NRF24_write_registers( NRF24_instruction_et instruction, NRF24_regi
         modified_address = address | NRF24_WRITE_BIT;
 
         /* Send register address */
-        HAL_SPI_write_and_read_data( modified_address );
+        HAL_SPI1_write_and_read_data( modified_address );
     }
     else if( instruction == R_REGISTER )
     {
         /* Send register address */
-        HAL_SPI_write_and_read_data( address );
+        HAL_SPI1_write_and_read_data( address );
     }
     else
     {
         /* These registers are the instructions themselves,
         so instead of using the address, we write down the instruction */
-        HAL_SPI_write_and_read_data( instruction );
+        HAL_SPI1_write_and_read_data( instruction );
     }
 
     /* Write all data to chip */
     for( i = 0; i < num_bytes; i++ )
     {
-        HAL_SPI_write_and_read_data( write_data[ i ] );
+        HAL_SPI1_write_and_read_data( write_data[ i ] );
     }
 
      /* release NCS / Slave Select line high */
@@ -962,12 +960,12 @@ pass_fail_et NRF24_send_payload( void )
       NRF24_spi_slave_select( LOW );
 
       /* Send register address */
-      HAL_SPI_write_and_read_data( W_TX_PAYLOAD );
+      HAL_SPI1_write_and_read_data( W_TX_PAYLOAD );
 
       /* Write all the valid data to the TX_buffer */
       while( len -- )
       {
-          HAL_SPI_write_and_read_data( *buffer++ );
+          HAL_SPI1_write_and_read_data( *buffer++ );
       }
 
       if( dpl_enabled != ENABLE_ )
@@ -976,7 +974,7 @@ pass_fail_et NRF24_send_payload( void )
           transmission to make it up to 32 bytes */
           while( stuff_buffer_size -- )
           {
-              HAL_SPI_write_and_read_data( 0x00 );
+              HAL_SPI1_write_and_read_data( 0x00 );
           }
       }
 
@@ -1048,13 +1046,13 @@ pass_fail_et NRF24_get_payload( u8_t* buffer )
     NRF24_spi_slave_select( LOW );
 
     /* Send register address */
-    HAL_SPI_write_and_read_data( R_RX_PAYLOAD );
+    HAL_SPI1_write_and_read_data( R_RX_PAYLOAD );
 
     /* Write all the valid data to the TX_buffer */
 
     while( buffer_size -- )
     {
-         *buffer++ = HAL_SPI_write_and_read_data( 0xAA );
+         *buffer++ = HAL_SPI1_write_and_read_data( 0xAA );
     }
 
      /* release NCS / Slave Select line high */
@@ -1389,11 +1387,11 @@ pass_fail_et NRF24_setup_dynamic_ack( disable_enable_et state )
 void NRF24_tick( void )
 {
     /* Need to make sure that the SPI interface is initialised */
-    if( HAL_SPI_get_init_status() == FALSE )
+    if( HAL_SPI1_get_init_status() == FALSE )
     {
         /* it is not initialised so do that now, Need to check that the UART isnt currently using the
         hardware pins before we do any initialisation */
-        HAL_SPI_init();
+        HAL_SPI1_init();
     }
 
     /* The SPI module is initialised so we can carry out the RF task */
@@ -1524,8 +1522,6 @@ void NRF24_tick( void )
 				/* The first byte in every RF frame is random and needs to be discarded */
 				RF_MGR_packet_received_event( &NRF24_tx_rx_payload_info_s.NRF24_rx_rf_payload[1], 31u );
 
-                HAL_BRD_toggle_led();
-
 				/* we may have received a packet !!!!!!*/
 				NRF24_status_register_clr_bit( RX_DR );
 
@@ -1552,8 +1548,6 @@ void NRF24_tick( void )
                     NRF24_tx_rx_payload_info_s.NRF24_rx_payload_ctr = 0u;
                     NRF24_tx_rx_payload_info_s.NRF24_rx_missed_packets = 0u;
                 }
-
-                 HAL_BRD_toggle_led();
             }
         }
         break;
@@ -1741,8 +1735,6 @@ void NRF24_handle_acks_and_tx_failures( void )
     {
         /* Clear the Data sent bit or else we cant send any more data */
         NRF24_status_register_clr_bit( TX_DS );
-
-        HAL_BRD_toggle_led();
 
         NRF24_handle_packet_stats( 1 );
     }

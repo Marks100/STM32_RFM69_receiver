@@ -348,10 +348,10 @@ pass_fail_et RFM69_read_registers( RFM69_instruction_et instruction, RFM69_regis
     u8_t i = 0;
 
     /* Need to make sure that the SPI interface is initialised */
-    if( HAL_SPI_get_init_status() == FALSE )
+    if( HAL_SPI1_get_init_status() == FALSE )
     {
         /* it is not initialised so do that now */
-    	HAL_SPI_init();
+    	HAL_SPI1_init();
     }
 
     /* Instruction and address looks good so carry out the read */
@@ -371,7 +371,7 @@ pass_fail_et RFM69_read_registers( RFM69_instruction_et instruction, RFM69_regis
         HAL_BRD_RFM69_spi_slave_select( LOW );
 
         /* Send the address */
-        HAL_SPI_write_and_read_data( address );
+        HAL_SPI1_write_and_read_data( address );
 
         if( instruction == READ_FROM_CHIP )
         {
@@ -383,7 +383,7 @@ pass_fail_et RFM69_read_registers( RFM69_instruction_et instruction, RFM69_regis
         for( i = 0; i < num_bytes; i++ )
         {
             /* send dummy byte to force readback */
-            read_data[ i ] = (u8_t)HAL_SPI_write_and_read_data( 0xFF );
+            read_data[ i ] = (u8_t)HAL_SPI1_write_and_read_data( 0xFF );
         }
 
         /* pull NCS / Slave Select line high */
@@ -444,7 +444,7 @@ pass_fail_et RFM69_write_registers( RFM69_instruction_et instruction, RFM69_regi
         modified_address = ( address | RFM69_WRITE_ACCESS );
 
         /* Send register address */
-        HAL_SPI_write_and_read_data( modified_address );
+        HAL_SPI1_write_and_read_data( modified_address );
 
         if( instruction == WRITE_TO_CHIP )
         {
@@ -459,12 +459,12 @@ pass_fail_et RFM69_write_registers( RFM69_instruction_et instruction, RFM69_regi
         {
         	if(  instruction == WRITE_TO_CHIP_BURST_MODE_CONF )
         	{
-        		HAL_SPI_write_and_read_data( write_data[ j ] );
+        		HAL_SPI1_write_and_read_data( write_data[ j ] );
 				j += 2;
         	}
         	else
         	{
-        		HAL_SPI_write_and_read_data( write_data[ i ] );
+        		HAL_SPI1_write_and_read_data( write_data[ i ] );
         	}
         }
 

@@ -1,22 +1,18 @@
 #ifndef NVM_H
 #define NVM_H
 
-#include "COMPILER_defs.h"
-#include "COMPILER_config.h"
 #include "C_defs.h"
 #include "CLI.h"
 #include "RF_MGR.h"
 #include "NRF24.h"
+#include "HEATING.h"
 #include "RFM69.h"
 
 /***************************************************************************************************
 **                              Defines                                                          **
 ***************************************************************************************************/
-//#define NVM_FLASH_PTR_START_ADDR     ((u32_t)0x800FC00)
-//#define NVM_FLASH_PTR_END_ADDR		 ((u32_t)0x8010000)
-
-#define NVM_FLASH_PTR_START_ADDR     ((u32_t)0x801C800)
-#define NVM_FLASH_PTR_END_ADDR		 ((u32_t)0x801CC00)
+#define NVM_FLASH_PTR_START_ADDR     ((u32_t)0x801FC00)
+#define NVM_FLASH_PTR_END_ADDR		 ((u32_t)0x801FFFF)
 
 #define MAX_NUM_FLASH_BYTES       256u
 #define CRC_BYTE                  255u
@@ -64,6 +60,12 @@ typedef struct
     CLI_cmd_st cmd_list[CLI_MAX_COMMAND_HISTORY];
     u16_t rf_whitelist[RF_MGR_RF_DATA_HANDLER_SIZE];
     disable_enable_et whitelist_state;
+    HEATING_mode_et heating_mode;
+    float cool_max_temp;
+    float cool_min_temp;
+    float heat_max_temp;
+    float heat_min_temp;
+
 } NVM_generic_data_blk_st;
 
 
@@ -95,6 +97,7 @@ extern NVM_info_st NVM_info_s;
 void NVM_init(void);
 void NVM_request_flush(void);
 NVM_module_state_et NVM_get_status( void );
+void NVM_set_override_state( void );
 void NVM_tick( void );
 ok_nok_et NVM_check_blk_crc_and_version( void );
 false_true_et NVM_populate_blk_crc_and_version( void );
