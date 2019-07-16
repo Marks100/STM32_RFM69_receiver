@@ -244,7 +244,7 @@ build_clean:
 # ROM limits
 ROM_SIZE := $(shell awk '/rom/ { rom = strtonum($$9); exit; } END { print rom } ' $(STM32_LINKER_SCRIPT) )
 ROM_PERC_LIMIT := 80
-ROM_CALC_LIMIT := $(shell echo $$(($(ROM_SIZE) * $(ROM_PERC_LIMIT) / 100 )))
+ROM_CALC_LIMIT := $(shell echo $(($(ROM_SIZE) * $(ROM_PERC_LIMIT) / 100 )))
 
 # RAM limits
 RAM_SIZE := $(shell awk '/ram/ { ram = strtonum($$9); exit; } END { print ram } ' $(STM32_LINKER_SCRIPT) )
@@ -297,7 +297,6 @@ test:
 	@echo "abspath = $(abspath $(ttt))"
 	@echo "name = $(basename $(notdir $(ttt)))"
 	test_MODE_MGR.test
-
 	
 
 
@@ -317,7 +316,7 @@ release_package:
 	@echo "--> Copying test results to $(RELEASE_PACKAGE_NAME) folder.."
 	@cp -r $(CEEDLING_GCOV_DIR) $(RELEASE_PACKAGE_NAME)
 	@echo "--> Running doxygen..."
-	@$(MAKE) -s doxygen
+	#@$(MAKE) -s doxygen
 	@echo "--> Copying doxygen output to $(RELEASE_PACKAGE_NAME) folder.."
 	@cp -r $(DOXYGEN_OUTPUT) $(RELEASE_PACKAGE_NAME)
 	@echo "--> Copying version file info to $(RELEASE_PACKAGE_NAME) folder.."

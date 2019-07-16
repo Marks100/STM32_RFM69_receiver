@@ -816,71 +816,30 @@ CLI_error_et listnodes_handler( u8_t aArgCount, char *aArgVector[] )
 	CLI_error_et error = CLI_ERROR_NONE;
 	char output_string[200];
 
-	u8_t num_node = 0u;
+	u8_t node_idx = 0u;
+	u8_t num_nodes = 0u;
+
 	RF_MGR_rf_data_store_st* node_id_p;
 
 	CLI_send_newline();
 
 	node_id_p = RF_MGR_get_all_decoded_IDs_address();
 
-	for( num_node = 0; num_node < RF_MGR_RF_DATA_HANDLER_SIZE; num_node++ )
+	for( node_idx = 0; node_idx < RF_MGR_RF_DATA_HANDLER_SIZE; node_idx++ )
 	{
-		sprintf( output_string, "Node ID %02d:\t0x%04X\r\n", num_node, node_id_p->data_packet_s[num_node].node_id );
+		if( node_id_p->data_packet_s[node_idx].node_id != 0x0000 )
+		{
+			num_nodes ++;
+		}
+		sprintf( output_string, "Node ID %02d:\t0x%04X\r\n", node_idx, node_id_p->data_packet_s[node_idx].node_id );
 		CLI_send_data( output_string, strlen(output_string));
 		STDC_memset( output_string, 0x20, sizeof( output_string ) );
 	}
 
-	sprintf( output_string, "Num Free Nodes:\t%02d\r\n", ( RF_MGR_RF_DATA_HANDLER_SIZE - num_node ) );
+	sprintf( output_string, "Num Free Nodes:\t%02d\r\n", ( RF_MGR_RF_DATA_HANDLER_SIZE - num_nodes ) );
 	CLI_send_data( output_string, strlen(output_string));
 	CLI_send_newline();
 	STDC_memset( output_string, 0x20, sizeof( output_string ) );
-
-	return( error );
-}
-
-
-CLI_error_et remove_wl_node_handler( u8_t aArgCount, char *aArgVector[] )
-{
-	CLI_error_et error = CLI_ERROR_NONE;
-	char output_string[200];
-	pass_fail_et status = FAIL;
-	u16_t id = 0u;
-	RF_MGR_whitelist_st* data_p;
-	u8_t nodes;
-
-	/* What ID is the user trying to remove */
-	id = strtoul( aArgVector[1], NULL, 16 );
-
-	/* This function should handle everything */
-	status = RF_MGR_remove_wl_node( id );
-
-	CLI_send_newline();
-
-	if( status == PASS )
-	{
-		sprintf( output_string, "Node 0x%04X was located in the current whitelist and has now been removed...", id );
-		CLI_send_data( output_string, strlen(output_string));
-		CLI_send_newline();
-		STDC_memset( output_string, 0x20, sizeof( output_string ) );
-	}
-	else
-	{
-		sprintf( output_string, "Node 0x%04X has not been located in the whitelist!!!,\r\nHere is the current whitelist..", id );
-		CLI_send_data( output_string, strlen(output_string));
-		CLI_send_newline();
-		STDC_memset( output_string, 0x20, sizeof( output_string ) );
-
-		data_p = RF_MGR_get_whitelist_address();
-
-		/* Print the current list to the user so that they can see them and delete the correct node */
-		for( nodes = 0; nodes < RF_MGR_RF_DATA_HANDLER_SIZE; nodes++ )
-		{
-			sprintf( output_string, "Node ID %02d:\t0x%04X\r\n", nodes, data_p->id[nodes] );
-			CLI_send_data( output_string, strlen(output_string));
-			CLI_send_newline();
-			STDC_memset( output_string, 0x20, sizeof( output_string ) );
-		}
-	}
 
 	return( error );
 }
@@ -956,27 +915,32 @@ CLI_error_et wl_remove_handler( u8_t aArgCount, char *aArgVector[] )
 {
 	CLI_error_et error = CLI_ERROR_NONE;
 	char output_string[200];
-	pass_fail_et result;
-	u16_t id;
+	pass_fail_et status = FAIL;
+	u16_t id = 0u;
+	RF_MGR_whitelist_st* data_p;
+	u8_t nodes;
 
-	/* What ID are we trying to add */
+	/* What ID is the user trying to remove */
 	id = strtoul( aArgVector[1], NULL, 16 );
+
+	/* This function should handle everything */
+	status = RF_MGR_remove_wl_node( id );
 
 	CLI_send_newline();
 
-	result = RF_MGR_remove_wl_node( id );
-
-	if( result == PASS )
+	if( status == PASS )
 	{
-		sprintf( output_string, "Node ID 0x%04X successfully removed", id );
+		sprintf( output_string, "Node 0x%04X was located in the current whitelist and has now been removed...", id );
 		CLI_send_data( output_string, strlen(output_string));
 		CLI_send_newline();
+		STDC_memset( output_string, 0x20, sizeof( output_string ) );
 	}
 	else
 	{
-		sprintf( output_string, "Failed to remove node ID 0x%04X", id );
+		sprintf( output_string, "Node 0x%04X has not been located in the whitelist!!!", id );
 		CLI_send_data( output_string, strlen(output_string));
 		CLI_send_newline();
+		STDC_memset( output_string, 0x20, sizeof( output_string ) );
 	}
 
 	return( error );
@@ -1042,6 +1006,8 @@ CLI_error_et savenvm_handler( u8_t aArgCount, char *aArgVector[] )
 	/* Force a write to nvm */
 	NVM_set_override_state();
 	NVM_request_flush();
+
+	CLI_send_newline();
 
 	sprintf( output_string, "NVM flush has been completed" );
 	CLI_send_data( output_string, strlen(output_string));
