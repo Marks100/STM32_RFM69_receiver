@@ -48,7 +48,7 @@ const char* CLI_err_string[ CLI_ERROR_MAX ] =
     "\r",
     "\r",
     "\r\nOperation failed\r\n",
-    "\r\nToo many arguments\r\n",
+    "\r\nInvalid number of arguments\r\n",
     "\r\nInvalid arguments\r\n",
     "\r\nCommand not supported\r\n",
     "\r\nCommand prohibited in this mode\r\n",
@@ -88,6 +88,8 @@ STATIC const CLI_Command_st CLI_commands[] =
 	 {"test",    	  &test_handler,	    HELP_TEST,	            SUPPORTED_FOR_ALL_MODES, ENABLE, 0, NULL_PARAM_LIST  },
 	 {"wlstate",      &wl_state_handler,	HELP_WL_STATE,	        SUPPORTED_FOR_ALL_MODES, ENABLE, 1, WL_STATE_CMD_PARAM_LIST },
 	 {"savenvm",      &savenvm_handler,	    HELP_SAVEMEVM,	        SUPPORTED_FOR_ALL_MODES, ENABLE, 0, NULL_PARAM_LIST  },
+	 {"acstate",      &ac_state_handler,	HELP_AC_STATE,	        SUPPORTED_FOR_ALL_MODES, ENABLE, 1, AC_STATE_CMD_PARAM_LIST },
+	 {"acmode",       &ac_mode_handler,	    HELP_AC_MODE,	        SUPPORTED_FOR_ALL_MODES, ENABLE, 1, AC_MODE_CMD_PARAM_LIST },
 	 {NULL,			  NULL,					NULL,					SUPPORTED_FOR_ALL_MODES, ENABLE, 0, NULL_PARAM_LIST  }
 };
 
@@ -436,7 +438,7 @@ CLI_error_et CLI_parse_cmd( char* message_string, u8_t* argumen_count, char *arg
 		{
 			if( ( calc_argumen_count ) >= max_num_args )
 			{
-				error = CLI_ERROR_INVALID_ARGS_MORE;
+				error = CLI_ERROR_INVALID_ARGS_NUM;
 				break;
 			}
 			argument_vector[calc_argumen_count++] = cmd;
@@ -460,9 +462,9 @@ CLI_error_et CLI_validate_arguments( u8_t aArgCount, char *aArgVector[], u8_t co
 	(void)min_arg_value;
 	(void)max_arg_value;
 
-	if( aArgCount > CLI_CMD_LINE_ARGS_MAX )
+	if( ( aArgCount > CLI_CMD_LINE_ARGS_MAX ) || ( aArgCount < CLI_commands[command_index].num_params ) )
 	{
-		error = CLI_ERROR_INVALID_ARGS_MORE;
+		error = CLI_ERROR_INVALID_ARGS_NUM;
 	}
 
 	if( error == CLI_ERROR_NONE)
@@ -594,29 +596,6 @@ CLI_error_et reset_handler( u8_t aArgCount, char *aArgVector[] )
 	return( error );
 }
 
-CLI_error_et readnvm_handler( u8_t aArgCount, char *aArgVector[] )
-{
-	CLI_error_et error = CLI_ERROR_NONE;
-	char output_string[200];
-	NVM_generic_data_blk_st* nvm_p = &(NVM_info_s.NVM_generic_data_blk_s);
-
-	STDC_memset(output_string, 0x00, sizeof(output_string));
-
-	sprintf( output_string, "/****** NVM data ******/\r\nChecksum:\t%X\r\nVersion:\t%d\r\nWrite count:\t%d",
-	NVM_info_s.checksum,
-	(int)NVM_info_s.version,
-	(int)NVM_info_s.write_count );
-	CLI_send_data( output_string, strlen(output_string));
-	CLI_send_newline();
-
-	STDC_memset(output_string, 0x00, sizeof(output_string));
-	sprintf( output_string, "%02X",
-	nvm_p->device_id );
-	CLI_send_data( output_string, strlen(output_string));
-	CLI_send_newline();
-
-	return( error );
-}
 
 CLI_error_et ver_handler( u8_t aArgCount, char *aArgVector[] )
 {
@@ -704,7 +683,7 @@ CLI_error_et nvm_handler( u8_t aArgCount, char *aArgVector[] )
 
 
 	STDC_memset( output_string, 0x00, sizeof( output_string ) );
-	sprintf( output_string, "/* Stored CLI commands */" );
+	sprintf( output_string, "/*** Stored CLI commands ***/" );
 	CLI_send_data( output_string, strlen(output_string));
 	CLI_send_newline();
 
@@ -735,7 +714,7 @@ CLI_error_et nvm_handler( u8_t aArgCount, char *aArgVector[] )
 	CLI_send_newline();
 
 	STDC_memset( output_string, 0x00, sizeof( output_string ) );
-	sprintf( output_string, "/* Thermostat */" );
+	sprintf( output_string, "/*** AIRCON ***/" );
 	CLI_send_data( output_string, strlen(output_string));
 	CLI_send_newline();
 
@@ -760,6 +739,16 @@ CLI_error_et nvm_handler( u8_t aArgCount, char *aArgVector[] )
 		CLI_send_newline();
 
 	}
+
+	STDC_memset( output_string, 0x00, sizeof( output_string ) );
+	CLI_send_newline();
+
+	sprintf( output_string, "state:\t%d\r\nmode:\t%d",
+			NVM_info_s.NVM_generic_data_blk_s.aircon_state,
+			NVM_info_s.NVM_generic_data_blk_s.aircon_mode );
+	CLI_send_data( output_string, strlen(output_string));
+	CLI_send_newline();
+
 
 	return( error );
 }
@@ -917,8 +906,6 @@ CLI_error_et wl_remove_handler( u8_t aArgCount, char *aArgVector[] )
 	char output_string[200];
 	pass_fail_et status = FAIL;
 	u16_t id = 0u;
-	RF_MGR_whitelist_st* data_p;
-	u8_t nodes;
 
 	/* What ID is the user trying to remove */
 	id = strtoul( aArgVector[1], NULL, 16 );
@@ -994,6 +981,51 @@ CLI_error_et wl_state_handler( u8_t aArgCount, char *aArgVector[] )
 	CLI_send_data( output_string, strlen(output_string));
 	CLI_send_newline();
 	
+	return( error );
+}
+
+
+CLI_error_et ac_state_handler( u8_t aArgCount, char *aArgVector[] )
+{
+	CLI_error_et error = CLI_ERROR_NONE;
+	char output_string[200];
+	disable_enable_et state;
+
+	state = strtoul( aArgVector[1], NULL, 10 );
+
+	CLI_send_newline();
+
+	NVM_info_s.NVM_generic_data_blk_s.aircon_state = state;
+	AIRCON_set_state( state );
+
+	NVM_request_flush();
+
+	sprintf( output_string, "New aircon state - %d", state );
+	CLI_send_data( output_string, strlen(output_string));
+	CLI_send_newline();
+
+	return( error );
+}
+
+CLI_error_et ac_mode_handler( u8_t aArgCount, char *aArgVector[] )
+{
+	CLI_error_et error = CLI_ERROR_NONE;
+	char output_string[200];
+	AIRCON_mode_et mode;
+
+	mode = strtoul( aArgVector[1], NULL, 10 );
+
+	CLI_send_newline();
+
+	NVM_info_s.NVM_generic_data_blk_s.aircon_mode = mode;
+	AIRCON_set_mode( mode );
+
+	NVM_request_flush();
+
+	sprintf( output_string, "New aircon mode - %d", mode );
+	CLI_send_data( output_string, strlen(output_string));
+	CLI_send_newline();
+
 	return( error );
 }
 	

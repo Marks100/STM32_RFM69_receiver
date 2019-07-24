@@ -2,8 +2,6 @@
 #define CLI_H
 
 
-
-
 #define CLI_MAX_INPUT_CHARS           40u
 #define CLI_CMD_LINE_ARGS_MAX         6
 #define CLI_MAX_COMMAND_HISTORY       6
@@ -47,6 +45,8 @@
 #define HELP_WL_STATE            "wlstate:           Sets the state of the switelist < 0-Disable, 1-Enable >\r\n"
 #define HELP_TEST                "test:              Used for random tests\r\n"
 #define HELP_SAVEMEVM            "savenvm:           Requests a flush of the NVM data into flash memory\r\n"
+#define HELP_AC_STATE			 "acstate:           Sets the state of the aircon module < 0-Disable, 1-Enable >\r\n"
+#define HELP_AC_MODE 			 "acmode:            Sets the mode of the aircon module\r\n"
 
 #define NULL_PARAM_LIST { { 0, (u32_t)0x0000, (u32_t)0x0000 } }
 
@@ -62,12 +62,16 @@
 
 #define WL_STATE_CMD_PARAM_LIST { { 1,(u32_t)DISABLE_,(u32_t)ENABLE_ } }
 
+#define AC_STATE_CMD_PARAM_LIST { { 1,(u32_t)DISABLE_,(u32_t)ENABLE_ } }
+
+#define AC_MODE_CMD_PARAM_LIST { { 1,(u32_t)DISABLE_,(u32_t)ENABLE_ } }
+
 typedef enum
 {
     CLI_ERROR_NONE = 0,
     CLI_ERROR_EMPTY,
     CLI_ERROR_FAILED,
-    CLI_ERROR_INVALID_ARGS_MORE,
+    CLI_ERROR_INVALID_ARGS_NUM,
     CLI_ERROR_INVALID_ARGS,
     CLI_ERROR_NOT_SUPPORTED,
     CLI_ERROR_PROHIBITED,
@@ -157,6 +161,8 @@ CLI_error_et wl_display_handler( u8_t aArgCount, char *aArgVector[] );
 CLI_error_et test_handler( u8_t aArgCount, char *aArgVector[] );
 CLI_error_et wl_state_handler( u8_t aArgCount, char *aArgVector[] );
 CLI_error_et savenvm_handler( u8_t aArgCount, char *aArgVector[] );
+CLI_error_et ac_state_handler( u8_t aArgCount, char *aArgVector[] );
+CLI_error_et ac_mode_handler( u8_t aArgCount, char *aArgVector[] );
 
 
 #endif

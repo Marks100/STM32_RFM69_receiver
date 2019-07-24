@@ -5,7 +5,7 @@
 #include "CLI.h"
 #include "RF_MGR.h"
 #include "NRF24.h"
-#include "HEATING.h"
+#include "AIRCON.h"
 #include "RFM69.h"
 
 /***************************************************************************************************
@@ -60,7 +60,8 @@ typedef struct
     CLI_cmd_st cmd_list[CLI_MAX_COMMAND_HISTORY];
     u16_t rf_whitelist[RF_MGR_RF_DATA_HANDLER_SIZE];
     disable_enable_et whitelist_state;
-    HEATING_mode_et heating_mode;
+    AIRCON_mode_et aircon_mode;
+    disable_enable_et aircon_state;
     float cool_max_temp;
     float cool_min_temp;
     float heat_max_temp;

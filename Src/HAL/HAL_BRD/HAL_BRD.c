@@ -158,20 +158,14 @@ void HAL_BRD_init( void )
     HAL_BRD_set_onboard_LED( OFF );
 
 
-
 	HAL_BRD_rotary_clock = HIGH;
 	HAL_BRD_rotary_data = HIGH;
 	HAL_BRD_prev_rotary_clock = HIGH;
 	HAL_BRD_prev_rotary_data = HIGH;
     trigger = EXTI_Trigger_Falling;
 
-
-
-
-
     ROTARY_plus_cnt_s = 0u;
     ROTARY_minus_cnt_s = 0u;
-
 }
 
 
@@ -273,19 +267,19 @@ void HAL_BRD_set_LED_state( HAL_BRD_led_et led, off_on_et state )
 	switch( led )
 	{
 		case LED_0:
-			//HAL_BRD_set_pin_state( GPIOB, GPIO_Pin_12, state );
+			HAL_BRD_set_pin_state( GPIOB, GPIO_Pin_12, state );
 			break;
 
 		case LED_1:
-			//HAL_BRD_set_pin_state( GPIOB, GPIO_Pin_13, state );
+			HAL_BRD_set_pin_state( GPIOB, GPIO_Pin_13, state );
 			break;
 
 		case LED_2:
-			//HAL_BRD_set_pin_state( GPIOB, GPIO_Pin_14, state );
+			HAL_BRD_set_pin_state( GPIOB, GPIO_Pin_14, state );
 			break;
 
 		case LED_3:
-			//HAL_BRD_set_pin_state( GPIOB, GPIO_Pin_15, state );
+			HAL_BRD_set_pin_state( GPIOB, GPIO_Pin_15, state );
 			break;
 
 		default:
