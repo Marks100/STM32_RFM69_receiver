@@ -66,6 +66,7 @@ typedef struct
     float cool_min_temp;
     float heat_max_temp;
     float heat_min_temp;
+    float auto_target_temp;
 
 } NVM_generic_data_blk_st;
 

@@ -66,6 +66,7 @@ const NVM_generic_data_blk_st NVM_DEFAULT_GENERIC_DATA_BLK_s =
 	15.3f,
 	19.2f,
 	18.0f,
+	19.0f
 };
 
 
