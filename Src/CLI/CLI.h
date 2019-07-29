@@ -37,6 +37,7 @@
 #define HELP_TEMP				 "temp:              Reads the internal temperature value of the device\r\n"
 #define HELP_BATT				 "batt:              Reads the internal battery/supply voltoge of the device\r\n"
 #define HELP_LISTNODES			 "listnodes:         Lists all of the connected sensor node IDs\r\n"
+#define HELP_NODESTATS			 "nodestats:         Lists the status of all of the nodes\r\n"
 #define HELP_REMOVENODE          "removenode:        Removes a specific node from the list of connected nodes\r\n"
 #define HELP_LED                 "led:               <0..3> <0..1> Controls the leds\r\n"
 #define HELP_WL_ADD              "wladd:             Adds the ID of a node to the RF whitelist\r\n"
@@ -47,6 +48,7 @@
 #define HELP_SAVEMEVM            "savenvm:           Requests a flush of the NVM data into flash memory\r\n"
 #define HELP_AC_STATE			 "acstate:           Sets the state of the aircon module < 0-Disable, 1-Enable >\r\n"
 #define HELP_AC_MODE 			 "acmode:            Sets the mode of the aircon module\r\n"
+#define HELP_RF_DEBUG 			 "¬:                 Toggle the RF debug on/off\r\n"
 
 #define NULL_PARAM_LIST { { 0, (u32_t)0x0000, (u32_t)0x0000 } }
 
@@ -154,6 +156,7 @@ CLI_error_et clocks_handler( u8_t aArgCount, char *aArgVector[] );
 CLI_error_et temp_handler( u8_t aArgCount, char *aArgVector[] );
 CLI_error_et batt_handler( u8_t aArgCount, char *aArgVector[] );
 CLI_error_et listnodes_handler( u8_t aArgCount, char *aArgVector[] );
+CLI_error_et nodestat_handler( u8_t aArgCount, char *aArgVector[] );
 CLI_error_et led_handler( u8_t aArgCount, char *aArgVector[] );
 CLI_error_et wl_add_handler( u8_t aArgCount, char *aArgVector[] );
 CLI_error_et wl_remove_handler( u8_t aArgCount, char *aArgVector[] );
@@ -163,6 +166,8 @@ CLI_error_et wl_state_handler( u8_t aArgCount, char *aArgVector[] );
 CLI_error_et savenvm_handler( u8_t aArgCount, char *aArgVector[] );
 CLI_error_et ac_state_handler( u8_t aArgCount, char *aArgVector[] );
 CLI_error_et ac_mode_handler( u8_t aArgCount, char *aArgVector[] );
+CLI_error_et rf_dbg_out_handler( u8_t aArgCount, char *aArgVector[] );
+
 
 
 #endif
