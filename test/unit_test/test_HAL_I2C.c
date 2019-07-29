@@ -45,7 +45,6 @@ void tearDown(void)
 void test_init(void)
 {
 	HAL_I2C_init();
-
 }
 
 

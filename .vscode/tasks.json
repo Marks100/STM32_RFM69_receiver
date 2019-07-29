@@ -15,9 +15,19 @@
             "command": "mingw32-make.exe build_clean",
         },
         {
+            "label": "test",
+            "type": "shell",
+            "command": "mingw32-make.exe ${fileBasenameNoExtension}.test",
+        },
+        {
             "label": "test_all",
             "type": "shell",
-            "command": "mingw32-make.exe build_clean",
+            "command": "mingw32-make.exe test_all",
+        },
+        {
+            "label": "test_all_with_coverage",
+            "type": "shell",
+            "command": "mingw32-make.exe test_all_with_coverage",
         },
         {
             "label": "total_clean",
@@ -33,6 +43,11 @@
             "label": "release_package",
             "type": "shell",
             "command": "mingw32-make.exe release_package",
+        },
+        {
+            "label": "test",
+            "type": "shell",
+            "command": "echo ${env:TTLD}",
         },
     ]
 }

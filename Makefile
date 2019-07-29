@@ -127,8 +127,6 @@ test/vendor:
 
 # Wild card test will allow any test to run once the name is provided
 %.test: test/vendor
-	echo $@
-	echo ...
 	@$(eval TEST_FILE := $(subst .test,.c,$@))
 	@echo Testing $(TEST_FILE)...
 	cd test && rake test:$(TEST_FILE)

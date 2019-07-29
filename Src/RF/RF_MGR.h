@@ -130,6 +130,7 @@ void 					 RF_MGR_analyse_fault_conditions( void );
 void				     RF_MGR_set_dtc_state( u16_t node_index, RF_MGR_generic_dtc_et dtc, pass_fail_et state );
 void				     RF_MGR_set_dbg_output_state( disable_enable_et state );
 disable_enable_et 		 RF_MGR_get_dbg_output_state( void );
+disable_enable_et 		 RF_MGR_toggle_dbg_output_state( void );
 
 void 					 RF_MGR_display_controller_data( void );
 void 					 RF_MGR_handle_early_prototype_controller( u16_t sensor_id, u8_t* data_p, u32_t packet_count );

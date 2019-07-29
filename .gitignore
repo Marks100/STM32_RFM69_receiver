@@ -23,3 +23,5 @@ Src/latex/
 Src/html/
 Tool_cfg/Doxygen/
 doc/doxygen/
+test/CodeCoverage/
+BuildEnv/bin/templates/

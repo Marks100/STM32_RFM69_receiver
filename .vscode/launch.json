@@ -1,18 +1,38 @@
-// {
-//     "version": "0.2.0",
-//     "configurations": [
-
-//         {
-//             "type": "cortex-debug",
-//             "request": "launch",
-//             "servertype": "jlink",
-//             "cwd": "${workspaceRoot}",
-//             "executable": "./Build_output/STM32_RF_HUB.elf",
-//             "name": "Debug (J-Link)",
-//             "device": "STM32F103RB",
-//             "interface": "swd",
-//             "ipAddress": "null",
-//             "serialNumber": "null",
-//         }
-//     ]    
-// }
+{
+    "version": "0.2.0",
+    "configurations": 
+    [
+        {
+            "type": "cortex-debug",
+            "request": "launch",
+            "servertype": "jlink",
+            "cwd": "${workspaceRoot}",
+            "executable": "./Build_output/STM32_RF_HUB.elf",
+            "name": "Debug (J-Link)",
+            "device": "STM32F103RB",
+            "interface": "swd",
+            "ipAddress": "null",
+            "serialNumber": "null",
+        },
+        {
+            "name": "Ceedling Test Explorer Debug",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/test/build/test/out/${fileBasenameNoExtension}.cexe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "miDebuggerPath": "${env:TTLD}/MinGW/TDM32_492_0/bin/gdb.exe",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        }
+    ]    
+}
