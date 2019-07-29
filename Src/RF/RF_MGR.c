@@ -239,7 +239,10 @@ void RF_MGR_handle_early_prototype_sed( u16_t sensor_id, u8_t* data_p, u32_t pac
 
     AIRCON_set_oat( RF_MGR_sed_data_s.temperature / 10.0 );
 
-    RF_MGR_display_sed_data();
+	if( RF_MGR_get_dbg_output_state() == ENABLE_ )
+	{
+		RF_MGR_display_sed_data();
+	}
 }
 
 
@@ -268,7 +271,10 @@ void RF_MGR_handle_early_prototype_controller( u16_t sensor_id, u8_t* data_p, u3
 
 	AIRCON_decode_control_cmd( RF_MGR_controller_data_s.packet_type );
 
-    RF_MGR_display_controller_data();
+	if( RF_MGR_get_dbg_output_state() == ENABLE_ )
+	{
+    	RF_MGR_display_controller_data();
+	}
 }
 
 /*!
