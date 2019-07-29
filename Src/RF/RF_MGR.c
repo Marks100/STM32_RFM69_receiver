@@ -31,6 +31,7 @@ STATIC RF_MGR_sed_data_st	   RF_MGR_sed_data_s;
 STATIC RF_MGR_sed_data_st	   RF_MGR_controller_data_s;
 
 STATIC RF_MGR_whitelist_st	   RF_MGR_whitelist_s;
+STATIC Enable_disable_et	   RF_MGR_dbg_out_s;
 
 
 /***************************************************************************************************
@@ -597,6 +598,18 @@ RF_MGR_whitelist_st* RF_MGR_get_whitelist_address( void )
 void RF_MGR_set_whitelist_state( disable_enable_et state )
 {
 	RF_MGR_whitelist_s.state = state;
+}
+
+
+void RF_MGR_set_dbg_output_state( disable_enable_et state )
+{
+	RF_MGR_dbg_out_s = state;
+	NVM_info_s.NVM_generic_data_blk_s.rf_dbg_out = RF_MGR_whitelist_s.state;
+}
+
+disable_enable_et RF_MGR_get_dbg_output_state( void )
+{
+	return ( RF_MGR_dbg_out_s );
 }
 
 
