@@ -41,11 +41,13 @@ set COMMON_TOOLS=^
 %TTLD%\Uncrustify;^
 %TTLD%\ST\STM32 ST-LINK Utility\ST-LINK Utility;^
 %TTLD%\Graphviz\bin;^
+%TTLD%\VScode\bin;^
+%TTLD%\gcc-arm\bin;^
 %PROGFILES_PATH%\USB Redirector Client;^
 %PROGFILES_PATH%\TortoiseSVN\bin;^
 %PBCD%\bin;^
-%PBCD%\..\Scripts;^
-%TTLD%\gcc-arm\bin;
+%PBCD%\..\Scripts;
+
 
 :: Git path
 set GIT_PATH=%TTLD%\Git_x64\bin;%TTLD%\Git\bin

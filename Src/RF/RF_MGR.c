@@ -31,7 +31,7 @@ STATIC RF_MGR_sed_data_st	   RF_MGR_sed_data_s;
 STATIC RF_MGR_sed_data_st	   RF_MGR_controller_data_s;
 
 STATIC RF_MGR_whitelist_st	   RF_MGR_whitelist_s;
-STATIC Enable_disable_et	   RF_MGR_dbg_out_s;
+STATIC disable_enable_et	   RF_MGR_dbg_out_s;
 
 
 /***************************************************************************************************
@@ -72,6 +72,7 @@ void RF_MGR_init( void )
     }
 
     RF_MGR_whitelist_s.state = NVM_info_s.NVM_generic_data_blk_s.whitelist_state;
+	RF_MGR_dbg_out_s = NVM_info_s.NVM_generic_data_blk_s.rf_dbg_out;
 
     /* Initialise the NRF24 specific variables */
     NRF24_init();
@@ -606,11 +607,24 @@ void RF_MGR_set_whitelist_state( disable_enable_et state )
 	RF_MGR_whitelist_s.state = state;
 }
 
+disable_enable_et RF_MGR_toggle_dbg_output_state( void )
+{
+	if( RF_MGR_get_dbg_output_state() == ENABLE_ )
+	{
+		RF_MGR_set_dbg_output_state( DISABLE_ );
+	}
+	else
+	{
+		RF_MGR_set_dbg_output_state( ENABLE_ );
+	}
+	return( RF_MGR_dbg_out_s );
+}
+
 
 void RF_MGR_set_dbg_output_state( disable_enable_et state )
 {
 	RF_MGR_dbg_out_s = state;
-	NVM_info_s.NVM_generic_data_blk_s.rf_dbg_out = RF_MGR_whitelist_s.state;
+	NVM_info_s.NVM_generic_data_blk_s.rf_dbg_out = RF_MGR_dbg_out_s;
 }
 
 disable_enable_et RF_MGR_get_dbg_output_state( void )

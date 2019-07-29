@@ -1,0 +1,18 @@
+// {
+//     "version": "0.2.0",
+//     "configurations": [
+
+//         {
+//             "type": "cortex-debug",
+//             "request": "launch",
+//             "servertype": "jlink",
+//             "cwd": "${workspaceRoot}",
+//             "executable": "./Build_output/STM32_RF_HUB.elf",
+//             "name": "Debug (J-Link)",
+//             "device": "STM32F103RB",
+//             "interface": "swd",
+//             "ipAddress": "null",
+//             "serialNumber": "null",
+//         }
+//     ]    
+// }

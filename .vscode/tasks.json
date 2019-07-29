@@ -1,0 +1,38 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks":
+     [
+        {
+            "label": "all",
+            "type": "shell",
+            "command": "mingw32-make.exe all",
+        },
+        {
+            "label": "build_clean",
+            "type": "shell",
+            "command": "mingw32-make.exe build_clean",
+        },
+        {
+            "label": "test_all",
+            "type": "shell",
+            "command": "mingw32-make.exe build_clean",
+        },
+        {
+            "label": "total_clean",
+            "type": "shell",
+            "command": "mingw32-make.exe total_clean",
+        },
+        {
+            "label": "memory_stats",
+            "type": "shell",
+            "command": "mingw32-make.exe memory_stats",
+        },
+        {
+            "label": "release_package",
+            "type": "shell",
+            "command": "mingw32-make.exe release_package",
+        },
+    ]
+}

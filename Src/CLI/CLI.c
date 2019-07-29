@@ -91,7 +91,7 @@ STATIC const CLI_Command_st CLI_commands[] =
 	 {"savenvm",      &savenvm_handler,	    HELP_SAVEMEVM,	        SUPPORTED_FOR_ALL_MODES, ENABLE, 0, NULL_PARAM_LIST  },
 	 {"acstate",      &ac_state_handler,	HELP_AC_STATE,	        SUPPORTED_FOR_ALL_MODES, ENABLE, 1, AC_STATE_CMD_PARAM_LIST },
 	 {"acmode",       &ac_mode_handler,	    HELP_AC_MODE,	        SUPPORTED_FOR_ALL_MODES, ENABLE, 1, AC_MODE_CMD_PARAM_LIST },
-	 {"¬",			  &rf_dbg_out_handler,  HELP_RF_DEBUG, 			SUPPORTED_FOR_ALL_MODES, ENABLE, 1, NULL_PARAM_LIST },
+	 {"`",			  &rf_dbg_out_handler,  HELP_RF_DEBUG, 			SUPPORTED_FOR_ALL_MODES, ENABLE, 0, NULL_PARAM_LIST },
 	 {NULL,			  NULL,					NULL,					SUPPORTED_FOR_ALL_MODES, ENABLE, 0, NULL_PARAM_LIST  }
 };
 
@@ -1062,10 +1062,12 @@ CLI_error_et rf_dbg_out_handler( u8_t aArgCount, char *aArgVector[] )
 	char output_string[200];
 	disable_enable_et state;
 
+	CLI_send_newline();
+
 	/* This is a toggle, function, it can turn the RF debug on/off */
-	RF_MGR_set_dbg_output_state( state );
+	state = RF_MGR_toggle_dbg_output_state();
 	NVM_request_flush();
-	sprintf( output_string, "RF debug output state - %d, state" );
+	sprintf( output_string, "RF debug output state - %d", state );
 	CLI_send_data( output_string, strlen(output_string));
 	CLI_send_newline();
 }
