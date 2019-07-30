@@ -15,6 +15,7 @@
             "serialNumber": "null",
         },
         {
+            //"preLaunchTask": "test", 
             "name": "Ceedling Test Explorer Debug",
             "type": "cppdbg",
             "request": "launch",
@@ -36,3 +37,158 @@
         }
     ]    
 }
+
+
+
+
+// // Use IntelliSense to learn about possible attributes.
+//     // Hover to view descriptions of existing attributes.
+//     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+//     "version": "0.4.2",
+//     "configurations": [
+//         {
+//             "name": "MG12-mspi",
+//             "type": "cppdbg",
+//             "request": "launch",
+//             "program": "${workspaceFolder}/apps/mspi/out/efr32-spi-master",
+//             "sourceFileMap": {
+//                 "\\root": "${workspaceFolder}",
+//             },
+//             "stopAtEntry": true,
+//             "cwd": "${workspaceFolder}",
+//             "debugServerArgs": "-device efr32mg12pxxxf1024 -if swd -speed 4000 -autoconnect 1",
+//             "serverLaunchTimeout": 20000,
+//             "serverStarted": "Connecting to target...Connected to target",
+//             "logging": {
+//                 "moduleLoad": true,
+//                 "trace": true,
+//                 "engineLogging": true,
+//                 "programOutput": true,
+//                 "exceptions": true
+//             },
+//             "MIMode": "gdb",
+//             "debugServerPath": "jlinkGDBserverCL.exe",
+//             "setupCommands": [
+//                 { "text": "-environment-cd ${workspaceFolder}\\apps\\mspi\\out","description":"connect to target", "ignoreFailures": false},
+//                 { "text": "-target-select remote localhost:2331", "description": "connect to target", "ignoreFailures": false },
+//                 { "text": "-file-exec-and-symbols efr32-spi-master", "description": "load file", "ignoreFailures": false},
+//                 //{ "text": "-interpreter-exec console \"monitor endian little\"", "ignoreFailures": false },
+//                 //{ "text": "-interpreter-exec console \"monitor halt\"", "ignoreFailures": false },
+//                 //{ "text": "-interpreter-exec console \"monitor arm semihosting enable\"", "ignoreFailures": false },
+//                 { "text": "-target-download", "description": "flash target", "ignoreFailures": false }
+//                 { "text": "-interpreter-exec console \"monitor reset \"", "ignoreFailures": true },
+//             ],
+//             "windows": {
+//                 "MIDebuggerPath": "arm-none-eabi-gdb.exe",
+//             }
+//         },
+//         {
+//             "name": "MG12-sspi",
+//             "type": "cppdbg",
+//             "request": "launch",
+//             "program": "${workspaceFolder}/apps/sspi/out/efr32-spi-master",
+//             "sourceFileMap": {
+//                 "\\root": "${workspaceFolder}",
+//             },
+//             "stopAtEntry": true,
+//             "cwd": "${workspaceFolder}",
+//             "debugServerArgs": "-device efr32mg12pxxxf1024 -if swd -speed 4000 -autoconnect 1",
+//             "serverLaunchTimeout": 20000,
+//             "serverStarted": "Connecting to target...Connected to target",
+//             "logging": {
+//                 "moduleLoad": true,
+//                 "trace": true,
+//                 "engineLogging": true,
+//                 "programOutput": true,
+//                 "exceptions": true
+//             },
+//             "MIMode": "gdb",
+//             "debugServerPath": "jlinkGDBserverCL.exe",
+//             "setupCommands": [
+//                 { "text": "-environment-cd ${workspaceFolder}\\apps\\sspi\\out","description":"connect to target", "ignoreFailures": false},
+//                 { "text": "-target-select remote localhost:2331", "description": "connect to target", "ignoreFailures": false },
+//                 { "text": "-file-exec-and-symbols efr32-spi-master", "description": "load file", "ignoreFailures": false},
+//                 //{ "text": "-interpreter-exec console \"monitor endian little\"", "ignoreFailures": false },
+//                 //{ "text": "-interpreter-exec console \"monitor halt\"", "ignoreFailures": false },
+//                 //{ "text": "-interpreter-exec console \"monitor arm semihosting enable\"", "ignoreFailures": false },
+//                 { "text": "-target-download", "description": "flash target", "ignoreFailures": false }
+//                 { "text": "-interpreter-exec console \"monitor reset \"", "ignoreFailures": true },
+//             ],
+//             "windows": {
+//                 "MIDebuggerPath": "arm-none-eabi-gdb.exe",
+//             }
+//         },
+//         {
+//             "name": "MG12-mantra-demo",
+//             "type": "cppdbg",
+//             "request": "launch",
+//             "program": "${workspaceFolder}/apps/mantra-demo/out/efr32-spi-master",
+//             "sourceFileMap": {
+//                 "\\root": "${workspaceFolder}",
+//             },
+//             "stopAtEntry": true,
+//             "cwd": "${workspaceFolder}",
+//             "debugServerArgs": "-device efr32mg12pxxxf1024 -if swd -speed 4000 -autoconnect 1",
+//             "serverLaunchTimeout": 20000,
+//             "serverStarted": "Connecting to target...Connected to target",
+//             "logging": {
+//                 "moduleLoad": true,
+//                 "trace": true,
+//                 "engineLogging": true,
+//                 "programOutput": true,
+//                 "exceptions": true
+//             },
+//             "MIMode": "gdb",
+//             "debugServerPath": "jlinkGDBserverCL.exe",
+//             "setupCommands": [
+//                 { "text": "-environment-cd ${workspaceFolder}\\apps\\mantra-demo\\out","description":"connect to target", "ignoreFailures": false},
+//                 { "text": "-target-select remote localhost:2331", "description": "connect to target", "ignoreFailures": false },
+//                 { "text": "-file-exec-and-symbols efr32-spi-master", "description": "load file", "ignoreFailures": false},
+//                 //{ "text": "-interpreter-exec console \"monitor endian little\"", "ignoreFailures": false },
+//                 //{ "text": "-interpreter-exec console \"monitor halt\"", "ignoreFailures": false },
+//                 //{ "text": "-interpreter-exec console \"monitor arm semihosting enable\"", "ignoreFailures": false },
+//                 { "text": "-target-download", "description": "flash target", "ignoreFailures": false }
+//                 { "text": "-interpreter-exec console \"monitor reset \"", "ignoreFailures": true },
+//             ],
+//             "windows": {
+//                 "MIDebuggerPath": "arm-none-eabi-gdb.exe",
+//             }
+//         },
+//         {
+//             "name": "MG12-mantra-rtos-demo",
+//             "type": "cppdbg",
+//             "request": "launch",
+//             "program": "${workspaceFolder}/apps/mantra-demo-rtos/out/efr32-spi-master",
+//             "sourceFileMap": {
+//                 "\\root": "${workspaceFolder}",
+//             },
+//             "stopAtEntry": true,
+//             "cwd": "${workspaceFolder}",
+//             "debugServerArgs": "-device efr32mg12pxxxf1024 -if swd -speed 4000 -autoconnect 1",
+//             "serverLaunchTimeout": 20000,
+//             "serverStarted": "Connecting to target...Connected to target",
+//             "logging": {
+//                 "moduleLoad": true,
+//                 "trace": true,
+//                 "engineLogging": true,
+//                 "programOutput": true,
+//                 "exceptions": true
+//             },
+//             "MIMode": "gdb",
+//             "debugServerPath": "jlinkGDBserverCL.exe",
+//             "setupCommands": [
+//                 { "text": "-environment-cd ${workspaceFolder}\\apps\\mantra-demo-rtos\\out","description":"connect to target", "ignoreFailures": false},
+//                 { "text": "-target-select remote localhost:2331", "description": "connect to target", "ignoreFailures": false },
+//                 { "text": "-file-exec-and-symbols efr32-spi-master", "description": "load file", "ignoreFailures": false},
+//                 //{ "text": "-interpreter-exec console \"monitor endian little\"", "ignoreFailures": false },
+//                 //{ "text": "-interpreter-exec console \"monitor halt\"", "ignoreFailures": false },
+//                 //{ "text": "-interpreter-exec console \"monitor arm semihosting enable\"", "ignoreFailures": false },
+//                 { "text": "-target-download", "description": "flash target", "ignoreFailures": false }
+//                 { "text": "-interpreter-exec console \"monitor reset \"", "ignoreFailures": true },
+//             ],
+//             "windows": {
+//                 "MIDebuggerPath": "arm-none-eabi-gdb.exe",
+//             }
+//         },
+//     ]
+// }

@@ -44,10 +44,5 @@
             "type": "shell",
             "command": "mingw32-make.exe release_package",
         },
-        {
-            "label": "test",
-            "type": "shell",
-            "command": "echo ${env:TTLD}",
-        },
     ]
 }
