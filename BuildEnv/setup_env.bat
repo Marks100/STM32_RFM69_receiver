@@ -40,9 +40,11 @@ set COMMON_TOOLS=^
 %TTLD%\CoIDE;^
 %TTLD%\Uncrustify;^
 %TTLD%\ST\STM32 ST-LINK Utility\ST-LINK Utility;^
+%TTLD%\ST\stlink_util_debug\bin;^
 %TTLD%\Graphviz\bin;^
 %TTLD%\VScode\bin;^
 %TTLD%\gcc-arm\bin;^
+%TTLD%\SEGGER\JLink_V620b;^
 %PROGFILES_PATH%\USB Redirector Client;^
 %PROGFILES_PATH%\TortoiseSVN\bin;^
 %PBCD%\bin;^

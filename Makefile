@@ -117,7 +117,7 @@ GCC_ARM: build_clean $(AUTOVERS_HEADER) $(OBJS)
 
 
 %.o: %.c
-	@echo "--> Compiling $<"
+	@echo "--> Compiling $(notdir $@) ..."
 	@$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@  2>&1 | tee -a $(STM32_COMPILER_OUTPUT)
 
 

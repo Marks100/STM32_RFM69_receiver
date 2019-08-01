@@ -5,6 +5,11 @@
     "tasks":
      [
         {
+            "label": "flash_device",
+            "type": "shell",
+            "command": "ST-LINK_CLI -C SWD Crst UR HOTPLUG -P Build_output/STM32_RF_HUB.hex 0x080A0000 -Rst",
+        },
+        {
             "label": "all",
             "type": "shell",
             "command": "mingw32-make.exe all",
