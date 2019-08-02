@@ -30,9 +30,9 @@
             "command": "mingw32-make.exe test_all",
         },
         {
-            "label": "test_all_with_coverage",
+            "label": "gen_lcov_report",
             "type": "shell",
-            "command": "mingw32-make.exe test_all_with_coverage",
+            "command": "mingw32-make.exe gen_lcov_report",
         },
         {
             "label": "total_clean",

@@ -16,11 +16,14 @@
 ***************************************************************************************************/
 #include "C_defs.h"
 
+#define MAX_ALLOWED_TEMP			( 100.0 )
+#define MIN_ALLOWED_TEMP			( -50.0 )
+#define TMPERATURE_NOT_AVAILABLE	( 65535 )
+#define TMPERATURE_INVALID			( 65534  )
+#define MAX_NUM_OUTPUTS ( 10 )
 
-#define TMPERATURE_INVALID	( 65535.0f )
 
-
-typedef enum
+typedef enum AIRCON_mode_et
 {
 	AIRCON_HEAT_MODE = 0u,
 	AIRCON_COOL_MODE,

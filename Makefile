@@ -162,9 +162,7 @@ gen_lcov_report: test_all_with_coverage
 	@echo "--> Generating LCOV reports.. Please be patient..."
 	@cd test && lcov -t 'LCov_report' -o CodeCoverage/LCOV/output_file.info -c -d . --rc lcov_branch_coverage=1
 	@cd $(CEEDLING_LCOV_XML_TEST_REPORT_DEST) && genhtml -o . output_file.info --rc lcov_branch_coverage=1 --sort --show-details
-ifdef ConEmuDir
 	@cd $(CEEDLING_LCOV_XML_TEST_REPORT_DEST) && start index.html
-endif
 	#@$(call check_test_result)
 
 

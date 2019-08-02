@@ -262,7 +262,7 @@ void HAL_BRD_toggle_pin_state(  GPIO_TypeDef * port, u16_t pin )
 /**************************************************************************************************
 EXTERNAL API's
 ***************************************************************************************************/
-void HAL_BRD_set_LED_state( HAL_BRD_led_et led, off_on_et state )
+void HAL_BRD_set_LED_state( HAL_BRD_led_et led, low_high_et state )
 {
 	switch( led )
 	{
@@ -281,6 +281,55 @@ void HAL_BRD_set_LED_state( HAL_BRD_led_et led, off_on_et state )
 		case LED_3:
 			HAL_BRD_set_pin_state( GPIOB, GPIO_Pin_15, state );
 			break;
+
+		default:
+			break;
+	}
+}
+
+void HAL_BRD_set_generic_output( u8_t generic_output_num, off_on_et state )
+{
+	switch (generic_output_num)
+	{
+		case 0:
+		//HAL_BRD_set_pin_state( GPIOB, GPIO_Pin_15, state );
+		break;
+
+		case 1:
+		//HAL_BRD_set_pin_state( GPIOB, GPIO_Pin_15, state );
+		break;
+
+		case 2:
+		//HAL_BRD_set_pin_state( GPIOB, GPIO_Pin_15, state );
+		break;
+
+		case 3:
+		//HAL_BRD_set_pin_state( GPIOB, GPIO_Pin_15, state );
+		break;
+
+		case 4:
+		//HAL_BRD_set_pin_state( GPIOB, GPIO_Pin_15, state );
+		break;
+
+		case 5:
+		//HAL_BRD_set_pin_state( GPIOB, GPIO_Pin_15, state );
+		break;
+
+		case 6:
+		//HAL_BRD_set_pin_state( GPIOB, GPIO_Pin_15, state );
+		break;
+
+		case 7:
+		//HAL_BRD_set_pin_state( GPIOB, GPIO_Pin_15, state );
+		break;
+
+		case 8:
+		//HAL_BRD_set_pin_state( GPIOB, GPIO_Pin_15, state );
+		break;
+
+		case 9:
+		//HAL_BRD_set_pin_state( GPIOB, GPIO_Pin_15, state );
+		break;
 
 		default:
 			break;

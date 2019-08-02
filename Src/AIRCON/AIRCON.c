@@ -34,6 +34,7 @@
 
 extern NVM_info_st NVM_info_s;
 STATIC AIRCON_config_st AIRCON_config_s;
+STATIC disable_enable_et AIRCON_generic_outputs_s[MAX_NUM_OUTPUTS];
 
 /***************************************************************************************************
 **                              Data declarations and definitions                                 **
@@ -48,7 +49,7 @@ STATIC AIRCON_config_st AIRCON_config_s;
 
 void AIRCON_init( void )
 {
-	AIRCON_config_s.oat_c = TMPERATURE_INVALID;
+	AIRCON_config_s.oat_c = TMPERATURE_NOT_AVAILABLE;
 	AIRCON_config_s.mode = NVM_info_s.NVM_generic_data_blk_s.aircon_mode;
 	AIRCON_config_s.cool_max_temp_c = NVM_info_s.NVM_generic_data_blk_s.cool_max_temp;
 	AIRCON_config_s.cool_min_temp_c = NVM_info_s.NVM_generic_data_blk_s.cool_min_temp;
@@ -56,6 +57,7 @@ void AIRCON_init( void )
 	AIRCON_config_s.heat_min_temp_c = NVM_info_s.NVM_generic_data_blk_s.heat_min_temp;
 	AIRCON_config_s.state = NVM_info_s.NVM_generic_data_blk_s.aircon_state;
 	AIRCON_config_s.auto_target_temp_c =  NVM_info_s.NVM_generic_data_blk_s.auto_target_temp;
+	AIRCON_config_s.hysteresis		= 0.5f;
 }
 
 
@@ -65,7 +67,7 @@ void AIRCON_tick( void )
 	/* Check that the feature is enabled */
 	if( AIRCON_config_s.state == ENABLE_ )
 	{
-		if( AIRCON_config_s.oat_c != TMPERATURE_INVALID )
+		if( ( AIRCON_config_s.oat_c != TMPERATURE_NOT_AVAILABLE ) || ( AIRCON_config_s.oat_c != TMPERATURE_INVALID ) )
 		{
 			/* Now check the mode that we want to be in */
 			switch( AIRCON_config_s.mode )
@@ -211,7 +213,18 @@ void AIRCON_toggle_state( void )
 
 void AIRCON_set_oat( float temperature )
 {
-	AIRCON_config_s.oat_c = temperature;
+	if( temperature > MAX_ALLOWED_TEMP )
+	{
+		AIRCON_config_s.oat_c = TMPERATURE_INVALID;
+	}
+	else if( temperature < MIN_ALLOWED_TEMP )
+	{
+		AIRCON_config_s.oat_c = TMPERATURE_INVALID;
+	}
+	else
+	{
+		AIRCON_config_s.oat_c = temperature;
+	}
 }
 
 
@@ -313,6 +326,22 @@ void AIRCON_update_outputs( void )
 		HAL_BRD_set_LED_state( LED_1, LOW );
 		HAL_BRD_set_LED_state( LED_2, LOW );
 		HAL_BRD_set_LED_state( LED_3, LOW );
+	}
+
+	/***************************************/
+	u8_t i = 0u;
+
+	for( i = 0u; i < MAX_NUM_OUTPUTS; i++ )
+	{
+		/* Each individual output has a different pin so must be handled individually */
+		if( AIRCON_generic_outputs_s[i] == ENABLE_ )
+		{
+			HAL_BRD_set_generic_output( AIRCON_generic_outputs_s[i], HIGH );
+		}
+		else
+		{
+			HAL_BRD_set_generic_output( AIRCON_generic_outputs_s[i], LOW );
+		}	
 	}
 }
 
