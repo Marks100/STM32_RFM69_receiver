@@ -20,7 +20,10 @@
 #define MIN_ALLOWED_TEMP			( -50.0 )
 #define TMPERATURE_NOT_AVAILABLE	( 65535.0f )
 #define TMPERATURE_INVALID			( 65534.0f )
-#define MAX_NUM_OUTPUTS ( 10 )
+#define MAX_NUM_OUTPUTS 			( 10 )
+
+#define MIN_AIRCON_TEMP_C_SETTING	( 16.0 )
+#define MAX_AIRCON_TEMP_C_SETTING	( 16.0 )
 
 
 typedef enum AIRCON_mode_et

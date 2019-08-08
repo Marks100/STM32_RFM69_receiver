@@ -362,21 +362,8 @@ void AIRCON_update_outputs( void )
 
 			case AIRCON_AUTO_MODE:
 			{
-				if( AIRCON_config_s.heater_state == ENABLE_ )
-				{
-					HAL_BRD_set_LED_state( LED_1, LOW );
-					HAL_BRD_set_LED_state( LED_2, HIGH );
-				}
-				else if( AIRCON_config_s.cooler_state == ENABLE_ )
-				{
-					HAL_BRD_set_LED_state( LED_1, HIGH );
-					HAL_BRD_set_LED_state( LED_2, LOW );
-				}
-				else
-				{
-					HAL_BRD_set_LED_state( LED_1, LOW );
-					HAL_BRD_set_LED_state( LED_2, LOW );
-				}
+				HAL_BRD_set_LED_state( LED_1, LOW );
+				HAL_BRD_set_LED_state( LED_2, LOW );
 			}
 			break;
 
