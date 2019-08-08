@@ -92,6 +92,7 @@ STATIC const CLI_Command_st CLI_commands[] =
 	 {"acstate",      &ac_state_handler,	HELP_AC_STATE,	        SUPPORTED_FOR_ALL_MODES, ENABLE, 1, AC_STATE_CMD_PARAM_LIST },
 	 {"acmode",       &ac_mode_handler,	    HELP_AC_MODE,	        SUPPORTED_FOR_ALL_MODES, ENABLE, 1, AC_MODE_CMD_PARAM_LIST },
 	 {"`",			  &rf_dbg_out_handler,  HELP_RF_DEBUG, 			SUPPORTED_FOR_ALL_MODES, ENABLE, 0, NULL_PARAM_LIST },
+	 {"acstats",      &ac_stats_handler,    HELP_AC_STATS,			SUPPORTED_FOR_ALL_MODES, ENABLE, 0, NULL_PARAM_LIST },
 	 {NULL,			  NULL,					NULL,					SUPPORTED_FOR_ALL_MODES, ENABLE, 0, NULL_PARAM_LIST  }
 };
 
@@ -1035,6 +1036,36 @@ CLI_error_et ac_mode_handler( u8_t aArgCount, char *aArgVector[] )
 
 	return( error );
 }
+
+
+CLI_error_et ac_stats_handler( u8_t aArgCount, char *aArgVector[] )
+{
+	CLI_error_et error = CLI_ERROR_NONE;
+	char output_string[300];
+	AIRCON_min_max_st* data_p;
+	
+	data_p = AIRCON_get_stats_address();
+
+	CLI_send_newline();
+	u16_t max, min, delta;
+
+	max = ( data_p->max_temp_c.value * 10 );
+	min = ( data_p->min_temp_c.value * 10 );
+	delta = ( data_p->temp_delta_c * 10 );
+
+	sprintf( output_string, "max temp:\t%d.%d, node id:\t0x%04X\r\nmin temp:\t%d.%d, node id:\t0x%04X\r\ntemp delta:\t%d.%d", \
+	( max / 10 ), ( max % 10 ), data_p->max_temp_c.id, ( min / 10 ), ( min % 10 ), data_p->min_temp_c.id, \
+	( delta / 10 ), ( delta % 10 ) );
+	CLI_send_data( output_string, strlen(output_string));
+	CLI_send_newline();
+
+	STDC_memset( output_string, 0x00, sizeof( output_string ) );
+
+	return( error );
+}
+
+
+
 	
 
 CLI_error_et savenvm_handler( u8_t aArgCount, char *aArgVector[] )
@@ -1077,8 +1108,11 @@ CLI_error_et rf_dbg_out_handler( u8_t aArgCount, char *aArgVector[] )
 CLI_error_et test_handler( u8_t aArgCount, char *aArgVector[] )
 {
 	CLI_error_et error = CLI_ERROR_NONE;
+	char output_string[200];
 
 	while(1);
 
 	return( error );
 }
+
+
