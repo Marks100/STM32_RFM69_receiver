@@ -1580,7 +1580,7 @@ void NRF24_tick( void )
             break;
 
         case NRF24_RESET:
-            NRF24_set_state( NRF24_INITIALISING );
+            NRF24_set_state( NRF24_POWERING_UP );
             break;
 
         default:

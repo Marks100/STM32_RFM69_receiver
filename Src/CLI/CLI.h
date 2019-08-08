@@ -49,6 +49,8 @@
 #define HELP_AC_STATE			 "acstate:           Sets the state of the aircon module < 0-Disable, 1-Enable >\r\n"
 #define HELP_AC_MODE 			 "acmode:            Sets the mode of the aircon module\r\n"
 #define HELP_RF_DEBUG 			 "¬:                 Toggle the RF debug on/off\r\n"
+#define HELP_AC_STATS 			 "acstats:           Returns the stats of the aircon moduler\n"
+
 
 #define NULL_PARAM_LIST { { 0, (u32_t)0x0000, (u32_t)0x0000 } }
 
@@ -165,6 +167,7 @@ CLI_error_et test_handler( u8_t aArgCount, char *aArgVector[] );
 CLI_error_et wl_state_handler( u8_t aArgCount, char *aArgVector[] );
 CLI_error_et savenvm_handler( u8_t aArgCount, char *aArgVector[] );
 CLI_error_et ac_state_handler( u8_t aArgCount, char *aArgVector[] );
+CLI_error_et ac_stats_handler( u8_t aArgCount, char *aArgVector[] );
 CLI_error_et ac_mode_handler( u8_t aArgCount, char *aArgVector[] );
 CLI_error_et rf_dbg_out_handler( u8_t aArgCount, char *aArgVector[] );
 

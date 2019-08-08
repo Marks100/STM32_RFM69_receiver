@@ -41,6 +41,7 @@ set COMMON_TOOLS=^
 %TTLD%\Uncrustify;^
 %TTLD%\ST\STM32 ST-LINK Utility\ST-LINK Utility;^
 %TTLD%\ST\stlink_util_debug\bin;^
+%TTLD%\ST\CoFlash\bin;^
 %TTLD%\Graphviz\bin;^
 %TTLD%\VScode\bin;^
 %TTLD%\gcc-arm\bin;^

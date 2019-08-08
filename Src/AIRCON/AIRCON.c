@@ -33,7 +33,8 @@
 
 
 extern NVM_info_st NVM_info_s;
-STATIC AIRCON_config_st AIRCON_config_s;
+STATIC AIRCON_config_st  AIRCON_config_s;
+STATIC AIRCON_min_max_st AIRCON_min_max_s;
 STATIC disable_enable_et AIRCON_generic_outputs_s[MAX_NUM_OUTPUTS];
 
 /***************************************************************************************************
@@ -57,7 +58,12 @@ void AIRCON_init( void )
 	AIRCON_config_s.heat_min_temp_c = NVM_info_s.NVM_generic_data_blk_s.heat_min_temp;
 	AIRCON_config_s.state = NVM_info_s.NVM_generic_data_blk_s.aircon_state;
 	AIRCON_config_s.auto_target_temp_c =  NVM_info_s.NVM_generic_data_blk_s.auto_target_temp;
-	AIRCON_config_s.hysteresis		= 0.5f;
+
+	AIRCON_min_max_s.max_temp_c.value = TMPERATURE_NOT_AVAILABLE;
+	AIRCON_min_max_s.max_temp_c.id    = 0u;
+	AIRCON_min_max_s.min_temp_c.value = TMPERATURE_NOT_AVAILABLE;
+	AIRCON_min_max_s.min_temp_c.id    = 0u;
+	AIRCON_min_max_s.temp_delta_c     = 0u;	
 }
 
 
@@ -67,7 +73,7 @@ void AIRCON_tick( void )
 	/* Check that the feature is enabled */
 	if( AIRCON_config_s.state == ENABLE_ )
 	{
-		if( ( AIRCON_config_s.oat_c != TMPERATURE_NOT_AVAILABLE ) || ( AIRCON_config_s.oat_c != TMPERATURE_INVALID ) )
+		if( ( AIRCON_config_s.oat_c != TMPERATURE_NOT_AVAILABLE ) && ( AIRCON_config_s.oat_c < TMPERATURE_INVALID ) )
 		{
 			/* Now check the mode that we want to be in */
 			switch( AIRCON_config_s.mode )
@@ -163,7 +169,10 @@ void AIRCON_tick( void )
 
 void AIRCON_set_mode( AIRCON_mode_et mode )
 {
-	AIRCON_config_s.mode = mode;
+	if( mode < AIRCON_MODE_MAX )
+	{
+		AIRCON_config_s.mode = mode;
+	}
 }
 
 
@@ -188,7 +197,10 @@ void AIRCON_toggle_mode( void )
 
 void AIRCON_set_state( disable_enable_et state )
 {
-	AIRCON_config_s.state = state;
+	if( state < DISABLE_ENABLE_MAX )
+	{
+		AIRCON_config_s.state = state;	
+	}
 }
 
 
@@ -211,7 +223,7 @@ void AIRCON_toggle_state( void )
 }
 
 
-void AIRCON_set_oat( float temperature )
+void AIRCON_set_oat( float temperature, u16_t node_id )
 {
 	if( temperature > MAX_ALLOWED_TEMP )
 	{
@@ -224,6 +236,35 @@ void AIRCON_set_oat( float temperature )
 	else
 	{
 		AIRCON_config_s.oat_c = temperature;
+
+		/* Now that the temp is valid lets track max and min */
+		if( ( AIRCON_min_max_s.max_temp_c.value > MAX_ALLOWED_TEMP ) || ( AIRCON_min_max_s.min_temp_c.value > MAX_ALLOWED_TEMP ) )
+		{
+			AIRCON_min_max_s.max_temp_c.value = temperature;
+			AIRCON_min_max_s.max_temp_c.id	  = node_id;
+			AIRCON_min_max_s.min_temp_c.value = temperature;
+			AIRCON_min_max_s.min_temp_c.id	  = node_id;
+		}
+		else
+		{
+			if( AIRCON_config_s.oat_c > AIRCON_min_max_s.max_temp_c.value )
+			{
+				AIRCON_min_max_s.max_temp_c.value = AIRCON_config_s.oat_c;
+				AIRCON_min_max_s.max_temp_c.id	  = node_id;
+			}
+			else if( AIRCON_config_s.oat_c < AIRCON_min_max_s.min_temp_c.value )
+			{
+				AIRCON_min_max_s.min_temp_c.value = AIRCON_config_s.oat_c;
+				AIRCON_min_max_s.min_temp_c.id	  = node_id;
+			}
+			else
+			{
+				/* code */
+			}
+					
+		}
+
+		AIRCON_min_max_s.temp_delta_c = ( AIRCON_min_max_s.max_temp_c.value - AIRCON_min_max_s.min_temp_c.value );
 	}
 }
 
@@ -244,6 +285,40 @@ void AIRCON_set_cooler_state( disable_enable_et state )
 {
 	AIRCON_config_s.cooler_state = state;
 }
+
+
+void AIRCON_set_generic_output_state( u8_t output_num, disable_enable_et state )
+{
+	if( output_num < MAX_NUM_OUTPUTS )
+	{
+		AIRCON_generic_outputs_s[output_num] = state;
+	}
+}
+
+void AIRCON_togggle_generic_output_state( u8_t output_num )
+{
+	if( output_num < MAX_NUM_OUTPUTS )
+	{
+		if( AIRCON_get_generic_output_state(output_num) == ENABLE_ )
+		{
+			AIRCON_set_generic_output_state( output_num, DISABLE_ );
+		}
+		else
+		{
+			AIRCON_set_generic_output_state( output_num, ENABLE_ );
+		}
+	}
+}
+
+disable_enable_et AIRCON_get_generic_output_state( u8_t output_num )
+{
+	if( output_num < MAX_NUM_OUTPUTS )
+	{
+		return( AIRCON_generic_outputs_s[output_num] );
+	}
+}
+
+
 
 void AIRCON_decode_control_cmd( u8_t cmd )
 {
@@ -346,3 +421,9 @@ void AIRCON_update_outputs( void )
 }
 
 
+
+
+AIRCON_min_max_st* AIRCON_get_stats_address( void )
+{
+	return( &AIRCON_min_max_s );
+}
