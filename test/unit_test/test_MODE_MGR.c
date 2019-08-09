@@ -77,15 +77,15 @@ void HAL_BRD_toggle_debug_pin( void ){}
 void NRF24_tick( void ){}
 void CLI_message_handler( void ){}
 void ROTARY_tick( void ){}
-void HEATING_tick( void ){}
+void AIRCON_tick( void ){}
 void MAIN_WATCHDOG_kick( void ){}
 void RF_MGR_tick( void ){}
 void NEOPIXEL_tick( void ){}
 void RF_MGR_analyse_fault_conditions( void ){}
-void HEATING_set_mode( void ){}
-void HEATING_get_mode( void ){}
+void AIRCON_set_mode( void ){}
+void AIRCON_get_mode( void ){}
 
-void HEATING_set_state( disable_enable_et state )
+void AIRCON_set_state( disable_enable_et state )
 {
 	(void)state;
 }
@@ -97,7 +97,17 @@ low_high_et HAL_BRD_read_selector_switch_pin( HAL_BRD_switch_slider_et slider )
 	return( 0 );
 }
 
-disable_enable_et HEATING_get_state( void )
+disable_enable_et AIRCON_get_state( void )
+{
+	return( 0 );
+}
+
+void AIRCON_toggle_state( void )
+{
+	return( 0 );
+}
+
+void AIRCON_toggle_mode( void )
 {
 	return( 0 );
 }

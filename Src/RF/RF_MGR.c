@@ -21,7 +21,7 @@
 #include "NVM.h"
 #include "CLI.h"
 
-#include "HEATING.h"
+#include "AIRCON.h"
 #include "NRF24.h"
 #include "RF_MGR.h"
 
@@ -31,6 +31,7 @@ STATIC RF_MGR_sed_data_st	   RF_MGR_sed_data_s;
 STATIC RF_MGR_sed_data_st	   RF_MGR_controller_data_s;
 
 STATIC RF_MGR_whitelist_st	   RF_MGR_whitelist_s;
+STATIC disable_enable_et	   RF_MGR_dbg_out_s;
 
 
 /***************************************************************************************************
@@ -71,6 +72,7 @@ void RF_MGR_init( void )
     }
 
     RF_MGR_whitelist_s.state = NVM_info_s.NVM_generic_data_blk_s.whitelist_state;
+	RF_MGR_dbg_out_s = NVM_info_s.NVM_generic_data_blk_s.rf_dbg_out;
 
     /* Initialise the NRF24 specific variables */
     NRF24_init();
@@ -236,9 +238,12 @@ void RF_MGR_handle_early_prototype_sed( u16_t sensor_id, u8_t* data_p, u32_t pac
     RF_MGR_sed_data_s.packet_ctr  = packet_count;
     RF_MGR_sed_data_s.tx_interval_secs = STDC_make_16_bit( data_p[5], data_p[6] );
 
-    HEATING_set_oat( RF_MGR_sed_data_s.temperature / 10.0 );
+    AIRCON_set_oat( RF_MGR_sed_data_s.temperature / 10.0 );
 
-    RF_MGR_display_sed_data();
+	if( RF_MGR_get_dbg_output_state() == ENABLE_ )
+	{
+		RF_MGR_display_sed_data();
+	}
 }
 
 
@@ -265,62 +270,12 @@ void RF_MGR_handle_early_prototype_controller( u16_t sensor_id, u8_t* data_p, u3
 	RF_MGR_controller_data_s.mode_type   = data_p[1];
 	RF_MGR_controller_data_s.status      = data_p[2];
 
-	switch( RF_MGR_controller_data_s.packet_type )
+	AIRCON_decode_control_cmd( RF_MGR_controller_data_s.packet_type );
+
+	if( RF_MGR_get_dbg_output_state() == ENABLE_ )
 	{
-		case RF_MGR_CONT_HEAT_TOGGLE_STATE:
-		{
-
-		}
-		break;
-
-		case RF_MGR_CONT_HEAT_STATE_ON:
-		{
-
-		}
-		break;
-
-		case RF_MGR_CONT_HEAT_STATE_OFF:
-		{
-
-		}
-		break;
-
-		case RF_MGR_CONT_HEAT_TOGGLE_MODE:
-		{
-			if( HEATING_get_mode() == HEATING_HEAT_MODE )
-			{
-				HEATING_set_mode( HEATING_COOL_MODE );
-			}
-			else
-			{
-				HEATING_set_mode( HEATING_HEAT_MODE );
-			}
-		}
-		break;
-
-		case RF_MGR_CONT_HEAT_MODE:
-		{
-			HEATING_set_mode( HEATING_HEAT_MODE );
-		}
-		break;
-
-		case RF_MGR_CONT_COOL_MODE:
-		{
-			HEATING_set_mode( HEATING_COOL_MODE );
-		}
-		break;
-
-		case RF_MGR_CONT_OFF_MODE:
-		{
-			HEATING_set_mode( HEATING_OFF_MODE );
-		}
-		break;
-
-		default:
-			break;
+    	RF_MGR_display_controller_data();
 	}
-
-    RF_MGR_display_controller_data();
 }
 
 /*!
@@ -650,6 +605,31 @@ RF_MGR_whitelist_st* RF_MGR_get_whitelist_address( void )
 void RF_MGR_set_whitelist_state( disable_enable_et state )
 {
 	RF_MGR_whitelist_s.state = state;
+}
+
+disable_enable_et RF_MGR_toggle_dbg_output_state( void )
+{
+	if( RF_MGR_get_dbg_output_state() == ENABLE_ )
+	{
+		RF_MGR_set_dbg_output_state( DISABLE_ );
+	}
+	else
+	{
+		RF_MGR_set_dbg_output_state( ENABLE_ );
+	}
+	return( RF_MGR_dbg_out_s );
+}
+
+
+void RF_MGR_set_dbg_output_state( disable_enable_et state )
+{
+	RF_MGR_dbg_out_s = state;
+	NVM_info_s.NVM_generic_data_blk_s.rf_dbg_out = RF_MGR_dbg_out_s;
+}
+
+disable_enable_et RF_MGR_get_dbg_output_state( void )
+{
+	return ( RF_MGR_dbg_out_s );
 }
 
 

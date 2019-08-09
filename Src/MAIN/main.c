@@ -16,7 +16,7 @@
 #include "HAL_TIM.h"
 #include "MODE_MGR.h"
 #include "RF_MGR.h"
-#include "HEATING.h"
+#include "AIRCON.h"
 #include "nvm.h"
 #include "NEOPIXEL.h"
 #include "main.h"
@@ -54,7 +54,7 @@ int main(void)
 
 	MODE_MGR_init();
 
-	HEATING_init();
+	AIRCON_init();
 
 	NEOPIXEL_int();
 

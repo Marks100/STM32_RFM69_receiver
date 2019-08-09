@@ -50,18 +50,6 @@
 /***************************************************************************************************
 **                              Data Types and Enums                                              **
 ***************************************************************************************************/
-
-typedef enum
-{
-	RF_MGR_CONT_HEAT_TOGGLE_STATE = 1u,
-	RF_MGR_CONT_HEAT_STATE_ON,
-	RF_MGR_CONT_HEAT_STATE_OFF,
-	RF_MGR_CONT_HEAT_TOGGLE_MODE,
-	RF_MGR_CONT_HEAT_MODE,
-	RF_MGR_CONT_COOL_MODE,
-	RF_MGR_CONT_OFF_MODE
-} RF_MGR_controller_packet_type_et;
-
 typedef enum
 {
 	RF_MGR_MISSING_SENSOR = 0u
@@ -102,7 +90,7 @@ typedef struct
 typedef struct
 {
 	u16_t node_id;
-	RF_MGR_controller_packet_type_et packet_type;
+	u8_t  packet_type;
 	u8_t  mode_type;
 	u16_t packet_ctr;
 	u8_t  status;
@@ -140,6 +128,9 @@ false_true_et 		 	 RF_MGR_check_ID_in_whitelist( u16_t id );
 void 				 	 RF_MGR_set_whitelist_state( disable_enable_et state );
 void 					 RF_MGR_analyse_fault_conditions( void );
 void				     RF_MGR_set_dtc_state( u16_t node_index, RF_MGR_generic_dtc_et dtc, pass_fail_et state );
+void				     RF_MGR_set_dbg_output_state( disable_enable_et state );
+disable_enable_et 		 RF_MGR_get_dbg_output_state( void );
+disable_enable_et 		 RF_MGR_toggle_dbg_output_state( void );
 
 void 					 RF_MGR_display_controller_data( void );
 void 					 RF_MGR_handle_early_prototype_controller( u16_t sensor_id, u8_t* data_p, u32_t packet_count );

@@ -117,7 +117,7 @@ GCC_ARM: build_clean $(AUTOVERS_HEADER) $(OBJS)
 
 
 %.o: %.c
-	@echo "--> Compiling $<"
+	@echo "--> Compiling $(notdir $@) ..."
 	@$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@  2>&1 | tee -a $(STM32_COMPILER_OUTPUT)
 
 
@@ -127,8 +127,6 @@ test/vendor:
 
 # Wild card test will allow any test to run once the name is provided
 %.test: test/vendor
-	echo $@
-	echo ...
 	@$(eval TEST_FILE := $(subst .test,.c,$@))
 	@echo Testing $(TEST_FILE)...
 	cd test && rake test:$(TEST_FILE)
@@ -164,9 +162,7 @@ gen_lcov_report: test_all_with_coverage
 	@echo "--> Generating LCOV reports.. Please be patient..."
 	@cd test && lcov -t 'LCov_report' -o CodeCoverage/LCOV/output_file.info -c -d . --rc lcov_branch_coverage=1
 	@cd $(CEEDLING_LCOV_XML_TEST_REPORT_DEST) && genhtml -o . output_file.info --rc lcov_branch_coverage=1 --sort --show-details
-ifdef ConEmuDir
 	@cd $(CEEDLING_LCOV_XML_TEST_REPORT_DEST) && start index.html
-endif
 	#@$(call check_test_result)
 
 
@@ -280,10 +276,6 @@ memory_stats: $(GCC_ARM_OUT_DIR)/$(STM32_MAP_FILE)
 	-------------------------------------------------------\n\n", NVM_used; }' $(GCC_ARM_OUT_DIR)/$(STM32_MAP_FILE) | tee -a $(GCC_ARM_OUT_DIR)/$(STM32_MEM_OUTPUT_FILE)
 	@echo "--> Output file \"$(STM32_MEM_OUTPUT_FILE)\" created @ $(PROJECT_NAME)/$(GCC_ARM_OUT_DIR)/"
 
-
-chksum:
-	@find Src -type f -print0 | xargs -0 sha1sum > output.txt
-
 	
 ttt:= Build_output/STM32_RFM69_receiver.map
 
@@ -306,17 +298,17 @@ release_package:
 	@echo "--> Creating release package..."
 	@-rm -fr $(RELEASE_PACKAGE_BASE_DIR)
 	@mkdir -p $(RELEASE_PACKAGE_NAME)
-	@$(MAKE) -s GCC_ARM
+	@$(MAKE) -s --no-print-directory GCC_ARM
 	@echo "--> Generating memory stats..."
-	@$(MAKE) -s memory_stats > /dev/null
+	@$(MAKE) -s --no-print-directory memory_stats > /dev/null
 	@echo "--> Copying build output to $(RELEASE_PACKAGE_NAME) folder.."
 	@cp -r $(GCC_ARM_OUT_DIR)/. $(RELEASE_PACKAGE_NAME)
 	@echo "--> Running tests..."
-	@$(MAKE) gen_lcov_report
+	@$(MAKE) -s --no-print-directory gen_lcov_report
 	@echo "--> Copying test results to $(RELEASE_PACKAGE_NAME) folder.."
 	@cp -r $(CEEDLING_GCOV_DIR) $(RELEASE_PACKAGE_NAME)
 	@echo "--> Running doxygen..."
-	#@$(MAKE) -s doxygen
+	#@$(MAKE) -s --no-print-directory doxygen
 	@echo "--> Copying doxygen output to $(RELEASE_PACKAGE_NAME) folder.."
 	@cp -r $(DOXYGEN_OUTPUT) $(RELEASE_PACKAGE_NAME)
 	@echo "--> Copying version file info to $(RELEASE_PACKAGE_NAME) folder.."

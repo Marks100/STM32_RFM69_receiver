@@ -49,8 +49,7 @@ void MODE_MGR_change_mode( void );
 void MODE_MGR_handle_settings( void );
 MODE_MGR_mode_et MODE_MGR_get_mode( void );
 void MODE_MGR_action_selector_switch_changes( HAL_BRD_switch_slider_et slider, low_high_et state );
-disable_enable_et HEATING_get_state( void );
-void HEATING_set_state( disable_enable_et state );
+
 
 
 

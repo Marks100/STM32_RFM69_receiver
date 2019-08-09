@@ -6,27 +6,30 @@
 *
 *               $HeadURL: https://selacvs01.schrader.local:8443/svn/ECU_Software/LF_TOOL_GEN2/trunk/Src/HAL/RF/RF.h $
 *
-*   \brief      Heating control module.
+*   \brief      AIRCON control module.
 */
-#ifndef HEATING_H
-#define HEATING_H
+#ifndef AIRCON_H
+#define AIRCON_H
 
 /***************************************************************************************************
 **                              Includes                                                          **
 ***************************************************************************************************/
 #include "C_defs.h"
 
+#define MAX_ALLOWED_TEMP			( 100.0 )
+#define MIN_ALLOWED_TEMP			( -50.0 )
+#define TMPERATURE_NOT_AVAILABLE	( 65535 )
+#define TMPERATURE_INVALID			( 65534  )
+#define MAX_NUM_OUTPUTS ( 10 )
 
-#define TMPERATURE_INVALID	( 65535.0f )
 
-
-typedef enum
+typedef enum AIRCON_mode_et
 {
-	HEATING_OFF_MODE = 0u,
-	HEATING_HEAT_MODE,
-	HEATING_COOL_MODE
+	AIRCON_HEAT_MODE = 0u,
+	AIRCON_COOL_MODE,
+	AIRCON_AUTO_MODE
 
-} HEATING_mode_et ;
+} AIRCON_mode_et ;
 
 typedef struct
 {
@@ -35,12 +38,13 @@ typedef struct
 	float cool_max_temp_c;
 	float heat_min_temp_c;
 	float heat_max_temp_c;
-	HEATING_mode_et heat_mode;
-	disable_enable_et enabled;
+	float auto_target_temp_c;
+	AIRCON_mode_et mode;
+	disable_enable_et state;
 	float hysteresis;
 	disable_enable_et cooler_state;
 	disable_enable_et heater_state;
-} HEATING_room_temp_mon_st;
+} AIRCON_config_st;
 
 
 /***************************************************************************************************
@@ -51,17 +55,21 @@ typedef struct
 /***************************************************************************************************
 **                              Function Prototypes                                               **
 ***************************************************************************************************/
-void  			HEATING_init( void );
-void  			HEATING_tick( void );
-void  			HEATING_set_oat( float temperature );
-float 			HEATING_get_oat( void );
-void  		    HEATING_set_mode( HEATING_mode_et mode );
-HEATING_mode_et HEATING_get_mode( void );
-void 			HEATING_update_outputs( void );
-void 			HEATING_set_heater_state( disable_enable_et state );
-void 			HEATING_set_cooler_state( disable_enable_et state );
+void  			  AIRCON_init( void );
+void  			  AIRCON_tick( void );
+void  			  AIRCON_set_oat( float temperature );
+float 			  AIRCON_get_oat( void );
+void  		      AIRCON_set_mode( AIRCON_mode_et mode );
+AIRCON_mode_et    AIRCON_get_mode( void );
+void  		      AIRCON_toggle_mode( void );
+void 			  AIRCON_update_outputs( void );
+void 			  AIRCON_set_heater_state( disable_enable_et state );
+void 			  AIRCON_set_cooler_state( disable_enable_et state );
+disable_enable_et AIRCON_get_state( void );
+void 			  AIRCON_set_state( disable_enable_et state );
+void 			  AIRCON_toggle_state( void );
+void 			  AIRCON_decode_control_cmd( u8_t cmd );
 
-
-#endif /* HEATING_H multiple inclusion guard */
+#endif /* AIRCON_H multiple inclusion guard */
 
 /****************************** END OF FILE *******************************************************/

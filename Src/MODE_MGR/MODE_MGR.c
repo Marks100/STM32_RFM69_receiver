@@ -8,7 +8,7 @@
 #include "HAL_BRD.h"
 #include "HAL_TIM.h"
 #include "MAIN.h"
-#include "HEATING.h"
+#include "AIRCON.h"
 #include "CLI.h"
 #include "RFM69.h"
 #include "HAL_UART.h"
@@ -90,7 +90,7 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 40u:
-            HEATING_tick();
+            AIRCON_tick();
         	break;
 
         case 60u:
@@ -111,7 +111,7 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 140u:
-            HEATING_tick();
+            AIRCON_tick();
         	ROTARY_tick();
         	break;
 
@@ -133,7 +133,7 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 240u:
-            HEATING_tick();
+            AIRCON_tick();
         	break;
 
         case 260u:
@@ -154,7 +154,7 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 340u:
-            HEATING_tick();
+            AIRCON_tick();
         	ROTARY_tick();
         	break;
 
@@ -176,7 +176,7 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 440u:
-            HEATING_tick();
+            AIRCON_tick();
         	break;
 
         case 460u:
@@ -197,7 +197,7 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 540u:
-            HEATING_tick();
+            AIRCON_tick();
         	ROTARY_tick();
         	break;
 
@@ -219,7 +219,7 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 640u:
-            HEATING_tick();
+            AIRCON_tick();
         	break;
 
         case 660u:
@@ -240,7 +240,7 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 740u:
-            HEATING_tick();
+            AIRCON_tick();
         	ROTARY_tick();
         	break;
 
@@ -262,7 +262,7 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 840u:
-            HEATING_tick();
+            AIRCON_tick();
         	break;
 
         case 860u:
@@ -283,7 +283,7 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 940u:
-            HEATING_tick();
+            AIRCON_tick();
         	ROTARY_tick();
         	break;
 
@@ -355,27 +355,13 @@ void MODE_MGR_action_selector_switch_changes( HAL_BRD_switch_slider_et slider, l
 	switch ( slider )
 	{
 		case SLIDER_1:
-			if( HEATING_get_state() == ENABLE_ )
-			{
-				HEATING_set_state( DISABLE_ );
-			}
-			else
-			{
-				HEATING_set_state( ENABLE_ );
-			}
+			AIRCON_toggle_state();
 			break;
 
 
 		case SLIDER_2:
 			/* This switch has changed state, we dont care what the actual state is ( high or low ) 0 as long as we detect a change */
-			if( HEATING_get_mode() == HEATING_HEAT_MODE )
-			{
-				HEATING_set_mode( HEATING_COOL_MODE );
-			}
-			else
-			{
-				HEATING_set_mode( HEATING_HEAT_MODE );
-			}
+			AIRCON_toggle_mode();
 			break;
 
 		default:

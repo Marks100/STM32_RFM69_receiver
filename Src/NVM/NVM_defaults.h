@@ -60,11 +60,14 @@ const NVM_generic_data_blk_st NVM_DEFAULT_GENERIC_DATA_BLK_s =
 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
 	DISABLE_,   											//Whitelist state
-	HEATING_COOL_MODE,
+	DISABLE_,												//RF debug output state
+	AIRCON_COOL_MODE,
+	DISABLE_,
 	19.2f,
 	15.3f,
 	19.2f,
 	18.0f,
+	19.0f
 };
 
 
