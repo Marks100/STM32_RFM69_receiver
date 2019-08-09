@@ -33,8 +33,6 @@ RELEASE_PACKAGE_NAME     := $(RELEASE_PACKAGE_BASE_DIR)/$(RELEASE_PACKAGE_BASE_D
 
 
 
-
-
 # Various test reports
 CEEDLING_GCOV_DIR					   := test/CodeCoverage
 CEEDLING_TEST_XML_TEST_REPORT_ORIGIN   := test/build/artifacts/test
