@@ -4,7 +4,7 @@
 #include "C_defs.h"
 #include "Screens.h"
 
-#define LCD_TICK_RATE_MS    200u
+#define LCD_TICK_RATE_MS    40u
 
 #define LCD_COL_COUNT 16
 #define LCD_ROW_COUNT 2
@@ -54,14 +54,6 @@
 #define BIT1    1
 #define BIT0    0
 
-typedef enum
-{
-    LCD_NO_REQUEST = 0u,
-    LCD_WELDER_FIRING,
-    LCD_DUTY_CYCLE_WARNING,
-    LCD_INFO,
-    LCD_EXPERT_MODE
-} LCD_async_display_request_et;
 
 typedef enum
 {
@@ -69,21 +61,13 @@ typedef enum
     LCD_COMMAND
 } LCD_command_type_et;
 
-
 typedef enum
 {
-	LCD_WELCOME_MESSAGE_SCREEN = 0u,
-	LCD_SAFETY_INFO_P1_SCREEN,
-	LCD_SAFETY_INFO_P2_SCREEN,
-	LCD_MAIN_MENU_SCREEN,
-	LCD_FIRING_SCREEN,
-	LCD_DUTY_CYCLE_WARNING_SCREEN,
-	LCD_INFO_SCREEN_1,
-	LCD_INFO_SCREEN_2,
-	LCD_INFO_SCREEN_3,
-	LCD_EXPERT_MODE_SCREEN
-
-} LCD_screen_et;
+    LCD_POWERING_UP  = 0,
+    LCD_INITIALISING_P1,
+    LCD_INITIALISING_P2,
+    LCD_READY,
+} LCD_state_et;
 
 
 void LCD_set_D0_pin( low_high_et state );
@@ -114,13 +98,7 @@ void LCD_scroll_right( void );
 void LCD_scroll_left( void );
 false_true_et LCD_check_setting_enabled( u8_t settings_mask );
 false_true_et LCD_write_message( u8_t* message, u8_t len );
-
-void LCD_200ms_tick( void );
-void LCD_create_screen( LCD_screen_et screen );
-LCD_screen_et LCD_handle_screen( LCD_screen_et screen );
-void LCD_set_async_requests( LCD_async_display_request_et request );
-void LCD_set_button_press( false_true_et state );
-false_true_et LCD_get_button_press( void );
+void LCD_tick( void );
 
 
 

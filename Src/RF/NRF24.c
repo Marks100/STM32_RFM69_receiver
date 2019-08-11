@@ -1743,7 +1743,7 @@ void NRF24_handle_acks_and_tx_failures( void )
         /* Clear the max retry bit before sending any further data */
         NRF24_status_register_clr_bit( MAX_RT );
 
-        HAL_BRD_toggle_debug_pin();
+        //HAL_BRD_toggle_debug_pin();
 
         NRF24_handle_packet_stats( 2 );
     }

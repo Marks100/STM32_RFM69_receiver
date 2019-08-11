@@ -82,11 +82,6 @@ void HAL_BRD_set_batt_monitor_state( disable_enable_et state );
 void HAL_BRD_set_rf_enable_pin( disable_enable_et state );
 void HAL_BRD_toggle_led( void );
 void HAL_BRD_set_LED( off_on_et state );
-void HAL_BRD_toggle_debug_pin( void );
-void HAL_BRD_set_debug_pin( off_on_et state );
-void HAL_BRD_RFM69_set_enable_pin_state( low_high_et state );
-void HAL_BRD_RFM69_set_reset_pin_state( low_high_et state );
-void HAL_BRD_RFM69_spi_slave_select( low_high_et state );
 low_high_et HAL_BRD_read_selector_switch_pin( HAL_BRD_switch_slider_et slider );
 void HAL_BRD_NRF24_spi_slave_select( low_high_et state );
 void HAL_BRD_NRF24_set_ce_pin_state( low_high_et state );
@@ -103,6 +98,16 @@ void HAL_BRD_set_cooler_state( off_on_et state );
 void HAL_BRD_set_heater_state( off_on_et state );
 low_high_et HAL_BRD_read_rotary_clock_pin( void );
 low_high_et HAL_BRD_read_rotary_data_pin( void );
+
+void HAL_BRD_74HC164_set_clk_pin_state( low_high_et state );
+void HAL_BRD_74HC164_pulse_clk_pin_state( void );
+void HAL_BRD_74HC164_set_data_pin_high( void );
+void HAL_BRD_74HC164_set_data_pin_low( void );
+void HAL_BRD_LCD_pulse_enable_pin_state( void );
+void HAL_BRD_LCD_set_enable_pin_low( void );
+void HAL_BRD_LCD_set_enable_pin_high( void );
+void HAL_BRD_LCD_set_RS_pin_high( void );
+void HAL_BRD_LCD_set_RS_pin_low( void );
 
 void HAL_BRD_get_SW_version_num( u8_t *version_num_p );
 void HAL_BRD_get_HW_version_num( u8_t *version_num_p );

@@ -17,7 +17,6 @@
 /*******************************************************************************
  *    DEFINITIONS
  ******************************************************************************/
-float HYSTERESIS = 0.5;
 
 
 /*******************************************************************************
@@ -45,8 +44,6 @@ void setUp(void)
     NVM_info_s.NVM_generic_data_blk_s.heat_min_temp = 19.0;
     NVM_info_s.NVM_generic_data_blk_s.aircon_state = DISABLE_;
     NVM_info_s.NVM_generic_data_blk_s.auto_target_temp = 18.5;
-    AIRCON_config_s.hysteresis = HYSTERESIS;
-
 }
 
 void tearDown(void)

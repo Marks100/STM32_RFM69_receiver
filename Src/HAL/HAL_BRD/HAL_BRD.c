@@ -9,7 +9,6 @@
 #include "STDC.h"
 #include "HAL_TIM.h"
 #include "main.h"
-#include "RFM69.h"
 #include "NEOPIXEL.h"
 #include "autoversion.h"
 
@@ -67,17 +66,6 @@ void HAL_BRD_init( void )
 		debug_mode = ENABLE;
 	#endif
 
-	/* Setup the RF( RFM69 ) NCS Pin ( PB1 ) */
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-	GPIO_Init(GPIOB, &GPIO_InitStructure);
-
-	/* Setup the RF ( RFM69 ) RESET Pin ( PB10 ) */
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-	GPIO_Init(GPIOB, &GPIO_InitStructure);
 
 	/* Setup the Selector mode switches( PB6, PB7, PB8, PB9 ) */
 	GPIO_InitStructure.GPIO_Pin = ( GPIO_Pin_6 | GPIO_Pin_7 | GPIO_Pin_8 | GPIO_Pin_9 );
@@ -115,17 +103,35 @@ void HAL_BRD_init( void )
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
 
-	/* Enable the "RFM69 packet received" interrupt on pin A1 */
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
-	GPIO_Init(GPIOA, &GPIO_InitStructure);
-
 	/* Configure the rotary clock and data pins */
 	GPIO_InitStructure.GPIO_Pin = ( GPIO_Pin_8 | GPIO_Pin_11 );
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+	/* Configure the 74HC164 clk pin */
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOB, &GPIO_InitStructure);
+
+	/* Configure the 74HC164 data pin */
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOB, &GPIO_InitStructure);
+
+	/* Configure the LCD Enable pin */
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOB, &GPIO_InitStructure);
+
+	/* Configure the LCD RS pin */
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOB, &GPIO_InitStructure);
 
 
 	NVIC_InitTypeDef NVIC_InitStruct;
@@ -148,9 +154,6 @@ void HAL_BRD_init( void )
 	NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
 	/* Add to NVIC */
 	NVIC_Init(&NVIC_InitStruct);
-
-	HAL_BRD_RFM69_spi_slave_select( HIGH );
-	HAL_BRD_RFM69_set_reset_pin_state( LOW );
 
 	HAL_BRD_rtc_triggered_s = TRUE;
 
@@ -337,30 +340,7 @@ void HAL_BRD_set_generic_output( u8_t generic_output_num, off_on_et state )
 }
 
 
-/*!
-****************************************************************************************************
-*
-*   \brief         SETS the state of the NEO pixel pin
-*
-*   \author        MS
-*
-*   \return        None
-*
-***************************************************************************************************/
-#pragma GCC push_options
-#pragma GCC optimize ("O3")
-void HAL_BRD_set_NEOpixel_state( low_high_et state )
-{
-	if( state == HIGH )
-	{
-		HAL_BRD_set_pin_state( GPIOA, GPIO_Pin_12, state );
-	}
-	else
-	{
-		HAL_BRD_set_pin_state( GPIOA, GPIO_Pin_12, state );
-	}
-}
-#pragma GCC pop_options
+
 
 
 /*!
@@ -390,24 +370,88 @@ void HAL_BRD_set_batt_monitor_state( disable_enable_et state )
 /*!
 ****************************************************************************************************
 *
-*   \brief         SETS the rf enable pin
+*   \brief         SETS the 74HC164 clk pin
 *
 *   \author        MS
 *
 *   \return        None
 *
 ***************************************************************************************************/
-void HAL_BRD_RFM69_set_enable_pin_state( low_high_et state )
+#pragma GCC push_options
+#pragma GCC optimize ("O1")
+
+void HAL_BRD_74HC164_set_clk_pin_state( low_high_et state )
 {
 	if( state == HIGH )
 	{
-		//HAL_BRD_Set_Pin_state();
+		HAL_BRD_set_pin_state( GPIOB, GPIO_Pin_0, HIGH );
 	}
 	else
 	{
-		//HAL_BRD_Set_Pin_state();
+		HAL_BRD_set_pin_state( GPIOB, GPIO_Pin_0, LOW );
 	}
 }
+
+
+void HAL_BRD_74HC164_pulse_clk_pin_state( void )
+{
+
+	/* This is soo time critical that instead of abstracting with function calls ill go direct to the hardware */
+	GPIOB->ODR |= GPIO_Pin_0;
+	asm("nop");asm("nop");asm("nop");asm("nop");
+	GPIOB->ODR &= ~GPIO_Pin_0;
+}
+
+
+
+void HAL_BRD_74HC164_set_data_pin_high( void )
+{
+	GPIOB->ODR |= GPIO_Pin_1;
+}
+
+void HAL_BRD_74HC164_set_data_pin_low( void )
+{
+	GPIOB->ODR &= ~GPIO_Pin_1;
+}
+
+void HAL_BRD_LCD_set_enable_pin_high( void )
+{
+	GPIOB->ODR |= GPIO_Pin_10;	
+}
+
+void HAL_BRD_LCD_set_enable_pin_low( void )
+{
+	GPIOB->ODR &= ~GPIO_Pin_10;	
+}
+
+
+void HAL_BRD_LCD_pulse_enable_pin_state( void )
+{
+	GPIOB->ODR |= GPIO_Pin_10;
+
+	asm("nop");asm("nop");asm("nop");asm("nop");
+	asm("nop");asm("nop");asm("nop");asm("nop");
+	asm("nop");asm("nop");asm("nop");asm("nop");
+	asm("nop");asm("nop");asm("nop");asm("nop");
+	asm("nop");asm("nop");asm("nop");asm("nop");
+	asm("nop");asm("nop");asm("nop");asm("nop");
+	asm("nop");asm("nop");asm("nop");asm("nop");
+	asm("nop");asm("nop");asm("nop");asm("nop");
+
+	GPIOB->ODR &= ~GPIO_Pin_10;	
+}
+
+void HAL_BRD_LCD_set_RS_pin_high( void )
+{
+	GPIOB->ODR |= GPIO_Pin_11;
+}
+
+void HAL_BRD_LCD_set_RS_pin_low( void )
+{
+	GPIOB->ODR &= ~GPIO_Pin_11;	
+}
+#pragma GCC pop_options
+
 
 
 /*!
@@ -433,52 +477,9 @@ void HAL_BRD_NRF24_set_ce_pin_state( low_high_et state )
 }
 
 
-/*!
-****************************************************************************************************
-*
-*   \brief         SETS the rf RST pin
-*
-*   \author        MS
-*
-*   \return        None
-*
-***************************************************************************************************/
-void HAL_BRD_RFM69_set_reset_pin_state( low_high_et state )
-{
-	if( state == HIGH )
-	{
-		HAL_BRD_set_pin_state( GPIOB, GPIO_Pin_10, HIGH );
-	}
-	else
-	{
-		HAL_BRD_set_pin_state( GPIOB, GPIO_Pin_10, LOW );
-	}
-}
 
 
 
-
-/*!
-****************************************************************************************************
-*
-*   \brief         SETS the SPI chip select pin for the RF module
-*
-*   \author        MS
-*
-*   \return        None
-*
-***************************************************************************************************/
-void HAL_BRD_RFM69_spi_slave_select( low_high_et state )
-{
-	if( state == HIGH )
-	{
-		HAL_BRD_set_pin_state( GPIOB, GPIO_Pin_1, HIGH );
-	}
-	else
-	{
-		HAL_BRD_set_pin_state( GPIOB, GPIO_Pin_1, LOW );
-	}
-}
 
 
 /*!
@@ -516,7 +517,7 @@ void HAL_BRD_NRF24_spi_slave_select( low_high_et state )
 *   \return        None
 *
 ***************************************************************************************************/
-void HAL_BRD_toggle_led( void )
+void HAL_BRD_toggle_onboard_led( void )
 {
     HAL_BRD_toggle_pin_state( GPIOC, GPIO_Pin_13 );
 }
@@ -536,32 +537,6 @@ void HAL_BRD_set_onboard_LED( off_on_et state )
 		val = LOW;
 	}
 	HAL_BRD_set_pin_state( GPIOC, GPIO_Pin_13, val);
-}
-
-
-
-
-
-/*!
-****************************************************************************************************
-*
-*   \brief         Toggles the debug pin
-*
-*   \author        MS
-*
-*   \return        None
-*
-***************************************************************************************************/
-void HAL_BRD_toggle_debug_pin( void )
-{
-    HAL_BRD_toggle_pin_state( GPIOA, GPIO_Pin_8 );
-}
-
-
-
-void HAL_BRD_set_debug_pin( off_on_et state )
-{
-	HAL_BRD_set_pin_state( GPIOA, GPIO_Pin_8, state );
 }
 
 
@@ -736,20 +711,6 @@ void HAL_BRD_debounce_completed( void )
 
 }
 
-/*!
-****************************************************************************************************
-*
-*   \brief         Toggles the heartbeat pin
-*
-*   \author        MS
-*
-*   \return        None
-*
-***************************************************************************************************/
-void HAL_BRD_toggle_heartbeat_pin(  void )
-{
-    HAL_BRD_toggle_pin_state( GPIOB, GPIO_Pin_11 );
-}
 
 
 
@@ -786,6 +747,7 @@ void HAL_BRD_set_cooler_state( off_on_et state )
 {
 	HAL_BRD_set_LED_state( LED_3, state );
 }
+
 
 
 void HAL_BRD_set_ROTARY_interrupt_state( disable_enable_et state )
@@ -874,7 +836,6 @@ void EXTI1_IRQHandler(void)
 		/* Clear interrupt flag */
 		EXTI_ClearITPendingBit(EXTI_Line1);
 
-		RFM69_update_packet_received( TRUE );
 	}
 }
 
@@ -897,7 +858,7 @@ void EXTI1_IRQHandler(void)
 /* Handle PB12 interrupt */
 void EXTI15_10_IRQHandler(void)
 {
-	HAL_BRD_toggle_led();
+	HAL_BRD_toggle_onboard_led();
 
 	/* Make sure that interrupt flag is set */
 	if ( EXTI_GetFlagStatus(EXTI_Line15) != RESET )
@@ -932,7 +893,7 @@ void EXTI15_10_IRQHandler(void)
 
 		/* Start a timer to generate a callback in xms to debounce the LOGIC */
 		HAL_TIM2_start();
-		HAL_BRD_toggle_led();
+		HAL_BRD_toggle_onboard_led();
 	}
 }
 

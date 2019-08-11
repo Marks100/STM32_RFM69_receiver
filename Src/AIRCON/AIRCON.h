@@ -23,8 +23,8 @@
 #define MAX_NUM_OUTPUTS 			( 10 )
 
 #define MIN_AIRCON_TEMP_C_SETTING	( 16.0 )
-#define MAX_AIRCON_TEMP_C_SETTING	( 16.0 )
-
+#define MAX_AIRCON_TEMP_C_SETTING	( 21.5 )
+#define MAX_NUM_SETTINGS			( ( MAX_AIRCON_TEMP_C_SETTING - MIN_AIRCON_TEMP_C_SETTING ) * 2.00 )
 
 typedef enum AIRCON_mode_et
 {

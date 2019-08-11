@@ -63,7 +63,7 @@ const NVM_generic_data_blk_st NVM_DEFAULT_GENERIC_DATA_BLK_s =
 	DISABLE_,												//RF debug output state
 	AIRCON_COOL_MODE,
 	DISABLE_,
-	19.2f,
+	19.5f,
 	15.3f,
 	19.2f,
 	18.0f,

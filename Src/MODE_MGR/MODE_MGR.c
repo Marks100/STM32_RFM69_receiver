@@ -10,9 +10,9 @@
 #include "MAIN.h"
 #include "AIRCON.h"
 #include "CLI.h"
-#include "RFM69.h"
 #include "HAL_UART.h"
 #include "NEOPIXEL.h"
+
 
 
 STATIC false_true_et 		   MODE_MGR_system_init_s;
@@ -66,6 +66,9 @@ void MODE_MGR_20ms_tick( void )
 }
 
 
+
+
+
 /*!
 ****************************************************************************************************
 *
@@ -81,16 +84,19 @@ void MODE_MGR_action_schedule_normal( void )
     NRF24_tick();
     CLI_message_handler();
     MODE_MGR_check_user_input();
-    NEOPIXEL_tick();
+    //NEOPIXEL_tick();
+
 
     switch( MODE_MGR_tick_timer_msecs_s )
     {
         case 20u:
         	ROTARY_tick();
+			
         	break;
 
         case 40u:
             AIRCON_tick();
+            LCD_tick();
         	break;
 
         case 60u:
@@ -99,6 +105,7 @@ void MODE_MGR_action_schedule_normal( void )
 
         case 80u:
         	NVM_tick();
+        	LCD_tick();
         	break;
 
         case 100u:
@@ -108,6 +115,7 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 120u:
+        	LCD_tick();
         	break;
 
         case 140u:
@@ -116,6 +124,7 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 160u:
+        	LCD_tick();
         	break;
 
         case 180u:
@@ -126,6 +135,7 @@ void MODE_MGR_action_schedule_normal( void )
         case 200u:
         	MAIN_WATCHDOG_kick();
             RF_MGR_tick();
+            LCD_tick();
         	break;
 
         case 220u:
@@ -134,6 +144,7 @@ void MODE_MGR_action_schedule_normal( void )
 
         case 240u:
             AIRCON_tick();
+            LCD_tick();
         	break;
 
         case 260u:
@@ -142,6 +153,7 @@ void MODE_MGR_action_schedule_normal( void )
 
         case 280u:
         	NVM_tick();
+        	LCD_tick();
         	break;
 
         case 300u:
@@ -151,6 +163,7 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 320u:
+        	LCD_tick();
         	break;
 
         case 340u:
@@ -159,6 +172,7 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 360u:
+        	LCD_tick();
         	break;
 
         case 380u:
@@ -169,6 +183,7 @@ void MODE_MGR_action_schedule_normal( void )
         case 400u:
         	MAIN_WATCHDOG_kick();
             RF_MGR_tick();
+            LCD_tick();
         	break;
 
         case 420u:
@@ -177,6 +192,7 @@ void MODE_MGR_action_schedule_normal( void )
 
         case 440u:
             AIRCON_tick();
+            LCD_tick();
         	break;
 
         case 460u:
@@ -185,6 +201,7 @@ void MODE_MGR_action_schedule_normal( void )
 
         case 480u:
         	NVM_tick();
+        	LCD_tick();
         	break;
 
         case 500u:
@@ -194,6 +211,7 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 520u:
+        	LCD_tick();
         	break;
 
         case 540u:
@@ -202,6 +220,7 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 560u:
+        	LCD_tick();
         	break;
 
         case 580u:
@@ -212,6 +231,7 @@ void MODE_MGR_action_schedule_normal( void )
         case 600u:
         	MAIN_WATCHDOG_kick();
             RF_MGR_tick();
+            LCD_tick();
         	break;
 
         case 620u:
@@ -220,6 +240,7 @@ void MODE_MGR_action_schedule_normal( void )
 
         case 640u:
             AIRCON_tick();
+            LCD_tick();
         	break;
 
         case 660u:
@@ -228,6 +249,7 @@ void MODE_MGR_action_schedule_normal( void )
 
         case 680u:
         	NVM_tick();
+        	LCD_tick();
         	break;
 
         case 700u:
@@ -237,6 +259,7 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 720u:
+        	LCD_tick();
         	break;
 
         case 740u:
@@ -245,6 +268,7 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 760u:
+        	LCD_tick();
         	break;
 
         case 780u:
@@ -255,6 +279,7 @@ void MODE_MGR_action_schedule_normal( void )
         case 800u:
         	MAIN_WATCHDOG_kick();
             RF_MGR_tick();
+            LCD_tick();
         	break;
 
         case 820u:
@@ -263,6 +288,7 @@ void MODE_MGR_action_schedule_normal( void )
 
         case 840u:
             AIRCON_tick();
+            LCD_tick();
         	break;
 
         case 860u:
@@ -271,6 +297,7 @@ void MODE_MGR_action_schedule_normal( void )
 
         case 880u:
         	NVM_tick();
+        	LCD_tick();
         	break;
 
         case 900u:
@@ -280,6 +307,7 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 920u:
+        	LCD_tick();
         	break;
 
         case 940u:
@@ -289,6 +317,7 @@ void MODE_MGR_action_schedule_normal( void )
 
         case 960u:
         	RF_MGR_analyse_fault_conditions();
+        	LCD_tick();
         	break;
 
         case 980u:
@@ -299,6 +328,7 @@ void MODE_MGR_action_schedule_normal( void )
         case 1000u:
         	MAIN_WATCHDOG_kick();
             RF_MGR_tick();
+            LCD_tick();
 
             /* keep track of time in secs */
             HAL_TIM_increment_secs();
