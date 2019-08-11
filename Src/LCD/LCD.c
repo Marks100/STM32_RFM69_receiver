@@ -318,7 +318,7 @@ false_true_et LCD_write_message( u8_t* message, u8_t size )
 	false_true_et status = TRUE;
 	u8_t i = 0;
 
-	if( size > 16u )
+	if( size > LCD_COL_COUNT )
     {
         /* The message wont fit on the screen, take appropriate action */
         status = FALSE;

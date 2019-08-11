@@ -5,7 +5,7 @@
 #include "VERSIONS.H"
 
 
-const u8_t MESSAGE_SPOT_WELDER[] = ("SPOT WELDER 2018");
+const u8_t MESSAGE_PROJECT[]     = ("  AIRCON  2019  ");
 const u8_t MESSAGE_CREATOR[]     = ("  MARK STEWART  ");
 const u8_t MESSAGE_SAFETY_0[]    = ("*   EXTREMELY  *");
 const u8_t MESSAGE_SAFETY_1[] 	 = ("*   DANGEROUS  *");
@@ -34,11 +34,13 @@ const u8_t HOT[]                 = ("   !! HOT  !!   ");
 STATIC SCREENS_async_display_request_et SCREENS_async_display_request_s;
 STATIC false_true_et                    SCREENS_button_press_s;
 STATIC u16_t                            SCREENS_screen_timer_s;
+STATIC u16_t                            SCREENS_loop_ctr_s;
 STATIC SCREENS_screen_et                SCREEN_screen_s;
 
 void SCREENS_init()
 {
 	SCREENS_screen_timer_s = 0u;
+	SCREENS_loop_ctr_s = 0u;
     SCREENS_async_display_request_s = NO_REQUEST;
     SCREENS_button_press_s = FALSE;
     SCREEN_screen_s = WELCOME_MESSAGE_SCREEN;
@@ -54,6 +56,7 @@ void SCREENS_set_async_requests( SCREENS_async_display_request_et request )
 void SCREENS_reset_screen_timer( void )
 {
 	SCREENS_screen_timer_s = 0u;
+	SCREENS_loop_ctr_s = 0u;
 }
 
 
@@ -387,11 +390,42 @@ u8_t SCREENS_handle_expert_mode_screen( void )
 void SCREENS_create_welcome_screen( void )
 {
     /* Display the message and keep it on the screen until the timer expires */
-    LCD_set_cursor_position(0,0);
-    LCD_write_message( (u8_t*)MESSAGE_SPOT_WELDER, LCD_COL_COUNT );
 
-    LCD_set_cursor_position(1,0);
-    LCD_write_message( (u8_t*)MESSAGE_CREATOR, LCD_COL_COUNT );
+	/* Create a non const array to hold the LCD string */
+    u8_t message[ LCD_COL_COUNT ];
+    u8_t i = 0x20;
+
+    STDC_memcpy( message, &i, sizeof( message ) );
+
+    switch( SCREENS_loop_ctr_s )
+    {
+		case 0 ... LCD_COL_COUNT:
+		{
+			for( i = 0u; i < SCREENS_loop_ctr_s; i++ )
+			{
+				message[i] = '*';
+			}
+
+			LCD_set_cursor_position(0,0);
+			LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
+
+			LCD_set_cursor_position(1,0);
+			LCD_write_message( (u8_t*)BLANK, LCD_COL_COUNT );
+		}
+		break;
+
+		case ( LCD_COL_COUNT + 1u ) ... ( LCD_COL_COUNT + 10 ): break;
+
+		default:
+			LCD_set_cursor_position(0,0);
+			LCD_write_message( (u8_t*)MESSAGE_PROJECT, LCD_COL_COUNT );
+
+			LCD_set_cursor_position(1,0);
+			LCD_write_message( (u8_t*)MESSAGE_CREATOR, LCD_COL_COUNT );
+			break;
+    }
+
+    SCREENS_loop_ctr_s ++;
 }
 
 
