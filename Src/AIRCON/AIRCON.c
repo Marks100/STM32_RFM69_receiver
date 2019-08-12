@@ -210,6 +210,13 @@ disable_enable_et AIRCON_get_state( void )
 }
 
 
+float AIRCON_get_auto_target_temp( void )
+{
+	return ( AIRCON_config_s.auto_target_temp_c );
+}
+
+
+
 void AIRCON_toggle_state( void )
 {
 	if( AIRCON_get_state() == DISABLE_ )
@@ -284,6 +291,16 @@ void AIRCON_set_heater_state( disable_enable_et state )
 void AIRCON_set_cooler_state( disable_enable_et state )
 {
 	AIRCON_config_s.cooler_state = state;
+}
+
+disable_enable_et AIRCON_get_heater_state( void )
+{
+	return( AIRCON_config_s.heater_state );
+}
+
+disable_enable_et AIRCON_get_cooler_state( void )
+{
+	return( AIRCON_config_s.cooler_state );
 }
 
 

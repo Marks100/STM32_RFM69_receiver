@@ -297,22 +297,28 @@ void SCREENS_create_welcome_screen( void )
 void SCREENS_create_main_menu_screen( void )
 {
     /* Create a non const array to hold the LCD string */
-    u8_t message[ LCD_COL_COUNT ];
+	u8_t message[ LCD_COL_COUNT + 1u ];
+	u16_t target_temp_c;
 
-    u16_t node = 0x0055;
-    u8_t temp_1 = 40;
-    u8_t temp_2 = 5;
+    u8_t* enable_disable_strings[2] = { "OFF", "ON " };
+    u8_t* mode_strings[3] = { "HEAT", "COOL", "AUTO" };
+
+    target_temp_c = AIRCON_get_auto_target_temp();
 
     STDC_memset( message, 0x20, sizeof(message) );
-    sprintf( message, "N:0x%04d T:%02d.%d",node, temp_1, temp_2 );
+    sprintf( message,     		 	      "%s ", enable_disable_strings[AIRCON_get_state()] );
+    sprintf( &message[strlen( message )], "%s " , mode_strings[AIRCON_get_mode()] );
+    sprintf( &message[strlen( message )], "%02d.%dc   ", ( (u16_t)target_temp_c ), ( (target_temp_c*10) % 10 )  );
 
-    /* Display the message and keep it on the screen until the timer expires */
     LCD_set_cursor_position(0,0);
     LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
 
-    STDC_memset( message, 0x20, sizeof(message) );
+    STDC_memset(message, 0x20, sizeof(message) );
+	sprintf( message, "F:%s H:%s     ", enable_disable_strings[ AIRCON_get_heater_state() ], \
+	                                    enable_disable_strings[ AIRCON_get_cooler_state() ] );
+
     LCD_set_cursor_position(1,0);
-    LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
+    LCD_write_message( (u8_t*)message, LCD_COL_COUNT  );
 }
 
 
@@ -344,7 +350,7 @@ void SCREENS_create_info_screen_1( void )
 void SCREENS_create_info_screen_2( void )
 {
     /* Create a non const array to hold the LCD string */
-    u8_t message[ LCD_COL_COUNT ] = { 0x00u, };
+    u8_t message[ LCD_COL_COUNT + 1u ];
     u8_t sw_version_string[SW_VERSION_NUM_SIZE];
     u8_t hw_version_string[HW_VERSION_NUM_SIZE];
 
