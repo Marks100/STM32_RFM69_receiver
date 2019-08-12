@@ -26,10 +26,9 @@
 #include "NVM.h"
 #include "NRF24.h"
 #include "HAL_BRD.h"
-
-
 #include "HAL_UART.h"
 #include "CLI.h"
+#include "VERSIONS.h"
 
 extern NVM_info_st        NVM_info_s;
 

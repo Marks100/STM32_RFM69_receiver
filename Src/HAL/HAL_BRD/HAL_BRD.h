@@ -21,7 +21,6 @@
 ***************************************************************************************************/
 /* None */
 #define SELECTOR_MODE_BIT_MASK ( 0x0F )
-#define SW_VERSION_NUM_SIZE    ( 3u )
 
 
 /***************************************************************************************************
@@ -111,9 +110,6 @@ void HAL_BRD_LCD_set_RS_pin_low( void );
 
 void HAL_BRD_get_SW_version_num( u8_t *version_num_p );
 void HAL_BRD_get_HW_version_num( u8_t *version_num_p );
-
-
-
 
 void ROTARY_evaluate_signals( low_high_et clock, low_high_et data );
 void ROTARY_tick( void );

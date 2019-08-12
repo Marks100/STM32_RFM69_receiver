@@ -11,6 +11,7 @@
 #include "main.h"
 #include "NEOPIXEL.h"
 #include "autoversion.h"
+#include "VERSIONS.h"
 
 EXTI_InitTypeDef EXTI_InitStruct;
 false_true_et HAL_BRD_rtc_triggered_s;

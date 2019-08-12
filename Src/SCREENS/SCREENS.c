@@ -7,28 +7,10 @@
 
 const u8_t MESSAGE_PROJECT[]     = ("  AIRCON  2019  ");
 const u8_t MESSAGE_CREATOR[]     = ("  MARK STEWART  ");
-const u8_t MESSAGE_SAFETY_0[]    = ("*   EXTREMELY  *");
-const u8_t MESSAGE_SAFETY_1[] 	 = ("*   DANGEROUS  *");
-const u8_t MESSAGE_SAFETY_2[]    = ("* PLEASE TREAT *");
-const u8_t MESSAGE_SAFETY_3[]    = ("* WITH CAUTION *");
-const u8_t FIRING[]              = ("!!.. FIRING ..!!");
-const u8_t ARMED[]               = ("!!    ARMED   !!");
-const u8_t DISARMED[]            = ("    DISARMED    ");
 const u8_t SETTINGS[]            = ("    SETTINGS    ");
-const u8_t WELD_TIME[]           = ("WELD TIME:0000ms");
 const u8_t STATUS_ACTIVE[]       = ("     ACTIVE     ");
 const u8_t BLANK[]               = ("                ");
-const u8_t WIRE_HOT[]            = ("  WIRING HOT!!  ");
-const u8_t COOLDOWN[]            = ("COOLDOWN NEEDED ");
-const u8_t TOTAL_WELDS[]         = ("TOT WELDS: 00000");
 const u8_t EXPERT_MODE[]         = ("  EXPERT MODE   ");
-const u8_t NO_COOLDOWN[]         = ("NO COOLDOWN TIME");
-const u8_t SW_VERSION[]          = ("SW VERS:00.00.00");
-const u8_t HW_VERSION[]          = ("HW VERS:00.00   ");
-const u8_t TEMPERATURE[]         = ("IN Temp: 000 deg");
-const u8_t COOL[]                = ("     COOL       ");
-const u8_t WARM[]                = ("     WARM       ");
-const u8_t HOT[]                 = ("   !! HOT  !!   ");
 
 
 STATIC SCREENS_async_display_request_et SCREENS_async_display_request_s;
@@ -69,14 +51,6 @@ void SCREENS_handle_screen( void )
     {
         switch( SCREENS_async_display_request_s )
         {
-            case WELDER_FIRING_REQUEST:
-                SCREEN_screen_s = FIRING_SCREEN;
-            break;
-
-            case DUTY_CYCLE_WARNING_REQUEST:
-                SCREEN_screen_s = DUTY_CYCLE_WARNING_SCREEN;
-                break;
-
             case INFO_REQUEST:
                 SCREEN_screen_s = INFO_SCREEN_1;
                 break;
@@ -98,24 +72,8 @@ void SCREENS_handle_screen( void )
            SCREEN_screen_s = SCREENS_handle_welcome_screen();
         break;
 
-        case SAFETY_INFO_P1_SCREEN:
-            SCREEN_screen_s = SCREENS_handle_safety_message_1_screen();
-            break;
-
-        case SAFETY_INFO_P2_SCREEN:
-            SCREEN_screen_s = SCREENS_handle_safety_message_2_screen();
-            break;
-
         case MAIN_MENU_SCREEN:
             SCREEN_screen_s = SCREENS_handle_main_menu_screen( SCREENS_button_press_s );
-            break;
-
-        case FIRING_SCREEN:
-            SCREEN_screen_s = SCREENS_handle_firing_screen();
-            break;
-
-        case DUTY_CYCLE_WARNING_SCREEN:
-            SCREEN_screen_s = SCREENS_handle_duty_cycle_warning_screen();
             break;
 
         case INFO_SCREEN_1:
@@ -151,25 +109,11 @@ void SCREENS_create_screen( SCREENS_screen_et screen )
             SCREENS_create_welcome_screen();
             break;
 
-        case SAFETY_INFO_P1_SCREEN:
-            SCREENS_create_safety_message_1_screen();
-            break;
-
-        case SAFETY_INFO_P2_SCREEN:
-            SCREENS_create_safety_message_2_screen();
-            break;
 
         case MAIN_MENU_SCREEN:
             SCREENS_create_main_menu_screen();
             break;
 
-        case FIRING_SCREEN:
-            SCREENS_create_firing_screen();
-            break;
-
-        case DUTY_CYCLE_WARNING_SCREEN:
-            SCREENS_create_duty_cycle_warning_screen();
-            break;
 
         case INFO_SCREEN_1:
             SCREENS_create_info_screen_1();
@@ -179,9 +123,6 @@ void SCREENS_create_screen( SCREENS_screen_et screen )
             SCREENS_create_info_screen_2();
             break;
 
-        case INFO_SCREEN_3:
-            SCREENS_create_info_screen_3();
-            break;
 
         case EXPERT_MODE_SCREEN:
             SCREENS_create_expert_mode_screen();
@@ -204,7 +145,7 @@ u8_t SCREENS_handle_welcome_screen( void )
     if( SCREENS_screen_timer_s >= DISPLAY_WELCOME_SCREEN_TIMEOUT )
     {
         SCREENS_reset_screen_timer();
-        new_screen = SAFETY_INFO_P1_SCREEN;
+        new_screen = MAIN_MENU_SCREEN;
     }
     else
     {
@@ -216,47 +157,7 @@ u8_t SCREENS_handle_welcome_screen( void )
 
 
 
-u8_t SCREENS_handle_safety_message_1_screen( void )
-{
-    /* keep track of the last screen that we were on */
-    SCREENS_screen_et new_screen = SAFETY_INFO_P1_SCREEN;
 
-    /* The screen timer is counting up */
-    if( SCREENS_screen_timer_s >= DISPLAY_WELCOME_SCREEN_TIMEOUT )
-    {
-        SCREENS_reset_screen_timer();
-        new_screen = SAFETY_INFO_P2_SCREEN;
-    }
-    else
-    {
-        SCREENS_screen_timer_s++;
-    }
-
-   return( new_screen );
-}
-
-
-
-
-u8_t SCREENS_handle_safety_message_2_screen( void )
-{
-    /* keep track of the last screen that we were on */
-    SCREENS_screen_et new_screen = SAFETY_INFO_P2_SCREEN;
-
-
-    /* The screen timer is counting up */
-    if( SCREENS_screen_timer_s >= DISPLAY_WELCOME_SCREEN_TIMEOUT )
-    {
-        SCREENS_reset_screen_timer();
-        new_screen = MAIN_MENU_SCREEN;
-    }
-    else
-    {
-        SCREENS_screen_timer_s++;
-    }
-
-   return( new_screen );
-}
 
 
 
@@ -266,7 +167,7 @@ u8_t SCREENS_handle_main_menu_screen( false_true_et button_press )
     /* keep track of the last screen that we were on */
     SCREENS_screen_et new_screen = MAIN_MENU_SCREEN;
 
-     if( button_press == TRUE )
+    if( button_press == TRUE )
     {
          new_screen = INFO_SCREEN_1;
     }
@@ -274,45 +175,6 @@ u8_t SCREENS_handle_main_menu_screen( false_true_et button_press )
     return( new_screen );
 }
 
-
-
-u8_t SCREENS_handle_firing_screen( void )
-{
-    SCREENS_screen_et new_screen = FIRING_SCREEN;
-
-    /* The screen timer is counting up */
-    if( SCREENS_screen_timer_s >= DISPLAY_WELCOME_SCREEN_TIMEOUT )
-    {
-        SCREENS_reset_screen_timer();
-        new_screen = MAIN_MENU_SCREEN;
-    }
-    else
-    {
-        SCREENS_screen_timer_s++;
-    }
-
-    return( new_screen );
-}
-
-
-
-u8_t SCREENS_handle_duty_cycle_warning_screen( void )
-{
-    SCREENS_screen_et new_screen = DUTY_CYCLE_WARNING_SCREEN;
-
-    /* The screen timer is counting up */
-    if( SCREENS_screen_timer_s >= DISPLAY_WELCOME_SCREEN_TIMEOUT )
-    {
-        SCREENS_reset_screen_timer();
-        new_screen = MAIN_MENU_SCREEN;
-    }
-    else
-    {
-        SCREENS_screen_timer_s++;
-    }
-
-    return( new_screen );
-}
 
 
 
@@ -430,88 +292,48 @@ void SCREENS_create_welcome_screen( void )
 
 
 
-void SCREENS_create_safety_message_1_screen( void )
-{
-    /* Display the message and keep it on the screen until the timer expires */
-    LCD_set_cursor_position(0,0);
-    LCD_write_message( (u8_t*)MESSAGE_SAFETY_0, LCD_COL_COUNT );
-
-    LCD_set_cursor_position(1,0);
-    LCD_write_message( (u8_t*)MESSAGE_SAFETY_1, LCD_COL_COUNT );
-}
-
-
-
-void SCREENS_create_safety_message_2_screen( void )
-{
-    /* Display the message and keep it on the screen until the timer expires */
-    LCD_set_cursor_position(0,0);
-    LCD_write_message( (u8_t*)MESSAGE_SAFETY_2, LCD_COL_COUNT );
-
-    LCD_set_cursor_position(1,0);
-    LCD_write_message( (u8_t*)MESSAGE_SAFETY_3, LCD_COL_COUNT );
-}
-
 
 
 void SCREENS_create_main_menu_screen( void )
 {
     /* Create a non const array to hold the LCD string */
-    u8_t message[ LCD_COL_COUNT ] = { 0x00u, };
+    u8_t message[ LCD_COL_COUNT ];
 
-    /* Now copy the const string into the new temp buffer */
-    STDC_memcpy( (u8_t*)message, (u8_t*)SW_VERSION, LCD_COL_COUNT );
+    u16_t node = 0x0055;
+    u8_t temp_1 = 40;
+    u8_t temp_2 = 5;
 
+    STDC_memset( message, 0x20, sizeof(message) );
+    sprintf( message, "N:0x%04d T:%02d.%d",node, temp_1, temp_2 );
 
     /* Display the message and keep it on the screen until the timer expires */
     LCD_set_cursor_position(0,0);
     LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
 
-    /* Now copy the const string into the new temp buffer */
-        STDC_memcpy( (u8_t*)message, (u8_t*)HW_VERSION, LCD_COL_COUNT );
-
-
+    STDC_memset( message, 0x20, sizeof(message) );
     LCD_set_cursor_position(1,0);
-    LCD_write_message( (u8_t*)STATUS_ACTIVE, LCD_COL_COUNT );
-}
-
-
-void SCREENS_create_firing_screen( void )
-{
-    /* Display the message and keep it on the screen until the timer expires */
-    LCD_set_cursor_position(0,0);
-    LCD_write_message( (u8_t*)FIRING, LCD_COL_COUNT );
-
-    LCD_set_cursor_position(1,0);
-    LCD_write_message( (u8_t*)BLANK, LCD_COL_COUNT );
+    LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
 }
 
 
 
-
-
-void SCREENS_create_duty_cycle_warning_screen( void )
-{
-    /* Display the message and keep it on the screen until the timer expires */
-    LCD_set_cursor_position(0,0);
-    LCD_write_message( (u8_t*)WIRE_HOT, LCD_COL_COUNT );
-
-    LCD_set_cursor_position(1,0);
-    LCD_write_message( (u8_t*)COOLDOWN, LCD_COL_COUNT );
-}
 
 
 
 void SCREENS_create_info_screen_1( void )
 {
     /* Create a non const array to hold the LCD string */
-    u8_t message[ LCD_COL_COUNT ] = { 0x00u, };
-    u32_t num_welds = 0u;
+    u8_t message[ LCD_COL_COUNT ];
 
+    STDC_memset( message, 0x20, sizeof(message) );
+    sprintf( message, "  Aircon  Unit  ");
 
     /* Display the message and keep it on the screen until the timer expires */
     LCD_set_cursor_position(0,0);
     LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
+
+    STDC_memset( message, 0x20, sizeof(message) );
+    sprintf( message, "      2019      ");
 
     LCD_set_cursor_position(1,0);
     LCD_write_message( (u8_t*)BLANK, LCD_COL_COUNT );
@@ -523,58 +345,29 @@ void SCREENS_create_info_screen_2( void )
 {
     /* Create a non const array to hold the LCD string */
     u8_t message[ LCD_COL_COUNT ] = { 0x00u, };
-    u32_t num_welds = 0;
-    u8_t num;
+    u8_t sw_version_string[SW_VERSION_NUM_SIZE];
+    u8_t hw_version_string[HW_VERSION_NUM_SIZE];
 
-    /* Now copy the const string into the new temp buffer */
-    STDC_memcpy( (u8_t*)message, (u8_t*)SW_VERSION, LCD_COL_COUNT );
+    HAL_BRD_get_SW_version_num( sw_version_string );
+    HAL_BRD_get_HW_version_num( hw_version_string );
 
     /* Display the message and keep it on the screen until the timer expires */
     LCD_set_cursor_position(0,0);
-    LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
-
+    
     /* Now copy the const string into the new temp buffer */
-    STDC_memcpy( (u8_t*)message, (u8_t*)HW_VERSION, LCD_COL_COUNT );
-
-    LCD_set_cursor_position(1,0);
+    sprintf( message, "SW Vers:%02d.%02d.%02d",  
+    sw_version_string[0], sw_version_string[1], sw_version_string[2] );
     LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
-}
 
-
-
-void SCREENS_create_info_screen_3( void )
-{
-    /* Create a non const array to hold the LCD string */
-    u8_t message[ LCD_COL_COUNT ] = { 0x00u, };
-    s8_t num;
-    u8_t temp;
-
-    /* Now copy the const string into the new temp buffer */
-    STDC_memcpy( (u8_t*)message, (u8_t*)TEMPERATURE, LCD_COL_COUNT );
-
-    LCD_set_cursor_position(0,0);
-    LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
+    STDC_memset( message, 0x20, sizeof(message) );
 
     LCD_set_cursor_position(1,0);
 
-    if( temp < 50u )
-    {
-        /* Now copy the const string into the new temp buffer */
-        STDC_memcpy( (u8_t*)message, (u8_t*)COOL, LCD_COL_COUNT );
-    }
-    else if( ( temp > 50u ) && ( temp < 80 ) )
-    {
-        /* Now copy the const string into the new temp buffer */
-        STDC_memcpy( (u8_t*)message, (u8_t*)WARM, LCD_COL_COUNT );
-    }
-    else
-    {
-        /* Now copy the const string into the new temp buffer */
-        STDC_memcpy( (u8_t*)message, (u8_t*)HOT, LCD_COL_COUNT );
-    }
+    /* Now copy the const string into the new temp buffer */
+    sprintf( message, "HW Vers:%02d.%02d.%02d",  
+    hw_version_string[0], hw_version_string[1], hw_version_string[2] );
     LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
 }
-
 
 
 
@@ -584,10 +377,5 @@ void SCREENS_create_info_screen_3( void )
 void SCREENS_create_expert_mode_screen( void )
 {
     /* Display the message and keep it on the screen until the timer expires */
-    LCD_set_cursor_position(0,0);
-    LCD_write_message( (u8_t*)EXPERT_MODE, LCD_COL_COUNT );
-
-    LCD_set_cursor_position(1,0);
-    LCD_write_message( (u8_t*)NO_COOLDOWN, LCD_COL_COUNT );
 }
 
