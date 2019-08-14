@@ -164,6 +164,7 @@ void AIRCON_tick( void )
 		AIRCON_set_cooler_state( OFF );
 	}
 	AIRCON_update_outputs();
+	NVM_request_flush();
 }
 
 

@@ -10,6 +10,7 @@
 #include "HAL_TIM.h"
 #include "main.h"
 #include "NEOPIXEL.h"
+#include "SCREENS.h"
 #include "autoversion.h"
 #include "VERSIONS.h"
 
@@ -968,11 +969,13 @@ void ROTARY_tick( void )
 	for( i = 0u; i < left; i++ )
 	{
 		NEOPIXEL_handle_rotary_input( ROTARY_LEFT_SCROLL );
+		SCREENS_handle_rotary_input( ROTARY_LEFT_SCROLL );
 	}
 
 	/* Handle all the left scrolls */
 	for( i = 0u; i < right; i++ )
 	{
 		NEOPIXEL_handle_rotary_input( ROTARY_RIGHT_SCROLL );
+		SCREENS_handle_rotary_input( ROTARY_RIGHT_SCROLL );
 	}
 }

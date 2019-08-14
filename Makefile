@@ -65,6 +65,11 @@ OBJS := $(SRCS:.c=.o)
 #add the "-I" to all folders found by the find command :)
 INCLUDES := $(addprefix -I ,$(shell find $(STM32_SRC_DIRS) -type d))
 
+ifeq ($(RELEASE),y)
+	OPTIMISATION := -O3
+else
+	OPTIMISATION := -O0
+endif
 
 CFLAGS :=  \
 		-mcpu=cortex-m3 \
@@ -72,7 +77,7 @@ CFLAGS :=  \
 		-Wall \
 		-ffunction-sections \
 		-g \
-		-O0 \
+		$(OPTIMISATION) \
 		-c \
 		-DSTM32DRIVERS \
 		-DSTM32F103C8 \
@@ -86,10 +91,10 @@ LDFLAGS := \
 		-g \
 		-nostartfiles \
 		"-Wl,-Map=$(GCC_ARM_OUT_DIR)/$(PROJECT_NAME).map" \
-		-O0 \
+		$(OPTIMISATION) \
 		-Wl,--gc-sections \
-		-L$(BUILD_SUPPORT)/ \
-		-Wl,-T$(STM32_LINKER_SCRIPT) -g -o $(GCC_ARM_OUT_DIR)/$(PROJECT_NAME).elf \
+		-L$(BUILD_SUPPORT) \
+		-T$(STM32_LINKER_SCRIPT) -g -o $(GCC_ARM_OUT_DIR)/$(PROJECT_NAME).elf \
 
 
 .PHONY: all

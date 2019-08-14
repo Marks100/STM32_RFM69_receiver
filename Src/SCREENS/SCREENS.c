@@ -1,6 +1,7 @@
 #include "STDC.h"
 #include "Screens.h"
 #include "LCD.h"
+#include "HAL_BRD.h"
 #include "NVM.h"
 #include "VERSIONS.H"
 
@@ -8,13 +9,13 @@
 const u8_t MESSAGE_PROJECT[]     = ("  AIRCON  2019  ");
 const u8_t MESSAGE_CREATOR[]     = ("  MARK STEWART  ");
 const u8_t SETTINGS[]            = ("    SETTINGS    ");
-const u8_t STATUS_ACTIVE[]       = ("     ACTIVE     ");
-const u8_t BLANK[]               = ("                ");
 const u8_t EXPERT_MODE[]         = ("  EXPERT MODE   ");
+const u8_t BLANK[]               = ("                ");
+
 
 
 STATIC SCREENS_async_display_request_et SCREENS_async_display_request_s;
-STATIC false_true_et                    SCREENS_button_press_s;
+STATIC ROTARY_scroll_type_et            SCREENS_rotary_press_s;
 STATIC u16_t                            SCREENS_screen_timer_s;
 STATIC u16_t                            SCREENS_loop_ctr_s;
 STATIC SCREENS_screen_et                SCREEN_screen_s;
@@ -24,9 +25,19 @@ void SCREENS_init()
 	SCREENS_screen_timer_s = 0u;
 	SCREENS_loop_ctr_s = 0u;
     SCREENS_async_display_request_s = NO_REQUEST;
-    SCREENS_button_press_s = FALSE;
+    SCREENS_rotary_press_s = ROTARY_NO_CHANGE;
     SCREEN_screen_s = WELCOME_MESSAGE_SCREEN;
 }
+
+
+void SCREENS_handle_rotary_input( ROTARY_scroll_type_et type )
+{
+    if( SCREENS_rotary_press_s == ROTARY_NO_CHANGE )
+    {
+        SCREENS_rotary_press_s = type;
+    }
+}
+
 
 void SCREENS_set_async_requests( SCREENS_async_display_request_et request )
 {
@@ -73,19 +84,23 @@ void SCREENS_handle_screen( void )
         break;
 
         case MAIN_MENU_SCREEN:
-            SCREEN_screen_s = SCREENS_handle_main_menu_screen( SCREENS_button_press_s );
+            SCREEN_screen_s = SCREENS_handle_main_menu_screen( SCREENS_rotary_press_s );
             break;
 
         case INFO_SCREEN_1:
-            SCREEN_screen_s = SCREENS_handle_info_screen_1( SCREENS_button_press_s );
+            SCREEN_screen_s = SCREENS_handle_info_screen_1( SCREENS_rotary_press_s );
             break;
 
         case INFO_SCREEN_2:
-            SCREEN_screen_s = SCREENS_handle_info_screen_2( SCREENS_button_press_s );
+            SCREEN_screen_s = SCREENS_handle_info_screen_2( SCREENS_rotary_press_s );
             break;
 
         case INFO_SCREEN_3:
-            SCREEN_screen_s = SCREENS_handle_info_screen_3( SCREENS_button_press_s );
+            SCREEN_screen_s = SCREENS_handle_info_screen_3( SCREENS_rotary_press_s );
+            break;
+
+        case TEST_SCREEN:
+            SCREEN_screen_s = SCREENS_handle_test_screen( SCREENS_rotary_press_s );
             break;
 
         case EXPERT_MODE_SCREEN:
@@ -95,7 +110,7 @@ void SCREENS_handle_screen( void )
         default:
             break;
     }
-    SCREENS_button_press_s = FALSE;
+    SCREENS_rotary_press_s = ROTARY_NO_CHANGE;
 }
 
 
@@ -109,7 +124,6 @@ void SCREENS_create_screen( SCREENS_screen_et screen )
             SCREENS_create_welcome_screen();
             break;
 
-
         case MAIN_MENU_SCREEN:
             SCREENS_create_main_menu_screen();
             break;
@@ -122,6 +136,14 @@ void SCREENS_create_screen( SCREENS_screen_et screen )
         case INFO_SCREEN_2:
             SCREENS_create_info_screen_2();
             break;
+
+        case INFO_SCREEN_3:
+            SCREENS_create_info_screen_3();
+            break;
+
+        case TEST_SCREEN:
+        	SCREENS_create_test_screen();
+        	break;
 
 
         case EXPERT_MODE_SCREEN:
@@ -162,15 +184,19 @@ u8_t SCREENS_handle_welcome_screen( void )
 
 
 
-u8_t SCREENS_handle_main_menu_screen( false_true_et button_press )
+u8_t SCREENS_handle_main_menu_screen( ROTARY_scroll_type_et button_press )
 {
     /* keep track of the last screen that we were on */
     SCREENS_screen_et new_screen = MAIN_MENU_SCREEN;
 
-    if( button_press == TRUE )
+    if( button_press == ROTARY_LEFT_SCROLL )
     {
          new_screen = INFO_SCREEN_1;
     }
+    else if( button_press == ROTARY_RIGHT_SCROLL )
+    {
+    	new_screen = INFO_SCREEN_3;
+    }
 
     return( new_screen );
 }
@@ -179,14 +205,18 @@ u8_t SCREENS_handle_main_menu_screen( false_true_et button_press )
 
 
 
-u8_t SCREENS_handle_info_screen_1( false_true_et button_press )
+u8_t SCREENS_handle_info_screen_1( ROTARY_scroll_type_et button_press )
 {
     SCREENS_screen_et new_screen = INFO_SCREEN_1;
 
-    if( button_press == TRUE )
+    if( button_press == ROTARY_LEFT_SCROLL )
     {
          new_screen = INFO_SCREEN_2;
     }
+    else if( button_press == ROTARY_RIGHT_SCROLL )
+    {
+    	new_screen = MAIN_MENU_SCREEN;
+    }
 
     return( new_screen );
 }
@@ -194,31 +224,55 @@ u8_t SCREENS_handle_info_screen_1( false_true_et button_press )
 
 
 
-u8_t SCREENS_handle_info_screen_2( false_true_et button_press )
+u8_t SCREENS_handle_info_screen_2( ROTARY_scroll_type_et button_press )
 {
     SCREENS_screen_et new_screen = INFO_SCREEN_2;
 
-    if( button_press == TRUE )
+    if( button_press == ROTARY_LEFT_SCROLL )
     {
          new_screen = INFO_SCREEN_3;
     }
-
-    return( new_screen );
-}
-
-
-u8_t SCREENS_handle_info_screen_3( false_true_et button_press )
-{
-    SCREENS_screen_et new_screen = INFO_SCREEN_3;
-
-    if( button_press == TRUE )
+    else if( button_press == ROTARY_RIGHT_SCROLL )
     {
-         new_screen = MAIN_MENU_SCREEN;
+    	new_screen = INFO_SCREEN_1;
     }
 
     return( new_screen );
 }
 
+
+u8_t SCREENS_handle_info_screen_3( ROTARY_scroll_type_et button_press )
+{
+    SCREENS_screen_et new_screen = INFO_SCREEN_3;
+
+    if( button_press == ROTARY_LEFT_SCROLL )
+    {
+         new_screen = TEST_SCREEN;
+    }
+    else if( button_press == ROTARY_RIGHT_SCROLL )
+    {
+    	new_screen = INFO_SCREEN_2;
+    }
+
+    return( new_screen );
+}
+
+
+SCREENS_screen_et SCREENS_handle_test_screen(ROTARY_scroll_type_et button_press )
+{
+    SCREENS_screen_et new_screen = TEST_SCREEN;
+
+    if( button_press == ROTARY_LEFT_SCROLL )
+    {
+         new_screen = MAIN_MENU_SCREEN;
+    }
+    else if( button_press == ROTARY_RIGHT_SCROLL )
+    {
+    	new_screen = INFO_SCREEN_3;
+    }
+
+    return( new_screen );
+}
 
 
 
@@ -314,8 +368,8 @@ void SCREENS_create_main_menu_screen( void )
     LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
 
     STDC_memset(message, 0x20, sizeof(message) );
-	sprintf( message, "F:%s H:%s     ", enable_disable_strings[ AIRCON_get_heater_state() ], \
-	                                    enable_disable_strings[ AIRCON_get_cooler_state() ] );
+	sprintf( message, "F:%s H:%s     ", enable_disable_strings[ AIRCON_get_cooler_state() ], \
+	                                    enable_disable_strings[ AIRCON_get_heater_state() ] );
 
     LCD_set_cursor_position(1,0);
     LCD_write_message( (u8_t*)message, LCD_COL_COUNT  );
@@ -342,7 +396,7 @@ void SCREENS_create_info_screen_1( void )
     sprintf( message, "      2019      ");
 
     LCD_set_cursor_position(1,0);
-    LCD_write_message( (u8_t*)BLANK, LCD_COL_COUNT );
+    LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
 }
 
 
@@ -375,6 +429,50 @@ void SCREENS_create_info_screen_2( void )
     LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
 }
 
+
+void SCREENS_create_info_screen_3( void )
+{
+    /* Create a non const array to hold the LCD string */
+    u8_t message[ LCD_COL_COUNT + 1u ];
+    u8_t sw_version_string[SW_VERSION_NUM_SIZE];
+    u8_t hw_version_string[HW_VERSION_NUM_SIZE];
+
+    HAL_BRD_get_SW_version_num( sw_version_string );
+    HAL_BRD_get_HW_version_num( hw_version_string );
+
+    /* Display the message and keep it on the screen until the timer expires */
+    LCD_set_cursor_position(0,0);
+
+    /* Now copy the const string into the new temp buffer */
+    LCD_write_message( (u8_t*)MESSAGE_CREATOR, LCD_COL_COUNT );
+
+    STDC_memset( message, 0x20, sizeof(message) );
+
+    LCD_set_cursor_position(1,0);
+    LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
+}
+
+
+void SCREENS_create_test_screen( void )
+{
+    /* Create a non const array to hold the LCD string */
+    u8_t message[ LCD_COL_COUNT + 1u ];
+
+    /* Display the message and keep it on the screen until the timer expires */
+    LCD_set_cursor_position(0,0);
+
+    sprintf( message, "ctr:%010d  ", SCREENS_loop_ctr_s );
+
+    /* Now copy the const string into the new temp buffer */
+    LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
+
+    STDC_memset( message, 0x20, sizeof(message) );
+
+    LCD_set_cursor_position(1,0);
+    LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
+
+    SCREENS_loop_ctr_s ++;
+}
 
 
 

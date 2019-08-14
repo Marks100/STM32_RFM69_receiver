@@ -31,7 +31,7 @@ set COMMON_TOOLS=^
 %TTLD%\CRC32;^
 %TTLD%\RubyScripts;^
 %TTLD%\SlikSvn\bin;^
-%TTLD%\Lauterbach\Trace32\2013_04\bin\windows;^
+%TTLD%\Lauterbach\T32\bin\windows64;^
 %TTLD%\MinGW\TDM32_492_0\bin;^
 %TTLD%\PRQA\8.2\common\bin;^
 %TTLD%\gcc-arm\bin;^
