@@ -14,7 +14,8 @@ typedef enum
 	INFO_SCREEN_2,
 	INFO_SCREEN_3,
 	TEST_SCREEN,
-	EXPERT_MODE_SCREEN
+	EXPERT_MODE_SCREEN,
+	AUTO_TARGET_TEMP_SCREEN
 } SCREENS_screen_et;
 
 typedef enum
@@ -40,6 +41,7 @@ void SCREENS_create_expert_mode_screen( void );
 void SCREENS_create_info_screen_1( void );
 void SCREENS_create_info_screen_2( void );
 void SCREENS_create_info_screen_3( void );
+void SCREENS_create_auto_temp_screen( void );
 
 void SCREENS_create_test_screen( void );
 
@@ -49,6 +51,7 @@ u8_t SCREENS_handle_expert_mode_screen( void );
 u8_t SCREENS_handle_info_screen_1( ROTARY_scroll_type_et button_press );
 u8_t SCREENS_handle_info_screen_2( ROTARY_scroll_type_et button_press );
 u8_t SCREENS_handle_info_screen_3( ROTARY_scroll_type_et button_press );
+u8_t SCREENS_handle_auto_temp_screen( ROTARY_scroll_type_et button_press );
 
 u8_t SCREENS_handle_test_screen( ROTARY_scroll_type_et button_press );
 

@@ -107,6 +107,10 @@ void SCREENS_handle_screen( void )
             SCREEN_screen_s = SCREENS_handle_expert_mode_screen();
             break;
 
+            case AUTO_TARGET_TEMP_SCREEN:
+            SCREEN_screen_s = SCREENS_handle_auto_temp_screen( SCREENS_rotary_press_s );
+            break;
+
         default:
             break;
     }
@@ -148,6 +152,10 @@ void SCREENS_create_screen( SCREENS_screen_et screen )
 
         case EXPERT_MODE_SCREEN:
             SCREENS_create_expert_mode_screen();
+            break;
+
+        case AUTO_TARGET_TEMP_SCREEN:
+            SCREENS_create_auto_temp_screen();
             break;
 
         default:
@@ -258,13 +266,13 @@ u8_t SCREENS_handle_info_screen_3( ROTARY_scroll_type_et button_press )
 }
 
 
-SCREENS_screen_et SCREENS_handle_test_screen(ROTARY_scroll_type_et button_press )
+SCREENS_screen_et SCREENS_handle_test_screen( ROTARY_scroll_type_et button_press )
 {
     SCREENS_screen_et new_screen = TEST_SCREEN;
 
     if( button_press == ROTARY_LEFT_SCROLL )
     {
-         new_screen = MAIN_MENU_SCREEN;
+         new_screen = AUTO_TARGET_TEMP_SCREEN;
     }
     else if( button_press == ROTARY_RIGHT_SCROLL )
     {
@@ -290,6 +298,22 @@ u8_t SCREENS_handle_expert_mode_screen( void )
     else
     {
         SCREENS_screen_timer_s++;
+    }
+
+    return( new_screen );
+}
+
+u8_t SCREENS_handle_auto_temp_screen( ROTARY_scroll_type_et button_press )
+{
+    SCREENS_screen_et new_screen = AUTO_TARGET_TEMP_SCREEN;
+
+    if( button_press == ROTARY_LEFT_SCROLL )
+    {
+         new_screen = MAIN_MENU_SCREEN;
+    }
+    else if( button_press == ROTARY_RIGHT_SCROLL )
+    {
+    	new_screen = TEST_SCREEN;
     }
 
     return( new_screen );
@@ -352,17 +376,17 @@ void SCREENS_create_main_menu_screen( void )
 {
     /* Create a non const array to hold the LCD string */
 	u8_t message[ LCD_COL_COUNT + 1u ];
-	u16_t target_temp_c;
+	s16_t target_temp_c;
 
     u8_t* enable_disable_strings[2] = { "OFF", "ON " };
     u8_t* mode_strings[3] = { "HEAT", "COOL", "AUTO" };
 
-    target_temp_c = AIRCON_get_auto_target_temp();
+    target_temp_c = ( AIRCON_get_oat() * 10 );
 
     STDC_memset( message, 0x20, sizeof(message) );
     sprintf( message,     		 	      "%s ", enable_disable_strings[AIRCON_get_state()] );
     sprintf( &message[strlen( message )], "%s " , mode_strings[AIRCON_get_mode()] );
-    sprintf( &message[strlen( message )], "%02d.%dc   ", ( (u16_t)target_temp_c ), ( (target_temp_c*10) % 10 )  );
+    sprintf( &message[strlen( message )], "%02d.%dc   ", ( (u16_t)target_temp_c / 10 ), ( target_temp_c % 10 )  );
 
     LCD_set_cursor_position(0,0);
     LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
@@ -434,22 +458,15 @@ void SCREENS_create_info_screen_3( void )
 {
     /* Create a non const array to hold the LCD string */
     u8_t message[ LCD_COL_COUNT + 1u ];
-    u8_t sw_version_string[SW_VERSION_NUM_SIZE];
-    u8_t hw_version_string[HW_VERSION_NUM_SIZE];
-
-    HAL_BRD_get_SW_version_num( sw_version_string );
-    HAL_BRD_get_HW_version_num( hw_version_string );
 
     /* Display the message and keep it on the screen until the timer expires */
+    sprintf( message, "  Developed By  " );
     LCD_set_cursor_position(0,0);
-
-    /* Now copy the const string into the new temp buffer */
-    LCD_write_message( (u8_t*)MESSAGE_CREATOR, LCD_COL_COUNT );
+    LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
 
     STDC_memset( message, 0x20, sizeof(message) );
-
     LCD_set_cursor_position(1,0);
-    LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
+    LCD_write_message( (u8_t*)MESSAGE_CREATOR, LCD_COL_COUNT );
 }
 
 
@@ -472,6 +489,26 @@ void SCREENS_create_test_screen( void )
     LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
 
     SCREENS_loop_ctr_s ++;
+}
+
+void SCREENS_create_auto_temp_screen( void )
+{
+    /* Create a non const array to hold the LCD string */
+    u8_t message[ LCD_COL_COUNT + 1u ];
+    u16_t target_temp_c = 0u;
+
+    /* Display the message and keep it on the screen until the timer expires */
+    LCD_set_cursor_position(0,0);
+
+    sprintf( message, "Auto target temp" );
+    LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
+
+    STDC_memset( message, 0x20, sizeof(message) );
+
+    target_temp_c = ( AIRCON_get_auto_target_temp() * 10 );
+    LCD_set_cursor_position(1,0);
+    sprintf( message, "  %d.%dc         ", ( target_temp_c / 10 ), ( target_temp_c % 10 ) );
+    LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
 }
 
 

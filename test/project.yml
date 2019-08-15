@@ -31,6 +31,7 @@
     - +:../Workspace/stm_lib/inc/*
     - +:../Workspace/cmsis_boot/**
     - +:../Workspace/cmsis/**
+    - +:../Workspace/stdio/**
   :support:
     - +:support
 

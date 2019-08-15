@@ -143,6 +143,6 @@ void test_welcome_screen( void )
     TEST_ASSERT_EQUAL( FALSE, SCREENS_async_display_request_s );
     TEST_ASSERT_EQUAL( FALSE, SCREENS_button_press_s );
     TEST_ASSERT_EQUAL( 0u, SCREENS_screen_timer_s );
-    TEST_ASSERT_EQUAL( SAFETY_INFO_P1_SCREEN, SCREEN_screen_s );
+    TEST_ASSERT_EQUAL( MAIN_MENU_SCREEN, SCREEN_screen_s );
 }
 

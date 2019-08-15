@@ -98,7 +98,6 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 100u:
-
         	break;
 
         case 150u:
