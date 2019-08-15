@@ -17,7 +17,7 @@ const u8_t BLANK[]               = ("                ");
 STATIC SCREENS_async_display_request_et SCREENS_async_display_request_s;
 STATIC ROTARY_scroll_type_et            SCREENS_rotary_press_s;
 STATIC u16_t                            SCREENS_screen_timer_s;
-STATIC u16_t                            SCREENS_loop_ctr_s;
+STATIC u32_t                            SCREENS_loop_ctr_s;
 STATIC SCREENS_screen_et                SCREEN_screen_s;
 
 void SCREENS_init()
@@ -330,7 +330,7 @@ void SCREENS_create_welcome_screen( void )
 		}
 		break;
 
-		case ( LCD_COL_COUNT + 1u ) ... ( LCD_COL_COUNT + 10 ): break;
+		case ( LCD_COL_COUNT + 1u ) ... ( LCD_COL_COUNT + 5 ): break;
 
 		default:
 			LCD_set_cursor_position(0,0);

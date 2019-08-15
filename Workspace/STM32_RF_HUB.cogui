@@ -86,6 +86,8 @@
 <part id="68"/>
 <part id="69"/>
 <part id="70"/>
+<part id="71"/>
+<part id="72"/>
 </presentation>
 </folder>
 </info>
@@ -102,9 +104,9 @@
 <input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STM32_RF_HUB/Src/RF/RFM69.c"/>
 <editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="12755" selectionTopPixel="6720"/>
 </editor>
-<editor id="org.eclipse.cdt.ui.editor.CEditor" name="MODE_MGR.c" partName="MODE_MGR.c" path="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/MODE_MGR/MODE_MGR.c" title="MODE_MGR.c" tooltip="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/MODE_MGR/MODE_MGR.c" workbook="DefaultEditorWorkbook">
+<editor activePart="true" focus="true" id="org.eclipse.cdt.ui.editor.CEditor" name="MODE_MGR.c" partName="MODE_MGR.c" path="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/MODE_MGR/MODE_MGR.c" title="MODE_MGR.c" tooltip="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/MODE_MGR/MODE_MGR.c" workbook="DefaultEditorWorkbook">
 <input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STM32_RF_HUB/Src/MODE_MGR/MODE_MGR.c"/>
-<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="6865" selectionTopPixel="5145"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="3256" selectionTopPixel="2055"/>
 </editor>
 <editor id="org.eclipse.cdt.ui.editor.CEditor" name="CLI.h" partName="CLI.h" path="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/CLI/CLI.h" title="CLI.h" tooltip="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/CLI/CLI.h" workbook="DefaultEditorWorkbook">
 <input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STM32_RF_HUB/Src/CLI/CLI.h"/>
@@ -127,8 +129,7 @@
 <editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="5584" selectionTopPixel="2610"/>
 </editor>
 <editor id="org.coocox.builder.ui.editors.repository.RepositoryBrowser" name="Repository" partName="Repository" title="Repository" tooltip="Repository" workbook="DefaultEditorWorkbook">
-<input factoryID="org.coocox.component.ui.editors.repository.RepositoryElementFactory">
-<subPage horizontalPosition="0" selectedItemId="0" subPageIndex="2" verticalPosition="0"/>
+<input factoryID="org.coocox.component.ui.editors.repository.RepositoryElementFactory">&#x0A;<subPage horizontalPosition="0" selectedItemId="0" subPageIndex="2" verticalPosition="0"/>
 </input>
 </editor>
 <editor id="org.eclipse.cdt.ui.editor.CEditor" name="printf.c" partName="printf.c" path="C:/Users/mark/Desktop/STM32_RFM69_receiver/Workspace/stdio/printf.c" title="printf.c" tooltip="C:/Users/mark/Desktop/STM32_RFM69_receiver/Workspace/stdio/printf.c" workbook="DefaultEditorWorkbook">
@@ -207,7 +208,7 @@
 <input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STM32_RF_HUB/Src/COMMON_MODULES/xINC/C_defs.h"/>
 <editorState selectionHorizontalPixel="0" selectionLength="7" selectionOffset="3981" selectionTopPixel="1800"/>
 </editor>
-<editor activePart="true" focus="true" id="org.eclipse.cdt.ui.editor.CEditor" name="RF_MGR.c" partName="RF_MGR.c" path="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/RF/RF_MGR.c" title="RF_MGR.c" tooltip="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/RF/RF_MGR.c" workbook="DefaultEditorWorkbook">
+<editor id="org.eclipse.cdt.ui.editor.CEditor" name="RF_MGR.c" partName="RF_MGR.c" path="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/RF/RF_MGR.c" title="RF_MGR.c" tooltip="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/RF/RF_MGR.c" workbook="DefaultEditorWorkbook">
 <input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STM32_RF_HUB/Src/RF/RF_MGR.c"/>
 <editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="17920" selectionTopPixel="9120"/>
 </editor>
@@ -353,7 +354,7 @@
 </editor>
 <editor id="org.eclipse.cdt.ui.editor.CEditor" name="AIRCON.c" partName="AIRCON.c" path="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/AIRCON/AIRCON.c" title="AIRCON.c" tooltip="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/AIRCON/AIRCON.c" workbook="DefaultEditorWorkbook">
 <input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STM32_RF_HUB/Src/AIRCON/AIRCON.c"/>
-<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="2081" selectionTopPixel="600"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="4933" selectionTopPixel="2190"/>
 </editor>
 <editor id="org.eclipse.cdt.ui.editor.CEditor" name="NVM.h" partName="NVM.h" title="NVM.h" tooltip="C:\Users\mark\Desktop\STM32_RFM69_receiver\Src\NVM\NVM.h" workbook="DefaultEditorWorkbook">
 <input factoryID="org.eclipse.cdt.ui.ExternalEditorInputFactory" path="C:\Users\mark\Desktop\STM32_RFM69_receiver\Src\NVM\NVM.h" project="STM32_RF_HUB"/>
@@ -374,6 +375,14 @@
 <editor id="org.eclipse.cdt.ui.editor.CEditor" name="main.c" partName="main.c" path="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/MAIN/main.c" title="main.c" tooltip="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/MAIN/main.c" workbook="DefaultEditorWorkbook">
 <input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STM32_RF_HUB/Src/MAIN/main.c"/>
 <editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="564" selectionTopPixel="315"/>
+</editor>
+<editor id="org.eclipse.cdt.ui.editor.CEditor" name="CLI.c" partName="CLI.c" path="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/CLI/CLI.c" title="CLI.c" tooltip="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/CLI/CLI.c" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STM32_RF_HUB/Src/CLI/CLI.c"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="5870" selectionTopPixel="1935"/>
+</editor>
+<editor id="org.eclipse.cdt.ui.editor.CEditor" name="NVM.c" partName="NVM.c" path="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/NVM/NVM.c" title="NVM.c" tooltip="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/NVM/NVM.c" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STM32_RF_HUB/Src/NVM/NVM.c"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="1496" selectionTopPixel="600"/>
 </editor>
 </editors>
 <views>
@@ -419,14 +428,14 @@
 </view>
 <view id="org.eclipse.debug.ui.ExpressionView" partName="Expressions">
 <viewState>
-<ExpressionKeySet ExpKeys="AIRCON_config_s.mode,"/>
+<ExpressionKeySet ExpKeys="AIRCON_config_s.mode,NVM_info_s,AIRCON_min_max_s,data_p,output_string,message,message,temp_message,strlen( temp_message ),NVM_info_s,"/>
 </viewState>
 </view>
 <view id="org.coocox.component.ui.ComponentView" partName="Components">
 <viewState/>
 </view>
 <view id="org.coocox.builder.ui.views.ProjectView" partName="Project">
-<viewState CommonNavigator.LINKING_ENABLED="0" horizontalPosition="0" org.eclipse.ui.navigator.resources.workingSets.showTopLevelWorkingSets="0" verticalPosition="54">
+<viewState CommonNavigator.LINKING_ENABLED="0" horizontalPosition="0" org.eclipse.ui.navigator.resources.workingSets.showTopLevelWorkingSets="0" verticalPosition="30">
 <expanded>
 <element path="/STM32_RF_HUB"/>
 <element path="/STM32_RF_HUB/Src"/>
@@ -448,7 +457,7 @@
 <element path="/STM32_RF_HUB/stm_lib"/>
 </expanded>
 <selection>
-<element path="/STM32_RF_HUB/Src/RF/RF_MGR.c"/>
+<element path="/STM32_RF_HUB/Src/MODE_MGR/MODE_MGR.c"/>
 </selection>
 </viewState>
 </view>
@@ -700,43 +709,16 @@
 <editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/STM32_RF_HUB/Src/CLI/CLI.c"/>
 <editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/STM32_RF_HUB/Src/CLI/CLI.h"/>
 <editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/STM32_RF_HUB/Src/RF/RF_MGR.h"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/STM32_RF_HUB/cmsis_boot/startup/startup_stm32f10x_md.c"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/STM32_RF_HUB/Src/MAIN/main.c"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/STM32_RF_HUB/Src/NVM/NVM.c"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/STM32_RF_HUB/Src/CLI/CLI.c"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/STM32_RF_HUB/Src/AIRCON/AIRCON.c"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/STM32_RF_HUB/cmsis_boot/startup/startup_stm32f10x_md.c"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/STM32_RF_HUB/Src/MAIN/main.c"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/STM32_RF_HUB/Src/NVM/NVM.c"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/STM32_RF_HUB/Src/MODE_MGR/MODE_MGR.c"/>
 </editors>
-<item historyLabel="CLI.c" index="1">
-<position info="not_deleted" x="14067" y="0"/>
-</item>
-<item historyLabel="CLI.c" index="1">
-<position info="not_deleted" x="14381" y="0"/>
-</item>
-<item historyLabel="CLI.c" index="1">
-<position info="not_deleted" x="14422" y="0"/>
-</item>
-<item historyLabel="CLI.c" index="1">
-<position info="not_deleted" x="14441" y="0"/>
-</item>
-<item historyLabel="CLI.c" index="1">
-<position info="not_deleted" x="5915" y="0"/>
-</item>
-<item historyLabel="CLI.c" index="1">
-<position info="not_deleted" x="5951" y="0"/>
-</item>
-<item historyLabel="CLI.c" index="1">
-<position info="not_deleted" x="15285" y="0"/>
-</item>
-<item historyLabel="CLI.c" index="1">
-<position info="not_deleted" x="15327" y="0"/>
-</item>
-<item historyLabel="CLI.c" index="1">
-<position info="not_deleted" x="15366" y="0"/>
-</item>
-<item historyLabel="CLI.c" index="1">
-<position info="not_deleted" x="15398" y="0"/>
-</item>
-<item historyLabel="CLI.c" index="1">
-<position info="not_deleted" x="15471" y="0"/>
-</item>
-<item historyLabel="CLI.c" index="1">
-<position info="not_deleted" x="15913" y="0"/>
-</item>
 <item historyLabel="CLI.c" index="1">
 <position info="not_deleted" x="15662" y="0"/>
 </item>
@@ -848,8 +830,44 @@
 <item historyLabel="RF_MGR.h" index="3">
 <position info="not_deleted" x="4987" y="0"/>
 </item>
-<item active="true" historyLabel="RF_MGR.c" index="0">
+<item historyLabel="RF_MGR.c" index="0">
 <position info="not_deleted" x="17695" y="0"/>
+</item>
+<item historyLabel="startup_stm32f10x_md.c" index="4">
+<position info="not_deleted" x="0" y="0"/>
+</item>
+<item historyLabel="main.c" index="5">
+<position info="not_deleted" x="564" y="0"/>
+</item>
+<item historyLabel="main.c" index="5">
+<position info="not_deleted" x="564" y="0"/>
+</item>
+<item historyLabel="NVM.c" index="6">
+<position info="not_deleted" x="9116" y="0"/>
+</item>
+<item historyLabel="NVM.c" index="6">
+<position info="not_deleted" x="9116" y="0"/>
+</item>
+<item historyLabel="CLI.c" index="7">
+<position info="not_deleted" x="4841" y="0"/>
+</item>
+<item historyLabel="AIRCON.c" index="8">
+<position info="not_deleted" x="2081" y="0"/>
+</item>
+<item historyLabel="startup_stm32f10x_md.c" index="9">
+<position info="not_deleted" x="0" y="0"/>
+</item>
+<item historyLabel="main.c" index="10">
+<position info="not_deleted" x="564" y="0"/>
+</item>
+<item historyLabel="main.c" index="10">
+<position info="not_deleted" x="564" y="0"/>
+</item>
+<item historyLabel="NVM.c" index="11">
+<position info="not_deleted" x="1496" y="0"/>
+</item>
+<item active="true" historyLabel="MODE_MGR.c" index="12">
+<position info="not_deleted" x="3084" y="8"/>
 </item>
 </navigationHistory>
 <input factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/" type="8"/>
@@ -858,8 +876,32 @@
 <actionBarAdvisor/>
 </window>
 <mruList>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="startup_stm32f10x_md.c" tooltip="STM32_RF_HUB/cmsis_boot/startup/startup_stm32f10x_md.c">
+<persistable path="/STM32_RF_HUB/cmsis_boot/startup/startup_stm32f10x_md.c"/>
+</file>
 <file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="main.c" tooltip="STM32_RF_HUB/Src/MAIN/main.c">
 <persistable path="/STM32_RF_HUB/Src/MAIN/main.c"/>
+</file>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="SCREENS.h" tooltip="STM32_RF_HUB/Src/SCREENS/SCREENS.h">
+<persistable path="/STM32_RF_HUB/Src/SCREENS/SCREENS.h"/>
+</file>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="SCREENS.c" tooltip="STM32_RF_HUB/Src/SCREENS/SCREENS.c">
+<persistable path="/STM32_RF_HUB/Src/SCREENS/SCREENS.c"/>
+</file>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="LCD.h" tooltip="STM32_RF_HUB/Src/LCD/LCD.h">
+<persistable path="/STM32_RF_HUB/Src/LCD/LCD.h"/>
+</file>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="LCD.c" tooltip="STM32_RF_HUB/Src/LCD/LCD.c">
+<persistable path="/STM32_RF_HUB/Src/LCD/LCD.c"/>
+</file>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="AIRCON.c" tooltip="STM32_RF_HUB/Src/AIRCON/AIRCON.c">
+<persistable path="/STM32_RF_HUB/Src/AIRCON/AIRCON.c"/>
+</file>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="PROJ_config.h" tooltip="STM32_RF_HUB/Src/PROJ_CONFIG/PROJ_config.h">
+<persistable path="/STM32_RF_HUB/Src/PROJ_CONFIG/PROJ_config.h"/>
+</file>
+<file factoryID="org.eclipse.ui.ide.FileStoreEditorInputFactory" id="org.eclipse.ui.DefaultTextEditor" name="arm-gcc-link.ld" tooltip="C:\Users\mark\Desktop\STM32_RFM69_receiver\Workspace\build\arm-gcc-link.ld">
+<persistable uri="file:/C:/Users/mark/Desktop/STM32_RFM69_receiver/Workspace/build/arm-gcc-link.ld"/>
 </file>
 <file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="SELMATH.c" tooltip="STM32_RF_HUB/Src/COMMON_MODULES/xINC/SELMATH/SELMATH.c">
 <persistable path="/STM32_RF_HUB/Src/COMMON_MODULES/xINC/SELMATH/SELMATH.c"/>
@@ -870,34 +912,11 @@
 <file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="SELMATH_pri.h" tooltip="STM32_RF_HUB/Src/COMMON_MODULES/xINC/SELMATH/SELMATH_pri.h">
 <persistable path="/STM32_RF_HUB/Src/COMMON_MODULES/xINC/SELMATH/SELMATH_pri.h"/>
 </file>
-<file factoryID="org.coocox.builder.ui.persistent.PersistentElementFactory" id="org.coocox.builder.ui.editors.ConfigEditor" name="" tooltip="">
-<persistable>
-<org.coocox.builder.ui.editors.ConfigEditor/>
-</persistable>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="main.c" tooltip="STM32_RF_HUB/Src/MAIN/main.c">
+<persistable path="/STM32_RF_HUB/Src/MAIN/main.c"/>
 </file>
-<file factoryID="org.eclipse.cdt.ui.ExternalEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="NVM.h" tooltip="C:\Users\mark\Desktop\STM32_RFM69_receiver\Src\NVM\NVM.h">
-<persistable path="C:\Users\mark\Desktop\STM32_RFM69_receiver\Src\NVM\NVM.h" project="STM32_RF_HUB"/>
-</file>
-<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="AIRCON.c" tooltip="STM32_RF_HUB/Src/AIRCON/AIRCON.c">
-<persistable path="/STM32_RF_HUB/Src/AIRCON/AIRCON.c"/>
-</file>
-<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="AIRCON.h" tooltip="STM32_RF_HUB/Src/AIRCON/AIRCON.h">
-<persistable path="/STM32_RF_HUB/Src/AIRCON/AIRCON.h"/>
-</file>
-<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="startup_stm32f10x_md.c" tooltip="STM32_sleepy_sensors/cmsis_boot/startup/startup_stm32f10x_md.c">
-<persistable path="/STM32_sleepy_sensors/cmsis_boot/startup/startup_stm32f10x_md.c"/>
-</file>
-<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="NRF24_Registers.h" tooltip="STM32_RF_HUB/Src/RF/NRF24_Registers.h">
-<persistable path="/STM32_RF_HUB/Src/RF/NRF24_Registers.h"/>
-</file>
-<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="CHKSUM.c" tooltip="STM32_RF_HUB/Src/COMMON_MODULES/xLIBS/CHKSUM/CHKSUM.c">
-<persistable path="/STM32_RF_HUB/Src/COMMON_MODULES/xLIBS/CHKSUM/CHKSUM.c"/>
-</file>
-<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="startup_stm32f10x_md.c" tooltip="STM32_RF_HUB/cmsis_boot/startup/startup_stm32f10x_md.c">
-<persistable path="/STM32_RF_HUB/cmsis_boot/startup/startup_stm32f10x_md.c"/>
-</file>
-<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.ui.DefaultTextEditor" name="system_stm32f10x.o" tooltip="STM32_RF_HUB/cmsis_boot/system_stm32f10x.o">
-<persistable path="/STM32_RF_HUB/cmsis_boot/system_stm32f10x.o"/>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="SELMATH.c" tooltip="STM32_RF_HUB/Src/COMMON_MODULES/xINC/SELMATH/SELMATH.c">
+<persistable path="/STM32_RF_HUB/Src/COMMON_MODULES/xINC/SELMATH/SELMATH.c"/>
 </file>
 <file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="system_stm32f10x.h" tooltip="STM32_RF_HUB/cmsis_boot/system_stm32f10x.h">
 <persistable path="/STM32_RF_HUB/cmsis_boot/system_stm32f10x.h"/>

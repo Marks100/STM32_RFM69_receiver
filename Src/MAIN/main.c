@@ -77,14 +77,9 @@ void SysTick_Handler( void )
 	delay_timer--;
 
 	debug_timer_s += 1u;
+	HAL_BRD_toggle_onboard_led();
 
-	if( debug_timer_s >= MODE_MGR_TICK_RATE_MSECS )
-	{
-		/* reset the task timer */
-		debug_timer_s = 0u;
-
-		MODE_MGR_20ms_tick();
-	}
+	MODE_MGR_tick();
 }
 
 
@@ -99,10 +94,10 @@ void MAIN_SYSTICK_init( void )
 	RCC_ClocksTypeDef RCC_Clocks;
 	RCC_GetClocksFreq (&RCC_Clocks);
 
-	SysTick_CLKSourceConfig( SysTick_CLKSource_HCLK );
+	SysTick_CLKSourceConfig( SysTick_CLKSource_HCLK_Div8 );
 
 	/* Trigger an interrupt every 1ms */
-	SysTick_Config(72000);
+	SysTick_Config(3600000);
 }
 
 

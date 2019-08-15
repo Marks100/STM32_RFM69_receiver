@@ -45,7 +45,7 @@ void MODE_MGR_init( void )
 
 
 
-void MODE_MGR_20ms_tick( void )
+void MODE_MGR_tick( void )
 {
 	switch( MODE_MGR_mode_s )
 	{
@@ -81,260 +81,111 @@ void MODE_MGR_20ms_tick( void )
 ***************************************************************************************************/
 void MODE_MGR_action_schedule_normal( void )
 {
-    NRF24_tick();
+	//HAL_BRD_set_onboard_LED(ON);
+	NRF24_tick();
     CLI_message_handler();
     MODE_MGR_check_user_input();
-    //NEOPIXEL_tick();
-
+    NEOPIXEL_tick();
+	LCD_tick();
+	ROTARY_tick();
+	MAIN_WATCHDOG_kick();
 
     switch( MODE_MGR_tick_timer_msecs_s )
     {
-        case 20u:
-        	ROTARY_tick();
-			
-        	break;
-
-        case 40u:
-            AIRCON_tick();
-            LCD_tick();
-        	break;
-
-        case 60u:
-        	ROTARY_tick();
-        	break;
-
-        case 80u:
-        	NVM_tick();
-        	LCD_tick();
+        case 50u:
+			AIRCON_tick();
+            RF_MGR_tick();
         	break;
 
         case 100u:
-        	MAIN_WATCHDOG_kick();
+
+        	break;
+
+        case 150u:
             RF_MGR_tick();
-        	ROTARY_tick();
-        	break;
-
-        case 120u:
-        	LCD_tick();
-        	break;
-
-        case 140u:
-            AIRCON_tick();
-        	ROTARY_tick();
-        	break;
-
-        case 160u:
-        	LCD_tick();
-        	break;
-
-        case 180u:
-        	NVM_tick();
-        	ROTARY_tick();
         	break;
 
         case 200u:
-        	MAIN_WATCHDOG_kick();
+			MAIN_WATCHDOG_kick();
+			NVM_tick();
+        	break;
+
+        case 250u:
+			AIRCON_tick();
             RF_MGR_tick();
-            LCD_tick();
-        	break;
-
-        case 220u:
-        	ROTARY_tick();
-        	break;
-
-        case 240u:
-            AIRCON_tick();
-            LCD_tick();
-        	break;
-
-        case 260u:
-        	ROTARY_tick();
-        	break;
-
-        case 280u:
-        	NVM_tick();
-        	LCD_tick();
         	break;
 
         case 300u:
         	MAIN_WATCHDOG_kick();
+        	break;
+
+        case 350u:
             RF_MGR_tick();
-        	ROTARY_tick();
-        	break;
-
-        case 320u:
-        	LCD_tick();
-        	break;
-
-        case 340u:
-            AIRCON_tick();
-        	ROTARY_tick();
-        	break;
-
-        case 360u:
-        	LCD_tick();
-        	break;
-
-        case 380u:
-        	NVM_tick();
-        	ROTARY_tick();
         	break;
 
         case 400u:
-        	MAIN_WATCHDOG_kick();
+			MAIN_WATCHDOG_kick();
+			NVM_tick();
+        	break;
+
+        case 450u:
+			AIRCON_tick();
             RF_MGR_tick();
-            LCD_tick();
-        	break;
-
-        case 420u:
-        	ROTARY_tick();
-        	break;
-
-        case 440u:
-            AIRCON_tick();
-            LCD_tick();
-        	break;
-
-        case 460u:
-        	ROTARY_tick();
-        	break;
-
-        case 480u:
-        	NVM_tick();
-        	LCD_tick();
         	break;
 
         case 500u:
         	MAIN_WATCHDOG_kick();
+        	break;
+
+        case 550u:
             RF_MGR_tick();
-        	ROTARY_tick();
-        	break;
-
-        case 520u:
-        	LCD_tick();
-        	break;
-
-        case 540u:
-            AIRCON_tick();
-        	ROTARY_tick();
-        	break;
-
-        case 560u:
-        	LCD_tick();
-        	break;
-
-        case 580u:
-        	NVM_tick();
-        	ROTARY_tick();
         	break;
 
         case 600u:
-        	MAIN_WATCHDOG_kick();
+			MAIN_WATCHDOG_kick();
+			NVM_tick();
+        	break;
+
+        case 650u:
+			AIRCON_tick();
             RF_MGR_tick();
-            LCD_tick();
-        	break;
-
-        case 620u:
-        	ROTARY_tick();
-        	break;
-
-        case 640u:
-            AIRCON_tick();
-            LCD_tick();
-        	break;
-
-        case 660u:
-        	ROTARY_tick();
-        	break;
-
-        case 680u:
-        	NVM_tick();
-        	LCD_tick();
         	break;
 
         case 700u:
         	MAIN_WATCHDOG_kick();
+        	break;
+
+        case 750u:
             RF_MGR_tick();
-        	ROTARY_tick();
-        	break;
-
-        case 720u:
-        	LCD_tick();
-        	break;
-
-        case 740u:
-            AIRCON_tick();
-        	ROTARY_tick();
-        	break;
-
-        case 760u:
-        	LCD_tick();
-        	break;
-
-        case 780u:
-        	NVM_tick();
-        	ROTARY_tick();
         	break;
 
         case 800u:
-        	MAIN_WATCHDOG_kick();
+			MAIN_WATCHDOG_kick();
+			NVM_tick();
+        	break;
+
+        case 850u:
+			AIRCON_tick();
             RF_MGR_tick();
-            LCD_tick();
-        	break;
-
-        case 820u:
-        	ROTARY_tick();
-        	break;
-
-        case 840u:
-            AIRCON_tick();
-            LCD_tick();
-        	break;
-
-        case 860u:
-        	ROTARY_tick();
-        	break;
-
-        case 880u:
-        	NVM_tick();
-        	LCD_tick();
         	break;
 
         case 900u:
-        	MAIN_WATCHDOG_kick();
+        	break;
+
+        case 950u:
             RF_MGR_tick();
-        	ROTARY_tick();
-        	break;
-
-        case 920u:
-        	LCD_tick();
-        	break;
-
-        case 940u:
-            AIRCON_tick();
-        	ROTARY_tick();
-        	break;
-
-        case 960u:
-        	RF_MGR_analyse_fault_conditions();
-        	LCD_tick();
-        	break;
-
-        case 980u:
-        	NVM_tick();
-        	ROTARY_tick();
         	break;
 
         case 1000u:
         	MAIN_WATCHDOG_kick();
-            RF_MGR_tick();
-            LCD_tick();
+			RF_MGR_analyse_fault_conditions();
+			NVM_tick();
 
-            /* keep track of time in secs */
+			 /* keep track of time in secs */
             HAL_TIM_increment_secs();
         	break;
 
-			default:
+		default:
 			break;
     }
 
@@ -346,6 +197,8 @@ void MODE_MGR_action_schedule_normal( void )
 	{
 		MODE_MGR_tick_timer_msecs_s += MODE_MGR_TICK_RATE_MSECS;
 	}
+
+	//HAL_BRD_set_onboard_LED(OFF);
 }
 
 

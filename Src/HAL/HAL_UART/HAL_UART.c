@@ -91,7 +91,7 @@ void HAL_UART_init( void )
 		- USART LastBit: The clock pulse of the last data bit is not output to
 			the SCLK pin
 	 */
-	USART_InitStructure.USART_BaudRate = 115200;
+	USART_InitStructure.USART_BaudRate = 230400;
 	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
 	USART_InitStructure.USART_StopBits = USART_StopBits_1;
 	USART_InitStructure.USART_Parity = USART_Parity_No;

@@ -4,7 +4,7 @@
 #include "HAL_BRD.h"
 
 #define MODE_MGR_MAX_TICK_CYCLE_VALUE 	1000u
-#define MODE_MGR_TICK_RATE_MSECS		20u
+#define MODE_MGR_TICK_RATE_MSECS		50u
 #define MODE_MGR_NUM_SLIDER_INPUTS		4u
 #define MODE_MGR_SLIDER_DB_TICKS		5u
 
@@ -42,7 +42,7 @@ typedef struct
 
 
 void MODE_MGR_init( void );
-void MODE_MGR_20ms_tick( void );
+void MODE_MGR_tick( void );
 void MODE_MGR_action_schedule_normal( void );
 void MODE_MGR_check_user_input( void );
 void MODE_MGR_change_mode( void );

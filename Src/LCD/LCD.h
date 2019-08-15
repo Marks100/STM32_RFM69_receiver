@@ -4,7 +4,7 @@
 #include "C_defs.h"
 #include "Screens.h"
 
-#define LCD_TICK_RATE_MS    40u
+#define LCD_TICK_RATE_MS    50u
 
 #define LCD_COL_COUNT 16
 #define LCD_ROW_COUNT 2

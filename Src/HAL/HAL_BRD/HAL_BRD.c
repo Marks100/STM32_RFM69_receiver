@@ -665,8 +665,6 @@ low_high_et HAL_BRD_read_selector_switch_pin( HAL_BRD_switch_slider_et slider )
 ***************************************************************************************************/
 void HAL_BRD_debounce_completed( void )
 {
-	//HAL_BRD_toggle_led();
-
 	/* Read the clock and data pin again */
 	HAL_BRD_rotary_data = HAL_BRD_read_rotary_data_pin();
 	HAL_BRD_rotary_clock = HAL_BRD_read_rotary_clock_pin();
