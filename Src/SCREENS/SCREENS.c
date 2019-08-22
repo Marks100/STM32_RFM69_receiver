@@ -9,8 +9,49 @@
 const u8_t MESSAGE_PROJECT[]     = ("  AIRCON  2019  ");
 const u8_t MESSAGE_CREATOR[]     = ("  MARK STEWART  ");
 const u8_t SETTINGS[]            = ("    SETTINGS    ");
-const u8_t EXPERT_MODE[]         = ("  EXPERT MODE   ");
+const u8_t EXPERT_MODE[]         = ("   EXPERT MODE  ");
 const u8_t BLANK[]               = ("                ");
+
+SCREENS_main_memu_items_st SCREENS_main_memu_items_s = 
+{
+	{
+		0
+	},
+	{
+		INFO_SCREEN_1,
+		MAIN_MENU_SCREEN,
+		MAIN_MENU_SCREEN,
+		MAIN_MENU_SCREEN,
+		MAIN_MENU_SCREEN,
+		MAIN_MENU_SCREEN,
+		MAIN_MENU_SCREEN,
+		MAIN_MENU_SCREEN,
+		MAIN_MENU_SCREEN
+	},
+	{
+		"1. INFO         ",
+		"2. RESET        ",
+		"3. MONITOR      ",
+		"4. SET TEMP     ",
+		"5. Option 1     ",
+		"6. Option 2     ",
+		"7. Option 3     ",
+		"8. Option 4     ",
+		"9. Option 5     ",
+	},
+};
+
+SCREENS_info_memu_items_st SCREENS_info_memu_items_s =
+{
+	{
+		0
+	},
+	{
+		INFO_SCREEN_1,
+		INFO_SCREEN_2,
+		INFO_SCREEN_3,
+	},
+};
 
 
 
@@ -19,6 +60,8 @@ STATIC ROTARY_scroll_type_et            SCREENS_rotary_press_s;
 STATIC u16_t                            SCREENS_screen_timer_s;
 STATIC u32_t                            SCREENS_loop_ctr_s;
 STATIC SCREENS_screen_et                SCREEN_screen_s;
+STATIC SCREENS_screen_et                SCREEN_prev_screen_s;
+
 
 void SCREENS_init()
 {
@@ -27,6 +70,8 @@ void SCREENS_init()
     SCREENS_async_display_request_s = NO_REQUEST;
     SCREENS_rotary_press_s = ROTARY_NO_CHANGE;
     SCREEN_screen_s = WELCOME_MESSAGE_SCREEN;
+
+    SCREENS_main_memu_items_s.item_no = 0u;
 }
 
 
@@ -88,15 +133,9 @@ void SCREENS_handle_screen( void )
             break;
 
         case INFO_SCREEN_1:
-            SCREEN_screen_s = SCREENS_handle_info_screen_1( SCREENS_rotary_press_s );
-            break;
-
         case INFO_SCREEN_2:
-            SCREEN_screen_s = SCREENS_handle_info_screen_2( SCREENS_rotary_press_s );
-            break;
-
         case INFO_SCREEN_3:
-            SCREEN_screen_s = SCREENS_handle_info_screen_3( SCREENS_rotary_press_s );
+            SCREEN_screen_s = SCREENS_handle_info_screens( SCREENS_rotary_press_s );
             break;
 
         case TEST_SCREEN:
@@ -132,7 +171,6 @@ void SCREENS_create_screen( SCREENS_screen_et screen )
             SCREENS_create_main_menu_screen();
             break;
 
-
         case INFO_SCREEN_1:
             SCREENS_create_info_screen_1();
             break;
@@ -148,7 +186,6 @@ void SCREENS_create_screen( SCREENS_screen_et screen )
         case TEST_SCREEN:
         	SCREENS_create_test_screen();
         	break;
-
 
         case EXPERT_MODE_SCREEN:
             SCREENS_create_expert_mode_screen();
@@ -199,12 +236,24 @@ u8_t SCREENS_handle_main_menu_screen( ROTARY_scroll_type_et button_press )
 
     if( button_press == ROTARY_LEFT_SCROLL )
     {
-         new_screen = INFO_SCREEN_1;
+         if( SCREENS_main_memu_items_s.item_no == 0 )
+         {
+        	 SCREENS_main_memu_items_s.item_no = SCREENS_MAIN_MEMU_ITEMS - 1;
+         }
+         else
+         {
+        	 SCREENS_main_memu_items_s.item_no -= 1;
+         }
     }
     else if( button_press == ROTARY_RIGHT_SCROLL )
     {
-    	new_screen = INFO_SCREEN_3;
+    	SCREENS_main_memu_items_s.item_no = ( ( SCREENS_main_memu_items_s.item_no + 1 ) % SCREENS_MAIN_MEMU_ITEMS);
     }
+    else if( button_press == ROTARY_SHORT_PPRESS )
+    {
+    	new_screen = SCREENS_main_memu_items_s.screens[SCREENS_main_memu_items_s.item_no];
+    }
+
 
     return( new_screen );
 }
@@ -213,18 +262,35 @@ u8_t SCREENS_handle_main_menu_screen( ROTARY_scroll_type_et button_press )
 
 
 
-u8_t SCREENS_handle_info_screen_1( ROTARY_scroll_type_et button_press )
+u8_t SCREENS_handle_info_screens( ROTARY_scroll_type_et button_press )
 {
-    SCREENS_screen_et new_screen = INFO_SCREEN_1;
+    /* keep track of the last screen that we were on */
+	SCREENS_screen_et new_screen = INFO_SCREEN_1;
 
-    if( button_press == ROTARY_LEFT_SCROLL )
-    {
-         new_screen = INFO_SCREEN_2;
-    }
-    else if( button_press == ROTARY_RIGHT_SCROLL )
-    {
-    	new_screen = MAIN_MENU_SCREEN;
-    }
+	if( button_press == ROTARY_LEFT_SCROLL )
+	{
+		 if( SCREENS_info_memu_items_s.item_no == 0 )
+		 {
+			 SCREENS_info_memu_items_s.item_no = SCREENS_INFO_MEMU_ITEMS - 1;
+		 }
+		 else
+		 {
+			 SCREENS_info_memu_items_s.item_no -= 1;
+		 }
+	}
+	else if( button_press == ROTARY_RIGHT_SCROLL )
+	{
+		SCREENS_info_memu_items_s.item_no = ( ( SCREENS_info_memu_items_s.item_no + 1 ) % SCREENS_INFO_MEMU_ITEMS);
+	}
+
+	if( button_press == ROTARY_SHORT_PPRESS )
+	{
+		new_screen = MAIN_MENU_SCREEN;
+	}
+	else
+	{
+		new_screen = SCREENS_info_memu_items_s.screens[SCREENS_info_memu_items_s.item_no];
+	}
 
     return( new_screen );
 }
@@ -376,27 +442,59 @@ void SCREENS_create_main_menu_screen( void )
 {
     /* Create a non const array to hold the LCD string */
 	u8_t message[ LCD_COL_COUNT + 1u ];
-	s16_t target_temp_c;
 
-    u8_t* enable_disable_strings[2] = { "OFF", "ON " };
-    u8_t* mode_strings[3] = { "HEAT", "COOL", "AUTO" };
 
-    target_temp_c = ( AIRCON_get_oat() * 10 );
+	sprintf( message, "->%s", SCREENS_main_memu_items_s.list[SCREENS_main_memu_items_s.item_no] );
+	LCD_set_cursor_position(0,0);
+	LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
 
-    STDC_memset( message, 0x20, sizeof(message) );
-    sprintf( message,     		 	      "%s ", enable_disable_strings[AIRCON_get_state()] );
-    sprintf( &message[strlen( message )], "%s " , mode_strings[AIRCON_get_mode()] );
-    sprintf( &message[strlen( message )], "%02d.%dc   ", ( (u16_t)target_temp_c / 10 ), ( target_temp_c % 10 )  );
+	LCD_set_cursor_position(1,0);
+	if( SCREENS_main_memu_items_s.item_no == SCREENS_MAIN_MEMU_ITEMS - 1 )
+	{
+		LCD_write_message( (u8_t*)BLANK, LCD_COL_COUNT );
+	}
+	else
+	{
+		sprintf( message, "%s", SCREENS_main_memu_items_s.list[SCREENS_main_memu_items_s.item_no+1] );
+		LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
+	}
 
-    LCD_set_cursor_position(0,0);
-    LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
 
-    STDC_memset(message, 0x20, sizeof(message) );
-	sprintf( message, "F:%s H:%s     ", enable_disable_strings[ AIRCON_get_cooler_state() ], \
-	                                    enable_disable_strings[ AIRCON_get_heater_state() ] );
 
-    LCD_set_cursor_position(1,0);
-    LCD_write_message( (u8_t*)message, LCD_COL_COUNT  );
+
+
+
+
+
+	// float temp_c;
+
+    // u8_t* enable_disable_strings[2] = { "OFF", "ON " };
+    // u8_t* mode_strings[3] = { "HEAT", "COOL", "AUTO" };
+
+    // temp_c =  AIRCON_get_oat();
+
+    // STDC_memset( message, 0x20, sizeof(message) );
+    // sprintf( message,     		 	      "%s ", enable_disable_strings[AIRCON_get_state()] );
+    // sprintf( &message[strlen( message )], "%s " , mode_strings[AIRCON_get_mode()] );
+
+    // if( temp_c >= TMPERATURE_NOT_AVAILABLE )
+    // {
+    // 	sprintf( &message[strlen( message )], "N/A     " );
+    // }
+    // else
+    // {
+    // 	sprintf( &message[strlen( message )], "%02d.%dc   ", (s16_t)( (temp_c * 10 ) / 10 ), ( (u16_t)( temp_c * 10 ) % 10 )  );
+    // }
+
+    // LCD_set_cursor_position(0,0);
+    // LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
+
+    // STDC_memset(message, 0x20, sizeof(message) );
+	// sprintf( message, "F:%s H:%s     ", enable_disable_strings[ AIRCON_get_cooler_state() ], \
+	//                                     enable_disable_strings[ AIRCON_get_heater_state() ] );
+
+    // LCD_set_cursor_position(1,0);
+    // LCD_write_message( (u8_t*)message, LCD_COL_COUNT  );
 }
 
 
@@ -448,7 +546,7 @@ void SCREENS_create_info_screen_2( void )
     LCD_set_cursor_position(1,0);
 
     /* Now copy the const string into the new temp buffer */
-    sprintf( message, "HW Vers:%02d.%02d.%02d",  
+    sprintf( message, "HW Vers:%02d.%02d   ",
     hw_version_string[0], hw_version_string[1], hw_version_string[2] );
     LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
 }

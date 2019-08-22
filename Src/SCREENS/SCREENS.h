@@ -5,6 +5,8 @@
 #include "LCD.h"
 #include "HAL_BRD.h"
 
+#define SCREENS_MAIN_MEMU_ITEMS 9
+#define SCREENS_INFO_MEMU_ITEMS 3
 
 typedef enum
 {
@@ -24,6 +26,19 @@ typedef enum
     INFO_REQUEST,
     EXPERT_MODE_REQUEST
 } SCREENS_async_display_request_et;
+
+typedef struct 
+{
+	u8_t  item_no;
+	u8_t  screens[SCREENS_MAIN_MEMU_ITEMS];
+	u8_t* list[SCREENS_MAIN_MEMU_ITEMS];
+} SCREENS_main_memu_items_st;
+
+typedef struct
+{
+	u8_t  item_no;
+	u8_t  screens[SCREENS_INFO_MEMU_ITEMS];
+} SCREENS_info_memu_items_st;
 
 
 #define DISPLAY_WELCOME_SCREEN_TIMEOUT  ( ( 3u * 1000 ) / LCD_TICK_RATE_MS )
@@ -48,9 +63,7 @@ void SCREENS_create_test_screen( void );
 u8_t SCREENS_handle_welcome_screen( void );
 u8_t SCREENS_handle_main_menu_screen( ROTARY_scroll_type_et button_press );
 u8_t SCREENS_handle_expert_mode_screen( void );
-u8_t SCREENS_handle_info_screen_1( ROTARY_scroll_type_et button_press );
-u8_t SCREENS_handle_info_screen_2( ROTARY_scroll_type_et button_press );
-u8_t SCREENS_handle_info_screen_3( ROTARY_scroll_type_et button_press );
+u8_t SCREENS_handle_info_screens( ROTARY_scroll_type_et button_press );
 u8_t SCREENS_handle_auto_temp_screen( ROTARY_scroll_type_et button_press );
 
 u8_t SCREENS_handle_test_screen( ROTARY_scroll_type_et button_press );

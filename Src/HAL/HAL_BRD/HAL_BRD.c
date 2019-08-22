@@ -59,15 +59,11 @@ void HAL_BRD_init( void )
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
 
-	/* small delay to allow the button to settle */
-	delay_us(500);
-
-	debug_mode = HAL_BRD_read_debug_pin();
-
-	#if( AUTO_DEBUG_MODE == 1 )
-		debug_mode = ENABLE;
-	#endif
-
+	/* Setup the Selector mode switches( PB6, PB7, PB8, PB9 ) */
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;
+	GPIO_Init(GPIOB, &GPIO_InitStructure);
 
 	/* Setup the Selector mode switches( PB6, PB7, PB8, PB9 ) */
 	GPIO_InitStructure.GPIO_Pin = ( GPIO_Pin_6 | GPIO_Pin_7 | GPIO_Pin_8 | GPIO_Pin_9 );
@@ -545,30 +541,6 @@ void HAL_BRD_set_onboard_LED( off_on_et state )
 
 
 
-/*!
-****************************************************************************************************
-*
-*   \brief         Reads the state of the debug pin
-*
-*   \author        MS
-*
-*   \return        None
-*
-***************************************************************************************************/
-disable_enable_et HAL_BRD_read_debug_pin( void )
-{
-	low_high_et state;
-	disable_enable_et mode;
-
-	state = HAL_BRD_read_pin_state(GPIOA, GPIO_Pin_4 );
-
-	mode = (( state == HIGH ) ? ENABLE : DISABLE );
-
-	return( mode );
-}
-
-
-
 
 
 /*!
@@ -609,6 +581,24 @@ low_high_et HAL_BRD_read_rotary_data_pin( void )
     return( state );
 }
 
+
+/****************************************************************************************************
+*
+*   \brief         Reads the state of the rotary SW pin
+*
+*   \author        MS
+*
+*   \return        low_high_et state of the pin
+*
+***************************************************************************************************/
+low_high_et HAL_BRD_read_rotary_SW_pin( void )
+{
+    low_high_et state = LOW;
+
+    state = HAL_BRD_read_pin_state( GPIOB, GPIO_Pin_5 );
+
+    return( state );
+}
 
 
 
@@ -807,7 +797,8 @@ void HAL_BRD_get_SW_version_num( u8_t *version_num_p )
 ***************************************************************************************************/
 void HAL_BRD_get_HW_version_num( u8_t *version_num_p )
 {
-	*version_num_p = 0u;
+	version_num_p[0] = 1u;
+	version_num_p[1] = 0u;
 }
 
 

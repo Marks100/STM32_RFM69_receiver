@@ -59,6 +59,8 @@ typedef enum
 {
     ROTARY_LEFT_SCROLL = 0u,
     ROTARY_RIGHT_SCROLL,
+    ROTARY_SHORT_PPRESS,
+    ROTARY_LONG_PPRESS,
     ROTARY_NO_CHANGE
 } ROTARY_scroll_type_et;
 
@@ -97,6 +99,7 @@ void HAL_BRD_set_cooler_state( off_on_et state );
 void HAL_BRD_set_heater_state( off_on_et state );
 low_high_et HAL_BRD_read_rotary_clock_pin( void );
 low_high_et HAL_BRD_read_rotary_data_pin( void );
+low_high_et HAL_BRD_read_rotary_SW_pin( void );
 
 void HAL_BRD_74HC164_set_clk_pin_state( low_high_et state );
 void HAL_BRD_74HC164_pulse_clk_pin_state( void );

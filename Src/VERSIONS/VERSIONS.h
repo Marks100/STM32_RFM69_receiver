@@ -29,7 +29,7 @@
 #define VER_VERIFICATION_HW   0
 
 #define SW_VERSION_NUM_SIZE    ( 3u )
-#define HW_VERSION_NUM_SIZE    ( 3u )
+#define HW_VERSION_NUM_SIZE    ( 2u )
 
 
 /***************************************************************************************************

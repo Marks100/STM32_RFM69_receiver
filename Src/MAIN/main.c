@@ -58,6 +58,8 @@ int main(void)
 
 	NEOPIXEL_int();
 
+	BUTTON_init();
+
 	/* Init the systick timer */
 	MAIN_SYSTICK_init();
 

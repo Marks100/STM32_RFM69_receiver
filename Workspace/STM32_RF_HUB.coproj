@@ -132,8 +132,8 @@
     <File name="stm_lib/src/stm32f10x_gpio.c" path="stm_lib/src/stm32f10x_gpio.c" type="1"/>
     <File name="stm_lib/inc/stm32f10x_usart.h" path="stm_lib/inc/stm32f10x_usart.h" type="1"/>
     <File name="cmsis_boot/system_stm32f10x.c" path="cmsis_boot/system_stm32f10x.c" type="1"/>
-    <File name="stdio" path="" type="2"/>
     <File name="Src/MAIN/main.c" path="../Src/MAIN/main.c" type="1"/>
+    <File name="stdio" path="" type="2"/>
     <File name="stm_lib/inc/misc.h" path="stm_lib/inc/misc.h" type="1"/>
     <File name="Src/MODE_MGR/MODE_MGR.h" path="../Src/MODE_MGR/MODE_MGR.h" type="1"/>
     <File name="cmsis/core_cmInstr.h" path="cmsis/core_cmInstr.h" type="1"/>
@@ -163,6 +163,7 @@
     <File name="stm_lib/inc/stm32f10x_adc.h" path="stm_lib/inc/stm32f10x_adc.h" type="1"/>
     <File name="cmsis_boot/system_stm32f10x.h" path="cmsis_boot/system_stm32f10x.h" type="1"/>
     <File name="Src/MAIN/main.h" path="../Src/MAIN/main.h" type="1"/>
+    <File name="Src/BUTTON_MANAGER" path="" type="2"/>
     <File name="Src/COMMON_MODULES/xINC/STDC" path="" type="2"/>
     <File name="Src/RF/NRF24_Registers.h" path="../Src/RF/NRF24_Registers.h" type="1"/>
     <File name="stm_lib/src/stm32f10x_crc.c" path="stm_lib/src/stm32f10x_crc.c" type="1"/>
@@ -180,11 +181,12 @@
     <File name="stm_lib/src/stm32f10x_bkp.o" path="stm_lib/src/stm32f10x_bkp.o" type="1"/>
     <File name="Src/PROJ_CONFIG/STDC_A_config.h" path="../Src/PROJ_CONFIG/STDC_A_config.h" type="1"/>
     <File name="Src/HAL/HAL_ADC/HAL_ADC.o" path="../Src/HAL/HAL_ADC/HAL_ADC.o" type="1"/>
-    <File name="Src/COMMON_MODULES/xINC/TPMS_types.h" path="../Src/COMMON_MODULES/xINC/TPMS_types.h" type="1"/>
     <File name="stm_lib/src/stm32f10x_tim.c" path="stm_lib/src/stm32f10x_tim.c" type="1"/>
+    <File name="Src/COMMON_MODULES/xINC/TPMS_types.h" path="../Src/COMMON_MODULES/xINC/TPMS_types.h" type="1"/>
     <File name="cmsis_boot/startup" path="" type="2"/>
     <File name="Src/HAL/HAL_SPI" path="" type="2"/>
     <File name="Src/COMMON_MODULES/xINC/STDC/STDC.h" path="../Src/COMMON_MODULES/xINC/STDC/STDC.h" type="1"/>
+    <File name="Src/BUTTON_MANAGER/Button_Manager.h" path="../Src/BUTTON_MANAGER/Button_Manager.h" type="1"/>
     <File name="stm_lib/src/stm32f10x_iwdg.c" path="stm_lib/src/stm32f10x_iwdg.c" type="1"/>
     <File name="stm_lib/src/stm32f10x_spi.c" path="stm_lib/src/stm32f10x_spi.c" type="1"/>
     <File name="Src/SCREENS/SCREENS.h" path="../Src/SCREENS/SCREENS.h" type="1"/>
@@ -245,6 +247,7 @@
     <File name="Src/RF/RFM69.o" path="../Src/RF/RFM69.o" type="1"/>
     <File name="Src/HAL/HAL_UART/HAL_UART.h" path="../Src/HAL/HAL_UART/HAL_UART.h" type="1"/>
     <File name="Src/COMMON_MODULES/xLIBS/CHKSUM/CHKSUM_pri.h" path="../Src/COMMON_MODULES/xLIBS/CHKSUM/CHKSUM_pri.h" type="1"/>
+    <File name="Src/BUTTON_MANAGER/Button_Manager.c" path="../Src/BUTTON_MANAGER/Button_Manager.c" type="1"/>
     <File name="Src" path="" type="2"/>
     <File name="stm_lib/inc" path="" type="2"/>
     <File name="stm_lib/inc/stm32f10x_crc.h" path="stm_lib/inc/stm32f10x_crc.h" type="1"/>

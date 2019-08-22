@@ -88,6 +88,7 @@ void MODE_MGR_action_schedule_normal( void )
     NEOPIXEL_tick();
 	LCD_tick();
 	ROTARY_tick();
+	BUTTON_tick();
 	MAIN_WATCHDOG_kick();
 
     switch( MODE_MGR_tick_timer_msecs_s )

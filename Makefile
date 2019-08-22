@@ -14,12 +14,16 @@ STRIP     := $(ARM)-strip
 PROJECT_NAME	:= STM32_RF_HUB
 STM32_SRC_DIRS  := Src Workspace
 
+VPATH = Src/AIRCON
+
 SW_VER := $(subst .,_,$(shell sVersion -l))
 VERSION := $(SW_VER)
 export VERSION
 
+PTLD := $(shell cygpath -u $(PTLD) )
+
 GCC_ARM_OUT_DIR          := Build_output
-GCC_ARM_OBJ_OUT_DIR      := $(GCC_ARM_OUT_DIR)/object_files
+GCC_ARM_OBJ_OUT_DIR      := $(GCC_ARM_OUT_DIR)/object_files/
 BUILD_SUPPORT            := Workspace/build
 STM32_LINKER_SCRIPT 	 := $(BUILD_SUPPORT)/arm-gcc-link.ld
 STM32_ELF_FILE           := $(PROJECT_NAME).elf
@@ -29,7 +33,6 @@ STM32_MEM_OUTPUT_FILE    := memory_analysis.txt
 STM32_MEM_OUTPUT_FILE    := memory_analysis.txt
 RELEASE_PACKAGE_BASE_DIR := Release_package
 RELEASE_PACKAGE_NAME     := $(RELEASE_PACKAGE_BASE_DIR)/$(RELEASE_PACKAGE_BASE_DIR)_$(SW_VER)
-
 
 
 
@@ -284,14 +287,9 @@ ttt:= Build_output/STM32_RFM69_receiver.map
 
 .PHONY: test
 test:
-	@echo "dir = $(dir $(ttt))"
-	@echo "notdir = $(notdir $(ttt))"
-	@echo "suffix = $(suffix $(ttt))"
-	@echo "basename = $(basename $(ttt))"
-	@echo "realpath = $(realpath $(ttt))"
-	@echo "abspath = $(abspath $(ttt))"
-	@echo "name = $(basename $(notdir $(ttt)))"
-	test_MODE_MGR.test
+	echo $(PTLD)
+	echo objs = $(OBJS)
+	echo target objs = $(TARGET_OBJS)
 	
 
 
