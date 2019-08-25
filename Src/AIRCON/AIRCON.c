@@ -216,6 +216,30 @@ float AIRCON_get_auto_target_temp( void )
 	return ( AIRCON_config_s.auto_target_temp_c );
 }
 
+void AIRCON_adjust_auto_target_temp( u8_t increment )
+{
+	float step_value = 0.5;
+
+	if( increment == 1 )
+	{
+		AIRCON_config_s.auto_target_temp_c += step_value;
+	}
+	else
+	{
+		AIRCON_config_s.auto_target_temp_c -= step_value;
+	}
+
+
+	if( AIRCON_config_s.auto_target_temp_c < AIRCON_config_s.cool_min_temp_c )
+	{
+		AIRCON_config_s.auto_target_temp_c = AIRCON_config_s.cool_min_temp_c;
+	}
+	else if( AIRCON_config_s.auto_target_temp_c > AIRCON_config_s.heat_max_temp_c )
+	{
+		AIRCON_config_s.auto_target_temp_c = AIRCON_config_s.heat_max_temp_c;
+	}
+}
+
 
 
 void AIRCON_toggle_state( void )

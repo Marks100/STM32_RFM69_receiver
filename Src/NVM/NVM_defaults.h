@@ -64,8 +64,8 @@ const NVM_generic_data_blk_st NVM_DEFAULT_GENERIC_DATA_BLK_s =
 	AIRCON_COOL_MODE,
 	DISABLE_,
 	19.5f,
-	15.3f,
-	19.2f,
+	15.5f,
+	19.5f,
 	18.0f,
 	19.0f
 };

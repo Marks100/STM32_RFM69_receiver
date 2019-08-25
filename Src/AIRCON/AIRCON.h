@@ -86,6 +86,7 @@ disable_enable_et  AIRCON_get_heater_state( void );
 disable_enable_et  AIRCON_get_cooler_state( void );
 disable_enable_et  AIRCON_get_state( void );
 float 			   AIRCON_get_auto_target_temp( void );
+void 			   AIRCON_adjust_auto_target_temp( u8_t increment );
 void 			   AIRCON_set_state( disable_enable_et state );
 void 			   AIRCON_toggle_state( void );
 void 			   AIRCON_set_generic_output_state( u8_t output_num, disable_enable_et state );
