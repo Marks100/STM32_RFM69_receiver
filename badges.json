@@ -1,6 +1,7 @@
 { 
-"commits": "173", 
+"commits": "176", 
 "latest_tag": "RX_Mode_Working", 
 "version": "1.0.0.A", 
 "project_name": "STM32_RFM69_receiver" 
+"last_committer": "Mark Stewart" 
 }

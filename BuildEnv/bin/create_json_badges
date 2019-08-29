@@ -1,0 +1,32 @@
+#!/bin/bash
+
+<<COMMENT
+This script will output a JSON formatted file with whatever contents you choose
+This JSON file can then interrogated to grab custom badges for you to display in the README files.
+Please note that you will need maintainer rights for youre project to setup the custom badges..
+COMMENT
+
+echo "--> Creating custom badges for project :)"
+
+
+<<COMMENT
+Grab some info for the badges like the no of commits on the project, latest tag,
+version number, project name, whatever else you can think off
+COMMENT
+
+commit_num=`git rev-list --all --count`
+latest_tag=$(git describe --tags `git rev-list --tags --max-count=1`)
+version_num=`sversion -l`
+project_name=`git remote -v | head -n1 | awk '{print $2}' | sed -e 's,.*:\(.*/\)\?,,' -e 's/\.git$//'`
+last_commit_uname=`git log -1 --pretty=format:'%an'`
+
+
+#print the string out to a file in the correct JSON format
+printf \
+"{ \
+\r\n\"commits\": \"$commit_num\", \
+\r\n\"latest_tag\": \"$latest_tag\", \
+\r\n\"version\": \"$version_num\", \
+\r\n\"project_name\": \"$project_name\" \
+\r\n\"last_committer\": \"$last_commit_uname\" \
+\r\n}" > badges.json
