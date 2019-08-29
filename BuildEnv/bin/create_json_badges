@@ -28,5 +28,5 @@ printf \
 \r\n\"latest_tag\": \"$latest_tag\", \
 \r\n\"version\": \"$version_num\", \
 \r\n\"project_name\": \"$project_name\", \
-\r\n\"last_committer\": \"$last_commit_uname\" \
+\r\n\"last_committer\": \"$last_commit_uname\", \
 \r\n}" > badges.json
