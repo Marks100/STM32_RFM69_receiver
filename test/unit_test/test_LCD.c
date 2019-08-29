@@ -83,6 +83,12 @@ void test_init(void)
 
 void test_LCD_full_initialisation( void )
 {
+    HAL_BRD_LCD_set_RS_pin_low_Ignore();
+    HAL_BRD_74HC164_set_data_pin_low_Ignore();
+    HAL_BRD_74HC164_pulse_clk_pin_state_Ignore();
+    HAL_BRD_74HC164_set_data_pin_high_Ignore();
+    HAL_BRD_LCD_pulse_enable_pin_state_Ignore();
+
     test_init();
 
     LCD_tick();
@@ -92,14 +98,6 @@ void test_LCD_full_initialisation( void )
     LCD_tick();
     TEST_ASSERT_EQUAL( 0x00, LCD_display_settings);
     TEST_ASSERT_EQUAL( LCD_INITIALISING_P2, LCD_state_s); 
-
-    LCD_tick();
-    TEST_ASSERT_EQUAL( 0x00, LCD_display_settings);
-    TEST_ASSERT_EQUAL( LCD_INITIALISING_P3, LCD_state_s); 
-
-    LCD_tick();
-    TEST_ASSERT_EQUAL( 0x00, LCD_display_settings);
-    TEST_ASSERT_EQUAL( LCD_INITIALISING_P4, LCD_state_s); 
 
     SCREENS_init_Expect();
     LCD_tick();
@@ -131,3 +129,10 @@ void test_LCD_runnable( void )
     TEST_ASSERT_EQUAL( LCD_READY, LCD_state_s); 
 }
 
+
+
+
+void delay_us(u16_t us)
+{
+    (void)us;
+}

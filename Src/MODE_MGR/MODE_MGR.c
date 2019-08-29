@@ -10,6 +10,8 @@
 #include "MAIN.h"
 #include "AIRCON.h"
 #include "CLI.h"
+#include "LCD.h"
+#include "Button_Manager.h"
 #include "HAL_UART.h"
 #include "NEOPIXEL.h"
 

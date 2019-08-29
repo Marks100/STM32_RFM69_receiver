@@ -19,23 +19,23 @@ SCREENS_main_memu_items_st SCREENS_main_memu_items_s =
 		0
 	},
 	{
-		INFO_SCREEN_1,
-		MAIN_MENU_SCREEN,
-		MONITOR_SCREEN,
+        MONITOR_SCREEN,
 		SET_TEMP_SEL_SCREEN,
-		MAIN_MENU_SCREEN,
-		MAIN_MENU_SCREEN,
+        INFO_SCREEN_1,
+		RESET_SCREEN,
+		MODE_SELECT_SCREEN,
+		STATE_SELECT_SCREEN,
 		MAIN_MENU_SCREEN,
 		MAIN_MENU_SCREEN,
 		MAIN_MENU_SCREEN
 	},
 	{
-		"1. INFO         ",
-		"2. RESET        ",
-		"3. MONITOR      ",
-		"4. SET TEMP     ",
-		"5. Option 1     ",
-		"6. Option 2     ",
+        "1. MONITOR      ",
+		"2. SET TEMP     ",
+		"3. INFO         ",
+		"4. RESET        ",
+		"5. MODE SELECT  ",
+		"6. STATE SELECT ",
 		"7. Option 3     ",
 		"8. Option 4     ",
 		"9. Option 5     ",
@@ -62,8 +62,8 @@ SCREENS_set_temp_memu_items_st SCREENS_set_temp_memu_items_s =
 	},
 	{
 		SET_AUTO_TEMP_SCREEN, //SET_AUTO_TEMP_SCREEN,
-		SET_HEAT_TEMP_SCREEN, //SET_HEAT_TEMP_SCREEN,
-		SET_COOL_TEMP_SCREEN, //SET_COOL_TEMP_SCREEN,
+		SET_HEAT_TEMP_SEL_SCREEN, //SET_HEAT_TEMP_SCREEN,
+		SET_COOL_TEMP_SEL_SCREEN, //SET_COOL_TEMP_SCREEN,
 		MAIN_MENU_SCREEN
 	},
 	{
@@ -75,6 +75,42 @@ SCREENS_set_temp_memu_items_st SCREENS_set_temp_memu_items_s =
 };
 
 
+SCREENS_set_temp_min_max_items_st SCREENS_set_heat_temp_min_max_items_s =
+{
+	{
+		0
+	},
+	{
+		SET_HEAT_TEMP_SCREEN_MIN,
+		SET_HEAT_TEMP_SCREEN_MAX,
+		SET_TEMP_SEL_SCREEN
+	},
+	{
+		"1. MIN TEMP     ",
+		"2. MAX TEMP     ",
+		"BACK            "
+	},
+};
+
+SCREENS_set_temp_min_max_items_st SCREENS_set_cool_temp_min_max_items_s =
+{
+	{
+		0
+	},
+	{
+		SET_COOL_TEMP_SCREEN_MIN,
+		SET_COOL_TEMP_SCREEN_MAX,
+		SET_TEMP_SEL_SCREEN
+	},
+	{
+		"1. MIN TEMP     ",
+		"2. MAX TEMP     ",
+		"BACK            "
+	},
+};
+
+
+
 
 STATIC SCREENS_async_display_request_et SCREENS_async_display_request_s;
 STATIC ROTARY_scroll_type_et            SCREENS_rotary_press_s;
@@ -82,6 +118,7 @@ STATIC u16_t                            SCREENS_screen_timer_s;
 STATIC u32_t                            SCREENS_loop_ctr_s;
 STATIC SCREENS_screen_et                SCREEN_screen_s;
 STATIC SCREENS_screen_et                SCREEN_prev_screen_s;
+STATIC u16_t                            SCREEN_inactivity_timer_s;
 
 
 void SCREENS_init()
@@ -91,6 +128,7 @@ void SCREENS_init()
     SCREENS_async_display_request_s = NO_REQUEST;
     SCREENS_rotary_press_s = ROTARY_NO_CHANGE;
     SCREEN_screen_s = WELCOME_MESSAGE_SCREEN;
+    SCREEN_inactivity_timer_s = 0u;
 
     SCREENS_main_memu_items_s.item_no = 0u;
 }
@@ -101,7 +139,36 @@ void SCREENS_handle_rotary_input( ROTARY_scroll_type_et type )
     if( SCREENS_rotary_press_s == ROTARY_NO_CHANGE )
     {
         SCREENS_rotary_press_s = type;
+
+        /* Button pressed so reset inactivity timer */
+        SCREENS_reset_inactivity_timer();
     }
+}
+
+
+void SCREENS_handle_inactivity_timer( void )
+{
+    if( SCREEN_inactivity_timer_s < DISPLAY_INACTIVITY_GENERAL_TIME )
+    {
+        SCREEN_inactivity_timer_s ++;
+    } 
+    else
+    {
+        SCREENS_reset_inactivity_timer();
+
+        /* Set main screen */
+        SCREEN_screen_s = MONITOR_SCREEN;
+
+        SCREENS_main_memu_items_s.item_no = 0u;
+        SCREENS_info_memu_items_s.item_no = 0u;
+        SCREENS_set_temp_memu_items_s.item_no = 0u;
+    }
+}
+
+
+void SCREENS_reset_inactivity_timer( void )
+{
+    SCREEN_inactivity_timer_s = 0u;
 }
 
 
@@ -172,26 +239,55 @@ void SCREENS_handle_screen( void )
             SCREEN_screen_s = SCREENS_handle_auto_temp_screen( SCREENS_rotary_press_s );
             break;
 
-        case SET_COOL_TEMP_SCREEN:
-        	SCREEN_screen_s = SCREENS_handle_cool_temp_screen( SCREENS_rotary_press_s );
+	    case SET_COOL_TEMP_SEL_SCREEN:
+        	SCREEN_screen_s = SCREENS_handle_cool_temp_sel_screen( SCREENS_rotary_press_s );
         	break;
 
-        case SET_HEAT_TEMP_SCREEN:
-        	SCREEN_screen_s = SCREENS_handle_heat_temp_screen( SCREENS_rotary_press_s );
+        case SET_HEAT_TEMP_SEL_SCREEN:
+        	SCREEN_screen_s = SCREENS_handle_heat_temp_sel_screen( SCREENS_rotary_press_s );
         	break;
 
         case SET_TEMP_SEL_SCREEN:
-        	SCREEN_screen_s = SCREENS_handle_set_temp_screen( SCREENS_rotary_press_s );
+        	SCREEN_screen_s = SCREENS_handle_temp_sel_screen( SCREENS_rotary_press_s );
+        	break;
+
+        case SET_COOL_TEMP_SCREEN_MIN:
+        	SCREEN_screen_s = SCREENS_handle_cool_temp_min_screen( SCREENS_rotary_press_s );
+        	break;
+
+        case SET_COOL_TEMP_SCREEN_MAX:
+        	SCREEN_screen_s = SCREENS_handle_cool_temp_max_screen( SCREENS_rotary_press_s );
+        	break;
+
+        case SET_HEAT_TEMP_SCREEN_MIN:
+        	SCREEN_screen_s = SCREENS_handle_heat_temp_min_screen( SCREENS_rotary_press_s );
+        	break;
+
+        case SET_HEAT_TEMP_SCREEN_MAX:
+        	SCREEN_screen_s = SCREENS_handle_heat_temp_max_screen( SCREENS_rotary_press_s );
         	break;
 
         case MONITOR_SCREEN:
         	SCREEN_screen_s = SCREENS_handle_monitor_screen( SCREENS_rotary_press_s );
         	break;
 
+        case MODE_SELECT_SCREEN:
+        	SCREEN_screen_s = SCREENS_handle_mode_selector_screen( SCREENS_rotary_press_s );
+            break;
+
+        case STATE_SELECT_SCREEN:
+        	SCREEN_screen_s = SCREENS_handle_state_selector_screen( SCREENS_rotary_press_s );
+            break;
+
+        case RESET_SCREEN:
+        	SCREEN_screen_s = SCREENS_handle_reset_screen( SCREENS_rotary_press_s );
+        	break;
+
         default:
             break;
     }
     SCREENS_rotary_press_s = ROTARY_NO_CHANGE;
+    SCREENS_handle_inactivity_timer();
 }
 
 
@@ -237,21 +333,49 @@ void SCREENS_create_screen( SCREENS_screen_et screen )
             SCREENS_create_auto_temp_screen();
             break;
 
-        case SET_COOL_TEMP_SCREEN:
-            SCREENS_create_cool_temp_screen();
+        case SET_COOL_TEMP_SEL_SCREEN:
+            SCREENS_create_cool_temp_sel_screen();
             break;
 
-        case SET_HEAT_TEMP_SCREEN:
-            SCREENS_create_heat_temp_screen();
+        case SET_HEAT_TEMP_SEL_SCREEN:
+            SCREENS_create_heat_temp_sel_screen();
             break;
 
         case SET_TEMP_SEL_SCREEN:
-        	SCREENS_create_set_temp_screen();
+        	SCREENS_create_temp_sel_screen();
+        	break;
+
+        case SET_COOL_TEMP_SCREEN_MIN:
+        	SCREENS_create_cool_temp_min_screen();
+        	break;
+
+        case SET_COOL_TEMP_SCREEN_MAX:
+        	SCREENS_create_cool_temp_max_screen();
+        	break;
+
+        case SET_HEAT_TEMP_SCREEN_MIN:
+        	SCREENS_create_heat_temp_min_screen();
+        	break;
+
+        case SET_HEAT_TEMP_SCREEN_MAX:
+        	SCREENS_create_heat_temp_max_screen();
         	break;
 
         case MONITOR_SCREEN:
         	SCREENS_create_monitor_screen();
         	break;
+
+        case MODE_SELECT_SCREEN:
+			SCREENS_create_mode_selector_screen();
+			break;
+
+        case STATE_SELECT_SCREEN:
+            SCREENS_create_state_selector_screen();
+            break;
+
+        case RESET_SCREEN:
+            SCREENS_create_reset_screen();
+            break;
 
         default:
         break;
@@ -270,7 +394,7 @@ u8_t SCREENS_handle_welcome_screen( void )
     if( SCREENS_screen_timer_s >= DISPLAY_WELCOME_SCREEN_TIMEOUT )
     {
         SCREENS_reset_screen_timer();
-        new_screen = MAIN_MENU_SCREEN;
+        new_screen = MONITOR_SCREEN;
     }
     else
     {
@@ -501,10 +625,9 @@ u8_t SCREENS_handle_auto_temp_screen( ROTARY_scroll_type_et button_press )
     return( new_screen );
 }
 
-
-u8_t SCREENS_handle_heat_temp_screen( ROTARY_scroll_type_et button_press )
+u8_t SCREENS_handle_cool_temp_min_screen( ROTARY_scroll_type_et button_press )
 {
-    SCREENS_screen_et new_screen = SET_HEAT_TEMP_SCREEN;
+    SCREENS_screen_et new_screen = SET_COOL_TEMP_SCREEN_MIN;
 
     if( button_press == ROTARY_LEFT_SCROLL )
     {
@@ -516,7 +639,199 @@ u8_t SCREENS_handle_heat_temp_screen( ROTARY_scroll_type_et button_press )
     }
     else if( button_press == ROTARY_SHORT_PPRESS )
     {
-    	new_screen = SET_TEMP_SEL_SCREEN;
+    	new_screen = SET_COOL_TEMP_SEL_SCREEN;
+    }
+
+    return( new_screen );
+}
+
+
+u8_t SCREENS_handle_cool_temp_max_screen( ROTARY_scroll_type_et button_press )
+{
+    SCREENS_screen_et new_screen = SET_COOL_TEMP_SCREEN_MAX;
+
+    if( button_press == ROTARY_LEFT_SCROLL )
+    {
+    	AIRCON_adjust_auto_target_temp(0);
+    }
+    else if( button_press == ROTARY_RIGHT_SCROLL )
+    {
+    	AIRCON_adjust_auto_target_temp(1);
+    }
+    else if( button_press == ROTARY_SHORT_PPRESS )
+    {
+    	new_screen = SET_COOL_TEMP_SEL_SCREEN;
+    }
+
+    return( new_screen );
+}
+
+u8_t SCREENS_handle_heat_temp_min_screen( ROTARY_scroll_type_et button_press )
+{
+    SCREENS_screen_et new_screen = SET_HEAT_TEMP_SCREEN_MIN;
+
+    if( button_press == ROTARY_LEFT_SCROLL )
+    {
+    	AIRCON_adjust_auto_target_temp(0);
+    }
+    else if( button_press == ROTARY_RIGHT_SCROLL )
+    {
+    	AIRCON_adjust_auto_target_temp(1);
+    }
+    else if( button_press == ROTARY_SHORT_PPRESS )
+    {
+    	new_screen = SET_HEAT_TEMP_SEL_SCREEN;
+    }
+
+    return( new_screen );
+}
+
+u8_t SCREENS_handle_heat_temp_max_screen( ROTARY_scroll_type_et button_press )
+{
+    SCREENS_screen_et new_screen = SET_HEAT_TEMP_SCREEN_MAX;
+
+    if( button_press == ROTARY_LEFT_SCROLL )
+    {
+    	AIRCON_adjust_auto_target_temp(0);
+    }
+    else if( button_press == ROTARY_RIGHT_SCROLL )
+    {
+    	AIRCON_adjust_auto_target_temp(1);
+    }
+    else if( button_press == ROTARY_SHORT_PPRESS )
+    {
+    	new_screen = SET_HEAT_TEMP_SEL_SCREEN;
+    }
+
+    return( new_screen );
+}
+
+u8_t SCREENS_handle_temp_sel_screen( ROTARY_scroll_type_et button_press )
+{
+    SCREENS_screen_et new_screen = SET_TEMP_SEL_SCREEN;
+
+    SCREENS_set_cool_temp_min_max_items_s.item_no = 0u;
+    SCREENS_set_heat_temp_min_max_items_s.item_no = 0u;
+
+   if( button_press == ROTARY_LEFT_SCROLL )
+	{
+        if( SCREENS_set_temp_memu_items_s.item_no == 0 )
+        {
+        	SCREENS_set_temp_memu_items_s.item_no = SCREENS_SET_TEMP_MEMU_ITEMS - 1;
+        }
+        else
+        {
+        	SCREENS_set_temp_memu_items_s.item_no -= 1;
+        }
+	}
+	else if( button_press == ROTARY_RIGHT_SCROLL )
+	{
+		SCREENS_set_temp_memu_items_s.item_no = ( ( SCREENS_set_temp_memu_items_s.item_no + 1 ) % SCREENS_SET_TEMP_MEMU_ITEMS);
+	}
+
+	if( button_press == ROTARY_SHORT_PPRESS )
+	{
+		new_screen = SCREENS_set_temp_memu_items_s.screens[SCREENS_set_temp_memu_items_s.item_no];
+	}
+
+	return( new_screen );
+}
+
+u8_t SCREENS_handle_heat_temp_sel_screen( ROTARY_scroll_type_et button_press )
+{
+    SCREENS_screen_et new_screen = SET_HEAT_TEMP_SEL_SCREEN;
+
+    if( button_press == ROTARY_LEFT_SCROLL )
+	{
+        if( SCREENS_set_heat_temp_min_max_items_s.item_no == 0 )
+        {
+            SCREENS_set_heat_temp_min_max_items_s.item_no = SCREENS_SET_MIN_MAX_MEMU_ITEMS - 1;
+        }
+        else
+        {
+            SCREENS_set_heat_temp_min_max_items_s.item_no -= 1;
+        }
+	}
+	else if( button_press == ROTARY_RIGHT_SCROLL )
+	{
+		SCREENS_set_heat_temp_min_max_items_s.item_no = ( ( SCREENS_set_heat_temp_min_max_items_s.item_no + 1 ) % SCREENS_SET_MIN_MAX_MEMU_ITEMS);
+	}
+
+	if( button_press == ROTARY_SHORT_PPRESS )
+	{
+		new_screen = SCREENS_set_heat_temp_min_max_items_s.screens[SCREENS_set_heat_temp_min_max_items_s.item_no];
+	}
+
+	return( new_screen );
+}
+
+
+
+u8_t SCREENS_handle_cool_temp_sel_screen( ROTARY_scroll_type_et button_press )
+{
+    SCREENS_screen_et new_screen = SET_COOL_TEMP_SEL_SCREEN;
+
+   if( button_press == ROTARY_LEFT_SCROLL )
+	{
+        if( SCREENS_set_cool_temp_min_max_items_s.item_no == 0 )
+        {
+            SCREENS_set_cool_temp_min_max_items_s.item_no = SCREENS_SET_MIN_MAX_MEMU_ITEMS - 1;
+        }
+        else
+        {
+            SCREENS_set_cool_temp_min_max_items_s.item_no -= 1;
+        }
+	}
+	else if( button_press == ROTARY_RIGHT_SCROLL )
+	{
+		SCREENS_set_cool_temp_min_max_items_s.item_no = ( ( SCREENS_set_cool_temp_min_max_items_s.item_no + 1 ) % SCREENS_SET_MIN_MAX_MEMU_ITEMS);
+	}
+
+	if( button_press == ROTARY_SHORT_PPRESS )
+	{
+		new_screen = SCREENS_set_cool_temp_min_max_items_s.screens[SCREENS_set_cool_temp_min_max_items_s.item_no];
+	}
+
+	return( new_screen );
+}
+
+
+u8_t SCREENS_handle_mode_selector_screen( ROTARY_scroll_type_et button_press )
+{
+    SCREENS_screen_et new_screen = MODE_SELECT_SCREEN;
+
+    if( button_press == ROTARY_LEFT_SCROLL )
+    {
+    	AIRCON_toggle_mode();
+    }
+    else if( button_press == ROTARY_RIGHT_SCROLL )
+    {
+    	AIRCON_toggle_mode();
+    }
+    else if( button_press == ROTARY_SHORT_PPRESS )
+    {
+    	new_screen = MAIN_MENU_SCREEN;
+    }
+
+    return( new_screen );
+}
+
+
+u8_t SCREENS_handle_state_selector_screen( ROTARY_scroll_type_et button_press )
+{
+    SCREENS_screen_et new_screen = STATE_SELECT_SCREEN;
+
+    if( button_press == ROTARY_LEFT_SCROLL )
+    {
+    	( AIRCON_get_state() == ENABLE ) ? AIRCON_set_state( DISABLE ) : AIRCON_set_state( ENABLE );
+    }
+    else if( button_press == ROTARY_RIGHT_SCROLL )
+    {
+    	( AIRCON_get_state() == ENABLE ) ? AIRCON_set_state( DISABLE ) : AIRCON_set_state( ENABLE );
+    }
+    else if( button_press == ROTARY_SHORT_PPRESS )
+    {
+    	new_screen = MAIN_MENU_SCREEN;
     }
 
     return( new_screen );
@@ -524,21 +839,32 @@ u8_t SCREENS_handle_heat_temp_screen( ROTARY_scroll_type_et button_press )
 
 
 
-u8_t SCREENS_handle_cool_temp_screen( ROTARY_scroll_type_et button_press )
+u8_t SCREENS_handle_reset_screen( ROTARY_scroll_type_et button_press )
 {
-    SCREENS_screen_et new_screen = SET_COOL_TEMP_SCREEN;
+    SCREENS_screen_et new_screen = RESET_SCREEN;
 
     if( button_press == ROTARY_LEFT_SCROLL )
     {
-    	AIRCON_adjust_auto_target_temp(0);
     }
     else if( button_press == ROTARY_RIGHT_SCROLL )
     {
-    	AIRCON_adjust_auto_target_temp(1);
     }
     else if( button_press == ROTARY_SHORT_PPRESS )
     {
-    	new_screen = SET_TEMP_SEL_SCREEN;
+    }
+
+    if( SCREENS_screen_timer_s >= DISPLAY_RESET_SCREEN_TIMEOUT )
+    {
+        /* reset the device */
+        SCREENS_reset_screen_timer();
+        new_screen = MAIN_MENU_SCREEN;
+
+        NVM_request_flush();
+	    NVIC_SystemReset();
+    }
+    else
+    {
+        SCREENS_screen_timer_s++;
     }
 
     return( new_screen );
@@ -601,7 +927,7 @@ void SCREENS_create_main_menu_screen( void )
 	u8_t message[ LCD_COL_COUNT + 1u ];
 
 
-	sprintf( message, "->%s", SCREENS_main_memu_items_s.list[SCREENS_main_memu_items_s.item_no] );
+	sprintf( message, ">%s", SCREENS_main_memu_items_s.list[SCREENS_main_memu_items_s.item_no] );
 	LCD_set_cursor_position(0,0);
 	LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
 
@@ -624,7 +950,7 @@ void SCREENS_create_set_temp_screen( void )
     /* Create a non const array to hold the LCD string */
 	u8_t message[ LCD_COL_COUNT + 1u ];
 
-	sprintf( message, "->%s", SCREENS_set_temp_memu_items_s.list[SCREENS_set_temp_memu_items_s.item_no] );
+	sprintf( message, ">%s", SCREENS_set_temp_memu_items_s.list[SCREENS_set_temp_memu_items_s.item_no] );
 	LCD_set_cursor_position(0,0);
 	LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
 
@@ -749,6 +1075,7 @@ void SCREENS_create_test_screen( void )
     SCREENS_loop_ctr_s ++;
 }
 
+
 void SCREENS_create_auto_temp_screen( void )
 {
     /* Create a non const array to hold the LCD string */
@@ -769,7 +1096,74 @@ void SCREENS_create_auto_temp_screen( void )
     LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
 }
 
-void SCREENS_create_cool_temp_screen( void )
+
+void SCREENS_create_temp_sel_screen( void )
+{
+    /* Create a non const array to hold the LCD string */
+    u8_t message[ LCD_COL_COUNT + 1u ];
+
+	sprintf( message, ">%s", SCREENS_set_temp_memu_items_s.list[SCREENS_set_temp_memu_items_s.item_no] );
+	LCD_set_cursor_position(0,0);
+	LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
+
+	LCD_set_cursor_position(1,0);
+	if( SCREENS_set_temp_memu_items_s.item_no == SCREENS_SET_TEMP_MEMU_ITEMS - 1 )
+	{
+		LCD_write_message( (u8_t*)BLANK, LCD_COL_COUNT );
+	}
+	else
+	{
+		sprintf( message, "%s", SCREENS_set_temp_memu_items_s.list[SCREENS_set_temp_memu_items_s.item_no+1] );
+		LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
+	}
+}
+
+
+void SCREENS_create_cool_temp_sel_screen( void )
+{
+    /* Create a non const array to hold the LCD string */
+    u8_t message[ LCD_COL_COUNT + 1u ];
+
+	sprintf( message, ">%s", SCREENS_set_cool_temp_min_max_items_s.list[SCREENS_set_cool_temp_min_max_items_s.item_no] );
+	LCD_set_cursor_position(0,0);
+	LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
+
+	LCD_set_cursor_position(1,0);
+	if( SCREENS_set_cool_temp_min_max_items_s.item_no == SCREENS_SET_MIN_MAX_MEMU_ITEMS - 1 )
+	{
+		LCD_write_message( (u8_t*)BLANK, LCD_COL_COUNT );
+	}
+	else
+	{
+		sprintf( message, "%s", SCREENS_set_cool_temp_min_max_items_s.list[SCREENS_set_cool_temp_min_max_items_s.item_no+1] );
+		LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
+	}
+}
+
+
+void SCREENS_create_heat_temp_sel_screen( void )
+{
+        /* Create a non const array to hold the LCD string */
+    u8_t message[ LCD_COL_COUNT + 1u ];
+
+	sprintf( message, ">%s", SCREENS_set_heat_temp_min_max_items_s.list[SCREENS_set_heat_temp_min_max_items_s.item_no] );
+	LCD_set_cursor_position(0,0);
+	LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
+
+	LCD_set_cursor_position(1,0);
+	if( SCREENS_set_heat_temp_min_max_items_s.item_no == SCREENS_SET_MIN_MAX_MEMU_ITEMS - 1 )
+	{
+		LCD_write_message( (u8_t*)BLANK, LCD_COL_COUNT );
+	}
+	else
+	{
+		sprintf( message, "%s", SCREENS_set_heat_temp_min_max_items_s.list[SCREENS_set_heat_temp_min_max_items_s.item_no+1] );
+		LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
+	}
+}
+
+
+void SCREENS_create_heat_temp_max_screen( void )
 {
     /* Create a non const array to hold the LCD string */
     u8_t message[ LCD_COL_COUNT + 1u ];
@@ -778,7 +1172,27 @@ void SCREENS_create_cool_temp_screen( void )
     /* Display the message and keep it on the screen until the timer expires */
     LCD_set_cursor_position(0,0);
 
-    sprintf( message, "Cool target temp" );
+    sprintf( message, " Heat max temp  " );
+    LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
+
+    STDC_memset( message, 0x20, sizeof(message) );
+
+    target_temp_c = ( AIRCON_get_auto_target_temp() * 10 );
+    LCD_set_cursor_position(1,0);
+    sprintf( message, "  %d.%dc         ", ( target_temp_c / 10 ), ( target_temp_c % 10 ) );
+    LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
+}
+
+void SCREENS_create_heat_temp_min_screen( void )
+{
+    /* Create a non const array to hold the LCD string */
+    u8_t message[ LCD_COL_COUNT + 1u ];
+    u16_t target_temp_c = 0u;
+
+    /* Display the message and keep it on the screen until the timer expires */
+    LCD_set_cursor_position(0,0);
+
+    sprintf( message, " Heat min temp  " );
     LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
 
     STDC_memset( message, 0x20, sizeof(message) );
@@ -790,7 +1204,7 @@ void SCREENS_create_cool_temp_screen( void )
 }
 
 
-void SCREENS_create_heat_temp_screen( void )
+void SCREENS_create_cool_temp_min_screen( void )
 {
     /* Create a non const array to hold the LCD string */
     u8_t message[ LCD_COL_COUNT + 1u ];
@@ -799,7 +1213,7 @@ void SCREENS_create_heat_temp_screen( void )
     /* Display the message and keep it on the screen until the timer expires */
     LCD_set_cursor_position(0,0);
 
-    sprintf( message, "Heat target temp" );
+    sprintf( message, " Cool min temp  " );
     LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
 
     STDC_memset( message, 0x20, sizeof(message) );
@@ -807,6 +1221,89 @@ void SCREENS_create_heat_temp_screen( void )
     target_temp_c = ( AIRCON_get_auto_target_temp() * 10 );
     LCD_set_cursor_position(1,0);
     sprintf( message, "  %d.%dc         ", ( target_temp_c / 10 ), ( target_temp_c % 10 ) );
+    LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
+}
+
+
+void SCREENS_create_cool_temp_max_screen( void )
+{
+    /* Create a non const array to hold the LCD string */
+    u8_t message[ LCD_COL_COUNT + 1u ];
+    u16_t target_temp_c = 0u;
+
+    /* Display the message and keep it on the screen until the timer expires */
+    LCD_set_cursor_position(0,0);
+
+    sprintf( message, " Cool max temp  " );
+    LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
+
+    STDC_memset( message, 0x20, sizeof(message) );
+
+    target_temp_c = ( AIRCON_get_auto_target_temp() * 10 );
+    LCD_set_cursor_position(1,0);
+    sprintf( message, "  %d.%dc         ", ( target_temp_c / 10 ), ( target_temp_c % 10 ) );
+    LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
+}
+
+
+void SCREENS_create_reset_screen( void )
+{
+    /* Create a non const array to hold the LCD string */
+    u8_t message[ LCD_COL_COUNT + 1u ];
+    u16_t target_temp_c = 0u;
+
+    /* Display the message and keep it on the screen until the timer expires */
+    LCD_set_cursor_position(0,0);
+
+    sprintf( message, "Resetting...    " );
+    LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
+
+    STDC_memset( message, 0x20, sizeof(message) );
+
+    LCD_set_cursor_position(1,0);
+    LCD_write_message( (u8_t*)BLANK, LCD_COL_COUNT );
+}
+
+
+void SCREENS_create_mode_selector_screen( void )
+{
+    /* Create a non const array to hold the LCD string */
+    u8_t message[ LCD_COL_COUNT + 1u ];
+    u16_t target_temp_c = 0u;
+    u8_t* strings[3] = { "HEAT", "COOL", "AUTO" };
+
+    /* Display the message and keep it on the screen until the timer expires */
+    LCD_set_cursor_position(0,0);
+
+    sprintf( message, "     Mode       " );
+    LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
+
+    STDC_memset( message, 0x20, sizeof(message) );
+
+    sprintf( message, "   %s MODE    ", strings[ AIRCON_get_mode() ] );
+    LCD_set_cursor_position(1,0);
+    LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
+}
+
+
+
+void SCREENS_create_state_selector_screen( void )
+{
+    /* Create a non const array to hold the LCD string */
+    u8_t message[ LCD_COL_COUNT + 1u ];
+    u16_t target_temp_c = 0u;
+    u8_t* strings[2] = { "OFF", "ON " };
+
+    /* Display the message and keep it on the screen until the timer expires */
+    LCD_set_cursor_position(0,0);
+
+    sprintf( message, "     State      " );
+    LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
+
+    STDC_memset( message, 0x20, sizeof(message) );
+
+    sprintf( message, "      %s       ", strings[ AIRCON_get_state() ] );
+    LCD_set_cursor_position(1,0);
     LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
 }
 

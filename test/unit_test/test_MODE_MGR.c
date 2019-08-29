@@ -84,6 +84,9 @@ void NEOPIXEL_tick( void ){}
 void RF_MGR_analyse_fault_conditions( void ){}
 void AIRCON_set_mode( void ){}
 void AIRCON_get_mode( void ){}
+void LCD_tick( void ){}
+void BUTTON_tick( void ){}
+
 
 void AIRCON_set_state( disable_enable_et state )
 {
@@ -104,12 +107,10 @@ disable_enable_et AIRCON_get_state( void )
 
 void AIRCON_toggle_state( void )
 {
-	return( 0 );
 }
 
 void AIRCON_toggle_mode( void )
 {
-	return( 0 );
 }
 
 
