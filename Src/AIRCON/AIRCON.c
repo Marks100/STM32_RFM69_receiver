@@ -50,14 +50,14 @@ STATIC disable_enable_et AIRCON_generic_outputs_s[MAX_NUM_OUTPUTS];
 
 void AIRCON_init( void )
 {
-	AIRCON_config_s.oat_c = TMPERATURE_NOT_AVAILABLE;
-	AIRCON_config_s.mode = NVM_info_s.NVM_generic_data_blk_s.aircon_mode;
-	AIRCON_config_s.cool_max_temp_c = NVM_info_s.NVM_generic_data_blk_s.cool_max_temp;
-	AIRCON_config_s.cool_min_temp_c = NVM_info_s.NVM_generic_data_blk_s.cool_min_temp;
-	AIRCON_config_s.heat_max_temp_c = NVM_info_s.NVM_generic_data_blk_s.heat_max_temp;
-	AIRCON_config_s.heat_min_temp_c = NVM_info_s.NVM_generic_data_blk_s.heat_min_temp;
-	AIRCON_config_s.state = NVM_info_s.NVM_generic_data_blk_s.aircon_state;
-	AIRCON_config_s.auto_target_temp_c =  NVM_info_s.NVM_generic_data_blk_s.auto_target_temp;
+	AIRCON_config_s.oat_c              = TMPERATURE_NOT_AVAILABLE;
+	AIRCON_config_s.mode               = NVM_info_s.NVM_generic_data_blk_s.aircon_mode;
+	AIRCON_config_s.cool_max_temp_c    = NVM_info_s.NVM_generic_data_blk_s.cool_max_temp;
+	AIRCON_config_s.cool_min_temp_c    = NVM_info_s.NVM_generic_data_blk_s.cool_min_temp;
+	AIRCON_config_s.heat_max_temp_c    = NVM_info_s.NVM_generic_data_blk_s.heat_max_temp;
+	AIRCON_config_s.heat_min_temp_c    = NVM_info_s.NVM_generic_data_blk_s.heat_min_temp;
+	AIRCON_config_s.state              = NVM_info_s.NVM_generic_data_blk_s.aircon_state;
+	AIRCON_config_s.auto_target_temp_c = NVM_info_s.NVM_generic_data_blk_s.auto_target_temp;
 
 	AIRCON_min_max_s.max_temp_c.value = TMPERATURE_NOT_AVAILABLE;
 	AIRCON_min_max_s.max_temp_c.id    = 0u;
@@ -211,33 +211,124 @@ disable_enable_et AIRCON_get_state( void )
 }
 
 
-float AIRCON_get_auto_target_temp( void )
+float AIRCON_get_temperature_setting( AIRCON_mode_et type, u8_t max_min )
 {
-	return ( AIRCON_config_s.auto_target_temp_c );
+	float return_val;
+
+	switch (type)
+	{
+		case AIRCON_HEAT_MODE:
+		{
+			return_val = ( max_min == SETTING_MAX ) ? AIRCON_config_s.heat_max_temp_c : AIRCON_config_s.heat_min_temp_c;
+		}
+		break;
+
+		case AIRCON_COOL_MODE:
+		{
+			return_val = (max_min == SETTING_MAX) ? AIRCON_config_s.cool_max_temp_c : AIRCON_config_s.cool_min_temp_c;
+		}
+		break;
+
+		case AIRCON_AUTO_MODE:
+		{
+			return_val = AIRCON_config_s.auto_target_temp_c;
+		}
+		break;
+	}
+	return (return_val );
 }
 
-void AIRCON_adjust_auto_target_temp( u8_t increment )
+
+void AIRCON_adjust_temperature_setting(AIRCON_mode_et type, u8_t max_min, u8_t dir)
 {
 	float step_value = 0.5;
 
-	if( increment == 1 )
+	switch (type)
 	{
-		AIRCON_config_s.auto_target_temp_c += step_value;
+		case AIRCON_HEAT_MODE:
+		{
+			if (max_min == SETTING_MAX)
+			{
+				AIRCON_config_s.heat_max_temp_c = (dir == SETTING_ADJUST_UP) ?  \
+				( AIRCON_config_s.heat_max_temp_c + step_value ) : ( AIRCON_config_s.heat_max_temp_c - step_value );
+			}
+			else
+			{
+				AIRCON_config_s.heat_min_temp_c = (dir == SETTING_ADJUST_UP) ?  \
+				( AIRCON_config_s.heat_min_temp_c + step_value ) : ( AIRCON_config_s.heat_min_temp_c - step_value );
+			}	
+		}
+		break;
+
+		case AIRCON_COOL_MODE:
+		{
+			if (max_min == SETTING_MAX)
+			{
+				AIRCON_config_s.cool_max_temp_c = (dir == SETTING_ADJUST_UP) ? \
+				( AIRCON_config_s.cool_max_temp_c + step_value) : ( AIRCON_config_s.cool_max_temp_c - step_value );
+			}
+			else
+			{
+				AIRCON_config_s.cool_min_temp_c = (dir == SETTING_ADJUST_UP) ? \
+				( AIRCON_config_s.cool_min_temp_c + step_value ) : ( AIRCON_config_s.cool_min_temp_c - step_value );
+			}
+		}
+		break;
+
+		case AIRCON_AUTO_MODE:
+		{
+			AIRCON_config_s.auto_target_temp_c = (dir == SETTING_ADJUST_UP) ? \
+			( AIRCON_config_s.auto_target_temp_c + step_value ) : ( AIRCON_config_s.auto_target_temp_c - step_value );
+
+		}
+		break;
 	}
-	else
+
+	/* Boundary check the temperature settings */
+	if( AIRCON_config_s.auto_target_temp_c < MIN_AIRCON_TEMP_C_SETTING )
 	{
-		AIRCON_config_s.auto_target_temp_c -= step_value;
+		AIRCON_config_s.auto_target_temp_c = MIN_AIRCON_TEMP_C_SETTING;
+	}
+	else if( AIRCON_config_s.auto_target_temp_c > MAX_AIRCON_TEMP_C_SETTING )
+	{
+		AIRCON_config_s.auto_target_temp_c = MAX_AIRCON_TEMP_C_SETTING;
+	}
+
+	if( AIRCON_config_s.cool_min_temp_c < MIN_AIRCON_TEMP_C_SETTING )
+	{
+		AIRCON_config_s.cool_min_temp_c = MIN_AIRCON_TEMP_C_SETTING;
+	}
+	else if( AIRCON_config_s.cool_max_temp_c > MAX_AIRCON_TEMP_C_SETTING )
+	{
+		AIRCON_config_s.cool_max_temp_c = MAX_AIRCON_TEMP_C_SETTING;
+	}
+	else if ( AIRCON_config_s.cool_min_temp_c >= AIRCON_config_s.cool_max_temp_c )
+	{
+		AIRCON_config_s.cool_min_temp_c = AIRCON_config_s.cool_max_temp_c;
+	}
+	else if ( AIRCON_config_s.cool_max_temp_c <= AIRCON_config_s.cool_min_temp_c )
+	{
+		AIRCON_config_s.cool_max_temp_c = AIRCON_config_s.cool_min_temp_c;
+	}
+
+	if( AIRCON_config_s.heat_min_temp_c < MIN_AIRCON_TEMP_C_SETTING )
+	{
+		AIRCON_config_s.heat_min_temp_c = MIN_AIRCON_TEMP_C_SETTING;
+	}
+	else if( AIRCON_config_s.heat_max_temp_c > MAX_AIRCON_TEMP_C_SETTING )
+	{
+		AIRCON_config_s.heat_max_temp_c = MAX_AIRCON_TEMP_C_SETTING;
+	}
+	else if ( AIRCON_config_s.heat_min_temp_c >= AIRCON_config_s.heat_max_temp_c )
+	{
+		AIRCON_config_s.heat_min_temp_c = AIRCON_config_s.heat_max_temp_c;
+	}
+	else if ( AIRCON_config_s.heat_max_temp_c <= AIRCON_config_s.heat_min_temp_c )
+	{
+		AIRCON_config_s.heat_max_temp_c = AIRCON_config_s.heat_min_temp_c;
 	}
 
 
-	if( AIRCON_config_s.auto_target_temp_c < AIRCON_config_s.cool_min_temp_c )
-	{
-		AIRCON_config_s.auto_target_temp_c = AIRCON_config_s.cool_min_temp_c;
-	}
-	else if( AIRCON_config_s.auto_target_temp_c > AIRCON_config_s.heat_max_temp_c )
-	{
-		AIRCON_config_s.auto_target_temp_c = AIRCON_config_s.heat_max_temp_c;
-	}
 }
 
 
@@ -349,14 +440,6 @@ void AIRCON_togggle_generic_output_state( u8_t output_num )
 		{
 			AIRCON_set_generic_output_state( output_num, ENABLE_ );
 		}
-	}
-}
-
-disable_enable_et AIRCON_get_generic_output_state( u8_t output_num )
-{
-	if( output_num < MAX_NUM_OUTPUTS )
-	{
-		return( AIRCON_generic_outputs_s[output_num] );
 	}
 }
 

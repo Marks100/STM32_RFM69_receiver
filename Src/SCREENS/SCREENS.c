@@ -611,11 +611,11 @@ u8_t SCREENS_handle_auto_temp_screen( ROTARY_scroll_type_et button_press )
 
     if( button_press == ROTARY_LEFT_SCROLL )
     {
-    	AIRCON_adjust_auto_target_temp(0);
+    	AIRCON_adjust_temperature_setting(AIRCON_AUTO_MODE, SETTING_MAX, SETTING_ADJUST_DOWN );
     }
     else if( button_press == ROTARY_RIGHT_SCROLL )
     {
-    	AIRCON_adjust_auto_target_temp(1);
+    	AIRCON_adjust_temperature_setting(AIRCON_AUTO_MODE, SETTING_MAX, SETTING_ADJUST_UP );
     }
     else if( button_press == ROTARY_SHORT_PPRESS )
     {
@@ -625,17 +625,18 @@ u8_t SCREENS_handle_auto_temp_screen( ROTARY_scroll_type_et button_press )
     return( new_screen );
 }
 
+
 u8_t SCREENS_handle_cool_temp_min_screen( ROTARY_scroll_type_et button_press )
 {
     SCREENS_screen_et new_screen = SET_COOL_TEMP_SCREEN_MIN;
 
     if( button_press == ROTARY_LEFT_SCROLL )
     {
-    	AIRCON_adjust_auto_target_temp(0);
+    	AIRCON_adjust_temperature_setting(AIRCON_COOL_MODE, SETTING_MIN, SETTING_ADJUST_DOWN );
     }
     else if( button_press == ROTARY_RIGHT_SCROLL )
     {
-    	AIRCON_adjust_auto_target_temp(1);
+    	AIRCON_adjust_temperature_setting(AIRCON_COOL_MODE, SETTING_MIN, SETTING_ADJUST_UP );
     }
     else if( button_press == ROTARY_SHORT_PPRESS )
     {
@@ -652,11 +653,11 @@ u8_t SCREENS_handle_cool_temp_max_screen( ROTARY_scroll_type_et button_press )
 
     if( button_press == ROTARY_LEFT_SCROLL )
     {
-    	AIRCON_adjust_auto_target_temp(0);
+    	AIRCON_adjust_temperature_setting(AIRCON_COOL_MODE, SETTING_MAX, SETTING_ADJUST_DOWN );
     }
     else if( button_press == ROTARY_RIGHT_SCROLL )
     {
-    	AIRCON_adjust_auto_target_temp(1);
+    	AIRCON_adjust_temperature_setting(AIRCON_COOL_MODE, SETTING_MAX, SETTING_ADJUST_UP );
     }
     else if( button_press == ROTARY_SHORT_PPRESS )
     {
@@ -672,11 +673,11 @@ u8_t SCREENS_handle_heat_temp_min_screen( ROTARY_scroll_type_et button_press )
 
     if( button_press == ROTARY_LEFT_SCROLL )
     {
-    	AIRCON_adjust_auto_target_temp(0);
+     	AIRCON_adjust_temperature_setting(AIRCON_HEAT_MODE, SETTING_MIN, SETTING_ADJUST_DOWN );
     }
     else if( button_press == ROTARY_RIGHT_SCROLL )
     {
-    	AIRCON_adjust_auto_target_temp(1);
+     	AIRCON_adjust_temperature_setting(AIRCON_HEAT_MODE, SETTING_MIN, SETTING_ADJUST_UP );
     }
     else if( button_press == ROTARY_SHORT_PPRESS )
     {
@@ -692,11 +693,11 @@ u8_t SCREENS_handle_heat_temp_max_screen( ROTARY_scroll_type_et button_press )
 
     if( button_press == ROTARY_LEFT_SCROLL )
     {
-    	AIRCON_adjust_auto_target_temp(0);
+     	AIRCON_adjust_temperature_setting(AIRCON_HEAT_MODE, SETTING_MAX, SETTING_ADJUST_DOWN );
     }
     else if( button_press == ROTARY_RIGHT_SCROLL )
     {
-    	AIRCON_adjust_auto_target_temp(1);
+     	AIRCON_adjust_temperature_setting(AIRCON_HEAT_MODE, SETTING_MAX, SETTING_ADJUST_UP );
     }
     else if( button_press == ROTARY_SHORT_PPRESS )
     {
@@ -1090,7 +1091,7 @@ void SCREENS_create_auto_temp_screen( void )
 
     STDC_memset( message, 0x20, sizeof(message) );
 
-    target_temp_c = ( AIRCON_get_auto_target_temp() * 10 );
+    target_temp_c = ( AIRCON_get_temperature_setting(AIRCON_AUTO_MODE,SETTING_MAX) * 10 );
     LCD_set_cursor_position(1,0);
     sprintf( message, "  %d.%dc         ", ( target_temp_c / 10 ), ( target_temp_c % 10 ) );
     LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
@@ -1177,7 +1178,7 @@ void SCREENS_create_heat_temp_max_screen( void )
 
     STDC_memset( message, 0x20, sizeof(message) );
 
-    target_temp_c = ( AIRCON_get_auto_target_temp() * 10 );
+    target_temp_c = ( AIRCON_get_temperature_setting(AIRCON_HEAT_MODE,SETTING_MAX) * 10 );
     LCD_set_cursor_position(1,0);
     sprintf( message, "  %d.%dc         ", ( target_temp_c / 10 ), ( target_temp_c % 10 ) );
     LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
@@ -1197,7 +1198,7 @@ void SCREENS_create_heat_temp_min_screen( void )
 
     STDC_memset( message, 0x20, sizeof(message) );
 
-    target_temp_c = ( AIRCON_get_auto_target_temp() * 10 );
+    target_temp_c = ( AIRCON_get_temperature_setting(AIRCON_HEAT_MODE,SETTING_MIN) * 10 );
     LCD_set_cursor_position(1,0);
     sprintf( message, "  %d.%dc         ", ( target_temp_c / 10 ), ( target_temp_c % 10 ) );
     LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
@@ -1218,7 +1219,7 @@ void SCREENS_create_cool_temp_min_screen( void )
 
     STDC_memset( message, 0x20, sizeof(message) );
 
-    target_temp_c = ( AIRCON_get_auto_target_temp() * 10 );
+    target_temp_c = ( AIRCON_get_temperature_setting(AIRCON_COOL_MODE,SETTING_MIN) * 10 );
     LCD_set_cursor_position(1,0);
     sprintf( message, "  %d.%dc         ", ( target_temp_c / 10 ), ( target_temp_c % 10 ) );
     LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
@@ -1239,7 +1240,7 @@ void SCREENS_create_cool_temp_max_screen( void )
 
     STDC_memset( message, 0x20, sizeof(message) );
 
-    target_temp_c = ( AIRCON_get_auto_target_temp() * 10 );
+    target_temp_c = ( AIRCON_get_temperature_setting(AIRCON_COOL_MODE,SETTING_MAX) * 10 );
     LCD_set_cursor_position(1,0);
     sprintf( message, "  %d.%dc         ", ( target_temp_c / 10 ), ( target_temp_c % 10 ) );
     LCD_write_message( (u8_t*)message, LCD_COL_COUNT );

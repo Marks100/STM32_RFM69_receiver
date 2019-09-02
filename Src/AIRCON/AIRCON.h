@@ -16,6 +16,11 @@
 ***************************************************************************************************/
 #include "C_defs.h"
 
+#define SETTING_MAX					( 0u )
+#define SETTING_MIN					( 1u )
+#define SETTING_ADJUST_UP			( 0u )
+#define SETTING_ADJUST_DOWN			( 1u )
+
 #define MAX_ALLOWED_TEMP			( 100.0 )
 #define MIN_ALLOWED_TEMP			( -50.0 )
 #define TMPERATURE_NOT_AVAILABLE	( 65535.0f )
@@ -23,7 +28,7 @@
 #define MAX_NUM_OUTPUTS 			( 10 )
 
 #define MIN_AIRCON_TEMP_C_SETTING	( 16.0 )
-#define MAX_AIRCON_TEMP_C_SETTING	( 21.5 )
+#define MAX_AIRCON_TEMP_C_SETTING	( 22.5 )
 #define MAX_NUM_SETTINGS			( ( MAX_AIRCON_TEMP_C_SETTING - MIN_AIRCON_TEMP_C_SETTING ) * 2.00 )
 
 typedef enum AIRCON_mode_et
@@ -85,14 +90,11 @@ void 			   AIRCON_set_cooler_state( disable_enable_et state );
 disable_enable_et  AIRCON_get_heater_state( void );
 disable_enable_et  AIRCON_get_cooler_state( void );
 disable_enable_et  AIRCON_get_state( void );
-float 			   AIRCON_get_auto_target_temp( void );
-void 			   AIRCON_adjust_auto_target_temp( u8_t increment );
+float			   AIRCON_get_temperature_setting( AIRCON_mode_et type, u8_t max_min );
+void 			   AIRCON_adjust_temperature_setting(AIRCON_mode_et type, u8_t max_min, u8_t dir);
 void 			   AIRCON_set_state( disable_enable_et state );
 void 			   AIRCON_toggle_state( void );
 void 			   AIRCON_set_generic_output_state( u8_t output_num, disable_enable_et state );
-void 			   AIRCON_togggle_generic_output_state( u8_t output_num );
-disable_enable_et  AIRCON_get_generic_output_state( u8_t output_num );
-void 			   AIRCON_decode_control_cmd( u8_t cmd );
 AIRCON_min_max_st* AIRCON_get_stats_address( void );
 
 #endif /* AIRCON_H multiple inclusion guard */
