@@ -1,13 +1,8 @@
 /*! \file
-*               $Revision: 16923 $
 *
 *               $Author: mstewart $
 *
-*               $Date: 2014-01-16 15:40:40 +0000 (Thu, 16 Jan 2014) $
-*
-*               $HeadURL:
-*
-*   \brief      AIRCON module
+*   \brief      AIRCON control module.
 */
 /***************************************************************************************************
 **                              Includes                                                          **
@@ -24,38 +19,30 @@
 #include <math.h>
 #include "STDC.h"
 #include "HAL_BRD.h"
-#include "nvm.h"
+#include "NVM.h"
 #include "AIRCON.h"
 
-
 #define STDC_MODULE_ID   STDC_MOD_RF_DECODE
-
-
-
-extern NVM_info_st NVM_info_s;
-STATIC AIRCON_config_st  AIRCON_config_s;
-STATIC AIRCON_min_max_st AIRCON_min_max_s;
-STATIC disable_enable_et AIRCON_generic_outputs_s[MAX_NUM_OUTPUTS];
 
 /***************************************************************************************************
 **                              Data declarations and definitions                                 **
 ***************************************************************************************************/
-/* None */
+extern NVM_info_st NVM_info_s;
+STATIC AIRCON_config_st  AIRCON_config_s;
+STATIC AIRCON_min_max_st AIRCON_min_max_s;
+STATIC disable_enable_et AIRCON_generic_outputs_s[MAX_NUM_OUTPUTS];
 
 
 
 /***************************************************************************************************
 **                              Public Functions                                                  **
 ***************************************************************************************************/
-
 void AIRCON_init( void )
 {
 	AIRCON_config_s.oat_c              = TMPERATURE_NOT_AVAILABLE;
 	AIRCON_config_s.mode               = NVM_info_s.NVM_generic_data_blk_s.aircon_mode;
-	AIRCON_config_s.cool_max_temp_c    = NVM_info_s.NVM_generic_data_blk_s.cool_max_temp;
-	AIRCON_config_s.cool_min_temp_c    = NVM_info_s.NVM_generic_data_blk_s.cool_min_temp;
-	AIRCON_config_s.heat_max_temp_c    = NVM_info_s.NVM_generic_data_blk_s.heat_max_temp;
-	AIRCON_config_s.heat_min_temp_c    = NVM_info_s.NVM_generic_data_blk_s.heat_min_temp;
+	AIRCON_config_s.cool_target_temp_c = NVM_info_s.NVM_generic_data_blk_s.cool_target_temp;
+	AIRCON_config_s.heat_target_temp_c = NVM_info_s.NVM_generic_data_blk_s.heat_target_temp;
 	AIRCON_config_s.state              = NVM_info_s.NVM_generic_data_blk_s.aircon_state;
 	AIRCON_config_s.auto_target_temp_c = NVM_info_s.NVM_generic_data_blk_s.auto_target_temp;
 
@@ -70,6 +57,8 @@ void AIRCON_init( void )
 
 void AIRCON_tick( void )
 {
+	float target;
+
 	/* Check that the feature is enabled */
 	if( AIRCON_config_s.state == ENABLE_ )
 	{
@@ -82,13 +71,15 @@ void AIRCON_tick( void )
 				{
 					AIRCON_set_cooler_state( OFF );
 
+					target = AIRCON_config_s.heat_target_temp_c;
+
 					/* We are in heat mode */
-					if( AIRCON_config_s.oat_c < AIRCON_config_s.heat_min_temp_c )
+					if( AIRCON_config_s.oat_c < ( target - ( target * 0.05 ) ) )
 					{
 						/* Start heating */
 						AIRCON_set_heater_state( ON );
 					}
-					else if ( AIRCON_config_s.oat_c > AIRCON_config_s.heat_max_temp_c )
+					else if( AIRCON_config_s.oat_c > ( target - ( target * 0.05 ) ) )
 					{
 						/* Stop heating */
 						AIRCON_set_heater_state( OFF );
@@ -105,12 +96,14 @@ void AIRCON_tick( void )
 				{
 					AIRCON_set_heater_state( OFF );
 
-					if( AIRCON_config_s.oat_c > AIRCON_config_s.cool_max_temp_c )
+					target = AIRCON_config_s.cool_target_temp_c;
+
+					if( AIRCON_config_s.oat_c > ( target - ( target * 0.05 ) ) )
 					{
 						/* Start cooling */
 						AIRCON_set_cooler_state( ON );
 					}
-					else if ( AIRCON_config_s.oat_c < AIRCON_config_s.cool_min_temp_c )
+					else if ( AIRCON_config_s.oat_c < ( target - ( target * 0.05 ) ) )
 					{
 						/* Stop cooling */
 						AIRCON_set_cooler_state( OFF );
@@ -125,7 +118,7 @@ void AIRCON_tick( void )
 
 				case AIRCON_AUTO_MODE:
 				{
-					float target = AIRCON_config_s.auto_target_temp_c;
+					target = AIRCON_config_s.auto_target_temp_c;
 
 					if( AIRCON_config_s.oat_c < ( target - ( target * 0.05 ) ) )
 					{
@@ -211,21 +204,21 @@ disable_enable_et AIRCON_get_state( void )
 }
 
 
-float AIRCON_get_temperature_setting( AIRCON_mode_et type, u8_t max_min )
+float AIRCON_get_temperature_setting( AIRCON_mode_et type )
 {
 	float return_val;
 
-	switch (type)
+	switch( type )
 	{
 		case AIRCON_HEAT_MODE:
 		{
-			return_val = ( max_min == SETTING_MAX ) ? AIRCON_config_s.heat_max_temp_c : AIRCON_config_s.heat_min_temp_c;
+			return_val = AIRCON_config_s.heat_target_temp_c;
 		}
 		break;
 
 		case AIRCON_COOL_MODE:
 		{
-			return_val = (max_min == SETTING_MAX) ? AIRCON_config_s.cool_max_temp_c : AIRCON_config_s.cool_min_temp_c;
+			return_val = AIRCON_config_s.cool_target_temp_c;
 		}
 		break;
 
@@ -234,54 +227,47 @@ float AIRCON_get_temperature_setting( AIRCON_mode_et type, u8_t max_min )
 			return_val = AIRCON_config_s.auto_target_temp_c;
 		}
 		break;
+
+		default:
+			break;
 	}
-	return (return_val );
+
+	return ( return_val );
 }
 
 
-void AIRCON_adjust_temperature_setting(AIRCON_mode_et type, u8_t max_min, u8_t dir)
+void AIRCON_adjust_temperature_setting(AIRCON_mode_et type, u8_t dir)
 {
 	float step_value = 0.5;
 
-	switch (type)
+	switch( type )
 	{
 		case AIRCON_HEAT_MODE:
 		{
-			if (max_min == SETTING_MAX)
-			{
-				AIRCON_config_s.heat_max_temp_c = (dir == SETTING_ADJUST_UP) ?  \
-				( AIRCON_config_s.heat_max_temp_c + step_value ) : ( AIRCON_config_s.heat_max_temp_c - step_value );
-			}
-			else
-			{
-				AIRCON_config_s.heat_min_temp_c = (dir == SETTING_ADJUST_UP) ?  \
-				( AIRCON_config_s.heat_min_temp_c + step_value ) : ( AIRCON_config_s.heat_min_temp_c - step_value );
-			}	
+			AIRCON_config_s.heat_target_temp_c = ( dir == SETTING_ADJUST_UP ) ?  \
+			( AIRCON_config_s.heat_target_temp_c + step_value ) : \
+			( AIRCON_config_s.heat_target_temp_c - step_value );
 		}
 		break;
 
 		case AIRCON_COOL_MODE:
 		{
-			if (max_min == SETTING_MAX)
-			{
-				AIRCON_config_s.cool_max_temp_c = (dir == SETTING_ADJUST_UP) ? \
-				( AIRCON_config_s.cool_max_temp_c + step_value) : ( AIRCON_config_s.cool_max_temp_c - step_value );
-			}
-			else
-			{
-				AIRCON_config_s.cool_min_temp_c = (dir == SETTING_ADJUST_UP) ? \
-				( AIRCON_config_s.cool_min_temp_c + step_value ) : ( AIRCON_config_s.cool_min_temp_c - step_value );
-			}
+			AIRCON_config_s.cool_target_temp_c = ( dir == SETTING_ADJUST_UP ) ? \
+			( AIRCON_config_s.cool_target_temp_c + step_value) : \
+			( AIRCON_config_s.cool_target_temp_c - step_value );
 		}
 		break;
 
 		case AIRCON_AUTO_MODE:
 		{
-			AIRCON_config_s.auto_target_temp_c = (dir == SETTING_ADJUST_UP) ? \
-			( AIRCON_config_s.auto_target_temp_c + step_value ) : ( AIRCON_config_s.auto_target_temp_c - step_value );
-
+			AIRCON_config_s.auto_target_temp_c = ( dir == SETTING_ADJUST_UP ) ? \
+			( AIRCON_config_s.auto_target_temp_c + step_value ) : \
+			( AIRCON_config_s.auto_target_temp_c - step_value );
 		}
 		break;
+
+		default:
+			break;
 	}
 
 	/* Boundary check the temperature settings */
@@ -294,41 +280,23 @@ void AIRCON_adjust_temperature_setting(AIRCON_mode_et type, u8_t max_min, u8_t d
 		AIRCON_config_s.auto_target_temp_c = MAX_AIRCON_TEMP_C_SETTING;
 	}
 
-	if( AIRCON_config_s.cool_min_temp_c < MIN_AIRCON_TEMP_C_SETTING )
+	if( AIRCON_config_s.cool_target_temp_c < MIN_AIRCON_TEMP_C_SETTING )
 	{
-		AIRCON_config_s.cool_min_temp_c = MIN_AIRCON_TEMP_C_SETTING;
+		AIRCON_config_s.cool_target_temp_c = MIN_AIRCON_TEMP_C_SETTING;
 	}
-	else if( AIRCON_config_s.cool_max_temp_c > MAX_AIRCON_TEMP_C_SETTING )
+	else if( AIRCON_config_s.cool_target_temp_c > MAX_AIRCON_TEMP_C_SETTING )
 	{
-		AIRCON_config_s.cool_max_temp_c = MAX_AIRCON_TEMP_C_SETTING;
+		AIRCON_config_s.cool_target_temp_c = MAX_AIRCON_TEMP_C_SETTING;
 	}
-	else if ( AIRCON_config_s.cool_min_temp_c >= AIRCON_config_s.cool_max_temp_c )
+	
+	if( AIRCON_config_s.heat_target_temp_c < MIN_AIRCON_TEMP_C_SETTING )
 	{
-		AIRCON_config_s.cool_min_temp_c = AIRCON_config_s.cool_max_temp_c;
+		AIRCON_config_s.heat_target_temp_c = MIN_AIRCON_TEMP_C_SETTING;
 	}
-	else if ( AIRCON_config_s.cool_max_temp_c <= AIRCON_config_s.cool_min_temp_c )
+	else if( AIRCON_config_s.heat_target_temp_c > MAX_AIRCON_TEMP_C_SETTING )
 	{
-		AIRCON_config_s.cool_max_temp_c = AIRCON_config_s.cool_min_temp_c;
+		AIRCON_config_s.heat_target_temp_c = MAX_AIRCON_TEMP_C_SETTING;
 	}
-
-	if( AIRCON_config_s.heat_min_temp_c < MIN_AIRCON_TEMP_C_SETTING )
-	{
-		AIRCON_config_s.heat_min_temp_c = MIN_AIRCON_TEMP_C_SETTING;
-	}
-	else if( AIRCON_config_s.heat_max_temp_c > MAX_AIRCON_TEMP_C_SETTING )
-	{
-		AIRCON_config_s.heat_max_temp_c = MAX_AIRCON_TEMP_C_SETTING;
-	}
-	else if ( AIRCON_config_s.heat_min_temp_c >= AIRCON_config_s.heat_max_temp_c )
-	{
-		AIRCON_config_s.heat_min_temp_c = AIRCON_config_s.heat_max_temp_c;
-	}
-	else if ( AIRCON_config_s.heat_max_temp_c <= AIRCON_config_s.heat_min_temp_c )
-	{
-		AIRCON_config_s.heat_max_temp_c = AIRCON_config_s.heat_min_temp_c;
-	}
-
-
 }
 
 
@@ -427,31 +395,6 @@ void AIRCON_set_generic_output_state( u8_t output_num, disable_enable_et state )
 		AIRCON_generic_outputs_s[output_num] = state;
 	}
 }
-
-void AIRCON_togggle_generic_output_state( u8_t output_num )
-{
-	if( output_num < MAX_NUM_OUTPUTS )
-	{
-		if( AIRCON_get_generic_output_state(output_num) == ENABLE_ )
-		{
-			AIRCON_set_generic_output_state( output_num, DISABLE_ );
-		}
-		else
-		{
-			AIRCON_set_generic_output_state( output_num, ENABLE_ );
-		}
-	}
-}
-
-
-
-void AIRCON_decode_control_cmd( u8_t cmd )
-{
-	/* we have just received a control command */
-
-
-}
-
 
 
 

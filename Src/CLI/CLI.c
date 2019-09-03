@@ -655,14 +655,11 @@ CLI_error_et nvm_handler( u8_t aArgCount, char *aArgVector[] )
 	u16_t divisor;
 	u8_t divident;
 	float* temp_data_p;
-	u8_t* strings[4] =
+	u8_t* strings[2] =
 	{
-		"cool mode max temp",
-		"cool mode min temp",
-		"heat mode max temp",
-		"heat mode min temp"
+		"cool mode temp  ",
+		"heat mode temp  ",
 	};
-
 
 	STDC_memset( output_string, 0x00, sizeof( output_string ) );
 
@@ -721,9 +718,9 @@ CLI_error_et nvm_handler( u8_t aArgCount, char *aArgVector[] )
 	CLI_send_newline();
 
 	/* setup the pointer */
-	temp_data_p = &NVM_info_s.NVM_generic_data_blk_s.cool_max_temp;
+	temp_data_p = &NVM_info_s.NVM_generic_data_blk_s.cool_target_temp;
 
-	for( i = 0; i < 4; i++ )
+	for( i = 0; i < 2u; i++ )
 	{
 		temp_val = ( ( (*temp_data_p) * 10u ) );
 		divisor = ( temp_val / 10u );
@@ -838,7 +835,8 @@ CLI_error_et listnodes_handler( u8_t aArgCount, char *aArgVector[] )
 CLI_error_et nodestat_handler( u8_t aArgCount, char *aArgVector[] )
 {
 	CLI_error_et error = CLI_ERROR_NONE;
-	char output_string[200];
+
+	return ( error );
 }
 
 
@@ -1100,6 +1098,8 @@ CLI_error_et rf_dbg_out_handler( u8_t aArgCount, char *aArgVector[] )
 	sprintf( output_string, "RF debug output state - %d", state );
 	CLI_send_data( output_string, strlen(output_string));
 	CLI_send_newline();
+
+	return( error );
 }
 
 
@@ -1107,7 +1107,6 @@ CLI_error_et rf_dbg_out_handler( u8_t aArgCount, char *aArgVector[] )
 CLI_error_et test_handler( u8_t aArgCount, char *aArgVector[] )
 {
 	CLI_error_et error = CLI_ERROR_NONE;
-	char output_string[200];
 
 	while(1);
 

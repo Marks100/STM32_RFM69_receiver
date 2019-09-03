@@ -20,12 +20,8 @@ typedef enum
 	INFO_SCREEN_4,
 	SET_TEMP_SEL_SCREEN,
 	SET_AUTO_TEMP_SCREEN,
-	SET_HEAT_TEMP_SEL_SCREEN,
-	SET_COOL_TEMP_SEL_SCREEN,
-	SET_COOL_TEMP_SCREEN_MIN,
-	SET_COOL_TEMP_SCREEN_MAX,
-	SET_HEAT_TEMP_SCREEN_MIN,
-	SET_HEAT_TEMP_SCREEN_MAX,
+	SET_COOL_TEMP_SCREEN,
+	SET_HEAT_TEMP_SCREEN,
 	MONITOR_SCREEN,
 	MODE_SELECT_SCREEN,
 	STATE_SELECT_SCREEN,
@@ -89,16 +85,14 @@ void SCREENS_create_info_screen_1( void );
 void SCREENS_create_info_screen_2( void );
 void SCREENS_create_info_screen_3( void );
 void SCREENS_create_info_screen_4( void );
-void SCREENS_create_auto_temp_screen( void );
-void SCREENS_create_cool_temp_sel_screen( void );
-void SCREENS_create_heat_temp_sel_screen( void );
 void SCREENS_create_temp_sel_screen( void );
+void SCREENS_create_auto_temp_screen( void );
+void SCREENS_create_cool_temp_screen( void );
+void SCREENS_create_heat_temp_screen( void );
 void SCREENS_create_monitor_screen( void );
 void SCREENS_create_reset_screen( void );
 void SCREENS_create_mode_selector_screen( void );
 void SCREENS_create_state_selector_screen( void );
-void SCREENS_create_heat_temp_sel_screen( void );
-void SCREENS_create_cool_temp_sel_screen( void );
 void SCREENS_create_test_screen( void );
 
 u8_t SCREENS_handle_welcome_screen( void );
@@ -106,13 +100,9 @@ u8_t SCREENS_handle_main_menu_screen( ROTARY_scroll_type_et button_press );
 u8_t SCREENS_handle_expert_mode_screen( void );
 u8_t SCREENS_handle_info_screens( ROTARY_scroll_type_et button_press );
 u8_t SCREENS_handle_auto_temp_screen( ROTARY_scroll_type_et button_press );
-u8_t SCREENS_handle_heat_temp_sel_screen( ROTARY_scroll_type_et button_press );
-u8_t SCREENS_handle_cool_temp_sel_screen( ROTARY_scroll_type_et button_press );
 u8_t SCREENS_handle_temp_sel_screen( ROTARY_scroll_type_et button_press );
-u8_t SCREENS_handle_heat_temp_min_screen( ROTARY_scroll_type_et button_press );
-u8_t SCREENS_handle_heat_temp_max_screen( ROTARY_scroll_type_et button_press );
-u8_t SCREENS_handle_cool_temp_min_screen( ROTARY_scroll_type_et button_press );
-u8_t SCREENS_handle_cool_temp_max_screen( ROTARY_scroll_type_et button_press );
+u8_t SCREENS_handle_heat_temp_screen( ROTARY_scroll_type_et button_press );
+u8_t SCREENS_handle_cool_temp_screen( ROTARY_scroll_type_et button_press );
 u8_t SCREENS_handle_monitor_screen( ROTARY_scroll_type_et button_press );
 u8_t SCREENS_handle_reset_screen( ROTARY_scroll_type_et button_press );
 u8_t SCREENS_handle_mode_selector_screen( ROTARY_scroll_type_et button_press );

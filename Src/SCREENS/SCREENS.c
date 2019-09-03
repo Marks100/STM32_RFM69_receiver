@@ -1,3 +1,6 @@
+#include <stdio.h>
+#include <string.h>
+
 #include "STDC.h"
 #include "Screens.h"
 #include "LCD.h"
@@ -15,9 +18,7 @@ const u8_t BLANK[]               = ("                ");
 
 SCREENS_main_memu_items_st SCREENS_main_memu_items_s = 
 {
-	{
-		0
-	},
+	0,
 	{
         MONITOR_SCREEN,
 		SET_TEMP_SEL_SCREEN,
@@ -44,9 +45,8 @@ SCREENS_main_memu_items_st SCREENS_main_memu_items_s =
 
 SCREENS_info_memu_items_st SCREENS_info_memu_items_s =
 {
-	{
-		0
-	},
+
+	0,
 	{
 		INFO_SCREEN_1,
 		INFO_SCREEN_2,
@@ -57,13 +57,11 @@ SCREENS_info_memu_items_st SCREENS_info_memu_items_s =
 
 SCREENS_set_temp_memu_items_st SCREENS_set_temp_memu_items_s =
 {
-	{
-		0
-	},
+	0,
 	{
 		SET_AUTO_TEMP_SCREEN, //SET_AUTO_TEMP_SCREEN,
-		SET_HEAT_TEMP_SEL_SCREEN, //SET_HEAT_TEMP_SCREEN,
-		SET_COOL_TEMP_SEL_SCREEN, //SET_COOL_TEMP_SCREEN,
+		SET_HEAT_TEMP_SCREEN, //SET_HEAT_TEMP_SCREEN,
+		SET_COOL_TEMP_SCREEN, //SET_COOL_TEMP_SCREEN,
 		MAIN_MENU_SCREEN
 	},
 	{
@@ -75,49 +73,12 @@ SCREENS_set_temp_memu_items_st SCREENS_set_temp_memu_items_s =
 };
 
 
-SCREENS_set_temp_min_max_items_st SCREENS_set_heat_temp_min_max_items_s =
-{
-	{
-		0
-	},
-	{
-		SET_HEAT_TEMP_SCREEN_MIN,
-		SET_HEAT_TEMP_SCREEN_MAX,
-		SET_TEMP_SEL_SCREEN
-	},
-	{
-		"1. MIN TEMP     ",
-		"2. MAX TEMP     ",
-		"BACK            "
-	},
-};
-
-SCREENS_set_temp_min_max_items_st SCREENS_set_cool_temp_min_max_items_s =
-{
-	{
-		0
-	},
-	{
-		SET_COOL_TEMP_SCREEN_MIN,
-		SET_COOL_TEMP_SCREEN_MAX,
-		SET_TEMP_SEL_SCREEN
-	},
-	{
-		"1. MIN TEMP     ",
-		"2. MAX TEMP     ",
-		"BACK            "
-	},
-};
-
-
-
 
 STATIC SCREENS_async_display_request_et SCREENS_async_display_request_s;
 STATIC ROTARY_scroll_type_et            SCREENS_rotary_press_s;
 STATIC u16_t                            SCREENS_screen_timer_s;
 STATIC u32_t                            SCREENS_loop_ctr_s;
 STATIC SCREENS_screen_et                SCREEN_screen_s;
-STATIC SCREENS_screen_et                SCREEN_prev_screen_s;
 STATIC u16_t                            SCREEN_inactivity_timer_s;
 
 
@@ -235,36 +196,20 @@ void SCREENS_handle_screen( void )
             SCREEN_screen_s = SCREENS_handle_expert_mode_screen();
             break;
 
-        case SET_AUTO_TEMP_SCREEN:
-            SCREEN_screen_s = SCREENS_handle_auto_temp_screen( SCREENS_rotary_press_s );
-            break;
-
-	    case SET_COOL_TEMP_SEL_SCREEN:
-        	SCREEN_screen_s = SCREENS_handle_cool_temp_sel_screen( SCREENS_rotary_press_s );
-        	break;
-
-        case SET_HEAT_TEMP_SEL_SCREEN:
-        	SCREEN_screen_s = SCREENS_handle_heat_temp_sel_screen( SCREENS_rotary_press_s );
-        	break;
-
         case SET_TEMP_SEL_SCREEN:
         	SCREEN_screen_s = SCREENS_handle_temp_sel_screen( SCREENS_rotary_press_s );
         	break;
 
-        case SET_COOL_TEMP_SCREEN_MIN:
-        	SCREEN_screen_s = SCREENS_handle_cool_temp_min_screen( SCREENS_rotary_press_s );
+        case SET_AUTO_TEMP_SCREEN:
+            SCREEN_screen_s = SCREENS_handle_auto_temp_screen( SCREENS_rotary_press_s );
+            break;
+
+        case SET_COOL_TEMP_SCREEN:
+        	SCREEN_screen_s = SCREENS_handle_cool_temp_screen( SCREENS_rotary_press_s );
         	break;
 
-        case SET_COOL_TEMP_SCREEN_MAX:
-        	SCREEN_screen_s = SCREENS_handle_cool_temp_max_screen( SCREENS_rotary_press_s );
-        	break;
-
-        case SET_HEAT_TEMP_SCREEN_MIN:
-        	SCREEN_screen_s = SCREENS_handle_heat_temp_min_screen( SCREENS_rotary_press_s );
-        	break;
-
-        case SET_HEAT_TEMP_SCREEN_MAX:
-        	SCREEN_screen_s = SCREENS_handle_heat_temp_max_screen( SCREENS_rotary_press_s );
+        case SET_HEAT_TEMP_SCREEN:
+        	SCREEN_screen_s = SCREENS_handle_heat_temp_screen( SCREENS_rotary_press_s );
         	break;
 
         case MONITOR_SCREEN:
@@ -329,36 +274,20 @@ void SCREENS_create_screen( SCREENS_screen_et screen )
             SCREENS_create_expert_mode_screen();
             break;
 
-        case SET_AUTO_TEMP_SCREEN:
-            SCREENS_create_auto_temp_screen();
-            break;
-
-        case SET_COOL_TEMP_SEL_SCREEN:
-            SCREENS_create_cool_temp_sel_screen();
-            break;
-
-        case SET_HEAT_TEMP_SEL_SCREEN:
-            SCREENS_create_heat_temp_sel_screen();
-            break;
-
         case SET_TEMP_SEL_SCREEN:
         	SCREENS_create_temp_sel_screen();
         	break;
 
-        case SET_COOL_TEMP_SCREEN_MIN:
-        	SCREENS_create_cool_temp_min_screen();
+        case SET_AUTO_TEMP_SCREEN:
+            SCREENS_create_auto_temp_screen();
+            break;
+
+        case SET_COOL_TEMP_SCREEN:
+        	SCREENS_create_cool_temp_screen();
         	break;
 
-        case SET_COOL_TEMP_SCREEN_MAX:
-        	SCREENS_create_cool_temp_max_screen();
-        	break;
-
-        case SET_HEAT_TEMP_SCREEN_MIN:
-        	SCREENS_create_heat_temp_min_screen();
-        	break;
-
-        case SET_HEAT_TEMP_SCREEN_MAX:
-        	SCREENS_create_heat_temp_max_screen();
+        case SET_HEAT_TEMP_SCREEN:
+        	SCREENS_create_heat_temp_screen();
         	break;
 
         case MONITOR_SCREEN:
@@ -611,11 +540,11 @@ u8_t SCREENS_handle_auto_temp_screen( ROTARY_scroll_type_et button_press )
 
     if( button_press == ROTARY_LEFT_SCROLL )
     {
-    	AIRCON_adjust_temperature_setting(AIRCON_AUTO_MODE, SETTING_MAX, SETTING_ADJUST_DOWN );
+    	AIRCON_adjust_temperature_setting(AIRCON_AUTO_MODE, SETTING_ADJUST_DOWN );
     }
     else if( button_press == ROTARY_RIGHT_SCROLL )
     {
-    	AIRCON_adjust_temperature_setting(AIRCON_AUTO_MODE, SETTING_MAX, SETTING_ADJUST_UP );
+    	AIRCON_adjust_temperature_setting(AIRCON_AUTO_MODE, SETTING_ADJUST_UP );
     }
     else if( button_press == ROTARY_SHORT_PPRESS )
     {
@@ -626,93 +555,52 @@ u8_t SCREENS_handle_auto_temp_screen( ROTARY_scroll_type_et button_press )
 }
 
 
-u8_t SCREENS_handle_cool_temp_min_screen( ROTARY_scroll_type_et button_press )
+u8_t SCREENS_handle_cool_temp_screen( ROTARY_scroll_type_et button_press )
 {
-    SCREENS_screen_et new_screen = SET_COOL_TEMP_SCREEN_MIN;
+    SCREENS_screen_et new_screen = SET_COOL_TEMP_SCREEN;
 
     if( button_press == ROTARY_LEFT_SCROLL )
     {
-    	AIRCON_adjust_temperature_setting(AIRCON_COOL_MODE, SETTING_MIN, SETTING_ADJUST_DOWN );
+    	AIRCON_adjust_temperature_setting(AIRCON_COOL_MODE, SETTING_ADJUST_DOWN );
     }
     else if( button_press == ROTARY_RIGHT_SCROLL )
     {
-    	AIRCON_adjust_temperature_setting(AIRCON_COOL_MODE, SETTING_MIN, SETTING_ADJUST_UP );
+    	AIRCON_adjust_temperature_setting(AIRCON_COOL_MODE, SETTING_ADJUST_UP );
     }
     else if( button_press == ROTARY_SHORT_PPRESS )
     {
-    	new_screen = SET_COOL_TEMP_SEL_SCREEN;
+    	new_screen = SET_TEMP_SEL_SCREEN;
     }
 
     return( new_screen );
 }
 
 
-u8_t SCREENS_handle_cool_temp_max_screen( ROTARY_scroll_type_et button_press )
+u8_t SCREENS_handle_heat_temp_screen( ROTARY_scroll_type_et button_press )
 {
-    SCREENS_screen_et new_screen = SET_COOL_TEMP_SCREEN_MAX;
+    SCREENS_screen_et new_screen = SET_HEAT_TEMP_SCREEN;
 
     if( button_press == ROTARY_LEFT_SCROLL )
     {
-    	AIRCON_adjust_temperature_setting(AIRCON_COOL_MODE, SETTING_MAX, SETTING_ADJUST_DOWN );
+     	AIRCON_adjust_temperature_setting(AIRCON_HEAT_MODE, SETTING_ADJUST_DOWN );
     }
     else if( button_press == ROTARY_RIGHT_SCROLL )
     {
-    	AIRCON_adjust_temperature_setting(AIRCON_COOL_MODE, SETTING_MAX, SETTING_ADJUST_UP );
+     	AIRCON_adjust_temperature_setting(AIRCON_HEAT_MODE, SETTING_ADJUST_UP );
     }
     else if( button_press == ROTARY_SHORT_PPRESS )
     {
-    	new_screen = SET_COOL_TEMP_SEL_SCREEN;
+    	new_screen = SET_TEMP_SEL_SCREEN;
     }
 
     return( new_screen );
 }
 
-u8_t SCREENS_handle_heat_temp_min_screen( ROTARY_scroll_type_et button_press )
-{
-    SCREENS_screen_et new_screen = SET_HEAT_TEMP_SCREEN_MIN;
 
-    if( button_press == ROTARY_LEFT_SCROLL )
-    {
-     	AIRCON_adjust_temperature_setting(AIRCON_HEAT_MODE, SETTING_MIN, SETTING_ADJUST_DOWN );
-    }
-    else if( button_press == ROTARY_RIGHT_SCROLL )
-    {
-     	AIRCON_adjust_temperature_setting(AIRCON_HEAT_MODE, SETTING_MIN, SETTING_ADJUST_UP );
-    }
-    else if( button_press == ROTARY_SHORT_PPRESS )
-    {
-    	new_screen = SET_HEAT_TEMP_SEL_SCREEN;
-    }
-
-    return( new_screen );
-}
-
-u8_t SCREENS_handle_heat_temp_max_screen( ROTARY_scroll_type_et button_press )
-{
-    SCREENS_screen_et new_screen = SET_HEAT_TEMP_SCREEN_MAX;
-
-    if( button_press == ROTARY_LEFT_SCROLL )
-    {
-     	AIRCON_adjust_temperature_setting(AIRCON_HEAT_MODE, SETTING_MAX, SETTING_ADJUST_DOWN );
-    }
-    else if( button_press == ROTARY_RIGHT_SCROLL )
-    {
-     	AIRCON_adjust_temperature_setting(AIRCON_HEAT_MODE, SETTING_MAX, SETTING_ADJUST_UP );
-    }
-    else if( button_press == ROTARY_SHORT_PPRESS )
-    {
-    	new_screen = SET_HEAT_TEMP_SEL_SCREEN;
-    }
-
-    return( new_screen );
-}
 
 u8_t SCREENS_handle_temp_sel_screen( ROTARY_scroll_type_et button_press )
 {
     SCREENS_screen_et new_screen = SET_TEMP_SEL_SCREEN;
-
-    SCREENS_set_cool_temp_min_max_items_s.item_no = 0u;
-    SCREENS_set_heat_temp_min_max_items_s.item_no = 0u;
 
    if( button_press == ROTARY_LEFT_SCROLL )
 	{
@@ -738,63 +626,6 @@ u8_t SCREENS_handle_temp_sel_screen( ROTARY_scroll_type_et button_press )
 	return( new_screen );
 }
 
-u8_t SCREENS_handle_heat_temp_sel_screen( ROTARY_scroll_type_et button_press )
-{
-    SCREENS_screen_et new_screen = SET_HEAT_TEMP_SEL_SCREEN;
-
-    if( button_press == ROTARY_LEFT_SCROLL )
-	{
-        if( SCREENS_set_heat_temp_min_max_items_s.item_no == 0 )
-        {
-            SCREENS_set_heat_temp_min_max_items_s.item_no = SCREENS_SET_MIN_MAX_MEMU_ITEMS - 1;
-        }
-        else
-        {
-            SCREENS_set_heat_temp_min_max_items_s.item_no -= 1;
-        }
-	}
-	else if( button_press == ROTARY_RIGHT_SCROLL )
-	{
-		SCREENS_set_heat_temp_min_max_items_s.item_no = ( ( SCREENS_set_heat_temp_min_max_items_s.item_no + 1 ) % SCREENS_SET_MIN_MAX_MEMU_ITEMS);
-	}
-
-	if( button_press == ROTARY_SHORT_PPRESS )
-	{
-		new_screen = SCREENS_set_heat_temp_min_max_items_s.screens[SCREENS_set_heat_temp_min_max_items_s.item_no];
-	}
-
-	return( new_screen );
-}
-
-
-
-u8_t SCREENS_handle_cool_temp_sel_screen( ROTARY_scroll_type_et button_press )
-{
-    SCREENS_screen_et new_screen = SET_COOL_TEMP_SEL_SCREEN;
-
-   if( button_press == ROTARY_LEFT_SCROLL )
-	{
-        if( SCREENS_set_cool_temp_min_max_items_s.item_no == 0 )
-        {
-            SCREENS_set_cool_temp_min_max_items_s.item_no = SCREENS_SET_MIN_MAX_MEMU_ITEMS - 1;
-        }
-        else
-        {
-            SCREENS_set_cool_temp_min_max_items_s.item_no -= 1;
-        }
-	}
-	else if( button_press == ROTARY_RIGHT_SCROLL )
-	{
-		SCREENS_set_cool_temp_min_max_items_s.item_no = ( ( SCREENS_set_cool_temp_min_max_items_s.item_no + 1 ) % SCREENS_SET_MIN_MAX_MEMU_ITEMS);
-	}
-
-	if( button_press == ROTARY_SHORT_PPRESS )
-	{
-		new_screen = SCREENS_set_cool_temp_min_max_items_s.screens[SCREENS_set_cool_temp_min_max_items_s.item_no];
-	}
-
-	return( new_screen );
-}
 
 
 u8_t SCREENS_handle_mode_selector_screen( ROTARY_scroll_type_et button_press )
@@ -824,11 +655,11 @@ u8_t SCREENS_handle_state_selector_screen( ROTARY_scroll_type_et button_press )
 
     if( button_press == ROTARY_LEFT_SCROLL )
     {
-    	( AIRCON_get_state() == ENABLE ) ? AIRCON_set_state( DISABLE ) : AIRCON_set_state( ENABLE );
+    	( AIRCON_get_state() == ENABLE_ ) ? AIRCON_set_state( DISABLE_ ) : AIRCON_set_state( ENABLE_ );
     }
     else if( button_press == ROTARY_RIGHT_SCROLL )
     {
-    	( AIRCON_get_state() == ENABLE ) ? AIRCON_set_state( DISABLE ) : AIRCON_set_state( ENABLE );
+    	( AIRCON_get_state() == ENABLE_ ) ? AIRCON_set_state( DISABLE_ ) : AIRCON_set_state( ENABLE_ );
     }
     else if( button_press == ROTARY_SHORT_PPRESS )
     {
@@ -870,10 +701,6 @@ u8_t SCREENS_handle_reset_screen( ROTARY_scroll_type_et button_press )
 
     return( new_screen );
 }
-
-
-
-
 
 
 
@@ -1018,7 +845,7 @@ void SCREENS_create_info_screen_2( void )
 
     /* Now copy the const string into the new temp buffer */
     sprintf( message, "HW Vers:%02d.%02d   ",
-    hw_version_string[0], hw_version_string[1], hw_version_string[2] );
+    hw_version_string[0], hw_version_string[1] );
     LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
 }
 
@@ -1091,7 +918,7 @@ void SCREENS_create_auto_temp_screen( void )
 
     STDC_memset( message, 0x20, sizeof(message) );
 
-    target_temp_c = ( AIRCON_get_temperature_setting(AIRCON_AUTO_MODE,SETTING_MAX) * 10 );
+    target_temp_c = ( AIRCON_get_temperature_setting(AIRCON_AUTO_MODE) * 10 );
     LCD_set_cursor_position(1,0);
     sprintf( message, "  %d.%dc         ", ( target_temp_c / 10 ), ( target_temp_c % 10 ) );
     LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
@@ -1120,51 +947,8 @@ void SCREENS_create_temp_sel_screen( void )
 }
 
 
-void SCREENS_create_cool_temp_sel_screen( void )
-{
-    /* Create a non const array to hold the LCD string */
-    u8_t message[ LCD_COL_COUNT + 1u ];
 
-	sprintf( message, ">%s", SCREENS_set_cool_temp_min_max_items_s.list[SCREENS_set_cool_temp_min_max_items_s.item_no] );
-	LCD_set_cursor_position(0,0);
-	LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
-
-	LCD_set_cursor_position(1,0);
-	if( SCREENS_set_cool_temp_min_max_items_s.item_no == SCREENS_SET_MIN_MAX_MEMU_ITEMS - 1 )
-	{
-		LCD_write_message( (u8_t*)BLANK, LCD_COL_COUNT );
-	}
-	else
-	{
-		sprintf( message, "%s", SCREENS_set_cool_temp_min_max_items_s.list[SCREENS_set_cool_temp_min_max_items_s.item_no+1] );
-		LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
-	}
-}
-
-
-void SCREENS_create_heat_temp_sel_screen( void )
-{
-        /* Create a non const array to hold the LCD string */
-    u8_t message[ LCD_COL_COUNT + 1u ];
-
-	sprintf( message, ">%s", SCREENS_set_heat_temp_min_max_items_s.list[SCREENS_set_heat_temp_min_max_items_s.item_no] );
-	LCD_set_cursor_position(0,0);
-	LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
-
-	LCD_set_cursor_position(1,0);
-	if( SCREENS_set_heat_temp_min_max_items_s.item_no == SCREENS_SET_MIN_MAX_MEMU_ITEMS - 1 )
-	{
-		LCD_write_message( (u8_t*)BLANK, LCD_COL_COUNT );
-	}
-	else
-	{
-		sprintf( message, "%s", SCREENS_set_heat_temp_min_max_items_s.list[SCREENS_set_heat_temp_min_max_items_s.item_no+1] );
-		LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
-	}
-}
-
-
-void SCREENS_create_heat_temp_max_screen( void )
+void SCREENS_create_heat_temp_screen( void )
 {
     /* Create a non const array to hold the LCD string */
     u8_t message[ LCD_COL_COUNT + 1u ];
@@ -1178,34 +962,15 @@ void SCREENS_create_heat_temp_max_screen( void )
 
     STDC_memset( message, 0x20, sizeof(message) );
 
-    target_temp_c = ( AIRCON_get_temperature_setting(AIRCON_HEAT_MODE,SETTING_MAX) * 10 );
-    LCD_set_cursor_position(1,0);
-    sprintf( message, "  %d.%dc         ", ( target_temp_c / 10 ), ( target_temp_c % 10 ) );
-    LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
-}
-
-void SCREENS_create_heat_temp_min_screen( void )
-{
-    /* Create a non const array to hold the LCD string */
-    u8_t message[ LCD_COL_COUNT + 1u ];
-    u16_t target_temp_c = 0u;
-
-    /* Display the message and keep it on the screen until the timer expires */
-    LCD_set_cursor_position(0,0);
-
-    sprintf( message, " Heat min temp  " );
-    LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
-
-    STDC_memset( message, 0x20, sizeof(message) );
-
-    target_temp_c = ( AIRCON_get_temperature_setting(AIRCON_HEAT_MODE,SETTING_MIN) * 10 );
+    target_temp_c = ( AIRCON_get_temperature_setting(AIRCON_HEAT_MODE) * 10 );
     LCD_set_cursor_position(1,0);
     sprintf( message, "  %d.%dc         ", ( target_temp_c / 10 ), ( target_temp_c % 10 ) );
     LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
 }
 
 
-void SCREENS_create_cool_temp_min_screen( void )
+
+void SCREENS_create_cool_temp_screen( void )
 {
     /* Create a non const array to hold the LCD string */
     u8_t message[ LCD_COL_COUNT + 1u ];
@@ -1219,39 +984,18 @@ void SCREENS_create_cool_temp_min_screen( void )
 
     STDC_memset( message, 0x20, sizeof(message) );
 
-    target_temp_c = ( AIRCON_get_temperature_setting(AIRCON_COOL_MODE,SETTING_MIN) * 10 );
+    target_temp_c = ( AIRCON_get_temperature_setting(AIRCON_COOL_MODE) * 10 );
     LCD_set_cursor_position(1,0);
     sprintf( message, "  %d.%dc         ", ( target_temp_c / 10 ), ( target_temp_c % 10 ) );
     LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
 }
 
-
-void SCREENS_create_cool_temp_max_screen( void )
-{
-    /* Create a non const array to hold the LCD string */
-    u8_t message[ LCD_COL_COUNT + 1u ];
-    u16_t target_temp_c = 0u;
-
-    /* Display the message and keep it on the screen until the timer expires */
-    LCD_set_cursor_position(0,0);
-
-    sprintf( message, " Cool max temp  " );
-    LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
-
-    STDC_memset( message, 0x20, sizeof(message) );
-
-    target_temp_c = ( AIRCON_get_temperature_setting(AIRCON_COOL_MODE,SETTING_MAX) * 10 );
-    LCD_set_cursor_position(1,0);
-    sprintf( message, "  %d.%dc         ", ( target_temp_c / 10 ), ( target_temp_c % 10 ) );
-    LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
-}
 
 
 void SCREENS_create_reset_screen( void )
 {
     /* Create a non const array to hold the LCD string */
     u8_t message[ LCD_COL_COUNT + 1u ];
-    u16_t target_temp_c = 0u;
 
     /* Display the message and keep it on the screen until the timer expires */
     LCD_set_cursor_position(0,0);
@@ -1270,7 +1014,6 @@ void SCREENS_create_mode_selector_screen( void )
 {
     /* Create a non const array to hold the LCD string */
     u8_t message[ LCD_COL_COUNT + 1u ];
-    u16_t target_temp_c = 0u;
     u8_t* strings[3] = { "HEAT", "COOL", "AUTO" };
 
     /* Display the message and keep it on the screen until the timer expires */
@@ -1292,7 +1035,6 @@ void SCREENS_create_state_selector_screen( void )
 {
     /* Create a non const array to hold the LCD string */
     u8_t message[ LCD_COL_COUNT + 1u ];
-    u16_t target_temp_c = 0u;
     u8_t* strings[2] = { "OFF", "ON " };
 
     /* Display the message and keep it on the screen until the timer expires */
@@ -1314,8 +1056,6 @@ void SCREENS_create_monitor_screen( void )
 {
     /* Create a non const array to hold the LCD string */
     u8_t message[ LCD_COL_COUNT + 1u ];
-    u16_t target_temp_c = 0u;
-
 	float temp_c;
 
 	u8_t* enable_disable_strings[2] = { "OFF", "ON " };

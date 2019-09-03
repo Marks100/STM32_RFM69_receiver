@@ -16,8 +16,6 @@
 ***************************************************************************************************/
 #include "C_defs.h"
 
-#define SETTING_MAX					( 0u )
-#define SETTING_MIN					( 1u )
 #define SETTING_ADJUST_UP			( 0u )
 #define SETTING_ADJUST_DOWN			( 1u )
 
@@ -43,10 +41,8 @@ typedef enum AIRCON_mode_et
 typedef struct
 {
 	float oat_c;
-	float cool_min_temp_c;
-	float cool_max_temp_c;
-	float heat_min_temp_c;
-	float heat_max_temp_c;
+	float cool_target_temp_c;
+	float heat_target_temp_c;
 	float auto_target_temp_c;
 	AIRCON_mode_et mode;
 	disable_enable_et state;
@@ -90,11 +86,10 @@ void 			   AIRCON_set_cooler_state( disable_enable_et state );
 disable_enable_et  AIRCON_get_heater_state( void );
 disable_enable_et  AIRCON_get_cooler_state( void );
 disable_enable_et  AIRCON_get_state( void );
-float			   AIRCON_get_temperature_setting( AIRCON_mode_et type, u8_t max_min );
-void 			   AIRCON_adjust_temperature_setting(AIRCON_mode_et type, u8_t max_min, u8_t dir);
+float			   AIRCON_get_temperature_setting( AIRCON_mode_et type );
+void 			   AIRCON_adjust_temperature_setting(AIRCON_mode_et type, u8_t dir);
 void 			   AIRCON_set_state( disable_enable_et state );
 void 			   AIRCON_toggle_state( void );
-void 			   AIRCON_set_generic_output_state( u8_t output_num, disable_enable_et state );
 AIRCON_min_max_st* AIRCON_get_stats_address( void );
 
 #endif /* AIRCON_H multiple inclusion guard */

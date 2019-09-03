@@ -63,10 +63,8 @@ typedef struct
     disable_enable_et whitelist_state;
     AIRCON_mode_et aircon_mode;
     disable_enable_et aircon_state;
-    float cool_max_temp;
-    float cool_min_temp;
-    float heat_max_temp;
-    float heat_min_temp;
+    float cool_target_temp;
+    float heat_target_temp;
     float auto_target_temp;
 
 } NVM_generic_data_blk_st;

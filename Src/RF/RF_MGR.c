@@ -270,8 +270,6 @@ void RF_MGR_handle_early_prototype_controller( u16_t sensor_id, u8_t* data_p, u3
 	RF_MGR_controller_data_s.mode_type   = data_p[1];
 	RF_MGR_controller_data_s.status      = data_p[2];
 
-	AIRCON_decode_control_cmd( RF_MGR_controller_data_s.packet_type );
-
 	if( RF_MGR_get_dbg_output_state() == ENABLE_ )
 	{
     	RF_MGR_display_controller_data();

@@ -15,9 +15,11 @@
 #include "HAL_I2C.h"
 #include "HAL_TIM.h"
 #include "MODE_MGR.h"
+#include "BTN_MGR.h"
 #include "RF_MGR.h"
 #include "AIRCON.h"
 #include "nvm.h"
+#include "HAL_BRD.h"
 #include "NEOPIXEL.h"
 #include "main.h"
 
@@ -58,7 +60,7 @@ int main(void)
 
 	NEOPIXEL_int();
 
-	BUTTON_init();
+	BTN_MGR_init();
 
 	/* Init the systick timer */
 	MAIN_SYSTICK_init();

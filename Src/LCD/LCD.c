@@ -81,8 +81,8 @@ void LCD_set_D7_pin( low_high_et state )
 
 pass_fail_et LCD_read_busy_flag( void )
 {
-    // low_high_et level = LOW;
-    // pass_fail_et status = FAIL;
+    //low_high_et level = LOW;
+    pass_fail_et status = FAIL;
 
     // delay_us( 1 );
 
@@ -102,7 +102,7 @@ pass_fail_et LCD_read_busy_flag( void )
     //     status = PASS;
     // }
 
-    // return ( status );
+     return ( status );
 }
 
 
@@ -199,6 +199,8 @@ void LCD_send_data( u8_t data )
 void LCD_send_byte( u8_t byte, LCD_command_type_et type )
 {
     pass_fail_et LCD_ready = FAIL;
+
+    (void*)LCD_ready;
 
     if( type == LCD_COMMAND )
     {

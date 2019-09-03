@@ -38,10 +38,8 @@ typedef u8_t HAL_BRD_led_et;
 void setUp(void)
 {
     NVM_info_s.NVM_generic_data_blk_s.aircon_mode = DISABLE_;
-    NVM_info_s.NVM_generic_data_blk_s.cool_max_temp = 19.0;
-    NVM_info_s.NVM_generic_data_blk_s.cool_min_temp = 16.0;
-    NVM_info_s.NVM_generic_data_blk_s.heat_max_temp = 21.0;
-    NVM_info_s.NVM_generic_data_blk_s.heat_min_temp = 19.0;
+    NVM_info_s.NVM_generic_data_blk_s.cool_target_temp = 19.0;
+    NVM_info_s.NVM_generic_data_blk_s.heat_target_temp = 16.0;
     NVM_info_s.NVM_generic_data_blk_s.aircon_state = DISABLE_;
     NVM_info_s.NVM_generic_data_blk_s.auto_target_temp = 18.5;
 }
@@ -60,23 +58,14 @@ void test_init(void)
 	AIRCON_init();
 
 	TEST_ASSERT_EQUAL( 18.5, AIRCON_config_s.auto_target_temp_c );
-    TEST_ASSERT_EQUAL( 19.0, AIRCON_config_s.cool_max_temp_c );
-    TEST_ASSERT_EQUAL( 16.0, AIRCON_config_s.cool_min_temp_c );
+    TEST_ASSERT_EQUAL( 19.0, AIRCON_config_s.cool_target_temp_c );
+    TEST_ASSERT_EQUAL( 16.0, AIRCON_config_s.heat_target_temp_c );
     TEST_ASSERT_EQUAL( DISABLE_, AIRCON_config_s.cooler_state );
-    TEST_ASSERT_EQUAL( 21.0, AIRCON_config_s.heat_max_temp_c );
-    TEST_ASSERT_EQUAL( 19.0, AIRCON_config_s.heat_min_temp_c );
     TEST_ASSERT_EQUAL( DISABLE_, AIRCON_config_s.heater_state );
     TEST_ASSERT_EQUAL( 0.5, AIRCON_config_s.hysteresis );
     TEST_ASSERT_EQUAL( DISABLE_, AIRCON_config_s.mode );
     TEST_ASSERT_EQUAL( TMPERATURE_NOT_AVAILABLE, AIRCON_get_oat() );
     TEST_ASSERT_EQUAL( DISABLE_, AIRCON_config_s.state );
-	
-    u8_t i;
-
-    for( i = 0u; i < MAX_NUM_OUTPUTS; i++ )
-    {
-        TEST_ASSERT_EQUAL( LOW, AIRCON_generic_outputs_s[i]);
-    }  
 }
 
 
@@ -400,7 +389,7 @@ void test_generic_outputs( void )
     AIRCON_config_s.auto_target_temp_c = 20.0;
     AIRCON_config_s.oat_c = 20.0;
 
-    u8_t i, output_pin, loop;
+    u8_t i;
 
     AIRCON_tick();
     TEST_ASSERT_EQUAL( DISABLE_, AIRCON_config_s.cooler_state );
@@ -414,59 +403,7 @@ void test_generic_outputs( void )
     AIRCON_tick();
     TEST_ASSERT_EQUAL( DISABLE_, AIRCON_config_s.cooler_state );
     TEST_ASSERT_EQUAL( DISABLE_, AIRCON_config_s.heater_state );
-    for( i = 0u; i < MAX_NUM_OUTPUTS; i++ )
-    {
-        TEST_ASSERT_EQUAL( DISABLE_, AIRCON_generic_outputs_s[i] );
-    }
-
-    for( loop = 0u; loop < MAX_NUM_OUTPUTS; loop++ )
-    {
-        output_pin = loop;
-        AIRCON_togggle_generic_output_state( output_pin );
-        for( i = 0; i < output_pin+1; i++ )
-        {
-            TEST_ASSERT_EQUAL( ENABLE_, AIRCON_generic_outputs_s[i] );
-        }
-
-        for( i = ( output_pin+1); i < MAX_NUM_OUTPUTS; i++ )
-        {
-            TEST_ASSERT_EQUAL( DISABLE_, AIRCON_generic_outputs_s[i] );
-        }
-
-        AIRCON_tick();
-    }
-
-    AIRCON_get_generic_output_state( 100 );
-    AIRCON_tick();
-
-
-    for( loop = 0u; loop < MAX_NUM_OUTPUTS; loop++ )
-    {
-        output_pin = loop;
-        AIRCON_togggle_generic_output_state( output_pin );
-        for( i = 0; i < output_pin+1; i++ )
-        {
-            TEST_ASSERT_EQUAL( DISABLE_, AIRCON_generic_outputs_s[i] );
-        }
-
-        for( i = ( output_pin+1); i < MAX_NUM_OUTPUTS; i++ )
-        {
-            TEST_ASSERT_EQUAL( ENABLE_, AIRCON_generic_outputs_s[i] );
-        }
-
-        AIRCON_tick();
-    }
-
-    AIRCON_get_generic_output_state( 100 );
-    AIRCON_tick();
-}
-
-void test_decode_control_bytes( void )
-{
-    u8_t command = 0u;
-
-    AIRCON_decode_control_cmd( command );
-}
+ }
 
 
 void test_min_max_tracking( void )

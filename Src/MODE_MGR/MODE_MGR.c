@@ -11,7 +11,7 @@
 #include "AIRCON.h"
 #include "CLI.h"
 #include "LCD.h"
-#include "Button_Manager.h"
+#include "BTN_MGR.h"
 #include "HAL_UART.h"
 #include "NEOPIXEL.h"
 
@@ -90,7 +90,7 @@ void MODE_MGR_action_schedule_normal( void )
     NEOPIXEL_tick();
 	LCD_tick();
 	ROTARY_tick();
-	BUTTON_tick();
+	BTN_MGR_tick();
 	MAIN_WATCHDOG_kick();
 
     switch( MODE_MGR_tick_timer_msecs_s )
