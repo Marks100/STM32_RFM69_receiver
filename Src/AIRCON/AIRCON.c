@@ -33,7 +33,6 @@ STATIC AIRCON_min_max_st AIRCON_min_max_s;
 STATIC disable_enable_et AIRCON_generic_outputs_s[MAX_NUM_OUTPUTS];
 
 
-
 /***************************************************************************************************
 **                              Public Functions                                                  **
 ***************************************************************************************************/
@@ -74,12 +73,12 @@ void AIRCON_tick( void )
 					target = AIRCON_config_s.heat_target_temp_c;
 
 					/* We are in heat mode */
-					if( AIRCON_config_s.oat_c < ( target - ( target * 0.05 ) ) )
+					if( AIRCON_config_s.oat_c < ( target - 0.2 ) )
 					{
 						/* Start heating */
 						AIRCON_set_heater_state( ON );
 					}
-					else if( AIRCON_config_s.oat_c > ( target - ( target * 0.05 ) ) )
+					else if( AIRCON_config_s.oat_c > ( target + 0.2 ) )
 					{
 						/* Stop heating */
 						AIRCON_set_heater_state( OFF );
@@ -98,12 +97,12 @@ void AIRCON_tick( void )
 
 					target = AIRCON_config_s.cool_target_temp_c;
 
-					if( AIRCON_config_s.oat_c > ( target - ( target * 0.05 ) ) )
+					if( AIRCON_config_s.oat_c > ( target + 0.2 ) )
 					{
 						/* Start cooling */
 						AIRCON_set_cooler_state( ON );
 					}
-					else if ( AIRCON_config_s.oat_c < ( target - ( target * 0.05 ) ) )
+					else if ( AIRCON_config_s.oat_c < ( target - 0.2 ) )
 					{
 						/* Stop cooling */
 						AIRCON_set_cooler_state( OFF );
@@ -159,6 +158,23 @@ void AIRCON_tick( void )
 	AIRCON_update_outputs();
 	NVM_request_flush();
 }
+
+
+void AIRCON_handle_rotary_input( ROTARY_scroll_type_et type )
+{
+	if( type == ROTARY_SHORT_PPRESS )
+	{
+		/* Only save to NVM when the user has interacted with the button */
+		NVM_info_s.NVM_generic_data_blk_s.aircon_state     = AIRCON_config_s.state;
+		NVM_info_s.NVM_generic_data_blk_s.aircon_mode      = AIRCON_config_s.mode;
+		NVM_info_s.NVM_generic_data_blk_s.cool_target_temp = AIRCON_config_s.cool_target_temp_c;
+		NVM_info_s.NVM_generic_data_blk_s.heat_target_temp = AIRCON_config_s.heat_target_temp_c;
+		NVM_info_s.NVM_generic_data_blk_s.auto_target_temp = AIRCON_config_s.auto_target_temp_c;
+	
+		NVM_request_flush();
+	}
+}
+
 
 
 void AIRCON_set_mode( AIRCON_mode_et mode )
@@ -270,6 +286,12 @@ void AIRCON_adjust_temperature_setting(AIRCON_mode_et type, u8_t dir)
 			break;
 	}
 
+	AIRCON_validate_temp_settings();
+}
+
+
+void AIRCON_validate_temp_settings( void )
+{
 	/* Boundary check the temperature settings */
 	if( AIRCON_config_s.auto_target_temp_c < MIN_AIRCON_TEMP_C_SETTING )
 	{

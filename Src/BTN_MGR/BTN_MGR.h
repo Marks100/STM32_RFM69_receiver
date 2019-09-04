@@ -18,16 +18,15 @@
 **                              Defines                                                           **
 ***************************************************************************************************/
 
-//These buttons have been configured off SMCLK which is set to 4Mhz, it also uses TIMERA set to roll over with interrupt
-//at ~10ms intervals.  Therefore 100 roll overs will equal approx 1sec
+#define BTN_MGR_TICK_TIME_MS      50
 #define BTN_MGR_DAB_TIME 	      5u
-#define BTN_MGR_HOLD_1_SEC_TIME   100u
-#define BTN_MGR_HOLD_2_SEC_TIME   200u
-#define BTN_MGR_HOLD_3_SEC_TIME   300u
+#define BTN_MGR_HOLD_1_SEC_TIME   ( 1000u / BTN_MGR_TICK_TIME_MS )
+#define BTN_MGR_HOLD_2_SEC_TIME   ( 2000u / BTN_MGR_TICK_TIME_MS )
+#define BTN_MGR_HOLD_3_SEC_TIME   ( 3000u / BTN_MGR_TICK_TIME_MS )
 
-#define BTN_MGR_TICK_TIME_MS      10
-#define BTN_MGR_PRESS_SHORT_TIME  1     //20ms time
-#define BTN_MGR_PRESS_LONG_TIME   100   //2sec time
+
+#define BTN_MGR_PRESS_SHORT_TIME  1u                                 //50ms time
+#define BTN_MGR_PRESS_LONG_TIME   ( 2000 / BTN_MGR_TICK_TIME_MS )   //2sec time
 
 
 

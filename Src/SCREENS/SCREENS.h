@@ -65,7 +65,7 @@ typedef struct
 } SCREENS_set_temp_min_max_items_st;
 
 
-#define DISPLAY_WELCOME_SCREEN_TIMEOUT  ( ( 3u * 1000u ) / LCD_TICK_RATE_MS )
+#define DISPLAY_WELCOME_SCREEN_TIMEOUT  ( ( 4u * 1000u ) / LCD_TICK_RATE_MS )
 #define DISPLAY_RESET_SCREEN_TIMEOUT    ( ( 2u * 1000u ) / LCD_TICK_RATE_MS )
 #define DISPLAY_INACTIVITY_GENERAL_TIME ( ( 20u * 1000u ) / LCD_TICK_RATE_MS )
 

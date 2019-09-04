@@ -17,6 +17,7 @@
 #include "STDC.h"
 #include "HAL_BRD.h"
 #include "MODE_MGR.h"
+#include "AIRCON.h"
 #include "LCD.h"
 #include "NVM.h"
 
@@ -383,6 +384,7 @@ void BTN_MGR_carryout_request( void )
             /* This is the short press manager */
             case 0x01: //ROTARY_BUTTON:
             	SCREENS_handle_rotary_input( ROTARY_SHORT_PPRESS );
+                AIRCON_handle_rotary_input( ROTARY_SHORT_PPRESS );
             break;
 
             default:

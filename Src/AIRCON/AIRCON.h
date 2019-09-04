@@ -2,10 +2,6 @@
 *
 *               $Author: mstewart $
 *
-*               $Date: 2014-01-16 15:40:40 +0000 (Thu, 16 Jan 2014) $
-*
-*               $HeadURL: https://selacvs01.schrader.local:8443/svn/ECU_Software/LF_TOOL_GEN2/trunk/Src/HAL/RF/RF.h $
-*
 *   \brief      AIRCON control module.
 */
 #ifndef AIRCON_H
@@ -15,6 +11,7 @@
 **                              Includes                                                          **
 ***************************************************************************************************/
 #include "C_defs.h"
+#include "HAL_BRD.h"
 
 #define SETTING_ADJUST_UP			( 0u )
 #define SETTING_ADJUST_DOWN			( 1u )
@@ -80,6 +77,7 @@ float 			   AIRCON_get_oat( void );
 void  		       AIRCON_set_mode( AIRCON_mode_et mode );
 AIRCON_mode_et     AIRCON_get_mode( void );
 void  		       AIRCON_toggle_mode( void );
+void               AIRCON_validate_temp_settings( void );
 void 			   AIRCON_update_outputs( void );
 void 			   AIRCON_set_heater_state( disable_enable_et state );
 void 			   AIRCON_set_cooler_state( disable_enable_et state );
@@ -90,6 +88,7 @@ float			   AIRCON_get_temperature_setting( AIRCON_mode_et type );
 void 			   AIRCON_adjust_temperature_setting(AIRCON_mode_et type, u8_t dir);
 void 			   AIRCON_set_state( disable_enable_et state );
 void 			   AIRCON_toggle_state( void );
+void 			   AIRCON_handle_rotary_input( ROTARY_scroll_type_et type );
 AIRCON_min_max_st* AIRCON_get_stats_address( void );
 
 #endif /* AIRCON_H multiple inclusion guard */
