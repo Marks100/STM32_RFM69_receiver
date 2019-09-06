@@ -7,46 +7,61 @@
         {
             "label": "flash_device",
             "type": "shell",
-            "command": "coflash.exe program STM32F103C8 C:/Users/mark/Desktop/STM32_RFM69_receiver/Build_output/STM32_RF_HUB.elf --adapter-name=ST-Link --port=SWD --adapter-clk=500000 --erase=all --reset=SYSRESETREQ --driver=C:/CooCox/CoIDE/flash/stm32f10x_md_128.elf",
+            "options": { "cwd": "${workspaceFolder}" },
+            "command": "coflash.exe program STM32F103C8 Build_output/STM32_RF_HUB.elf --adapter-name=ST-Link --port=SWD --adapter-clk=500000 --erase=all --reset=SYSRESETREQ --driver=C:/CooCox/CoIDE/flash/stm32f10x_md_128.elf",
         },
         {
             "label": "all",
             "type": "shell",
+            "options": { "cwd": "${workspaceFolder}" },
             "command": "mingw32-make.exe all",
         },
         {
             "label": "build_clean",
             "type": "shell",
+            "options": { "cwd": "${workspaceFolder}" },
             "command": "mingw32-make.exe build_clean",
         },
         {
-            "label": "test",
+            "label": "test_specific",
             "type": "shell",
+            "options": { "cwd": "${workspaceFolder}" },
             "command": "mingw32-make.exe ${fileBasenameNoExtension}.test",
+        },
+        {
+            "label": "test_specific_lcov",
+            "type": "shell",
+            "options": { "cwd": "${workspaceFolder}" },
+            "command": "mingw32-make.exe ${fileBasenameNoExtension}.test_lcov",
         },
         {
             "label": "test_all",
             "type": "shell",
+            "options": { "cwd": "${workspaceFolder}" },
             "command": "mingw32-make.exe test_all",
         },
         {
             "label": "gen_lcov_report",
             "type": "shell",
+            "options": { "cwd": "${workspaceFolder}" },
             "command": "mingw32-make.exe gen_lcov_report",
         },
         {
             "label": "total_clean",
             "type": "shell",
+            "options": { "cwd": "${workspaceFolder}" },
             "command": "mingw32-make.exe total_clean",
         },
         {
             "label": "memory_stats",
             "type": "shell",
+            "options": { "cwd": "${workspaceFolder}" },
             "command": "mingw32-make.exe memory_stats",
         },
         {
             "label": "release_package",
             "type": "shell",
+            "options": { "cwd": "${workspaceFolder}" },
             "command": "mingw32-make.exe release_package",
         },
     ]

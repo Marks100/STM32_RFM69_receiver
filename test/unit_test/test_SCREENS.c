@@ -19,7 +19,7 @@
 
 #include "mock_HAL_BRD.h"
 #include "mock_LCD.h"
-
+#include "mock_AIRCON.h"
 
 //-- module being tested
 #include "SCREENS.h"
@@ -35,7 +35,6 @@
  *    PRIVATE TYPES
  ******************************************************************************/
 
-
 /*******************************************************************************
  *    PRIVATE DATA
  ******************************************************************************/
@@ -43,16 +42,16 @@
 extern NVM_info_st NVM_info_s;
 
 extern SCREENS_async_display_request_et SCREENS_async_display_request_s;
-extern false_true_et                    SCREENS_button_press_s;
+extern ROTARY_scroll_type_et            SCREENS_rotary_press_s;
 extern u16_t                            SCREENS_screen_timer_s;
+extern u32_t                            SCREENS_loop_ctr_s;
 extern SCREENS_screen_et                SCREEN_screen_s;
-
+extern u16_t                            SCREEN_inactivity_timer_s;
 
 
 /*******************************************************************************
  *    PRIVATE FUNCTIONS
  ******************************************************************************/
-
 
 /*******************************************************************************
  *    SETUP, TEARDOWN
@@ -80,7 +79,7 @@ void test_init( void )
     SCREENS_init();
 
     TEST_ASSERT_EQUAL( FALSE, SCREENS_async_display_request_s );
-    TEST_ASSERT_EQUAL( FALSE, SCREENS_button_press_s );
+    TEST_ASSERT_EQUAL( ROTARY_NO_CHANGE, SCREENS_rotary_press_s );
     TEST_ASSERT_EQUAL( 0u, SCREENS_screen_timer_s );
     TEST_ASSERT_EQUAL( WELCOME_MESSAGE_SCREEN, SCREEN_screen_s );
 }
@@ -93,31 +92,31 @@ void test_welcome_screen( void )
 
     SCREENS_handle_screen();
     TEST_ASSERT_EQUAL( FALSE, SCREENS_async_display_request_s );
-    TEST_ASSERT_EQUAL( FALSE, SCREENS_button_press_s );
+    TEST_ASSERT_EQUAL( ROTARY_NO_CHANGE, SCREENS_rotary_press_s );
     TEST_ASSERT_EQUAL( 1u, SCREENS_screen_timer_s );
     TEST_ASSERT_EQUAL( WELCOME_MESSAGE_SCREEN, SCREEN_screen_s );
 
     SCREENS_handle_screen();
     TEST_ASSERT_EQUAL( FALSE, SCREENS_async_display_request_s );
-    TEST_ASSERT_EQUAL( FALSE, SCREENS_button_press_s );
+    TEST_ASSERT_EQUAL( ROTARY_NO_CHANGE, SCREENS_rotary_press_s );
     TEST_ASSERT_EQUAL( 2u, SCREENS_screen_timer_s );
     TEST_ASSERT_EQUAL( WELCOME_MESSAGE_SCREEN, SCREEN_screen_s );
 
     SCREENS_handle_screen();
     TEST_ASSERT_EQUAL( FALSE, SCREENS_async_display_request_s );
-    TEST_ASSERT_EQUAL( FALSE, SCREENS_button_press_s );
+    TEST_ASSERT_EQUAL( ROTARY_NO_CHANGE, SCREENS_rotary_press_s );
     TEST_ASSERT_EQUAL( 3u, SCREENS_screen_timer_s );
     TEST_ASSERT_EQUAL( WELCOME_MESSAGE_SCREEN, SCREEN_screen_s );
 
     SCREENS_handle_screen();
     TEST_ASSERT_EQUAL( FALSE, SCREENS_async_display_request_s );
-    TEST_ASSERT_EQUAL( FALSE, SCREENS_button_press_s );
+    TEST_ASSERT_EQUAL( ROTARY_NO_CHANGE, SCREENS_rotary_press_s );
     TEST_ASSERT_EQUAL( 4u, SCREENS_screen_timer_s );
     TEST_ASSERT_EQUAL( WELCOME_MESSAGE_SCREEN, SCREEN_screen_s );
 
     SCREENS_handle_screen();
     TEST_ASSERT_EQUAL( FALSE, SCREENS_async_display_request_s );
-    TEST_ASSERT_EQUAL( FALSE, SCREENS_button_press_s );
+    TEST_ASSERT_EQUAL( ROTARY_NO_CHANGE, SCREENS_rotary_press_s );
     TEST_ASSERT_EQUAL( 5u, SCREENS_screen_timer_s );
     TEST_ASSERT_EQUAL( WELCOME_MESSAGE_SCREEN, SCREEN_screen_s );
 
@@ -128,21 +127,22 @@ void test_welcome_screen( void )
     {
         SCREENS_handle_screen();
         TEST_ASSERT_EQUAL( FALSE, SCREENS_async_display_request_s );
-        TEST_ASSERT_EQUAL( FALSE, SCREENS_button_press_s );
+        TEST_ASSERT_EQUAL( ROTARY_NO_CHANGE, SCREENS_rotary_press_s );
         TEST_ASSERT_EQUAL( i, SCREENS_screen_timer_s );
         TEST_ASSERT_EQUAL( WELCOME_MESSAGE_SCREEN, SCREEN_screen_s );
     }
 
     SCREENS_handle_screen();
     TEST_ASSERT_EQUAL( FALSE, SCREENS_async_display_request_s );
-    TEST_ASSERT_EQUAL( FALSE, SCREENS_button_press_s );
-    TEST_ASSERT_EQUAL( 40u, SCREENS_screen_timer_s );
+    TEST_ASSERT_EQUAL( ROTARY_NO_CHANGE, SCREENS_rotary_press_s );
+    TEST_ASSERT_EQUAL( 80u, SCREENS_screen_timer_s );
     TEST_ASSERT_EQUAL( WELCOME_MESSAGE_SCREEN, SCREEN_screen_s );
 
     SCREENS_handle_screen();
     TEST_ASSERT_EQUAL( FALSE, SCREENS_async_display_request_s );
-    TEST_ASSERT_EQUAL( FALSE, SCREENS_button_press_s );
+    TEST_ASSERT_EQUAL( ROTARY_NO_CHANGE, SCREENS_rotary_press_s );
     TEST_ASSERT_EQUAL( 0u, SCREENS_screen_timer_s );
-    TEST_ASSERT_EQUAL( MAIN_MENU_SCREEN, SCREEN_screen_s );
+    TEST_ASSERT_EQUAL( MONITOR_SCREEN, SCREEN_screen_s );
 }
+
 

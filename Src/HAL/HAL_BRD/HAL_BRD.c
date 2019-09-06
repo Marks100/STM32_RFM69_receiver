@@ -4,6 +4,8 @@
 #include "stm32f10x.h"
 #include "misc.h"
 #include "assert.h"
+#include "core_cm3.h"
+
 
 #include "HAL_BRD.h"
 #include "STDC.h"
@@ -171,7 +173,21 @@ void HAL_BRD_init( void )
 
 
 
-
+/*!
+****************************************************************************************************
+*
+*   \brief         Resets the board
+*
+*   \author        MS
+*
+*   \return        low_high_et
+*
+***************************************************************************************************/
+void HAL_BRD_reset( void )
+{
+	NVIC_SystemReset();
+}
+	    
 
 
 

@@ -20,7 +20,7 @@
             "name": "Ceedling Test Explorer Debug",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/test/build/test/out/${fileBasenameNoExtension}.cexe",
+            "program": "${workspaceFolder}/test/build/gcov/out/${fileBasenameNoExtension}.cexe",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

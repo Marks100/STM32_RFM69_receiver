@@ -4,10 +4,9 @@
 #include "C_defs.h"
 #include "Compiler_defs.h"
 #include "STDC.h"
-
-
 #include "STM32_stubs.h"
 
+#include "mock_BTN_MGR.h"
 
 //-- module being tested
 #include "MODE_MGR.h"

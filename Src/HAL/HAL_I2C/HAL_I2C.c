@@ -25,10 +25,13 @@
 /***************************************************************************************************
 **                              Includes                                                          **
 ***************************************************************************************************/
-#include "stm32f10x_rcc.h"
+#ifndef UNIT_TEST
+  #include "stm32f10x_rcc.h"
+  #include "stm32f10x_gpio.h"
+  #include "misc.h"
+#endif
+
 #include "stm32f10x_i2c.h"
-#include "stm32f10x_gpio.h"
-#include "misc.h"
 
 #include "C_defs.h"
 #include "STDC.h"

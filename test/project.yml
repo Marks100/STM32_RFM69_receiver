@@ -42,7 +42,7 @@
   :commmon: &common_defines []
   :test:
     - *common_defines
-    - UNIT_TEST=1
+    - UNIT_TEST
     - mcpu=cortex-m3 
     - STM32F103C8
     - STM32F10X_MD

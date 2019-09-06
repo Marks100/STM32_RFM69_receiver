@@ -23,13 +23,10 @@
  *     Variables
  ******************************************************************************/
 
-extern NVM_info_st NVM_info_s;
+extern NVM_info_st       NVM_info_s;
 extern AIRCON_config_st  AIRCON_config_s;
 extern disable_enable_et AIRCON_generic_outputs_s[MAX_NUM_OUTPUTS];
 extern AIRCON_min_max_st AIRCON_min_max_s;
-
-typedef u8_t HAL_BRD_switch_slider_et;
-typedef u8_t HAL_BRD_led_et;
 
 /*******************************************************************************
  *    SETUP, TEARDOWN
@@ -500,6 +497,170 @@ void test_min_max_tracking( void )
     TEST_ASSERT_EQUAL( 2, AIRCON_min_max_s.min_temp_c.id );
     TEST_ASSERT_EQUAL( 14, AIRCON_min_max_s.temp_delta_c );
 }
+
+
+void test_get_temp_setting( void )
+{
+    AIRCON_init();
+    float temperature_val ;
+
+    AIRCON_config_s.state = ENABLE_;
+    AIRCON_config_s.mode =  100;
+    AIRCON_config_s.auto_target_temp_c = 20.0;
+    AIRCON_config_s.cool_target_temp_c = 15.5;
+    AIRCON_config_s.heat_target_temp_c = 18.5;
+    AIRCON_config_s.oat_c = 20.0;
+
+    TEST_ASSERT_EQUAL( TMPERATURE_NOT_AVAILABLE, AIRCON_min_max_s.max_temp_c.value );
+    TEST_ASSERT_EQUAL( 0, AIRCON_min_max_s.max_temp_c.id );
+    TEST_ASSERT_EQUAL( TMPERATURE_NOT_AVAILABLE, AIRCON_min_max_s.min_temp_c.value );
+    TEST_ASSERT_EQUAL( 0, AIRCON_min_max_s.min_temp_c.id );
+    TEST_ASSERT_EQUAL( 0, AIRCON_min_max_s.temp_delta_c );
+
+    AIRCON_tick();
+
+    TEST_ASSERT_EQUAL( TMPERATURE_NOT_AVAILABLE, AIRCON_min_max_s.max_temp_c.value );
+    TEST_ASSERT_EQUAL( 0, AIRCON_min_max_s.max_temp_c.id );
+    TEST_ASSERT_EQUAL( TMPERATURE_NOT_AVAILABLE, AIRCON_min_max_s.min_temp_c.value );
+    TEST_ASSERT_EQUAL( 0, AIRCON_min_max_s.min_temp_c.id );
+    TEST_ASSERT_EQUAL( 0, AIRCON_min_max_s.temp_delta_c );
+
+    TEST_ASSERT_EQUAL( 18.5, AIRCON_get_temperature_setting( AIRCON_HEAT_MODE ) );
+    TEST_ASSERT_EQUAL( 15.5, AIRCON_get_temperature_setting( AIRCON_COOL_MODE ) );
+    TEST_ASSERT_EQUAL( 20.0, AIRCON_get_temperature_setting( AIRCON_AUTO_MODE ) );
+}
+
+
+void test_AIRCON_adjust_temperature_setting( void )
+{
+    AIRCON_init();
+    float temperature_val ;
+
+    AIRCON_config_s.state = ENABLE_;
+    AIRCON_config_s.mode =  100;
+    AIRCON_config_s.auto_target_temp_c = 5.0;
+    AIRCON_config_s.cool_target_temp_c = 6.5;
+    AIRCON_config_s.heat_target_temp_c = 7.5;
+    AIRCON_config_s.oat_c = 20.0;
+
+    TEST_ASSERT_EQUAL( TMPERATURE_NOT_AVAILABLE, AIRCON_min_max_s.max_temp_c.value );
+    TEST_ASSERT_EQUAL( 0, AIRCON_min_max_s.max_temp_c.id );
+    TEST_ASSERT_EQUAL( TMPERATURE_NOT_AVAILABLE, AIRCON_min_max_s.min_temp_c.value );
+    TEST_ASSERT_EQUAL( 0, AIRCON_min_max_s.min_temp_c.id );
+    TEST_ASSERT_EQUAL( 0, AIRCON_min_max_s.temp_delta_c );
+
+    /* Auto temp settings */
+    TEST_ASSERT_EQUAL( 7.5, AIRCON_get_temperature_setting( AIRCON_HEAT_MODE ) );
+    TEST_ASSERT_EQUAL( 6.5, AIRCON_get_temperature_setting( AIRCON_COOL_MODE ) );
+    TEST_ASSERT_EQUAL( 5.0, AIRCON_get_temperature_setting( AIRCON_AUTO_MODE ) );
+
+    AIRCON_adjust_temperature_setting( AIRCON_AUTO_MODE, SETTING_ADJUST_UP );
+    TEST_ASSERT_FLOAT_WITHIN( 0.1, MIN_AIRCON_TEMP_C_SETTING, AIRCON_get_temperature_setting( AIRCON_HEAT_MODE ) );
+    TEST_ASSERT_FLOAT_WITHIN( 0.1, MIN_AIRCON_TEMP_C_SETTING, AIRCON_get_temperature_setting( AIRCON_COOL_MODE ) );
+    TEST_ASSERT_FLOAT_WITHIN( 0.1, MIN_AIRCON_TEMP_C_SETTING, AIRCON_get_temperature_setting( AIRCON_AUTO_MODE ) );
+
+    AIRCON_adjust_temperature_setting( AIRCON_AUTO_MODE, SETTING_ADJUST_UP );
+    TEST_ASSERT_FLOAT_WITHIN( 0.1, MIN_AIRCON_TEMP_C_SETTING, AIRCON_get_temperature_setting( AIRCON_HEAT_MODE ) );
+    TEST_ASSERT_FLOAT_WITHIN( 0.1, MIN_AIRCON_TEMP_C_SETTING, AIRCON_get_temperature_setting( AIRCON_COOL_MODE ) );
+    TEST_ASSERT_FLOAT_WITHIN( 0.1, MIN_AIRCON_TEMP_C_SETTING + STEP_VALUE, AIRCON_get_temperature_setting( AIRCON_AUTO_MODE ) );
+
+    AIRCON_adjust_temperature_setting( AIRCON_AUTO_MODE, SETTING_ADJUST_UP );
+    TEST_ASSERT_FLOAT_WITHIN( 0.1, MIN_AIRCON_TEMP_C_SETTING, AIRCON_get_temperature_setting( AIRCON_HEAT_MODE ) );
+    TEST_ASSERT_FLOAT_WITHIN( 0.1, MIN_AIRCON_TEMP_C_SETTING, AIRCON_get_temperature_setting( AIRCON_COOL_MODE ) );
+    TEST_ASSERT_FLOAT_WITHIN( 0.1, MIN_AIRCON_TEMP_C_SETTING + ( STEP_VALUE * 2u ), AIRCON_get_temperature_setting( AIRCON_AUTO_MODE ) );
+
+    u8_t i = 0;
+    for( i = 0u; i < 100; i++ )
+    {
+        AIRCON_adjust_temperature_setting( AIRCON_AUTO_MODE, SETTING_ADJUST_UP );
+    }
+    TEST_ASSERT_FLOAT_WITHIN( 0.1, MIN_AIRCON_TEMP_C_SETTING, AIRCON_get_temperature_setting( AIRCON_HEAT_MODE ) );
+    TEST_ASSERT_FLOAT_WITHIN( 0.1, MIN_AIRCON_TEMP_C_SETTING, AIRCON_get_temperature_setting( AIRCON_COOL_MODE ) );
+    TEST_ASSERT_FLOAT_WITHIN( 0.1, MAX_AIRCON_TEMP_C_SETTING, AIRCON_get_temperature_setting( AIRCON_AUTO_MODE ) );
+
+
+
+    /* heat temp settings */
+
+    AIRCON_config_s.auto_target_temp_c = 5.0;
+    AIRCON_config_s.cool_target_temp_c = 6.5;
+    AIRCON_config_s.heat_target_temp_c = 7.5;
+
+    TEST_ASSERT_EQUAL( 7.5, AIRCON_get_temperature_setting( AIRCON_HEAT_MODE ) );
+    TEST_ASSERT_EQUAL( 6.5, AIRCON_get_temperature_setting( AIRCON_COOL_MODE ) );
+    TEST_ASSERT_EQUAL( 5.0, AIRCON_get_temperature_setting( AIRCON_AUTO_MODE ) );
+
+    AIRCON_adjust_temperature_setting( AIRCON_HEAT_MODE, SETTING_ADJUST_UP );
+    TEST_ASSERT_FLOAT_WITHIN( 0.1, MIN_AIRCON_TEMP_C_SETTING, AIRCON_get_temperature_setting( AIRCON_HEAT_MODE ) );
+    TEST_ASSERT_FLOAT_WITHIN( 0.1, MIN_AIRCON_TEMP_C_SETTING, AIRCON_get_temperature_setting( AIRCON_COOL_MODE ) );
+    TEST_ASSERT_FLOAT_WITHIN( 0.1, MIN_AIRCON_TEMP_C_SETTING, AIRCON_get_temperature_setting( AIRCON_AUTO_MODE ) );
+
+    AIRCON_adjust_temperature_setting( AIRCON_HEAT_MODE, SETTING_ADJUST_UP );
+    TEST_ASSERT_FLOAT_WITHIN( 0.1, MIN_AIRCON_TEMP_C_SETTING + STEP_VALUE, AIRCON_get_temperature_setting( AIRCON_HEAT_MODE ) );
+    TEST_ASSERT_FLOAT_WITHIN( 0.1, MIN_AIRCON_TEMP_C_SETTING, AIRCON_get_temperature_setting( AIRCON_COOL_MODE ) );
+    TEST_ASSERT_FLOAT_WITHIN( 0.1, MIN_AIRCON_TEMP_C_SETTING, AIRCON_get_temperature_setting( AIRCON_AUTO_MODE ) );
+
+    AIRCON_adjust_temperature_setting( AIRCON_HEAT_MODE, SETTING_ADJUST_UP );
+    TEST_ASSERT_FLOAT_WITHIN( 0.1, MIN_AIRCON_TEMP_C_SETTING + ( STEP_VALUE * 2u ), AIRCON_get_temperature_setting( AIRCON_HEAT_MODE ) );
+    TEST_ASSERT_FLOAT_WITHIN( 0.1, MIN_AIRCON_TEMP_C_SETTING, AIRCON_get_temperature_setting( AIRCON_COOL_MODE ) );
+    TEST_ASSERT_FLOAT_WITHIN( 0.1, MIN_AIRCON_TEMP_C_SETTING, AIRCON_get_temperature_setting( AIRCON_AUTO_MODE ) );
+
+    for( i = 0u; i < 100; i++ )
+    {
+        AIRCON_adjust_temperature_setting( AIRCON_HEAT_MODE, SETTING_ADJUST_UP );
+    }
+    TEST_ASSERT_FLOAT_WITHIN( 0.1, MAX_AIRCON_TEMP_C_SETTING, AIRCON_get_temperature_setting( AIRCON_HEAT_MODE ) );
+    TEST_ASSERT_FLOAT_WITHIN( 0.1, MIN_AIRCON_TEMP_C_SETTING, AIRCON_get_temperature_setting( AIRCON_COOL_MODE ) );
+    TEST_ASSERT_FLOAT_WITHIN( 0.1, MIN_AIRCON_TEMP_C_SETTING, AIRCON_get_temperature_setting( AIRCON_AUTO_MODE ) );
+
+
+    /* cool temp settings */
+    AIRCON_config_s.auto_target_temp_c = 5.0;
+    AIRCON_config_s.cool_target_temp_c = 6.5;
+    AIRCON_config_s.heat_target_temp_c = 7.5;
+
+    TEST_ASSERT_EQUAL( 7.5, AIRCON_get_temperature_setting( AIRCON_HEAT_MODE ) );
+    TEST_ASSERT_EQUAL( 6.5, AIRCON_get_temperature_setting( AIRCON_COOL_MODE ) );
+    TEST_ASSERT_EQUAL( 5.0, AIRCON_get_temperature_setting( AIRCON_AUTO_MODE ) );
+
+    AIRCON_adjust_temperature_setting( AIRCON_COOL_MODE, SETTING_ADJUST_UP );
+    TEST_ASSERT_FLOAT_WITHIN( 0.1, MIN_AIRCON_TEMP_C_SETTING, AIRCON_get_temperature_setting( AIRCON_HEAT_MODE ) );
+    TEST_ASSERT_FLOAT_WITHIN( 0.1, MIN_AIRCON_TEMP_C_SETTING, AIRCON_get_temperature_setting( AIRCON_COOL_MODE ) );
+    TEST_ASSERT_FLOAT_WITHIN( 0.1, MIN_AIRCON_TEMP_C_SETTING, AIRCON_get_temperature_setting( AIRCON_AUTO_MODE ) );
+
+    AIRCON_adjust_temperature_setting( AIRCON_COOL_MODE, SETTING_ADJUST_UP );
+    TEST_ASSERT_FLOAT_WITHIN( 0.1, MIN_AIRCON_TEMP_C_SETTING, AIRCON_get_temperature_setting( AIRCON_HEAT_MODE ) );
+    TEST_ASSERT_FLOAT_WITHIN( 0.1, MIN_AIRCON_TEMP_C_SETTING + STEP_VALUE, AIRCON_get_temperature_setting( AIRCON_COOL_MODE ) );
+    TEST_ASSERT_FLOAT_WITHIN( 0.1, MIN_AIRCON_TEMP_C_SETTING, AIRCON_get_temperature_setting( AIRCON_AUTO_MODE ) );
+
+    AIRCON_adjust_temperature_setting( AIRCON_COOL_MODE, SETTING_ADJUST_UP );
+    TEST_ASSERT_FLOAT_WITHIN( 0.1, MIN_AIRCON_TEMP_C_SETTING, AIRCON_get_temperature_setting( AIRCON_HEAT_MODE ) );
+    TEST_ASSERT_FLOAT_WITHIN( 0.1, MIN_AIRCON_TEMP_C_SETTING + ( STEP_VALUE * 2u ), AIRCON_get_temperature_setting( AIRCON_COOL_MODE ) );
+    TEST_ASSERT_FLOAT_WITHIN( 0.1, MIN_AIRCON_TEMP_C_SETTING, AIRCON_get_temperature_setting( AIRCON_AUTO_MODE ) );
+
+    for( i = 0u; i < 100; i++ )
+    {
+        AIRCON_adjust_temperature_setting( AIRCON_COOL_MODE, SETTING_ADJUST_UP );
+    }
+    TEST_ASSERT_FLOAT_WITHIN( 0.1, MIN_AIRCON_TEMP_C_SETTING, AIRCON_get_temperature_setting( AIRCON_HEAT_MODE ) );
+    TEST_ASSERT_FLOAT_WITHIN( 0.1, MAX_AIRCON_TEMP_C_SETTING, AIRCON_get_temperature_setting( AIRCON_COOL_MODE ) );
+    TEST_ASSERT_FLOAT_WITHIN( 0.1, MIN_AIRCON_TEMP_C_SETTING, AIRCON_get_temperature_setting( AIRCON_AUTO_MODE ) );
+}
+
+
+
+void test_AIRCON_get_heater_state( void )
+{
+    AIRCON_config_s.heater_state = AIRCON_HEAT_MODE;
+    TEST_ASSERT_EQUAL( AIRCON_HEAT_MODE, AIRCON_get_heater_state() );
+
+    AIRCON_config_s.heater_state = AIRCON_COOL_MODE;
+    TEST_ASSERT_EQUAL( AIRCON_COOL_MODE, AIRCON_get_heater_state() );
+
+    AIRCON_config_s.heater_state = AIRCON_AUTO_MODE;
+    TEST_ASSERT_EQUAL( AIRCON_AUTO_MODE, AIRCON_get_heater_state() );
+}
+
 
 
 

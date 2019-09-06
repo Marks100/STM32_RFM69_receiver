@@ -1,5 +1,5 @@
 ####################################################################################################
-#                                  Ceedling test target & rules                                    #
+#                                  Configuration variables                                         #
 ####################################################################################################
 GCOVR_EXE := gcovr
 ARM		  := arm-none-eabi
@@ -33,28 +33,6 @@ STM32_MEM_OUTPUT_FILE    := memory_analysis.txt
 STM32_MEM_OUTPUT_FILE    := memory_analysis.txt
 RELEASE_PACKAGE_BASE_DIR := Release_package
 RELEASE_PACKAGE_NAME     := $(RELEASE_PACKAGE_BASE_DIR)/$(RELEASE_PACKAGE_BASE_DIR)_$(SW_VER)
-
-
-
-# Various test reports
-CEEDLING_GCOV_DIR					   := test/CodeCoverage
-CEEDLING_TEST_XML_TEST_REPORT_ORIGIN   := test/build/artifacts/test
-CEEDLING_GCOV_XML_TEST_REPORT_ORIGIN   := test/build/artifacts/gcov
-CEEDLING_TEST_XML_TEST_REPORT_DEST 	   := $(CEEDLING_GCOV_DIR)/Test_Report
-CEEDLING_LCOV_XML_TEST_REPORT_DEST	   := $(CEEDLING_GCOV_DIR)/LCOV
-
-# Output files
-GCOV_OUTPUT_DIR := test/build/gcov/out
-
-# Files to be excluded from gcov coverage
-UNWANTED_GEN_COVERAGE :=        \
-$(GCOV_OUTPUT_DIR)/cmock*       \
-$(GCOV_OUTPUT_DIR)/SELMATH*     \
-$(GCOV_OUTPUT_DIR)/CHKSUM*      \
-$(GCOV_OUTPUT_DIR)/STDC*        \
-$(GCOV_OUTPUT_DIR)/test_*       \
-$(GCOV_OUTPUT_DIR)/unity.*      \
-$(GCOV_OUTPUT_DIR)/*helper*     \
 
 # location of autoversion header
 AUTOVERS_HEADER := Src/autoversion.h
@@ -100,6 +78,12 @@ LDFLAGS := \
 		-T$(STM32_LINKER_SCRIPT) -g -o $(GCC_ARM_OUT_DIR)/$(PROJECT_NAME).elf \
 
 
+####################################################################################################
+
+
+####################################################################################################
+#                      All (Default) Target and other Build Targets                                #
+####################################################################################################
 .PHONY: all
 all: GCC_ARM
 
@@ -127,51 +111,80 @@ GCC_ARM: build_clean $(AUTOVERS_HEADER) $(OBJS)
 	@$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@  2>&1 | tee -a $(STM32_COMPILER_OUTPUT)
 
 
+
+####################################################################################################
+#                                  Ceedling test target & rules                                    #
+####################################################################################################
+# Various test reports
+CEEDLING_GCOV_DIR					   := CodeCoverage
+CEEDLING_TEST_XML_TEST_REPORT_ORIGIN   := test/build/artifacts/test
+CEEDLING_GCOV_XML_TEST_REPORT_ORIGIN   := test/build/artifacts/gcov
+CEEDLING_TEST_XML_TEST_REPORT_DEST 	   := $(CEEDLING_GCOV_DIR)/Test_Report
+CEEDLING_LCOV_XML_TEST_REPORT_DEST	   := $(CEEDLING_GCOV_DIR)/LCOV
+
+# Output files
+GCOV_OUTPUT_DIR := test/build/gcov/out
+
+# Files to be excluded from gcov coverage
+UNWANTED_GEN_COVERAGE :=        \
+$(GCOV_OUTPUT_DIR)/cmock*       \
+$(GCOV_OUTPUT_DIR)/SELMATH*     \
+$(GCOV_OUTPUT_DIR)/CHKSUM*      \
+$(GCOV_OUTPUT_DIR)/STDC*        \
+$(GCOV_OUTPUT_DIR)/test_*       \
+$(GCOV_OUTPUT_DIR)/unity.*      \
+$(GCOV_OUTPUT_DIR)/*helper*     \
+$(GCOV_OUTPUT_DIR)/mock*
+
 # Creates Ceedling environment if it does not exist
 test/vendor:
 	@createCeedlingEnv
 
 # Wild card test will allow any test to run once the name is provided
-%.test: test/vendor
+%.test: test_clean test/vendor 
 	@$(eval TEST_FILE := $(subst .test,.c,$@))
+	@$(eval MSN := $(subst test_,,$(TEST_FILE)))
 	@echo Testing $(TEST_FILE)...
-	cd test && rake test:$(TEST_FILE)
+	@cd test && rake gcov:$(TEST_FILE) 2>&1 | \
+	sed -n -e '1,/GCOV: CODE COVERAGE SUMMARY/p; s/GCOV: CODE COVERAGE SUMMARY/---------------------------/p; /$(MSN) /p'
 
-
-# Wild card test will allow any test to run once the name is provided
-%.test_with_coverage: test/vendor
-	@$(eval TEST_FILE := $(subst .test_with_coverage,.c,$@))
-	@echo "--> Testing $(TEST_FILE)..."
-	cd test && rake gcov:$(TEST_FILE)
+%.test_lcov: $(CEEDLING_LCOV_XML_TEST_REPORT_DEST)
+	@$(eval TEST_FILE := $(subst .test_lcov,,$@))
+	@$(MAKE) --no-print-directory $(TEST_FILE).test
+	@rm -fr $(UNWANTED_GEN_COVERAGE)
+	@echo ' '
+	@echo "Generating HTML for Code Coverage on $(TEST_FILE)"
+	@cd test && lcov -t 'Title of Test' -o output_file.info -c -d ..
+	@cd test && genhtml -o $(CEEDLING_LCOV_XML_TEST_REPORT_DEST) output_file.info
+	@echo "--> Launching HTML..."
+	@start test/$(CEEDLING_LCOV_XML_TEST_REPORT_DEST)/index.html
 
 
 .PHONY: test_all
-test_all: test/vendor
-	cd test && rake test:all
-	@mv $(CEEDLING_TEST_XML_TEST_REPORT_ORIGIN)/report.xml $(CEEDLING_TEST_XML_TEST_REPORT_DEST)
-	#@ceedling-gen-report $(CEEDLING_TEST_XML_TEST_REPORT_DEST)report.xml $(CEEDLING_TEST_XML_TEST_REPORT_DEST)SoftwareCeedlingTestReport.html
-	#@$(call check_test_result)
-
-	
-test_all_with_coverage: test/vendor
-	@mkdir -p $(CEEDLING_GCOV_DIR)/{Test_Report,LCOV}
-	@cd test/unit_test && rake gcov:all
-	#@mv $(CEEDLING_TEST_XML_GCOV_REPORT_ORIGIN)/report.xml $(CEEDLING_TEST_XML_TEST_REPORT_DEST)
-	#@ceedling-gen-report $(CEEDLING_TEST_XML_TEST_REPORT_DEST)report.xml $(CEEDLING_TEST_XML_TEST_REPORT_DEST)SoftwareCeedlingTestReport.html
-	@-rm -f $(UNWANTED_GEN_COVERAGE)
+test_all: test_clean test/vendor $(CEEDLING_TEST_XML_TEST_REPORT_DEST)
+	@cd test && rake gcov:all
+	@mv $(CEEDLING_GCOV_XML_TEST_REPORT_ORIGIN)/report.xml $(CEEDLING_TEST_XML_TEST_REPORT_DEST)
+	@rm -fr $(UNWANTED_GEN_COVERAGE)
+#@ceedling-gen-report $(CEEDLING_TEST_XML_TEST_REPORT_DEST)report.xml $(CEEDLING_TEST_XML_TEST_REPORT_DEST)SoftwareCeedlingTestReport.html
+#@$(call check_test_result)
 
 
 # Make Target: runs lcov coverage tool
 .PHONY: gen_lcov_report
 # Note: Test report checked for pass at end to ensure that test report is generated regardless of test case failures
-gen_lcov_report: test_all_with_coverage
+gen_lcov_report: test_all
 	@echo "--> Generating LCOV reports.. Please be patient..."
-	@cd test && lcov -t 'LCov_report' -o CodeCoverage/LCOV/output_file.info -c -d . --rc lcov_branch_coverage=1
-	@cd $(CEEDLING_LCOV_XML_TEST_REPORT_DEST) && genhtml -o . output_file.info --rc lcov_branch_coverage=1 --sort --show-details
-	@cd $(CEEDLING_LCOV_XML_TEST_REPORT_DEST) && start index.html
-	#@$(call check_test_result)
+	@cd test && lcov -t 'LCov_report' -o output_file.info -c -d .. --rc lcov_branch_coverage=1
+	@cd test && genhtml -o $(CEEDLING_LCOV_XML_TEST_REPORT_DEST) output_file.info
+	@cd test/$(CEEDLING_LCOV_XML_TEST_REPORT_DEST) && start index.html
+#@$(call check_test_result)
 
 
+# Cleans up any generated files from tests
+.PHONY: test_clean
+test_clean: 
+	@echo "--> Cleaning test..."
+	@-cd test && rake clobber
 
 
 # user fn check overall test result for Pass \ Fail.  Exits with error code on failure
@@ -185,6 +198,12 @@ define check_test_result
 	fi
 endef
 
+
+$(CEEDLING_LCOV_XML_TEST_REPORT_DEST):
+	mkdir -p $(CEEDLING_LCOV_XML_TEST_REPORT_DEST)
+
+$(CEEDLING_TEST_XML_TEST_REPORT_DEST):
+	mkdir -p $(CEEDLING_TEST_XML_TEST_REPORT_DEST)
 
 ####################################################################################################
 #                                  Doxygen targets & rules                                         #

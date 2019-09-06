@@ -41,7 +41,7 @@ typedef struct
 {
 	u8_t  item_no;
 	u8_t  screens[SCREENS_MAIN_MEMU_ITEMS];
-	u8_t* list[SCREENS_MAIN_MEMU_ITEMS];
+	char* list[SCREENS_MAIN_MEMU_ITEMS];
 } SCREENS_main_memu_items_st;
 
 typedef struct
@@ -54,14 +54,14 @@ typedef struct
 {
 	u8_t  item_no;
 	u8_t  screens[SCREENS_SET_TEMP_MEMU_ITEMS];
-	u8_t* list[SCREENS_SET_TEMP_MEMU_ITEMS];
+	char* list[SCREENS_SET_TEMP_MEMU_ITEMS];
 } SCREENS_set_temp_memu_items_st;
 
 typedef struct
 {
 	u8_t  item_no;
 	u8_t  screens[SCREENS_SET_MIN_MAX_MEMU_ITEMS];
-	u8_t* list[SCREENS_SET_MIN_MAX_MEMU_ITEMS];
+	char* list[SCREENS_SET_MIN_MAX_MEMU_ITEMS];
 } SCREENS_set_temp_min_max_items_st;
 
 

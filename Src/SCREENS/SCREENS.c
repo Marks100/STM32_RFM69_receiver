@@ -18,7 +18,7 @@ const u8_t BLANK[]               = ("                ");
 
 SCREENS_main_memu_items_st SCREENS_main_memu_items_s = 
 {
-	0,
+	0u,
 	{
         MONITOR_SCREEN,
 		SET_TEMP_SEL_SCREEN,
@@ -46,7 +46,7 @@ SCREENS_main_memu_items_st SCREENS_main_memu_items_s =
 SCREENS_info_memu_items_st SCREENS_info_memu_items_s =
 {
 
-	0,
+	0u,
 	{
 		INFO_SCREEN_1,
 		INFO_SCREEN_2,
@@ -57,7 +57,7 @@ SCREENS_info_memu_items_st SCREENS_info_memu_items_s =
 
 SCREENS_set_temp_memu_items_st SCREENS_set_temp_memu_items_s =
 {
-	0,
+	0u,
 	{
 		SET_AUTO_TEMP_SCREEN, //SET_AUTO_TEMP_SCREEN,
 		SET_HEAT_TEMP_SCREEN, //SET_HEAT_TEMP_SCREEN,
@@ -749,7 +749,7 @@ u8_t SCREENS_handle_reset_screen( ROTARY_scroll_type_et button_press )
         new_screen = MAIN_MENU_SCREEN;
 
         NVM_request_flush();
-	    NVIC_SystemReset();
+        HAL_BRD_reset();
     }
     else
     {
@@ -820,8 +820,7 @@ void SCREENS_create_main_menu_screen( void )
     /* Create a non const array to hold the LCD string */
 	u8_t message[ LCD_COL_COUNT + 1u ];
 
-
-	sprintf( message, ">%s", SCREENS_main_memu_items_s.list[SCREENS_main_memu_items_s.item_no] );
+	sprintf( (char*)message, ">%s", SCREENS_main_memu_items_s.list[SCREENS_main_memu_items_s.item_no] );
 	LCD_set_cursor_position(0,0);
 	LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
 
@@ -832,7 +831,7 @@ void SCREENS_create_main_menu_screen( void )
 	}
 	else
 	{
-		sprintf( message, "%s", SCREENS_main_memu_items_s.list[SCREENS_main_memu_items_s.item_no+1] );
+		sprintf( (char*)message, "%s", SCREENS_main_memu_items_s.list[SCREENS_main_memu_items_s.item_no+1] );
 		LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
 	}
 }
@@ -844,7 +843,7 @@ void SCREENS_create_set_temp_screen( void )
     /* Create a non const array to hold the LCD string */
 	u8_t message[ LCD_COL_COUNT + 1u ];
 
-	sprintf( message, ">%s", SCREENS_set_temp_memu_items_s.list[SCREENS_set_temp_memu_items_s.item_no] );
+	sprintf( (char*)message, ">%s", (char*)SCREENS_set_temp_memu_items_s.list[SCREENS_set_temp_memu_items_s.item_no] );
 	LCD_set_cursor_position(0,0);
 	LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
 
@@ -855,7 +854,7 @@ void SCREENS_create_set_temp_screen( void )
 	}
 	else
 	{
-		sprintf( message, "%s", SCREENS_set_temp_memu_items_s.list[SCREENS_set_temp_memu_items_s.item_no+1] );
+		sprintf( (char*)message, "%s", (char*)SCREENS_set_temp_memu_items_s.list[SCREENS_set_temp_memu_items_s.item_no+1] );
 		LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
 	}
 }
@@ -872,14 +871,14 @@ void SCREENS_create_info_screen_1( void )
     u8_t message[ LCD_COL_COUNT ];
 
     STDC_memset( message, 0x20, sizeof(message) );
-    sprintf( message, "  Aircon  Unit  ");
+    sprintf( (char*)message, "  Aircon  Unit  ");
 
     /* Display the message and keep it on the screen until the timer expires */
     LCD_set_cursor_position(0,0);
     LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
 
     STDC_memset( message, 0x20, sizeof(message) );
-    sprintf( message, "      2019      ");
+    sprintf( (char*)message, "      2019      ");
 
     LCD_set_cursor_position(1,0);
     LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
@@ -901,7 +900,7 @@ void SCREENS_create_info_screen_2( void )
     LCD_set_cursor_position(0,0);
     
     /* Now copy the const string into the new temp buffer */
-    sprintf( message, "SW Vers:%02d.%02d.%02d",  
+    sprintf( (char*)message, "SW Vers:%02d.%02d.%02d",  
     sw_version_string[0], sw_version_string[1], sw_version_string[2] );
     LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
 
@@ -910,7 +909,7 @@ void SCREENS_create_info_screen_2( void )
     LCD_set_cursor_position(1,0);
 
     /* Now copy the const string into the new temp buffer */
-    sprintf( message, "HW Vers:%02d.%02d   ",
+    sprintf( (char*)message, "HW Vers:%02d.%02d   ",
     hw_version_string[0], hw_version_string[1] );
     LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
 }
@@ -922,7 +921,7 @@ void SCREENS_create_info_screen_3( void )
     u8_t message[ LCD_COL_COUNT + 1u ];
 
     /* Display the message and keep it on the screen until the timer expires */
-    sprintf( message, "  Developed By  " );
+    sprintf( (char*)message, "  Developed By  " );
     LCD_set_cursor_position(0,0);
     LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
 
@@ -937,12 +936,12 @@ void SCREENS_create_info_screen_4( void )
     u8_t message[ LCD_COL_COUNT + 1u ];
 
     /* Display the message and keep it on the screen until the timer expires */
-    sprintf( message, "   Build Date   " );
+    sprintf( (char*)message, "   Build Date   " );
     LCD_set_cursor_position(0,0);
     LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
 
     STDC_memset( message, 0x20, sizeof(message) );
-    sprintf( message, "   22/08/2019   " );
+    sprintf( (char*)message, "   22/08/2019   " );
     LCD_set_cursor_position(1,0);
     LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
 }
@@ -956,12 +955,12 @@ void SCREENS_create_test_screen( void )
     /* Display the message and keep it on the screen until the timer expires */
     LCD_set_cursor_position(0,0);
 
-    sprintf( message, "ctr:%010d  ", SCREENS_loop_ctr_s );
+    sprintf( (char*)message, "ctr:%010d  ", SCREENS_loop_ctr_s );
 
     /* Now copy the const string into the new temp buffer */
     LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
 
-    STDC_memset( message, 0x20, sizeof(message) );
+    STDC_memset( (u8_t*)message, 0x20, sizeof(message) );
 
     LCD_set_cursor_position(1,0);
     LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
@@ -979,14 +978,14 @@ void SCREENS_create_auto_temp_screen( void )
     /* Display the message and keep it on the screen until the timer expires */
     LCD_set_cursor_position(0,0);
 
-    sprintf( message, "Auto target temp" );
+    sprintf( (char*)message, "Auto target temp" );
     LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
 
     STDC_memset( message, 0x20, sizeof(message) );
 
     target_temp_c = ( AIRCON_get_temperature_setting(AIRCON_AUTO_MODE) * 10 );
     LCD_set_cursor_position(1,0);
-    sprintf( message, "  %d.%dc         ", ( target_temp_c / 10 ), ( target_temp_c % 10 ) );
+    sprintf( (char*)message, "  %d.%dc         ", ( target_temp_c / 10 ), ( target_temp_c % 10 ) );
     LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
 }
 
@@ -996,7 +995,7 @@ void SCREENS_create_temp_sel_screen( void )
     /* Create a non const array to hold the LCD string */
     u8_t message[ LCD_COL_COUNT + 1u ];
 
-	sprintf( message, ">%s", SCREENS_set_temp_memu_items_s.list[SCREENS_set_temp_memu_items_s.item_no] );
+	sprintf( (char*)message, ">%s", SCREENS_set_temp_memu_items_s.list[SCREENS_set_temp_memu_items_s.item_no] );
 	LCD_set_cursor_position(0,0);
 	LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
 
@@ -1007,7 +1006,7 @@ void SCREENS_create_temp_sel_screen( void )
 	}
 	else
 	{
-		sprintf( message, "%s", SCREENS_set_temp_memu_items_s.list[SCREENS_set_temp_memu_items_s.item_no+1] );
+		sprintf( (char*)message, "%s", SCREENS_set_temp_memu_items_s.list[SCREENS_set_temp_memu_items_s.item_no+1] );
 		LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
 	}
 }
@@ -1023,14 +1022,14 @@ void SCREENS_create_heat_temp_screen( void )
     /* Display the message and keep it on the screen until the timer expires */
     LCD_set_cursor_position(0,0);
 
-    sprintf( message, "Heat target temp" );
+    sprintf( (char*)message, "Heat target temp" );
     LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
 
-    STDC_memset( message, 0x20, sizeof(message) );
+    STDC_memset( (u8_t*)message, 0x20, sizeof(message) );
 
     target_temp_c = ( AIRCON_get_temperature_setting(AIRCON_HEAT_MODE) * 10 );
     LCD_set_cursor_position(1,0);
-    sprintf( message, "  %d.%dc         ", ( target_temp_c / 10 ), ( target_temp_c % 10 ) );
+    sprintf( (char*)message, "  %d.%dc         ", ( target_temp_c / 10 ), ( target_temp_c % 10 ) );
     LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
 }
 
@@ -1045,14 +1044,14 @@ void SCREENS_create_cool_temp_screen( void )
     /* Display the message and keep it on the screen until the timer expires */
     LCD_set_cursor_position(0,0);
 
-    sprintf( message, "Cool target temp" );
+    sprintf( (char*)message, "Cool target temp" );
     LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
 
     STDC_memset( message, 0x20, sizeof(message) );
 
     target_temp_c = ( AIRCON_get_temperature_setting(AIRCON_COOL_MODE) * 10 );
     LCD_set_cursor_position(1,0);
-    sprintf( message, "  %d.%dc         ", ( target_temp_c / 10 ), ( target_temp_c % 10 ) );
+    sprintf( (char*)message, "  %d.%dc         ", ( target_temp_c / 10 ), ( target_temp_c % 10 ) );
     LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
 }
 
@@ -1066,7 +1065,7 @@ void SCREENS_create_reset_screen( void )
     /* Display the message and keep it on the screen until the timer expires */
     LCD_set_cursor_position(0,0);
 
-    sprintf( message, "Resetting...    " );
+    sprintf( (char*)message, "Resetting...    " );
     LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
 
     STDC_memset( message, 0x20, sizeof(message) );
@@ -1085,12 +1084,12 @@ void SCREENS_create_mode_selector_screen( void )
     /* Display the message and keep it on the screen until the timer expires */
     LCD_set_cursor_position(0,0);
 
-    sprintf( message, "     Mode       " );
+    sprintf( (char*)message, "     Mode       " );
     LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
 
     STDC_memset( message, 0x20, sizeof(message) );
 
-    sprintf( message, "   %s MODE    ", strings[ AIRCON_get_mode() ] );
+    sprintf( (char*)message, "   %s MODE    ", strings[ AIRCON_get_mode() ] );
     LCD_set_cursor_position(1,0);
     LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
 }
@@ -1106,12 +1105,12 @@ void SCREENS_create_state_selector_screen( void )
     /* Display the message and keep it on the screen until the timer expires */
     LCD_set_cursor_position(0,0);
 
-    sprintf( message, "     State      " );
+    sprintf( (char*)message, "     State      " );
     LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
 
     STDC_memset( message, 0x20, sizeof(message) );
 
-    sprintf( message, "      %s       ", strings[ AIRCON_get_state() ] );
+    sprintf( (char*)message, "      %s       ", strings[ AIRCON_get_state() ] );
     LCD_set_cursor_position(1,0);
     LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
 }
@@ -1130,23 +1129,23 @@ void SCREENS_create_monitor_screen( void )
 	temp_c =  AIRCON_get_oat();
 
 	STDC_memset( message, 0x20, sizeof(message) );
-	sprintf( message,     		 	      "%s ", enable_disable_strings[AIRCON_get_state()] );
-	sprintf( &message[strlen( message )], "%s " , mode_strings[AIRCON_get_mode()] );
+	sprintf( (char*)message,     		 	      "%s ", enable_disable_strings[AIRCON_get_state()] );
+	sprintf( (char*)&message[strlen( message )], "%s " , mode_strings[AIRCON_get_mode()] );
 
 	if( temp_c >= TMPERATURE_NOT_AVAILABLE )
 	{
-	sprintf( &message[strlen( message )], "N/A     " );
+	    sprintf( (char*)&message[strlen( message )], "N/A     " );
 	}
 	else
 	{
-	sprintf( &message[strlen( message )], "%02d.%dc   ", (s16_t)( (temp_c * 10 ) / 10 ), ( (u16_t)( temp_c * 10 ) % 10 )  );
+	    sprintf( (char*)&message[strlen( message )], "%02d.%dc   ", (s16_t)( (temp_c * 10 ) / 10 ), ( (u16_t)( temp_c * 10 ) % 10 )  );
 	}
 
 	LCD_set_cursor_position(0,0);
 	LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
 
 	STDC_memset(message, 0x20, sizeof(message) );
-	sprintf( message, "F:%s H:%s     ", enable_disable_strings[ AIRCON_get_cooler_state() ], \
+	sprintf( (char*)message, "F:%s H:%s     ", enable_disable_strings[ AIRCON_get_cooler_state() ], \
 									 enable_disable_strings[ AIRCON_get_heater_state() ] );
 
 	LCD_set_cursor_position(1,0);

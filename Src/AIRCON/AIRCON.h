@@ -13,8 +13,8 @@
 #include "C_defs.h"
 #include "HAL_BRD.h"
 
-#define SETTING_ADJUST_UP			( 0u )
-#define SETTING_ADJUST_DOWN			( 1u )
+#define SETTING_ADJUST_UP			( 1u )
+#define SETTING_ADJUST_DOWN			( 0u )
 
 #define MAX_ALLOWED_TEMP			( 100.0 )
 #define MIN_ALLOWED_TEMP			( -50.0 )
@@ -25,6 +25,7 @@
 #define MIN_AIRCON_TEMP_C_SETTING	( 16.0 )
 #define MAX_AIRCON_TEMP_C_SETTING	( 22.5 )
 #define MAX_NUM_SETTINGS			( ( MAX_AIRCON_TEMP_C_SETTING - MIN_AIRCON_TEMP_C_SETTING ) * 2.00 )
+#define STEP_VALUE 					( 0.5f )
 
 typedef enum AIRCON_mode_et
 {

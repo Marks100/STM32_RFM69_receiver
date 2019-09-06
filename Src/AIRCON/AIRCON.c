@@ -254,31 +254,29 @@ float AIRCON_get_temperature_setting( AIRCON_mode_et type )
 
 void AIRCON_adjust_temperature_setting(AIRCON_mode_et type, u8_t dir)
 {
-	float step_value = 0.5;
-
 	switch( type )
 	{
 		case AIRCON_HEAT_MODE:
 		{
 			AIRCON_config_s.heat_target_temp_c = ( dir == SETTING_ADJUST_UP ) ?  \
-			( AIRCON_config_s.heat_target_temp_c + step_value ) : \
-			( AIRCON_config_s.heat_target_temp_c - step_value );
+			( AIRCON_config_s.heat_target_temp_c + STEP_VALUE ) : \
+			( AIRCON_config_s.heat_target_temp_c - STEP_VALUE );
 		}
 		break;
 
 		case AIRCON_COOL_MODE:
 		{
 			AIRCON_config_s.cool_target_temp_c = ( dir == SETTING_ADJUST_UP ) ? \
-			( AIRCON_config_s.cool_target_temp_c + step_value) : \
-			( AIRCON_config_s.cool_target_temp_c - step_value );
+			( AIRCON_config_s.cool_target_temp_c + STEP_VALUE) : \
+			( AIRCON_config_s.cool_target_temp_c - STEP_VALUE );
 		}
 		break;
 
 		case AIRCON_AUTO_MODE:
 		{
 			AIRCON_config_s.auto_target_temp_c = ( dir == SETTING_ADJUST_UP ) ? \
-			( AIRCON_config_s.auto_target_temp_c + step_value ) : \
-			( AIRCON_config_s.auto_target_temp_c - step_value );
+			( AIRCON_config_s.auto_target_temp_c + STEP_VALUE ) : \
+			( AIRCON_config_s.auto_target_temp_c - STEP_VALUE );
 		}
 		break;
 
