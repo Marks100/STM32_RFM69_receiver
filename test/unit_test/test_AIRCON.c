@@ -834,11 +834,7 @@ void test_get_temp_setting_fo_invalid_mode( void )
     TEST_ASSERT_EQUAL( 0.5, AIRCON_config_s.hysteresis );
     TEST_ASSERT_EQUAL( 100, AIRCON_config_s.mode );
     TEST_ASSERT_EQUAL( TMPERATURE_NOT_AVAILABLE, AIRCON_get_oat() );
-    TEST_ASSERT_EQUAL( DISABLE_, AIRCON_config_s.state );
-    
-    
-
-    
+    TEST_ASSERT_EQUAL( DISABLE_, AIRCON_config_s.state );   
 }
 
 
