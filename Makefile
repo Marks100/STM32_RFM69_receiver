@@ -174,7 +174,7 @@ test_all: test_clean test/vendor $(CEEDLING_TEST_XML_TEST_REPORT_DEST)
 # Note: Test report checked for pass at end to ensure that test report is generated regardless of test case failures
 gen_lcov_report: test_all
 	@echo "--> Generating LCOV reports.. Please be patient..."
-	@cd test && lcov -t 'LCov_report' -o output_file.info -c -d .. --rc lcov_branch_coverage=1
+	@cd test && lcov -t 'LCov_report' -o output_file.info -c -d .. --rc genhtml_hi_limit=95
 	@cd test && genhtml -o $(CEEDLING_LCOV_XML_TEST_REPORT_DEST) output_file.info
 	@cd test/$(CEEDLING_LCOV_XML_TEST_REPORT_DEST) && start index.html
 #@$(call check_test_result)

@@ -408,15 +408,6 @@ disable_enable_et AIRCON_get_cooler_state( void )
 }
 
 
-void AIRCON_set_generic_output_state( u8_t output_num, disable_enable_et state )
-{
-	if( output_num < MAX_NUM_OUTPUTS )
-	{
-		AIRCON_generic_outputs_s[output_num] = state;
-	}
-}
-
-
 
 /*
  * LED 0 - system enabled or disabled
