@@ -138,6 +138,7 @@ typedef enum
     NRF24_POWER_DOWN,
     NRF24_SETUP_CONST_WAVE,
     NRF24_CONST_WAVE,
+    NRF24_FAULT,
     NRF24_RESET
 } NRF24_state_et;
 
@@ -375,6 +376,7 @@ void                 NRF24_spi_slave_select( low_high_et state );
 void                 NRF24_ce_select( low_high_et state );
 void 				 NRF24_handle_supervisor_reset( void );
 false_true_et        NRF24_check_for_packet_received( void );
+pass_fail_et         NRF24_self_check( void );
 
 void 				 NRF24_handle_packet_stats( u8_t type );
 

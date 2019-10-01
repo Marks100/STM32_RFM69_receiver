@@ -43,16 +43,13 @@ STATIC const u8_t NRF24_data_pipe_custom_s_2[5] = {0xBB, 0xCC, 0xDD, 0xEE, 0xAA}
 STATIC const u8_t NRF24_data_pipe_custom_s_3[5] = {0xBB, 0xCC, 0xDD, 0xEE, 0xBB};
 STATIC const u8_t NRF24_data_pipe_custom_s_4[5] = {0xBB, 0xCC, 0xDD, 0xEE, 0xCC};
 STATIC const u8_t NRF24_data_pipe_custom_s_5[5] = {0xBB, 0xCC, 0xDD, 0xEE, 0xDD};
-STATIC const u8_t NRF24_data_pipe_test_s[5];
 
-STATIC NRF24_state_et NRF24_state_s = NRF24_POWERING_UP;
-
+STATIC NRF24_state_et NRF24_state_s;
 STATIC u8_t  NRF24_status_register_s;
 STATIC u8_t  NRF24_register_readback_s[DEFAULT_CONFIGURATION_SIZE];
 STATIC u16_t NRF24_cycle_counter_s;
 STATIC NRF24_tx_rx_payload_info_st NRF24_tx_rx_payload_info_s;
-STATIC false_true_et  NRF24_start_rf_test_s;
-
+STATIC pass_fail_et NRF24_self_test_s;
 STATIC u32_t NRF24_recieve_timeout_s;
 STATIC u16_t NRF24_resets_s;
 
@@ -82,17 +79,46 @@ void NRF24_init( void )
 {
 	/* Set up the state to initialise the module in the 1 sec tick */
 	NRF24_state_s = NRF24_POWERING_UP;
-	NRF24_cycle_counter_s = NRF24_TX_SCHEDULE_CNT;
 	NRF24_status_register_s = 0u;
-
-	NRF24_start_rf_test_s = TRUE;
-
+    NRF24_cycle_counter_s = 0u;
+	NRF24_self_test_s = TRUE;
 	NRF24_recieve_timeout_s = NRF24_TIMEOUT_VAL_SEC;
 	NRF24_resets_s = 0u;
 
     STDC_memset( &NRF24_tx_rx_payload_info_s, 0x00, sizeof( NRF24_tx_rx_payload_info_s ) );
+    STDC_memset( &NRF24_register_readback_s, 0x00, DEFAULT_CONFIGURATION_SIZE );
 }
 
+
+pass_fail_et NRF24_self_check( void )
+{
+    /* There is no real self check that i can see, so lets try configuring a register with
+    known data and try reading it back */
+    pass_fail_et returntype = FAIL;
+    const u8_t self_check_data_str[5] = { 0x01, 0x02, 0x03, 0x04, 0x05 };
+    u8_t self_check_data[5];
+    u8_t old_data[5];
+
+    /* Store the old data as we will need it again */
+    NRF24_read_registers( R_REGISTER, RX_ADDR_P0, old_data, sizeof( old_data) );
+
+    /* Now write down the test data */
+    NRF24_write_registers( W_REGISTER, RX_ADDR_P0, self_check_data_str, sizeof( self_check_data_str ) );
+
+    /* Now read it back again */
+    NRF24_read_registers( R_REGISTER, RX_ADDR_P0, self_check_data, sizeof( self_check_data) );
+    
+    /* Now write down the old data */
+    NRF24_write_registers( W_REGISTER, RX_ADDR_P0, old_data, sizeof( old_data ) );
+
+    /* now compare the test str with the data str */
+    if( STDC_memcompare( self_check_data, self_check_data_str, sizeof( self_check_data) ) == TRUE )
+    {
+        returntype = PASS;
+    }
+
+    return( returntype );
+}
 
 
 
@@ -1404,7 +1430,7 @@ void NRF24_tick( void )
             NRF24_ce_select( LOW );
             NRF24_spi_slave_select( HIGH );
 
-            NRF24_state_s = NRF24_INITIALISING;
+            NRF24_set_state( NRF24_INITIALISING );
         }
         break;
 
@@ -1421,7 +1447,6 @@ void NRF24_tick( void )
 
             /* open up the data pipe to communicate with the receiver */
             NRF24_open_write_data_pipe( 0, NRF24_data_pipe_default_s );
-            NRF24_read_data_pipe( 0, NRF24_data_pipe_test_s );
 
             /* Setup retries and dynamic ACKS */
             NRF24_set_dynamic_payloads( ENABLE, 0 );
@@ -1448,7 +1473,7 @@ void NRF24_tick( void )
             NRF24_complete_flush();
 
             /* Move onto the TX_MODE state */
-            NRF24_state_s = NRF24_TX;
+            NRF24_set_state( NRF24_TX );
         }
         break;
 
@@ -1459,38 +1484,6 @@ void NRF24_tick( void )
 
             /* Handle the next RF TX time and send payload if necessary */
             NRF24_scheduled_tx();
-        }
-        break;
-
-        case NRF24_TX_TEST_MODE:
-        {
-            u8_t data_array[11];
-
-            /* Handle the ACKS and failed tx's */
-            NRF24_handle_acks_and_tx_failures();
-
-			if( NRF24_scheduled_tx() == TRUE )
-			{
-				if( NRF24_start_rf_test_s == TRUE )
-				{
-					/* we want to start the test */
-					NRF24_setup_payload( "Start Test", 10u );
-					NRF24_start_rf_test_s = FALSE;
-				}
-				else
-				{
-					NRF24_start_rf_test_s = TRUE;
-					data_array[0] = ( ( NRF24_tx_rx_payload_info_s.NRF24_tx_payload_ctr & 0xFF00 ) >> 8u );
-					data_array[1] =  ( NRF24_tx_rx_payload_info_s.NRF24_tx_payload_ctr & 0x00FF );
-					STDC_memset( &data_array[2], 0x55, sizeof( data_array ) - NRF_PACKET_CTR_SIZE );
-
-					/* we want to start the test */
-					NRF24_setup_payload( data_array, sizeof( data_array ) );
-				}
-
-				/* Send the configured payload */
-				NRF24_send_payload();
-			}
         }
         break;
 
@@ -1506,7 +1499,7 @@ void NRF24_tick( void )
 			NRF24_ce_select( HIGH );
 
 			/* Move onto the RX_MODE state */
-			NRF24_state_s = NRF24_RX;
+			NRF24_set_state( NRF24_RX );
         }
         break;
 
@@ -1568,7 +1561,7 @@ void NRF24_tick( void )
             NRF24_set_low_level_mode( NRF_TX_MODE );
 
             /* Move onto the NRF24_CONST_WAVE state */
-			NRF24_state_s = NRF24_CONST_WAVE;
+			NRF24_set_state( NRF24_CONST_WAVE );
             break;
 
         case NRF24_CONST_WAVE:
@@ -1579,7 +1572,15 @@ void NRF24_tick( void )
             NRF24_ce_select(HIGH);
             break;
 
+        case NRF24_FAULT:
+            NRF24_set_state( NRF24_RESET );
+        break;
+
         case NRF24_RESET:
+            if( NRF24_resets_s <= U16_T_MAX )
+            {
+                NRF24_resets_s += 1;
+            }
             NRF24_set_state( NRF24_POWERING_UP );
             break;
 
@@ -1587,6 +1588,22 @@ void NRF24_tick( void )
         break;
     }
     NRF24_handle_supervisor_reset();
+    
+    /* Only run the self test in modes that deem it neccessary */
+    switch( NRF24_state_s )
+    {
+        case NRF24_TX:
+        case NRF24_TX_TEST_MODE:
+        case NRF24_RX:
+        case NRF24_RX_TEST_MODE:
+        case NRF24_FAULT:
+        
+        if( FAIL == NRF24_self_check() )
+        {
+            NRF24_set_state( NRF24_FAULT );
+        }
+        break;
+    }
 }
 
 

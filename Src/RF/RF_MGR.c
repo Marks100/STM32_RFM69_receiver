@@ -634,7 +634,6 @@ disable_enable_et RF_MGR_get_dbg_output_state( void )
 
 void RF_MGR_set_dtc_state( u16_t node_index, RF_MGR_generic_dtc_et dtc, pass_fail_et state )
 {
-
 	if( state == PASS )
 	{
 		RF_MGR_rf_data_store_s.data_packet_s[node_index].generic_dtc_mask &= ~( 1u << dtc );
