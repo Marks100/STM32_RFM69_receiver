@@ -24,8 +24,7 @@ PTLD := $(shell cygpath -u $(PTLD) )
 
 GCC_ARM_OUT_DIR          := Build_output
 GCC_ARM_OBJ_OUT_DIR      := $(GCC_ARM_OUT_DIR)/object_files/
-BUILD_SUPPORT            := Workspace/build
-STM32_LINKER_SCRIPT 	 := $(BUILD_SUPPORT)/arm-gcc-link.ld
+STM32_LINKER_SCRIPT 	 := Workspace/linker_script/arm-gcc-link.ld
 STM32_ELF_FILE           := $(PROJECT_NAME).elf
 STM32_MAP_FILE  	     := $(PROJECT_NAME).map
 STM32_COMPILER_OUTPUT    := compile_log.txt

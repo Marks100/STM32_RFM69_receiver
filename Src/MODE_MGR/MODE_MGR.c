@@ -83,115 +83,120 @@ void MODE_MGR_tick( void )
 ***************************************************************************************************/
 void MODE_MGR_action_schedule_normal( void )
 {
-	//HAL_BRD_set_onboard_LED(ON);
-	NRF24_tick();
-    CLI_message_handler();
-    MODE_MGR_check_user_input();
-    NEOPIXEL_tick();
-	LCD_tick();
-	ROTARY_tick();
-	BTN_MGR_tick();
 	MAIN_WATCHDOG_kick();
+
+
+	HAL_BRD_toggle_onboard_led();
+	NRF24_tick();
+    //CLI_message_handler();
+    //MODE_MGR_check_user_input();
+    //NEOPIXEL_tick();
+	//LCD_tick();
+	//ROTARY_tick();
+	//BTN_MGR_tick();
 
     switch( MODE_MGR_tick_timer_msecs_s )
     {
         case 50u:
-			AIRCON_tick();
-            RF_MGR_tick();
+
+			//AIRCON_tick();
+            //RF_MGR_tick();
         	break;
 
         case 100u:
-			TEMP_cyclic();
+			MAIN_WATCHDOG_kick();
+			//TEMP_cyclic();
         	break;
 
         case 150u:
-            RF_MGR_tick();
+            //RF_MGR_tick();
         	break;
 
         case 200u:
 			MAIN_WATCHDOG_kick();
 			NVM_tick();
-			TEMP_cyclic();
+			//TEMP_cyclic();
         	break;
 
         case 250u:
-			AIRCON_tick();
-            RF_MGR_tick();
+			//AIRCON_tick();
+            //RF_MGR_tick();
         	break;
 
         case 300u:
         	MAIN_WATCHDOG_kick();
-			TEMP_cyclic();
+			//TEMP_cyclic();
         	break;
 
         case 350u:
-            RF_MGR_tick();
+            //RF_MGR_tick();
         	break;
 
         case 400u:
 			MAIN_WATCHDOG_kick();
-			TEMP_cyclic();
+			//TEMP_cyclic();
 			NVM_tick();
         	break;
 
         case 450u:
-			AIRCON_tick();
-            RF_MGR_tick();
+			//AIRCON_tick();
+            //RF_MGR_tick();
         	break;
 
         case 500u:
         	MAIN_WATCHDOG_kick();
-			TEMP_cyclic();
+			//TEMP_cyclic();
         	break;
 
         case 550u:
-            RF_MGR_tick();
+            //RF_MGR_tick();
         	break;
 
         case 600u:
 			MAIN_WATCHDOG_kick();
 			NVM_tick();
-			TEMP_cyclic();
+			//TEMP_cyclic();
         	break;
 
         case 650u:
 			AIRCON_tick();
-            RF_MGR_tick();
+            //RF_MGR_tick();
         	break;
 
         case 700u:
         	MAIN_WATCHDOG_kick();
-			TEMP_cyclic();
+			//TEMP_cyclic();
         	break;
 
         case 750u:
-            RF_MGR_tick();
+            //RF_MGR_tick();
         	break;
 
         case 800u:
 			MAIN_WATCHDOG_kick();
 			NVM_tick();
-			TEMP_cyclic();
+			//TEMP_cyclic();
         	break;
 
         case 850u:
-			AIRCON_tick();
-            RF_MGR_tick();
+			//AIRCON_tick();
+            //RF_MGR_tick();
         	break;
 
         case 900u:
-			TEMP_cyclic();
+			MAIN_WATCHDOG_kick();
+			//TEMP_cyclic();
         	break;
 
         case 950u:
-            RF_MGR_tick();
+            //RF_MGR_tick();
         	break;
 
         case 1000u:
         	MAIN_WATCHDOG_kick();
-			RF_MGR_analyse_fault_conditions();
+			//RF_MGR_analyse_fault_conditions();
 			NVM_tick();
-			TEMP_cyclic();
+			//TEMP_cyclic();
 
 			 /* keep track of time in secs */
             HAL_TIM_increment_secs();

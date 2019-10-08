@@ -95,6 +95,8 @@
 <part id="77"/>
 <part id="78"/>
 <part id="79"/>
+<part id="80"/>
+<part id="81"/>
 </presentation>
 </folder>
 </info>
@@ -113,7 +115,7 @@
 </editor>
 <editor id="org.eclipse.cdt.ui.editor.CEditor" name="MODE_MGR.c" partName="MODE_MGR.c" path="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/MODE_MGR/MODE_MGR.c" title="MODE_MGR.c" tooltip="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/MODE_MGR/MODE_MGR.c" workbook="DefaultEditorWorkbook">
 <input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STM32_RF_HUB/Src/MODE_MGR/MODE_MGR.c"/>
-<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="2328" selectionTopPixel="1200"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="4367" selectionTopPixel="2985"/>
 </editor>
 <editor id="org.eclipse.cdt.ui.editor.CEditor" name="CLI.h" partName="CLI.h" path="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/CLI/CLI.h" title="CLI.h" tooltip="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/CLI/CLI.h" workbook="DefaultEditorWorkbook">
 <input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STM32_RF_HUB/Src/CLI/CLI.h"/>
@@ -127,9 +129,9 @@
 <input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STM32_RF_HUB/Src/HAL/HAL_BRD/HAL_BRD.h"/>
 <editorState selectionHorizontalPixel="0" selectionLength="19" selectionOffset="1813" selectionTopPixel="855"/>
 </editor>
-<editor activePart="true" focus="true" id="org.eclipse.cdt.ui.editor.CEditor" name="HAL_BRD.c" partName="HAL_BRD.c" path="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/HAL/HAL_BRD/HAL_BRD.c" title="HAL_BRD.c" tooltip="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/HAL/HAL_BRD/HAL_BRD.c" workbook="DefaultEditorWorkbook">
+<editor id="org.eclipse.cdt.ui.editor.CEditor" name="HAL_BRD.c" partName="HAL_BRD.c" path="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/HAL/HAL_BRD/HAL_BRD.c" title="HAL_BRD.c" tooltip="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/HAL/HAL_BRD/HAL_BRD.c" workbook="DefaultEditorWorkbook">
 <input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STM32_RF_HUB/Src/HAL/HAL_BRD/HAL_BRD.c"/>
-<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="4999" selectionTopPixel="2070"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="13296" selectionTopPixel="7935"/>
 </editor>
 <editor id="org.eclipse.cdt.ui.editor.CEditor" name="stdio.h" partName="stdio.h" title="stdio.h" tooltip="C:\SVN_source\Tools\gcc-arm\arm-none-eabi\include\stdio.h" workbook="DefaultEditorWorkbook">
 <input factoryID="org.eclipse.cdt.ui.ExternalEditorInputFactory" path="C:\SVN_source\Tools\gcc-arm\arm-none-eabi\include\stdio.h" project="STM32_RF_HUB"/>
@@ -197,7 +199,7 @@
 </editor>
 <editor id="org.eclipse.cdt.ui.editor.CEditor" name="HAL_I2C.c" partName="HAL_I2C.c" path="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/HAL/HAL_I2C/HAL_I2C.c" title="HAL_I2C.c" tooltip="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/HAL/HAL_I2C/HAL_I2C.c" workbook="DefaultEditorWorkbook">
 <input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STM32_RF_HUB/Src/HAL/HAL_I2C/HAL_I2C.c"/>
-<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="2740" selectionTopPixel="885"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="2730" selectionTopPixel="945"/>
 </editor>
 <editor id="org.eclipse.cdt.ui.editor.CEditor" name="stm32f10x_iwdg.c" partName="stm32f10x_iwdg.c" path="C:/Users/mark/Desktop/STM32_RFM69_receiver/Workspace/stm_lib/src/stm32f10x_iwdg.c" title="stm32f10x_iwdg.c" tooltip="C:/Users/mark/Desktop/STM32_RFM69_receiver/Workspace/stm_lib/src/stm32f10x_iwdg.c" workbook="DefaultEditorWorkbook">
 <input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STM32_RF_HUB/stm32f10x_iwdg.c"/>
@@ -405,7 +407,7 @@
 </editor>
 <editor id="org.eclipse.cdt.ui.editor.CEditor" name="main.c" partName="main.c" path="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/MAIN/main.c" title="main.c" tooltip="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/MAIN/main.c" workbook="DefaultEditorWorkbook">
 <input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STM32_RF_HUB/Src/MAIN/main.c"/>
-<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="899" selectionTopPixel="435"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="552" selectionTopPixel="285"/>
 </editor>
 <editor id="org.eclipse.cdt.ui.editor.CEditor" name="TEMP.c" partName="TEMP.c" path="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/TEMP/TEMP.c" title="TEMP.c" tooltip="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/TEMP/TEMP.c" workbook="DefaultEditorWorkbook">
 <input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STM32_RF_HUB/Src/TEMP/TEMP.c"/>
@@ -418,6 +420,15 @@
 <editor id="org.eclipse.cdt.ui.editor.CEditor" name="HAL_I2C.h" partName="HAL_I2C.h" path="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/HAL/HAL_I2C/HAL_I2C.h" title="HAL_I2C.h" tooltip="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/HAL/HAL_I2C/HAL_I2C.h" workbook="DefaultEditorWorkbook">
 <input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STM32_RF_HUB/Src/HAL/HAL_I2C/HAL_I2C.h"/>
 <editorState selectionHorizontalPixel="0" selectionLength="36" selectionOffset="2335" selectionTopPixel="305"/>
+</editor>
+<editor id="org.eclipse.cdt.ui.editor.CEditor" name="BMP280.c" partName="BMP280.c" path="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/BMP280/BMP280.c" title="BMP280.c" tooltip="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/BMP280/BMP280.c" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STM32_RF_HUB/Src/BMP280/BMP280.c"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="1873" selectionTopPixel="975"/>
+</editor>
+<editor activePart="true" focus="true" id="org.coocox.builder.ui.editors.ConfigEditor" name="" partName="Configuration" title="Configuration" tooltip="" workbook="DefaultEditorWorkbook">
+<input factoryID="org.coocox.builder.ui.persistent.PersistentElementFactory">
+<org.coocox.builder.ui.editors.ConfigEditor horizontalPosition="0" subTagIndex="1" verticalPosition="0"/>
+</input>
 </editor>
 </editors>
 <views>
@@ -494,7 +505,7 @@
 <element path="/STM32_RF_HUB/stm_lib"/>
 </expanded>
 <selection>
-<element path="/STM32_RF_HUB/Src/HAL/HAL_BRD/HAL_BRD.c"/>
+<element path="/STM32_RF_HUB/Src/COMMON_MODULES/xINC/COMPILER_check.h"/>
 </selection>
 </viewState>
 </view>
@@ -518,7 +529,7 @@
 </viewState>
 </view>
 </views>
-<perspectives activePart="org.eclipse.cdt.ui.editor.CEditor" activePerspective="org.coocox.builder.perspective.CoBuilder">
+<perspectives activePart="org.coocox.builder.ui.editors.ConfigEditor" activePerspective="org.coocox.builder.perspective.CoBuilder">
 <perspective editorAreaTrimState="2" editorAreaVisible="1" fixed="0" version="0.016">
 <descriptor class="org.coocox.builder.ui.PerspectiveCoBuilder" id="org.coocox.builder.perspective.CoBuilder" label="CooCox CoBuilder"/>
 <alwaysOnActionSet id="org.coocox.component.ui.actionSet"/>
@@ -690,7 +701,7 @@
 </folder>
 </info>
 <info folder="true" part="org.eclipse.ui.internal.ViewStack@9abe1b" ratio="0.63579476" ratioLeft="508" ratioRight="291" relationship="4" relative="org.eclipse.ui.internal.ViewStack@cacb75">
-<folder activePageID="org.eclipse.debug.ui.DebugView" appearance="2" expanded="2">
+<folder activePageID="org.eclipse.ui.console.ConsoleView" appearance="2" expanded="2">
 <page content="org.eclipse.ui.console.ConsoleView" label="Console"/>
 <page content="org.eclipse.debug.ui.BreakpointView" label="Breakpoints"/>
 <page content="org.eclipse.debug.ui.DebugView" label="Debug"/>
@@ -742,168 +753,164 @@
 <workingSets/>
 <navigationHistory>
 <editors>
-<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/STM32_RF_HUB/Src/RF/NRF24.c"/>
 <editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/STM32_RF_HUB/Src/MAIN/main.c"/>
-<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/STM32_RF_HUB/Src/SCREENS/SCREENS.c"/>
-<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/STM32_RF_HUB/Src/SCREENS/SCREENS.h"/>
-<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/STM32_RF_HUB/Src/TEMP/TEMP.c"/>
-<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/STM32_RF_HUB/Src/COMMON_MODULES/xINC/C_defs.h"/>
-<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/STM32_RF_HUB/Src/BMP280/BMP280.c"/>
-<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/STM32_RF_HUB/Src/HAL/HAL_I2C/HAL_I2C.c"/>
-<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/STM32_RF_HUB/Src/HAL/HAL_I2C/HAL_I2C.h"/>
-<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/STM32_RF_HUB/Src/MODE_MGR/MODE_MGR.c"/>
 <editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/STM32_RF_HUB/Src/HAL/HAL_BRD/HAL_BRD.c"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/STM32_RF_HUB/Src/HAL/HAL_I2C/HAL_I2C.c"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/STM32_RF_HUB/Src/MODE_MGR/MODE_MGR.c"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/STM32_RF_HUB/cmsis_boot/startup/startup_stm32f10x_md.c"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/STM32_RF_HUB/cmsis_boot/startup/startup_stm32f10x_md.c"/>
+<editor factoryID="org.coocox.builder.ui.persistent.PersistentElementFactory" id="org.coocox.builder.ui.editors.ConfigEditor">
+<org.coocox.builder.ui.editors.ConfigEditor horizontalPosition="0" subTagIndex="1" verticalPosition="0"/>
+</editor>
 </editors>
-<item historyLabel="NRF24.c" index="0">
-<position info="not_deleted" x="43712" y="0"/>
+<item historyLabel="HAL_BRD.c" index="1">
+<position info="not_deleted" x="5308" y="0"/>
 </item>
-<item historyLabel="SCREENS.c" index="2">
-<position info="not_deleted" x="27592" y="0"/>
+<item historyLabel="main.c" index="0">
+<position info="not_deleted" x="799" y="0"/>
 </item>
-<item historyLabel="SCREENS.c" index="2">
-<position/>
+<item historyLabel="main.c" index="0">
+<position info="not_deleted" x="820" y="0"/>
 </item>
-<item historyLabel="SCREENS.c" index="2">
-<position/>
+<item historyLabel="main.c" index="0">
+<position info="not_deleted" x="836" y="0"/>
 </item>
-<item historyLabel="SCREENS.c" index="2">
-<position info="not_deleted" x="4884" y="0"/>
+<item historyLabel="HAL_I2C.c" index="2">
+<position info="not_deleted" x="2730" y="0"/>
 </item>
-<item historyLabel="SCREENS.c" index="2">
-<position info="not_deleted" x="7051" y="0"/>
+<item historyLabel="main.c" index="0">
+<position info="not_deleted" x="856" y="0"/>
 </item>
-<item historyLabel="SCREENS.c" index="2">
-<position/>
+<item historyLabel="main.c" index="0">
+<position info="not_deleted" x="909" y="0"/>
 </item>
-<item historyLabel="SCREENS.c" index="2">
-<position info="not_deleted" x="13498" y="0"/>
+<item historyLabel="main.c" index="0">
+<position info="not_deleted" x="930" y="0"/>
 </item>
-<item historyLabel="main.c" index="1">
-<position info="not_deleted" x="608" y="0"/>
+<item historyLabel="main.c" index="0">
+<position info="not_deleted" x="951" y="0"/>
 </item>
-<item historyLabel="SCREENS.c" index="2">
-<position info="not_deleted" x="13591" y="0"/>
+<item historyLabel="main.c" index="0">
+<position info="not_deleted" x="972" y="0"/>
 </item>
-<item historyLabel="SCREENS.h" index="3">
-<position info="not_deleted" x="2925" y="29"/>
+<item historyLabel="main.c" index="0">
+<position info="not_deleted" x="994" y="0"/>
 </item>
-<item historyLabel="SCREENS.c" index="2">
-<position info="not_deleted" x="13595" y="0"/>
+<item historyLabel="main.c" index="0">
+<position info="not_deleted" x="1016" y="0"/>
 </item>
-<item historyLabel="SCREENS.c" index="2">
-<position info="not_deleted" x="7031" y="0"/>
+<item historyLabel="main.c" index="0">
+<position info="not_deleted" x="1066" y="0"/>
 </item>
-<item historyLabel="SCREENS.c" index="2">
-<position info="not_deleted" x="7051" y="0"/>
+<item historyLabel="main.c" index="0">
+<position info="not_deleted" x="1091" y="0"/>
 </item>
-<item historyLabel="SCREENS.c" index="2">
-<position info="not_deleted" x="7053" y="0"/>
+<item historyLabel="MODE_MGR.c" index="3">
+<position info="not_deleted" x="2330" y="0"/>
 </item>
-<item historyLabel="main.c" index="1">
-<position info="not_deleted" x="608" y="0"/>
+<item historyLabel="MODE_MGR.c" index="3">
+<position info="not_deleted" x="2120" y="0"/>
 </item>
-<item historyLabel="SCREENS.c" index="2">
-<position info="not_deleted" x="7053" y="0"/>
+<item historyLabel="MODE_MGR.c" index="3">
+<position info="not_deleted" x="2154" y="0"/>
 </item>
-<item historyLabel="main.c" index="1">
-<position info="not_deleted" x="608" y="0"/>
+<item historyLabel="MODE_MGR.c" index="3">
+<position info="not_deleted" x="2246" y="0"/>
 </item>
-<item historyLabel="TEMP.c" index="4">
-<position info="not_deleted" x="1236" y="36"/>
+<item historyLabel="MODE_MGR.c" index="3">
+<position info="not_deleted" x="2276" y="0"/>
 </item>
-<item historyLabel="C_defs.h" index="5">
-<position info="not_deleted" x="3981" y="7"/>
+<item historyLabel="MODE_MGR.c" index="3">
+<position info="not_deleted" x="4115" y="0"/>
 </item>
-<item historyLabel="C_defs.h" index="5">
-<position info="not_deleted" x="4118" y="0"/>
+<item historyLabel="MODE_MGR.c" index="3">
+<position info="not_deleted" x="4341" y="0"/>
 </item>
-<item historyLabel="BMP280.c" index="6">
-<position info="not_deleted" x="6951" y="42"/>
+<item historyLabel="HAL_BRD.c" index="1">
+<position info="not_deleted" x="13190" y="0"/>
 </item>
-<item historyLabel="HAL_I2C.c" index="7">
-<position info="not_deleted" x="1579" y="22"/>
+<item historyLabel="main.c" index="0">
+<position info="not_deleted" x="954" y="0"/>
 </item>
-<item historyLabel="HAL_I2C.c" index="7">
-<position info="not_deleted" x="3648" y="0"/>
+<item historyLabel="startup_stm32f10x_md.c" index="4">
+<position info="not_deleted" x="0" y="0"/>
 </item>
-<item historyLabel="HAL_I2C.c" index="7">
-<position info="not_deleted" x="7462" y="0"/>
+<item historyLabel="main.c" index="0">
+<position info="not_deleted" x="935" y="1"/>
 </item>
-<item historyLabel="HAL_I2C.h" index="8">
-<position info="not_deleted" x="2335" y="36"/>
+<item historyLabel="MODE_MGR.c" index="3">
+<position info="not_deleted" x="1213" y="0"/>
 </item>
-<item historyLabel="main.c" index="1">
-<position info="not_deleted" x="608" y="0"/>
+<item historyLabel="HAL_BRD.c" index="1">
+<position info="not_deleted" x="15242" y="32"/>
 </item>
-<item historyLabel="MODE_MGR.c" index="9">
-<position info="not_deleted" x="2328" y="0"/>
+<item historyLabel="main.c" index="0">
+<position info="not_deleted" x="550" y="0"/>
 </item>
-<item historyLabel="TEMP.c" index="4">
-<position info="not_deleted" x="1371" y="11"/>
+<item historyLabel="MODE_MGR.c" index="3">
+<position info="not_deleted" x="2154" y="0"/>
 </item>
-<item historyLabel="TEMP.c" index="4">
-<position info="not_deleted" x="1395" y="0"/>
+<item historyLabel="MODE_MGR.c" index="3">
+<position info="not_deleted" x="2276" y="0"/>
 </item>
-<item historyLabel="TEMP.c" index="4">
-<position info="not_deleted" x="1447" y="0"/>
+<item historyLabel="MODE_MGR.c" index="3">
+<position info="not_deleted" x="2154" y="0"/>
 </item>
-<item historyLabel="BMP280.c" index="6">
-<position info="not_deleted" x="1218" y="0"/>
+<item historyLabel="MODE_MGR.c" index="3">
+<position info="not_deleted" x="2315" y="0"/>
 </item>
-<item historyLabel="BMP280.c" index="6">
-<position info="not_deleted" x="1284" y="0"/>
+<item historyLabel="main.c" index="0">
+<position info="not_deleted" x="2146" y="0"/>
 </item>
-<item historyLabel="BMP280.c" index="6">
-<position info="not_deleted" x="1325" y="0"/>
+<item historyLabel="main.c" index="0">
+<position info="not_deleted" x="2227" y="0"/>
 </item>
-<item historyLabel="BMP280.c" index="6">
-<position info="not_deleted" x="1369" y="0"/>
+<item historyLabel="main.c" index="0">
+<position info="not_deleted" x="2251" y="0"/>
 </item>
-<item historyLabel="TEMP.c" index="4">
+<item historyLabel="MODE_MGR.c" index="3">
+<position info="not_deleted" x="2362" y="0"/>
+</item>
+<item historyLabel="MODE_MGR.c" index="3">
+<position info="not_deleted" x="2154" y="0"/>
+</item>
+<item historyLabel="MODE_MGR.c" index="3">
+<position info="not_deleted" x="2784" y="0"/>
+</item>
+<item historyLabel="MODE_MGR.c" index="3">
+<position info="not_deleted" x="4115" y="0"/>
+</item>
+<item historyLabel="MODE_MGR.c" index="3">
+<position info="not_deleted" x="4262" y="0"/>
+</item>
+<item historyLabel="MODE_MGR.c" index="3">
+<position info="not_deleted" x="4328" y="0"/>
+</item>
+<item historyLabel="HAL_BRD.c" index="1">
+<position info="not_deleted" x="13152" y="0"/>
+</item>
+<item historyLabel="HAL_BRD.c" index="1">
+<position info="not_deleted" x="13177" y="0"/>
+</item>
+<item historyLabel="HAL_BRD.c" index="1">
+<position info="not_deleted" x="13296" y="0"/>
+</item>
+<item historyLabel="startup_stm32f10x_md.c" index="5">
+<position info="not_deleted" x="0" y="0"/>
+</item>
+<item historyLabel="main.c" index="0">
+<position info="not_deleted" x="550" y="0"/>
+</item>
+<item historyLabel="MODE_MGR.c" index="3">
+<position info="not_deleted" x="4367" y="0"/>
+</item>
+<item historyLabel="main.c" index="0">
 <position info="not_deleted" x="1471" y="0"/>
 </item>
-<item historyLabel="BMP280.c" index="6">
-<position info="not_deleted" x="1832" y="0"/>
+<item historyLabel="main.c" index="0">
+<position info="not_deleted" x="552" y="0"/>
 </item>
-<item historyLabel="BMP280.c" index="6">
-<position info="not_deleted" x="1873" y="0"/>
-</item>
-<item historyLabel="main.c" index="1">
-<position info="not_deleted" x="608" y="0"/>
-</item>
-<item historyLabel="TEMP.c" index="4">
-<position info="not_deleted" x="1395" y="0"/>
-</item>
-<item historyLabel="TEMP.c" index="4">
-<position info="not_deleted" x="1447" y="0"/>
-</item>
-<item historyLabel="TEMP.c" index="4">
-<position info="not_deleted" x="1471" y="0"/>
-</item>
-<item historyLabel="BMP280.c" index="6">
-<position info="not_deleted" x="1832" y="0"/>
-</item>
-<item historyLabel="BMP280.c" index="6">
-<position info="not_deleted" x="1873" y="0"/>
-</item>
-<item historyLabel="HAL_I2C.c" index="7">
-<position info="not_deleted" x="4132" y="0"/>
-</item>
-<item historyLabel="HAL_I2C.c" index="7">
-<position info="not_deleted" x="4068" y="1"/>
-</item>
-<item historyLabel="main.c" index="1">
-<position info="not_deleted" x="945" y="12"/>
-</item>
-<item historyLabel="HAL_I2C.c" index="7">
-<position info="not_deleted" x="2740" y="0"/>
-</item>
-<item historyLabel="main.c" index="1">
-<position info="not_deleted" x="945" y="12"/>
-</item>
-<item active="true" historyLabel="HAL_BRD.c" index="10">
-<position info="not_deleted" x="23007" y="0"/>
-</item>
+<item active="true" historyLabel="Configuration" index="6"/>
 </navigationHistory>
 <input factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/" type="8"/>
 </page>
@@ -911,6 +918,19 @@
 <actionBarAdvisor/>
 </window>
 <mruList>
+<file factoryID="org.coocox.builder.ui.persistent.PersistentElementFactory" id="org.coocox.builder.ui.editors.ConfigEditor" name="" tooltip="">
+<persistable>
+<org.coocox.builder.ui.editors.ConfigEditor horizontalPosition="0" subTagIndex="1" verticalPosition="0"/>
+</persistable>
+</file>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="startup_stm32f10x_md.c" tooltip="STM32_RF_HUB/cmsis_boot/startup/startup_stm32f10x_md.c">
+<persistable path="/STM32_RF_HUB/cmsis_boot/startup/startup_stm32f10x_md.c"/>
+</file>
+<file factoryID="org.coocox.builder.ui.persistent.PersistentElementFactory" id="org.coocox.builder.ui.editors.ConfigEditor" name="" tooltip="">
+<persistable>
+<org.coocox.builder.ui.editors.ConfigEditor horizontalPosition="0" subTagIndex="1" verticalPosition="0"/>
+</persistable>
+</file>
 <file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="HAL_I2C.h" tooltip="STM32_RF_HUB/Src/HAL/HAL_I2C/HAL_I2C.h">
 <persistable path="/STM32_RF_HUB/Src/HAL/HAL_I2C/HAL_I2C.h"/>
 </file>
@@ -919,9 +939,6 @@
 </file>
 <file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="TEMP.c" tooltip="STM32_RF_HUB/Src/TEMP/TEMP.c">
 <persistable path="/STM32_RF_HUB/Src/TEMP/TEMP.c"/>
-</file>
-<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="startup_stm32f10x_md.c" tooltip="STM32_RF_HUB/cmsis_boot/startup/startup_stm32f10x_md.c">
-<persistable path="/STM32_RF_HUB/cmsis_boot/startup/startup_stm32f10x_md.c"/>
 </file>
 <file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="main.c" tooltip="STM32_RF_HUB/Src/MAIN/main.c">
 <persistable path="/STM32_RF_HUB/Src/MAIN/main.c"/>
@@ -946,12 +963,6 @@
 </file>
 <file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="SCREENS.c" tooltip="STM32_RF_HUB/Src/SCREENS/SCREENS.c">
 <persistable path="/STM32_RF_HUB/Src/SCREENS/SCREENS.c"/>
-</file>
-<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="Button_Manager.c" tooltip="STM32_RF_HUB/Src/BUTTON_MANAGER/Button_Manager.c">
-<persistable path="/STM32_RF_HUB/Src/BUTTON_MANAGER/Button_Manager.c"/>
-</file>
-<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="VERSIONS.h" tooltip="STM32_RF_HUB/Src/VERSIONS/VERSIONS.h">
-<persistable path="/STM32_RF_HUB/Src/VERSIONS/VERSIONS.h"/>
 </file>
 </mruList>
 </workbench>

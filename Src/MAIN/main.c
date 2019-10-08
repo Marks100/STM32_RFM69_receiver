@@ -24,16 +24,8 @@
 #include "main.h"
 
 
-u16_t delay_timer;
-u32_t ctr;
-u16_t debug_timer_s;
-
 int main(void)
 {
- 	ctr = 0;
-	delay_timer = 0u;
-	debug_timer_s = 0u;
-
 	RCC_DeInit();
 	SystemInit();
 
@@ -45,29 +37,29 @@ int main(void)
 	NVM_init();
 
 	/* Init the HW */
-	HAL_BRD_init();
-	HAL_SPI1_init();
-	CLI_init();
-	HAL_I2C_init();
-	HAL_TIM2_init();
+	//HAL_BRD_init();
+	//HAL_SPI1_init();
+	//CLI_init();
+	//HAL_I2C_init();
+	//HAL_TIM2_init();
 
 	/* Initialise the RF MGR */
-	RF_MGR_init();
+	//RF_MGR_init();
 
-	MODE_MGR_init();
+	//MODE_MGR_init();
 
-	AIRCON_init();
+	//AIRCON_init();
 
-	NEOPIXEL_int();
+	//NEOPIXEL_int();
 
-	BTN_MGR_init();
+	//BTN_MGR_init();
 
-	TEMP_init();
+	//TEMP_init();
 
 	/* Init the systick timer */
 	MAIN_SYSTICK_init();
 
-	MAIN_WATCHDOG_init();
+	//MAIN_WATCHDOG_init();
 
 	while (1)
 	{
@@ -75,24 +67,12 @@ int main(void)
 }
 
 
-
-
 /* ISR for systick handler */
 void SysTick_Handler( void )
 {
-	delay_timer--;
-
-	debug_timer_s += 1u;
-	HAL_BRD_toggle_onboard_led();
-
 	MODE_MGR_tick();
 }
 
-
-u32_t get_counter( void )
-{
-	return ( ctr );
-}
 
 
 void MAIN_SYSTICK_init( void )
@@ -104,13 +84,6 @@ void MAIN_SYSTICK_init( void )
 
 	/* Trigger an interrupt every 1ms */
 	SysTick_Config(3600000);
-}
-
-
-void delay_ms(u16_t ms)
-{
-	delay_timer = ms;
-	while(delay_timer != 0);
 }
 
 
