@@ -49,25 +49,6 @@ extern NVM_info_st NVM_info_s;
 ***************************************************************************************************/
 /* None */
 
-const u8_t RTC_EXT_default_register_values[ RTC_EXT_MAX_NUM_REGS ] =
-{
-	0x00,	//Control_status_1
-	0x11,	//Control_status_2
-	0x00,	//VL_seconds
-	0x00,	//Minutes
-	0x00,	//Hours
-	0x00,	//Days
-	0x00,	//Weekdays
-	0x00,	//Century_months
-	0x00,	//Years
-	0x00,	//Minute_alarm
-	0x00,	//Hour_alarm
-	0x00,	//Day_alarm
-	0x00,	//Weekday_alarm
-	0x83,	//CLKOUT_control
-	0x82,	//Timer_control
-	RTC_EXT_DEFAULT_WAKEUP_TIME_SEC
-};
 
 
 
@@ -99,7 +80,7 @@ void HAL_I2C_init( void )
 	GPIO_InitTypeDef GPIO_InitStructure;
 
 	/* Configure I2C_EE pins: SCL and SDA */
-	GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_6 | GPIO_Pin_7;
+	GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_8 | GPIO_Pin_9;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_OD;
 	GPIO_Init(GPIOB, &GPIO_InitStructure);
@@ -252,74 +233,6 @@ void HAL_I2C_read_multiple_registers( u8_t dev_add, u8_t reg_start_add, u8_t* da
 
 
 
-
-void RTC_ext_init( void )
-{
-	u8_t data_burst[16];
-
-	/* Write down the default config */
-	HAL_I2C_write_multiple_register( RTC_EXT_I2C_ADDRESS, Control_status_1, (u8_t*)RTC_EXT_default_register_values, sizeof( RTC_EXT_default_register_values ) );
-
-	/* Now adjust it with the currently stored NVM value */
-	RTC_set_wakeup_time( NVM_info_s.NVM_generic_data_blk_s.sleep_time );
-
-	HAL_I2C_read_multiple_registers( RTC_EXT_I2C_ADDRESS, Control_status_1, data_burst, sizeof( data_burst ) );
-}
-
-
-
-void RTC_ext_clear_int( void )
-{
-	u8_t data;
-
-	/* Read the register first to get the old value */
-	HAL_I2C_read_register(RTC_EXT_I2C_ADDRESS, Control_status_2, &data );
-
-	/* Clear the inerrupt active bit */
-	data &= !RTC_EXT_TIMER_INT_ACTIVE_BIT;
-
-	/* Write the data back down again :) */
-	HAL_I2C_write_single_register( RTC_EXT_I2C_ADDRESS, Control_status_2, &data );
-}
-
-
-
-void RTC_set_wakeup_time( u32_t seconds )
-{
-	u8_t data;
-	u8_t divider;
-
-	/* Boundary check the wakeup time */
-	if( seconds > RTC_EXT_MAX_WAKEUP_TIME_SEC )
-	{
-		seconds = RTC_EXT_MAX_WAKEUP_TIME_SEC;
-	}
-
-	/* Read the register first to get the old value */
-	HAL_I2C_read_register(RTC_EXT_I2C_ADDRESS, Timer_control, &data );
-
-	if( seconds > U8_T_MAX )
-	{
-		divider = seconds/60;
-
-		/* set the correct hz bit*/
-		data |= RTC_EXT_ALARM_1_OVER60HZ_BIT;
-		data |= RTC_EXT_ALARM_1HZ_BIT;
-	}
-	else
-	{
-		divider = seconds;
-
-		/* set the correct hz bit*/
-		data &= ~RTC_EXT_ALARM_1_OVER60HZ_BIT;
-		data |= RTC_EXT_ALARM_1HZ_BIT;
-	}
-
-	HAL_I2C_write_single_register( RTC_EXT_I2C_ADDRESS, Timer_control, &data );
-
-	/* Now set the time register */
-	HAL_I2C_write_single_register( RTC_EXT_I2C_ADDRESS, Timer, &divider );
-}
 
 
 

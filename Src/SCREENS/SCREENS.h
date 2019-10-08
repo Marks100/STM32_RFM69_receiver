@@ -9,6 +9,7 @@
 #define SCREENS_INFO_MEMU_ITEMS 4
 #define SCREENS_SET_TEMP_MEMU_ITEMS 4
 #define SCREENS_SET_MIN_MAX_MEMU_ITEMS 3
+#define SCREENS_DEBUG_MEMU_ITEMS 4
 
 typedef enum
 {
@@ -27,7 +28,10 @@ typedef enum
 	STATE_SELECT_SCREEN,
 	EXPERT_MODE_SCREEN,
 	RESET_SCREEN,
-	TEST_SCREEN
+	DEBUG_SCREEN_1,
+	DEBUG_SCREEN_2,
+	DEBUG_SCREEN_3,
+	DEBUG_SCREEN_4,
 } SCREENS_screen_et;
 
 typedef enum
@@ -64,6 +68,12 @@ typedef struct
 	char* list[SCREENS_SET_MIN_MAX_MEMU_ITEMS];
 } SCREENS_set_temp_min_max_items_st;
 
+typedef struct
+{
+	u8_t  item_no;
+	u8_t  screens[SCREENS_DEBUG_MEMU_ITEMS];
+} SCREENS_debug_items_st;
+
 
 #define DISPLAY_WELCOME_SCREEN_TIMEOUT  ( ( 4u * 1000u ) / LCD_TICK_RATE_MS )
 #define DISPLAY_RESET_SCREEN_TIMEOUT    ( ( 2u * 1000u ) / LCD_TICK_RATE_MS )
@@ -94,11 +104,13 @@ void SCREENS_create_reset_screen( void );
 void SCREENS_create_mode_selector_screen( void );
 void SCREENS_create_state_selector_screen( void );
 void SCREENS_create_test_screen( void );
+void SCREENS_create_debug_screen_1( void );
 
 u8_t SCREENS_handle_welcome_screen( void );
 u8_t SCREENS_handle_main_menu_screen( ROTARY_scroll_type_et button_press );
 u8_t SCREENS_handle_expert_mode_screen( void );
 u8_t SCREENS_handle_info_screens( ROTARY_scroll_type_et button_press );
+u8_t SCREENS_handle_debug_screens( ROTARY_scroll_type_et button_press );
 u8_t SCREENS_handle_auto_temp_screen( ROTARY_scroll_type_et button_press );
 u8_t SCREENS_handle_temp_sel_screen( ROTARY_scroll_type_et button_press );
 u8_t SCREENS_handle_heat_temp_screen( ROTARY_scroll_type_et button_press );

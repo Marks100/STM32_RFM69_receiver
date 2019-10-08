@@ -67,12 +67,6 @@ void HAL_BRD_init( void )
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;
 	GPIO_Init(GPIOB, &GPIO_InitStructure);
 
-	/* Setup the Selector mode switches( PB6, PB7, PB8, PB9 ) */
-	GPIO_InitStructure.GPIO_Pin = ( GPIO_Pin_6 | GPIO_Pin_7 | GPIO_Pin_8 | GPIO_Pin_9 );
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;
-	GPIO_Init(GPIOB, &GPIO_InitStructure);
-
 	/* Configure the GPIO_LED pin */
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
@@ -635,21 +629,6 @@ low_high_et HAL_BRD_read_selector_switch_pin( HAL_BRD_switch_slider_et slider )
 
     switch ( slider )
     {
-        case SLIDER_1:
-            state = HAL_BRD_read_pin_state( GPIOB, GPIO_Pin_6 );
-        break;
-
-        case SLIDER_2:
-            state = HAL_BRD_read_pin_state( GPIOB, GPIO_Pin_7 );
-        break;
-
-        case SLIDER_3:
-            state = HAL_BRD_read_pin_state( GPIOB, GPIO_Pin_8 );
-        break;
-
-        case SLIDER_4:
-            state = HAL_BRD_read_pin_state( GPIOB, GPIO_Pin_9 );
-        break;
 
         default:
             break;
@@ -917,23 +896,6 @@ void EXTI9_5_IRQHandler(void)
 		EXTI_ClearITPendingBit(EXTI_Line5);
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 void ROTARY_evaluate_signals( low_high_et clock, low_high_et data )

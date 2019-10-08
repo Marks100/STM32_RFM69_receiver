@@ -26,7 +26,7 @@ SCREENS_main_memu_items_st SCREENS_main_memu_items_s =
         MODE_SELECT_SCREEN,
         RESET_SCREEN,
         INFO_SCREEN_1,
-		MAIN_MENU_SCREEN,
+		DEBUG_SCREEN_1,
 		MAIN_MENU_SCREEN,
 		MAIN_MENU_SCREEN
 	},
@@ -37,7 +37,7 @@ SCREENS_main_memu_items_st SCREENS_main_memu_items_s =
 		"4. MODE SELECT  ",
 		"5. RESET        ",
 		"6. INFO         ",
-		"7. Option 3     ",
+		"7. DEBUG        ",
 		"8. Option 4     ",
 		"9. Option 5     ",
 	},
@@ -45,13 +45,23 @@ SCREENS_main_memu_items_st SCREENS_main_memu_items_s =
 
 SCREENS_info_memu_items_st SCREENS_info_memu_items_s =
 {
-
 	0u,
 	{
 		INFO_SCREEN_1,
 		INFO_SCREEN_2,
 		INFO_SCREEN_3,
 		INFO_SCREEN_4
+	},
+};
+
+SCREENS_info_memu_items_st SCREENS_debug_memu_items_s =
+{
+	0u,
+	{
+        DEBUG_SCREEN_1,
+        DEBUG_SCREEN_2,
+        DEBUG_SCREEN_3,
+        DEBUG_SCREEN_4
 	},
 };
 
@@ -188,9 +198,13 @@ void SCREENS_handle_screen( void )
             SCREEN_screen_s = SCREENS_handle_info_screens( SCREENS_rotary_press_s );
             break;
 
-        case TEST_SCREEN:
-            SCREEN_screen_s = SCREENS_handle_test_screen( SCREENS_rotary_press_s );
+        case DEBUG_SCREEN_1:
+        case DEBUG_SCREEN_2:
+        case DEBUG_SCREEN_3:
+        case DEBUG_SCREEN_4:
+            SCREEN_screen_s = SCREENS_handle_debug_screens( SCREENS_rotary_press_s );
             break;
+
 
         case EXPERT_MODE_SCREEN:
             SCREEN_screen_s = SCREENS_handle_expert_mode_screen();
@@ -266,9 +280,9 @@ void SCREENS_create_screen( SCREENS_screen_et screen )
         	SCREENS_create_info_screen_4();
         	break;
 
-        case TEST_SCREEN:
-        	SCREENS_create_test_screen();
-        	break;
+        case DEBUG_SCREEN_1:
+        	SCREENS_create_debug_screen_1();
+        break;
 
         case EXPERT_MODE_SCREEN:
             SCREENS_create_expert_mode_screen();
@@ -475,69 +489,42 @@ u8_t SCREENS_handle_info_screens( ROTARY_scroll_type_et button_press )
 }
 
 
-
-
-u8_t SCREENS_handle_info_screen_2( ROTARY_scroll_type_et button_press )
+u8_t SCREENS_handle_debug_screens( ROTARY_scroll_type_et button_press )
 {
-    SCREENS_screen_et new_screen = INFO_SCREEN_2;
+    /* keep track of the last screen that we were on */
+	SCREENS_screen_et new_screen = DEBUG_SCREEN_1;
 
-    if( button_press == ROTARY_LEFT_SCROLL )
-    {
-         new_screen = INFO_SCREEN_3;
-    }
-    else if( button_press == ROTARY_RIGHT_SCROLL )
-    {
-    	new_screen = INFO_SCREEN_1;
-    }
+	if( button_press == ROTARY_LEFT_SCROLL )
+	{
+		if( SCREENS_debug_memu_items_s.item_no == 0 )
+		{
+			SCREENS_debug_memu_items_s.item_no = SCREENS_DEBUG_MEMU_ITEMS - 1;
+		}
+		else
+		{
+			SCREENS_debug_memu_items_s.item_no -= 1;
+		}
+	}
+	else if( button_press == ROTARY_RIGHT_SCROLL )
+	{
+		SCREENS_debug_memu_items_s.item_no = ( (SCREENS_debug_memu_items_s.item_no + 1) % SCREENS_DEBUG_MEMU_ITEMS);
+	}
+	else if( button_press == ROTARY_SHORT_PPRESS )
+	{
+		new_screen = MAIN_MENU_SCREEN;
+	}
     else if( button_press == ROTARY_LONG_PPRESS )
     {
-        new_screen = MONITOR_SCREEN;
+        new_screen = MAIN_MENU_SCREEN;
     }
+	else
+	{
+		new_screen = SCREENS_debug_memu_items_s.screens[SCREENS_debug_memu_items_s.item_no];
+	}
 
     return( new_screen );
 }
 
-
-u8_t SCREENS_handle_info_screen_3( ROTARY_scroll_type_et button_press )
-{
-    SCREENS_screen_et new_screen = INFO_SCREEN_3;
-
-    if( button_press == ROTARY_LEFT_SCROLL )
-    {
-         new_screen = TEST_SCREEN;
-    }
-    else if( button_press == ROTARY_RIGHT_SCROLL )
-    {
-    	new_screen = INFO_SCREEN_2;
-    }
-    else if( button_press == ROTARY_LONG_PPRESS )
-    {
-        new_screen = MONITOR_SCREEN;
-    }
-
-    return( new_screen );
-}
-
-
-SCREENS_screen_et SCREENS_handle_test_screen( ROTARY_scroll_type_et button_press )
-{
-    SCREENS_screen_et new_screen = TEST_SCREEN;
-
-    if( button_press == ROTARY_LEFT_SCROLL )
-    {
-         new_screen = SET_AUTO_TEMP_SCREEN;
-    }
-    else if( button_press == ROTARY_RIGHT_SCROLL )
-    {
-    	new_screen = INFO_SCREEN_3;
-    }
-    else if( button_press == ROTARY_LONG_PPRESS )
-    {
-        new_screen = MONITOR_SCREEN;
-    }
-
-    return( new_screen );
-}
 
 
 
@@ -862,9 +849,6 @@ void SCREENS_create_set_temp_screen( void )
 
 
 
-
-
-
 void SCREENS_create_info_screen_1( void )
 {
     /* Create a non const array to hold the LCD string */
@@ -947,6 +931,23 @@ void SCREENS_create_info_screen_4( void )
 }
 
 
+void SCREENS_create_debug_screen_1( void )
+{
+    /* Create a non const array to hold the LCD string */
+    u8_t message[ LCD_COL_COUNT + 1u ];
+
+    /* Display the message and keep it on the screen until the timer expires */
+    sprintf( (char*)message, "RF r77ets: %2d   ", NRF24_get_reset_count() );
+    LCD_set_cursor_position(0,0);
+    LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
+
+    STDC_memset( message, 0x20, sizeof(message) );
+    sprintf( (char*)message, "RF t-out:       " );
+    LCD_set_cursor_position(1,0);
+    LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
+}
+
+
 void SCREENS_create_test_screen( void )
 {
     /* Create a non const array to hold the LCD string */
@@ -985,7 +986,7 @@ void SCREENS_create_auto_temp_screen( void )
 
     target_temp_c = ( AIRCON_get_temperature_setting(AIRCON_AUTO_MODE) * 10 );
     LCD_set_cursor_position(1,0);
-    sprintf( (char*)message, "  %d.%dc         ", ( target_temp_c / 10 ), ( target_temp_c % 10 ) );
+    sprintf( (char*)message, ">>   %d.%dc     ", ( target_temp_c / 10 ), ( target_temp_c % 10 ) );
     LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
 }
 
@@ -1029,7 +1030,7 @@ void SCREENS_create_heat_temp_screen( void )
 
     target_temp_c = ( AIRCON_get_temperature_setting(AIRCON_HEAT_MODE) * 10 );
     LCD_set_cursor_position(1,0);
-    sprintf( (char*)message, "  %d.%dc         ", ( target_temp_c / 10 ), ( target_temp_c % 10 ) );
+    sprintf( (char*)message, ">>   %d.%dc     ", ( target_temp_c / 10 ), ( target_temp_c % 10 ) );
     LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
 }
 
@@ -1051,7 +1052,7 @@ void SCREENS_create_cool_temp_screen( void )
 
     target_temp_c = ( AIRCON_get_temperature_setting(AIRCON_COOL_MODE) * 10 );
     LCD_set_cursor_position(1,0);
-    sprintf( (char*)message, "  %d.%dc         ", ( target_temp_c / 10 ), ( target_temp_c % 10 ) );
+    sprintf( (char*)message, ">>   %d.%dc     ", ( target_temp_c / 10 ), ( target_temp_c % 10 ) );
     LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
 }
 

@@ -1587,7 +1587,7 @@ void NRF24_tick( void )
         default:
         break;
     }
-    NRF24_handle_supervisor_reset();
+     NRF24_handle_supervisor_reset();
     
     /* Only run the self test in modes that deem it neccessary */
     switch( NRF24_state_s )
@@ -1681,6 +1681,13 @@ void NRF24_complete_flush( void )
 
 
 
+u32_t NRF24_get_reset_count( void )
+{
+    return ( NRF24_resets_s );
+} 
+
+
+
 /*!
 ****************************************************************************************************
 *
@@ -1725,11 +1732,6 @@ void NRF24_handle_supervisor_reset( void )
 		NRF24_recieve_timeout_s = NRF24_TIMEOUT_VAL_SEC;
 
 		NRF24_set_state( NRF24_RESET );
-
-		if( NRF24_resets_s < U16_T_MAX )
-		{
-			NRF24_resets_s ++;
-		}
 	}
 }
 

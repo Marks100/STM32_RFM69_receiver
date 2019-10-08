@@ -101,6 +101,7 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 100u:
+			TEMP_cyclic();
         	break;
 
         case 150u:
@@ -110,6 +111,7 @@ void MODE_MGR_action_schedule_normal( void )
         case 200u:
 			MAIN_WATCHDOG_kick();
 			NVM_tick();
+			TEMP_cyclic();
         	break;
 
         case 250u:
@@ -119,6 +121,7 @@ void MODE_MGR_action_schedule_normal( void )
 
         case 300u:
         	MAIN_WATCHDOG_kick();
+			TEMP_cyclic();
         	break;
 
         case 350u:
@@ -127,6 +130,7 @@ void MODE_MGR_action_schedule_normal( void )
 
         case 400u:
 			MAIN_WATCHDOG_kick();
+			TEMP_cyclic();
 			NVM_tick();
         	break;
 
@@ -137,6 +141,7 @@ void MODE_MGR_action_schedule_normal( void )
 
         case 500u:
         	MAIN_WATCHDOG_kick();
+			TEMP_cyclic();
         	break;
 
         case 550u:
@@ -146,6 +151,7 @@ void MODE_MGR_action_schedule_normal( void )
         case 600u:
 			MAIN_WATCHDOG_kick();
 			NVM_tick();
+			TEMP_cyclic();
         	break;
 
         case 650u:
@@ -155,6 +161,7 @@ void MODE_MGR_action_schedule_normal( void )
 
         case 700u:
         	MAIN_WATCHDOG_kick();
+			TEMP_cyclic();
         	break;
 
         case 750u:
@@ -164,6 +171,7 @@ void MODE_MGR_action_schedule_normal( void )
         case 800u:
 			MAIN_WATCHDOG_kick();
 			NVM_tick();
+			TEMP_cyclic();
         	break;
 
         case 850u:
@@ -172,6 +180,7 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 900u:
+			TEMP_cyclic();
         	break;
 
         case 950u:
@@ -182,6 +191,7 @@ void MODE_MGR_action_schedule_normal( void )
         	MAIN_WATCHDOG_kick();
 			RF_MGR_analyse_fault_conditions();
 			NVM_tick();
+			TEMP_cyclic();
 
 			 /* keep track of time in secs */
             HAL_TIM_increment_secs();

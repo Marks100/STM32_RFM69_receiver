@@ -48,7 +48,7 @@ int main(void)
 	HAL_BRD_init();
 	HAL_SPI1_init();
 	CLI_init();
-
+	HAL_I2C_init();
 	HAL_TIM2_init();
 
 	/* Initialise the RF MGR */
@@ -61,6 +61,8 @@ int main(void)
 	NEOPIXEL_int();
 
 	BTN_MGR_init();
+
+	TEMP_init();
 
 	/* Init the systick timer */
 	MAIN_SYSTICK_init();

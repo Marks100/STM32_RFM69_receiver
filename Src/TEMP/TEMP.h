@@ -1,6 +1,6 @@
+#ifndef TEMP_H
+#define TEMP_H
 
-#ifndef HAL_I2C_H
-#define HAL_I2C_H
 
 /***************************************************************************************************
 **                              Includes                                                          **
@@ -8,10 +8,12 @@
 #include "C_defs.h"
 #include "COMPILER_defs.h"
 
+
 /***************************************************************************************************
 **                              Defines                                                           **
 ***************************************************************************************************/
-
+#define TEMP_TICK_RATE_MS	50u
+#define TEMP_TIMEOUT		( 60u * ( 1000u / TEMP_TICK_RATE_MS ) ) 
 
 
 
@@ -25,6 +27,15 @@
 **                              Data Types and Enums                                              **
 ***************************************************************************************************/
 /* None */
+typedef enum
+{
+	TEMP_INIT = 0u,
+	TEMP_SETUP,
+	TEMP_RUNNING,
+	TEMP_ERROR
+	
+} TEMP_state_et;
+
 
 
 
@@ -38,16 +49,16 @@
 /***************************************************************************************************
 **                              Function Prototypes                                               **
 ***************************************************************************************************/
-void HAL_I2C_init( void );
-void HAL_I2C_de_init( void );
+void          TEMP_init( void );
+void          TEMP_cyclic( void );
+s16_t         TEMP_get_temp( void );
+TEMP_state_et TEMP_get_state( void );
+void          TEMP_set_state( TEMP_state_et state );
+pass_fail_et  TEMP_self_check( void );
+void          TEMP_increment_fail_cnt( void );
+void          TEMP_take_temp_measurement( s16_t* TEMP_temperature_c_s );
 
-void HAL_I2C_write_single_register( u8_t dev_address, u8_t register_address, u8_t* data );
-void HAL_I2C_write_multiple_register( u8_t dev_address, u8_t register_start_address, u8_t* data, u8_t num_bytes );
-void HAL_I2C_read_register(  u8_t dev_add, u8_t reg_add, u8_t* data );
-void HAL_I2C_read_multiple_registers( u8_t dev_add, u8_t reg_start_add, u8_t* data, u8_t num_bytes );
 
+#endif /* TEMP_H multiple inclusion guard */
 
-
-#endif /* HAL_UART_PUB_H multiple inclusion guard */
-
-/****************************** END OF FILE *******************************************************/
+///****************************** END OF FILE *******************************************************/

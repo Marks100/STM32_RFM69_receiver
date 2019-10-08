@@ -1,11 +1,13 @@
 #!/usr/bin/env ruby
 
 require 'docopt'
+require 'ruby-progressbar'
 
 # Setup some nice things
 VERSION = '1.0.0'
 NAME = File.basename(__FILE__)
 START_TIME = Time.now
+progressbar = ProgressBar.create(:smoothing => 0.7, :progress_mark => '#', :remainder_mark => '-', :format => '%a |%b%i| %p%% %t' )
 
 doc = <<DOCOPT
 Example program.
@@ -46,6 +48,10 @@ debug_log( "Debug has been set to true" )
 debug_log( "options = #{$options}" )
 debug_log( "current directory: #{__dir__}" )
 
+for i in 0..99 do
+	progressbar.increment 
+	sleep 0.1
+end
 
 
 if $options['--char']

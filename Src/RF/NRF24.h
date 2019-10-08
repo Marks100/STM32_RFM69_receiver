@@ -377,6 +377,7 @@ void                 NRF24_ce_select( low_high_et state );
 void 				 NRF24_handle_supervisor_reset( void );
 false_true_et        NRF24_check_for_packet_received( void );
 pass_fail_et         NRF24_self_check( void );
+u32_t                NRF24_get_reset_count( void );
 
 void 				 NRF24_handle_packet_stats( u8_t type );
 
