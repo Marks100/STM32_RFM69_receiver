@@ -28,6 +28,7 @@
 #include "stm32f10x_spi.h"
 #include "stm32f10x_dma.h"
 
+#include "HAL_config.h"
 #include "C_defs.h"
 #include "COMPILER_defs.h"
 #include "HAL_BRD.h"
@@ -37,12 +38,6 @@
 
 /* Module Identification for STDC_assert functionality */
 #define STDC_MODULE_ID   STDC_MOD_HAL_SPI
-
-static false_true_et HAL_SPI1_initialised = FALSE;
-static false_true_et HAL_SPI2_initialised = FALSE;
-
-
-
 
 
 
@@ -79,11 +74,11 @@ void HAL_SPI1_init( void )
 	/* Configure the GPIOs */
 	GPIO_InitTypeDef GPIO_InitStructure;
 
-	/* Setup the SPI pins (PA5, PA6, PA7 ) */
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7;
+	/* Setup the SPI pins  */
+	GPIO_InitStructure.GPIO_Pin = SPI1_SCK_PIN | SPI1_MISO_PIN | SPI1_MOSI_PIN;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-	GPIO_Init(GPIOA, &GPIO_InitStructure);
+	GPIO_Init(SPI1_PORT, &GPIO_InitStructure);
 
 	SPI_InitTypeDef   SPI_InitStructure;
 
@@ -101,12 +96,8 @@ void HAL_SPI1_init( void )
 
 	/* Enable SPI1 */
 	SPI_Cmd(SPI1, ENABLE);
-
-    HAL_SPI1_initialised = TRUE;
 }
 
-
-u8_t SPITransmittedValue[] = {  0x00, 0x92,0x49,0x24,  0xDB, 0x6D,0xB6,  0x92,0x49,0x24, 0x00, 0x00, };
 
 /*!
 ****************************************************************************************************
@@ -134,8 +125,8 @@ void HAL_SPI2_init( void )
 	/* Configure the GPIOs */
 	GPIO_InitTypeDef GPIO_InitStructure;
 
-	/* Setup the SPI pins ( PB13, PB14, PB15 ) */
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13 | GPIO_Pin_15;
+	/* Setup the SPI pins */
+	GPIO_InitStructure.GPIO_Pin = SPI2_SCK_PIN | SPI2_MISO_PIN | SPI2_MOSI_PIN;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
 	GPIO_Init(GPIOB, &GPIO_InitStructure);
@@ -164,7 +155,7 @@ void HAL_SPI2_init( void )
 	DMA_DeInit(DMA1_Channel5); //Set DMA registers to default values
 	DMA_StructInit(&DMA_InitStructure);
 	DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)&SPI2->DR; //Address of peripheral the DMA must map to
-	DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)&SPITransmittedValue[0]; //Variable from which data will be transmitted
+	//DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)&SPITransmittedValue[0]; //Variable from which data will be transmitted
 	DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;
 	DMA_InitStructure.DMA_BufferSize = 12; //Buffer size
 	DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
@@ -183,8 +174,6 @@ void HAL_SPI2_init( void )
 	// Enable the SPI2 TX DMA requests
 	//SPI_I2S_DMACmd(SPI2, SPI_I2S_DMAReq_Tx, ENABLE);
 	SPI_I2S_DMACmd(SPI2, SPI_I2S_DMAReq_Tx, DISABLE);
-
-    HAL_SPI2_initialised = TRUE;
 }
 
 
@@ -199,8 +188,6 @@ void HAL_SPI1_de_init( void )
 
 	/* Disable SPI clock */
 	RCC_APB2PeriphClockCmd( RCC_APB2Periph_SPI1, DISABLE );
-
-    HAL_SPI1_initialised = FALSE;
 }
 
 
@@ -214,41 +201,10 @@ void HAL_SPI2_de_init( void )
 
 	/* Disable SPI clock */
 	RCC_APB1PeriphClockCmd( RCC_APB1Periph_SPI2, DISABLE );
-
-    HAL_SPI2_initialised = FALSE;
 }
 
 
 
-/*!
-****************************************************************************************************
-*
-*   \brief         Return the init status of the SPI module
-*
-*   \author        MS
-*
-*   \return        none
-*
-***************************************************************************************************/
-false_true_et HAL_SPI1_get_init_status( void )
-{
-    return ( HAL_SPI1_initialised );
-}
-
-/*!
-****************************************************************************************************
-*
-*   \brief         Return the init status of the SPI module
-*
-*   \author        MS
-*
-*   \return        none
-*
-***************************************************************************************************/
-false_true_et HAL_SPI2_get_init_status( void )
-{
-    return ( HAL_SPI2_initialised );
-}
 
 
 /*!

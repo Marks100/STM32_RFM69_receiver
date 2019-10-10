@@ -1412,14 +1412,6 @@ pass_fail_et NRF24_setup_dynamic_ack( disable_enable_et state )
 ***************************************************************************************************/
 void NRF24_tick( void )
 {
-    /* Need to make sure that the SPI interface is initialised */
-    if( HAL_SPI1_get_init_status() == FALSE )
-    {
-        /* it is not initialised so do that now, Need to check that the UART isnt currently using the
-        hardware pins before we do any initialisation */
-        HAL_SPI1_init();
-    }
-
     /* The SPI module is initialised so we can carry out the RF task */
     switch( NRF24_state_s )
     {
@@ -1587,7 +1579,7 @@ void NRF24_tick( void )
         default:
         break;
     }
-     NRF24_handle_supervisor_reset();
+    NRF24_handle_supervisor_reset();
     
     /* Only run the self test in modes that deem it neccessary */
     switch( NRF24_state_s )

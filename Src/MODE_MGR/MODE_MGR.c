@@ -32,7 +32,7 @@ void MODE_MGR_init( void )
 	u8_t i = 0u;
 
 	MODE_MGR_tick_timer_msecs_s = MODE_MGR_TICK_RATE_MSECS;
-	MODE_MGR_mode_s = MODE_MGR_MODE_NORMAL;
+	MODE_MGR_mode_s = MODE_MGR_MODE_STARTUP;
 	MODE_MGR_system_init_s = FALSE;
 	MODE_MGR_debounce_ctr_s = 0xFF;
 
@@ -49,13 +49,42 @@ void MODE_MGR_init( void )
 
 void MODE_MGR_tick( void )
 {
+	MAIN_WATCHDOG_kick();
+
 	switch( MODE_MGR_mode_s )
 	{
+		case MODE_MGR_MODE_STARTUP:
+			if( LOW == HAL_BRD_read_Onboard_btn_state() )
+			{
+				MODE_MGR_change_mode( MODE_MGR_MODE_WAIT );
+				HAL_BRD_set_onboard_LED( HIGH );
+			}
+			else
+			{
+				MODE_MGR_change_mode( MODE_MGR_MODE_NORMAL );
+			}
+		break;
+
+		case MODE_MGR_MODE_WAIT:
+			if( HIGH == HAL_BRD_read_Onboard_btn_state() )
+			{
+				MODE_MGR_change_mode( MODE_MGR_MODE_TEST );
+			}
+
+			HAL_BRD_set_onboard_LED( HIGH );
+		break;
+
 		case MODE_MGR_MODE_NORMAL:
 			MODE_MGR_action_schedule_normal();
 		break;
 
 		case MODE_MGR_MODE_TEST:
+			MODE_MGR_action_schedule_test();
+
+			if( LOW == HAL_BRD_read_Onboard_btn_state() )
+			{
+				MODE_MGR_change_mode( MODE_MGR_MODE_NORMAL );
+			}
 		break;
 
 		case MODE_MGR_SETTINGS_MODE:
@@ -83,12 +112,9 @@ void MODE_MGR_tick( void )
 ***************************************************************************************************/
 void MODE_MGR_action_schedule_normal( void )
 {
-	MAIN_WATCHDOG_kick();
-
-
 	HAL_BRD_toggle_onboard_led();
 	NRF24_tick();
-    //CLI_message_handler();
+    CLI_message_handler();
     //MODE_MGR_check_user_input();
     //NEOPIXEL_tick();
 	//LCD_tick();
@@ -99,104 +125,94 @@ void MODE_MGR_action_schedule_normal( void )
     {
         case 50u:
 
-			//AIRCON_tick();
-            //RF_MGR_tick();
+			AIRCON_tick();
+            RF_MGR_tick();
         	break;
 
         case 100u:
-			MAIN_WATCHDOG_kick();
-			//TEMP_cyclic();
+			TEMP_cyclic();
         	break;
 
         case 150u:
-            //RF_MGR_tick();
+            RF_MGR_tick();
         	break;
 
         case 200u:
-			MAIN_WATCHDOG_kick();
 			NVM_tick();
-			//TEMP_cyclic();
+			TEMP_cyclic();
         	break;
 
         case 250u:
-			//AIRCON_tick();
-            //RF_MGR_tick();
+			AIRCON_tick();
+            RF_MGR_tick();
         	break;
 
         case 300u:
-        	MAIN_WATCHDOG_kick();
-			//TEMP_cyclic();
+			TEMP_cyclic();
         	break;
 
         case 350u:
-            //RF_MGR_tick();
+            RF_MGR_tick();
         	break;
 
         case 400u:
-			MAIN_WATCHDOG_kick();
-			//TEMP_cyclic();
+			TEMP_cyclic();
 			NVM_tick();
         	break;
 
         case 450u:
-			//AIRCON_tick();
-            //RF_MGR_tick();
+			AIRCON_tick();
+            RF_MGR_tick();
         	break;
 
         case 500u:
-        	MAIN_WATCHDOG_kick();
-			//TEMP_cyclic();
+			TEMP_cyclic();
         	break;
 
         case 550u:
-            //RF_MGR_tick();
+            RF_MGR_tick();
         	break;
 
         case 600u:
-			MAIN_WATCHDOG_kick();
 			NVM_tick();
-			//TEMP_cyclic();
+			TEMP_cyclic();
         	break;
 
         case 650u:
 			AIRCON_tick();
-            //RF_MGR_tick();
+            RF_MGR_tick();
         	break;
 
         case 700u:
-        	MAIN_WATCHDOG_kick();
-			//TEMP_cyclic();
+			TEMP_cyclic();
         	break;
 
         case 750u:
-            //RF_MGR_tick();
+            RF_MGR_tick();
         	break;
 
         case 800u:
-			MAIN_WATCHDOG_kick();
 			NVM_tick();
-			//TEMP_cyclic();
+			TEMP_cyclic();
         	break;
 
         case 850u:
-			//AIRCON_tick();
-            //RF_MGR_tick();
+			AIRCON_tick();
+            RF_MGR_tick();
         	break;
 
         case 900u:
-			MAIN_WATCHDOG_kick();
-			//TEMP_cyclic();
+			TEMP_cyclic();
         	break;
 
         case 950u:
-            //RF_MGR_tick();
+            RF_MGR_tick();
         	break;
 
         case 1000u:
-        	MAIN_WATCHDOG_kick();
-			//RF_MGR_analyse_fault_conditions();
+			RF_MGR_analyse_fault_conditions();
 			NVM_tick();
-			//TEMP_cyclic();
+			TEMP_cyclic();
 
 			 /* keep track of time in secs */
             HAL_TIM_increment_secs();
@@ -214,8 +230,30 @@ void MODE_MGR_action_schedule_normal( void )
 	{
 		MODE_MGR_tick_timer_msecs_s += MODE_MGR_TICK_RATE_MSECS;
 	}
+}
 
-	//HAL_BRD_set_onboard_LED(OFF);
+/*!
+****************************************************************************************************
+*
+*   \brief          < Brief description of function >
+*
+*   \author
+*
+*   \return         none
+*
+***************************************************************************************************/
+void MODE_MGR_action_schedule_test( void )
+{
+	if( MODE_MGR_tick_timer_msecs_s >= MODE_MGR_MAX_TICK_CYCLE_VALUE )
+	{
+		MODE_MGR_tick_timer_msecs_s = MODE_MGR_TICK_RATE_MSECS;
+
+		HAL_BRD_toggle_onboard_led();
+	}
+	else
+	{
+		MODE_MGR_tick_timer_msecs_s += MODE_MGR_TICK_RATE_MSECS;
+	}
 }
 
 
@@ -229,22 +267,9 @@ MODE_MGR_mode_et MODE_MGR_get_mode( void )
 
 
 
-void MODE_MGR_change_mode( void )
+void MODE_MGR_change_mode( MODE_MGR_mode_et mode )
 {
-	false_true_et reset_value = FALSE;
-	(void)reset_value;
-
-	switch( MODE_MGR_mode_s )
-	{
-		case MODE_MGR_MODE_NORMAL:
-			break;
-
-		case MODE_MGR_SETTINGS_MODE:
-		    break;
-
-        default:
-            break;
-	}
+	MODE_MGR_mode_s = mode;
 }
 
 

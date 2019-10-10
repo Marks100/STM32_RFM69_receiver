@@ -28,8 +28,8 @@
 extern NVM_info_st NVM_info_s;
 
 BMP280_calib_st BMP280_calib_s;
-s32_t BMP280_pressure_reading_s;
-s32_t BMP280_temperature_reading_s;
+float BMP280_temp_c;
+
 
 /***************************************************************************************************
 **                              Data declarations and definitions                                 **
@@ -40,8 +40,7 @@ s32_t BMP280_temperature_reading_s;
 void BMP280_init( void )
 {
 	STDC_memset( &BMP280_calib_s, 0x00, sizeof( BMP280_calib_st ));
-	BMP280_pressure_reading_s = S32_T_MAX;
-	BMP280_temperature_reading_s = S32_T_MAX;
+	float BMP280_temp_c = S16_T_MAX;
 }
 
 
@@ -49,13 +48,13 @@ void BMP280_setup_default_registers( void )
 {
 	u8_t register_data = 0u;
 	
-	register_data = BMP280_MEAS_BIT_MASK;
-	BMP280_set_ctrl_meas( &register_data );
+	//BMP280_set_mode( BMP280_NORMAL_MODE );
 
 	register_data = BMP280_CONFIG_BIT_MASK;
 	BMP280_set_config( &register_data );
 
-	BMP280_set_mode( BMP280_NORMAL_MODE );
+	register_data = BMP280_MEAS_BIT_MASK;
+	BMP280_set_ctrl_meas( &register_data );
 }
 
 
@@ -136,7 +135,7 @@ u32_t BMP280_read_raw_pressure_counts( void )
 
 
 
-void BMP280_convert( u32_t* temperature, u32_t* pressure)
+void BMP280_convert( s32_t* temperature, s32_t* pressure)
 {
   unsigned long adc_T;
   unsigned long adc_P;
@@ -171,12 +170,6 @@ void BMP280_convert( u32_t* temperature, u32_t* pressure)
 
 
 
-void BMP280_trigger_meas( void )
-{
-	BMP280_convert( &BMP280_temperature_reading_s, &BMP280_pressure_reading_s );
-}
-
-
 void BMP280_set_mode( BMP280_operating_modes_et mode )
 {
   u8_t register_data = 0u;
@@ -203,24 +196,6 @@ pass_fail_et BMP280_self_check( void )
 }
 
 
-void BMP280_wakeup( void )
-{
-	u8_t register_data;
-
-	STDC_memset( &BMP280_calib_s, 0x00, sizeof( BMP280_calib_s ) );
-
-	register_data = BMP280_MEAS_BIT_MASK;
-	HAL_I2C_write_single_register( BMP280_I2C_ADDR, BMP280_CTRL_MEAS, &register_data );
-
-	register_data = BMP280_CONFIG_BIT_MASK;
-	HAL_I2C_write_single_register( BMP280_I2C_ADDR, BMP280_CONFIG, &register_data );
-
-	register_data = 0u;
-	HAL_I2C_read_register( BMP280_I2C_ADDR, BMP280_CONFIG, &register_data );
-
-	BMP280_read_calib_values();
-}
-
 
 void BMP280_shutdown( void )
 {
@@ -241,13 +216,25 @@ void BMP280_set_config( u8_t* data )
 
 
 
-s32_t BMP280_take_temp_measurement( void )
+float BMP280_take_temp_measurement( void )
 {
+	s32_t BMP280_pressure_reading_s;
+	s32_t BMP280_temperature_reading_s;
+
 	BMP280_convert( &BMP280_temperature_reading_s, &BMP280_pressure_reading_s );
 
-	return( BMP280_temperature_reading_s );
+	BMP280_temp_c = ( BMP280_temperature_reading_s / 10.0 );
+	
+	return( BMP280_temp_c );
 }
 
+
+void BMP280_read_all_regs( void )
+{
+	u8_t regs[8];
+
+	HAL_I2C_read_multiple_registers( BMP280_I2C_ADDR, BMP280_STATUS, regs, 8 );
+}
 
 
 ///****************************** END OF FILE *******************************************************/

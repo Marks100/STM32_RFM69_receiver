@@ -27,7 +27,9 @@
 
 typedef enum
 {
-    MODE_MGR_MODE_NORMAL = 0u,
+	MODE_MGR_MODE_STARTUP = 0u,
+	MODE_MGR_MODE_WAIT,
+    MODE_MGR_MODE_NORMAL,
     MODE_MGR_MODE_TEST,
     MODE_MGR_SETTINGS_MODE
 } MODE_MGR_mode_et;
@@ -44,8 +46,9 @@ typedef struct
 void MODE_MGR_init( void );
 void MODE_MGR_tick( void );
 void MODE_MGR_action_schedule_normal( void );
+void MODE_MGR_action_schedule_test( void );
 void MODE_MGR_check_user_input( void );
-void MODE_MGR_change_mode( void );
+void MODE_MGR_change_mode( MODE_MGR_mode_et mode );
 void MODE_MGR_handle_settings( void );
 MODE_MGR_mode_et MODE_MGR_get_mode( void );
 void MODE_MGR_action_selector_switch_changes( HAL_BRD_switch_slider_et slider, low_high_et state );

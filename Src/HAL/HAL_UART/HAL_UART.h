@@ -38,9 +38,9 @@
 /***************************************************************************************************
 **                              Function Prototypes                                               **
 ***************************************************************************************************/
-void HAL_UART_init( void );
-void HAL_UART_close( void );
-void HAL_UART_send_data(const char *pucBuffer, u16_t data_size );
+void HAL_USART2_init( void );
+void HAL_USART2_close( void );
+void HAL_USART2_send_data(const char *pucBuffer, u16_t data_size );
 
 
 

@@ -68,7 +68,6 @@ typedef enum
 **                              Exported Globals                                                  **
 ***************************************************************************************************/
 /* None */
-extern u8_t debug_mode;
 
 
 /***************************************************************************************************
@@ -80,9 +79,10 @@ void              HAL_BRD_reset( void );
 low_high_et       HAL_BRD_read_pin_state( GPIO_TypeDef * port, u16_t pin );
 void              HAL_BRD_set_pin_state(  GPIO_TypeDef * port, u16_t pin, low_high_et state );
 void              HAL_BRD_toggle_onboard_led( void );
+low_high_et       HAL_BRD_read_Onboard_btn_state( void );
+
 void              HAL_BRD_set_batt_monitor_state( disable_enable_et state );
 void              HAL_BRD_set_rf_enable_pin( disable_enable_et state );
-void              HAL_BRD_toggle_led( void );
 void              HAL_BRD_set_LED( off_on_et state );
 low_high_et       HAL_BRD_read_selector_switch_pin( HAL_BRD_switch_slider_et slider );
 void              HAL_BRD_NRF24_spi_slave_select( low_high_et state );

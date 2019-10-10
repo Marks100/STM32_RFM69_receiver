@@ -18,7 +18,6 @@
 
 EXTI_InitTypeDef EXTI_InitStruct;
 false_true_et    HAL_BRD_rtc_triggered_s;
-false_true_et    debug_mode;
 
 low_high_et HAL_BRD_rotary_clock;
 low_high_et HAL_BRD_rotary_data;
@@ -84,6 +83,14 @@ void HAL_BRD_init( void )
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
 	GPIO_Init(NRF24_CE_PORT, &GPIO_InitStructure);
+
+	/* Configure the onboard switch */
+	GPIO_InitStructure.GPIO_Pin = ONBOARD_BTN_PIN;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(ONBOARD_BTN_PORT, &GPIO_InitStructure);
+
+
 
 	/* Configure the NEO PIXEL pin */
 	// GPIO_InitStructure.GPIO_Pin = ( GPIO_Pin_12 );
@@ -256,6 +263,27 @@ void HAL_BRD_toggle_pin_state(  GPIO_TypeDef * port, u16_t pin )
     {
         HAL_BRD_set_pin_state( port, pin, HIGH );
     }
+}
+
+
+
+/*!
+****************************************************************************************************
+*
+*   \brief         Reads the state of the onboard Button
+*
+*   \author        MS
+*
+*   \return        low_high_et
+*
+***************************************************************************************************/
+low_high_et HAL_BRD_read_Onboard_btn_state( void )
+{
+	low_high_et returnType;
+
+	returnType = HAL_BRD_read_pin_state( ONBOARD_BTN_PORT, ONBOARD_BTN_PIN );
+
+	return ( returnType );
 }
 
 

@@ -112,9 +112,6 @@ void CLI_init( void )
 		STDC_memcpy( &CLI_cmd_history_s.cmd_list[i], &NVM_info_s.NVM_generic_data_blk_s.cmd_list[i], sizeof( CLI_cmd_history_s.cmd_list ) );
 	}
 
-    /* Init the HAL UART driver */
-    HAL_UART_init();
-
     /* Print a welcome message */
     CLI_print_welcome_message();
 
@@ -402,7 +399,7 @@ void CLI_print_prompt( false_true_et newline )
 
 void CLI_send_data( char* data, u16_t data_size )
 {
-    HAL_UART_send_data( data, data_size );
+    HAL_USART2_send_data( data, data_size );
 }
 
 

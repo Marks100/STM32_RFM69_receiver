@@ -37,6 +37,7 @@
 #include "STDC.h"
 #include "NVM.h"
 #include "COMPILER_defs.h"
+#include "HAL_config.h"
 #include "HAL_I2C.h"
 
 
@@ -70,8 +71,8 @@ extern NVM_info_st NVM_info_s;
 void HAL_I2C_init( void )
 {
 	/* Enable I2C and GPIOA clock, should be enabled anyway but just in case */
-	RCC_APB1PeriphClockCmd( RCC_APB1Periph_I2C1, ENABLE );
 	RCC_APB2PeriphClockCmd( RCC_APB2Periph_GPIOB, ENABLE );
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1, ENABLE);
 	
 	I2C_SoftwareResetCmd(I2C1, ENABLE);
 	I2C_SoftwareResetCmd(I2C1, DISABLE);
@@ -80,10 +81,10 @@ void HAL_I2C_init( void )
 	GPIO_InitTypeDef GPIO_InitStructure;
 
 	/* Configure I2C_EE pins: SCL and SDA */
-	GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_8 | GPIO_Pin_9;
+	GPIO_InitStructure.GPIO_Pin =  I2C1_SDA_PIN | I2C1_SCL_PIN;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_OD;
-	GPIO_Init(GPIOB, &GPIO_InitStructure);
+	GPIO_Init(I2C1_PORT, &GPIO_InitStructure);
 	
 	I2C_InitTypeDef  I2C_InitStructure;
 

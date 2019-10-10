@@ -56,7 +56,9 @@ TEMP_state_et TEMP_get_state( void );
 void          TEMP_set_state( TEMP_state_et state );
 pass_fail_et  TEMP_self_check( void );
 void          TEMP_increment_fail_cnt( void );
-void          TEMP_take_temp_measurement( s16_t* TEMP_temperature_c_s );
+float         TEMP_take_temp_measurement( void );
+pass_fail_et  TEMP_get_last_temp_measurement( float* temp );
+pass_fail_et  TEMP_validate_temp( float temp );
 
 
 #endif /* TEMP_H multiple inclusion guard */

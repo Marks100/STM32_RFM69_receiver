@@ -10,11 +10,6 @@
 /***************************************************************************************************
 **                              Includes                                                          **
 ***************************************************************************************************/
-#include "stm32f10x_rcc.h"
-#include "stm32f10x_i2c.h"
-#include "stm32f10x_gpio.h"
-#include "misc.h"
-
 #include "C_defs.h"
 #include "STDC.h"
 #include "HAL_BRD.h"
@@ -28,10 +23,9 @@
 
 extern NVM_info_st NVM_info_s;
 
-s16_t TEMP_temperature_c_s;
-TEMP_state_et TEMP_state_s;
-u16_t TEMP_timeout_s;
-u16_t TEMP_fail_cnt_s;
+STATIC float TEMP_temperature_c_s;
+STATIC TEMP_state_et TEMP_state_s;
+STATIC u16_t TEMP_fail_cnt_s;
 
 /***************************************************************************************************
 **                              Data declarations and definitions                                 **
@@ -41,9 +35,8 @@ u16_t TEMP_fail_cnt_s;
 
 void TEMP_init( void )
 {
-	TEMP_temperature_c_s = S16_T_MAX;
+	TEMP_temperature_c_s = 32767.1;
 	TEMP_state_s = TEMP_INIT;
-	TEMP_timeout_s = TEMP_TIMEOUT;
 	TEMP_fail_cnt_s = 0u;
 }
 
@@ -55,35 +48,37 @@ void TEMP_cyclic( void )
 	{
 		case TEMP_INIT:
 			BMP280_init();
-			
+
 			BMP280_reset();
-			
 			TEMP_set_state( TEMP_SETUP );
 		break;
-		
+
 		case TEMP_SETUP:
+			BMP280_read_calib_values();
 			BMP280_setup_default_registers();
-			
+
 			TEMP_set_state( TEMP_RUNNING );
 		break;
-		
+
 		case TEMP_RUNNING:
-			TEMP_take_temp_measurement( &TEMP_temperature_c_s );
+			TEMP_take_temp_measurement();
+			
+			if( FAIL == TEMP_self_check() )
+			{
+				TEMP_set_state( TEMP_ERROR );
+			}
 		break;
-		
+
 		case TEMP_ERROR:
-			BMP280_reset();
-			
 			TEMP_increment_fail_cnt();
-			
+
 			TEMP_set_state( TEMP_INIT );
 		break;
 
 		default:
-			TEMP_set_state( TEMP_SETUP );
+			TEMP_set_state( TEMP_INIT );
 		break;
 	}
-	TEMP_self_check();
 }
 
 
@@ -100,13 +95,13 @@ void TEMP_set_state( TEMP_state_et state )
 
 pass_fail_et TEMP_self_check( void )
 {
-	pass_fail_et test;
+	pass_fail_et test = FAIL;
 	
 	test = BMP280_self_check();
 	
-	if( test == FAIL )
+	if( test == PASS )
 	{
-		TEMP_set_state( TEMP_ERROR );
+		test = TEMP_validate_temp( TEMP_temperature_c_s );
 	}
 
 	return( test );
@@ -121,19 +116,28 @@ void TEMP_increment_fail_cnt( void )
 	}
 }
 
-void TEMP_take_temp_measurement( s16_t* TEMP_temperature_c_s )
+float TEMP_take_temp_measurement( void )
 {
-	s16_t temp;
-
-	temp = BMP280_take_temp_measurement();
-	TEMP_temperature_c_s = &temp;
+	TEMP_temperature_c_s = BMP280_take_temp_measurement();
 }
 
-pass_fail_et TEMP_get_last_temp_measurement( s16_t* temp )
+pass_fail_et TEMP_validate_temp( float temp )
+{
+	pass_fail_et test = FAIL;
+
+	if( ( temp >= -40.0 ) && ( temp <= 150.0 ) )
+	{
+		test = PASS;
+	}
+	return ( test );
+}
+
+
+pass_fail_et TEMP_get_last_temp_measurement( float* temp )
 {
 	pass_fail_et status = FAIL;
 	
-	if( TEMP_temperature_c_s != S16_T_MAX )
+	if( TEMP_temperature_c_s <= S16_T_MAX )
 	{
 		temp = &TEMP_temperature_c_s;
 		status = PASS;

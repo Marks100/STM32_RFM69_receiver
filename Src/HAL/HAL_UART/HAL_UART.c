@@ -11,14 +11,11 @@
 #include "HAL_BRD.h"
 #include "COMPILER_defs.h"
 #include "CLI.h"
+#include "HAL_config.h"
 #include "HAL_UART.h"
 
 
 STATIC u8_t HAL_UART_rx_buf_char_s;
-
-STATIC u8_t HAL_UART_rx_test_array_s[10];
-STATIC u8_t HAL_UART_rx_test_index_s;
-
 
 
 /***************************************************************************************************
@@ -43,7 +40,7 @@ STATIC u8_t HAL_UART_rx_test_index_s;
 *   \note          Fixed baudrate for now at 9600 8N1
 *
 ***************************************************************************************************/
-void HAL_UART_init( void )
+void HAL_USART2_init( void )
 {
 	/* Enable GPIOA clock, should be enabled anyway but just in case */
 	RCC_APB2PeriphClockCmd( RCC_APB2Periph_GPIOA, ENABLE);
@@ -63,16 +60,16 @@ void HAL_UART_init( void )
 	/* Configure the GPIOs */
 	GPIO_InitTypeDef GPIO_InitStructure;
 
-	/* Configure USART1 Tx (PA.02) as alternate function push-pull */
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2;
+	/* Configure USART2 Tx (PA.02) as alternate function push-pull */
+	GPIO_InitStructure.GPIO_Pin = USART2_TX_PIN;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_Init(GPIOA, &GPIO_InitStructure);
+	GPIO_Init(USART2_PORT, &GPIO_InitStructure);
 
-	/* Configure USART1 Rx (PA.3) as input floating */
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3;
+	/* Configure USART2 Rx (PA.3) as input floating */
+	GPIO_InitStructure.GPIO_Pin = USART2_RX_PIN;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-	GPIO_Init(GPIOA, &GPIO_InitStructure);
+	GPIO_Init(USART2_PORT, &GPIO_InitStructure);
 
 	/* Configure the USART2 */
 	USART_InitTypeDef USART_InitStructure;
@@ -108,9 +105,6 @@ void HAL_UART_init( void )
 	USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
 
 	HAL_UART_rx_buf_char_s = 0u;
-
-	STDC_memset( HAL_UART_rx_test_array_s, 0x20, sizeof( HAL_UART_rx_test_array_s ) );
-	HAL_UART_rx_test_index_s = 0u;
 }
 
 
@@ -127,7 +121,7 @@ void HAL_UART_init( void )
 *   \note          Fixed baudrate for now at 9600 8N1
 *
 ***************************************************************************************************/
-void HAL_UART_close( void )
+void HAL_USART2_close( void )
 {
 	/* Enable GPIOA clock, should be enabled anyway but just in case */
 	RCC_APB2PeriphClockCmd( RCC_APB2Periph_GPIOA, ENABLE);
@@ -147,16 +141,16 @@ void HAL_UART_close( void )
 	/* Configure the GPIOs */
 	GPIO_InitTypeDef GPIO_InitStructure;
 
-	/* Configure USART1 Tx (PA.02) as alternate function push-pull */
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2;
+	/* Configure USART2 Tx (PA.02) as alternate function push-pull */
+	GPIO_InitStructure.GPIO_Pin = USART2_TX_PIN;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_Init(GPIOA, &GPIO_InitStructure);
+	GPIO_Init(USART2_PORT, &GPIO_InitStructure);
 
-	/* Configure USART1 Rx (PA.3) as input floating */
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3;
+	/* Configure USART2 Rx (PA.3) as input floating */
+	GPIO_InitStructure.GPIO_Pin = USART2_RX_PIN;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-	GPIO_Init(GPIOA, &GPIO_InitStructure);
+	GPIO_Init(USART2_PORT, &GPIO_InitStructure);
 
 	/* Configure the USART2 */
 	USART_InitTypeDef USART_InitStructure;
@@ -210,7 +204,7 @@ void HAL_UART_close( void )
 *   \return        none
 *
 ***************************************************************************************************/
-void HAL_UART_send_data(const char *pucBuffer, u16_t data_size )
+void HAL_USART2_send_data(const char *pucBuffer, u16_t data_size )
 {
 	u16_t byte_index = 0u;
 
@@ -232,11 +226,8 @@ void HAL_UART_send_data(const char *pucBuffer, u16_t data_size )
 //***************************************************************************************************/
 void USART2_IRQHandler(void)
 {
-    if ((USART2->SR & USART_FLAG_RXNE) != (u16)RESET)
 	{
 		HAL_UART_rx_buf_char_s = USART_ReceiveData(USART2);
-
-		//HAL_UART_rx_test_array_s[HAL_UART_rx_test_index_s++] = HAL_UART_rx_buf_char_s;
 
 		CLI_handle_received_char( HAL_UART_rx_buf_char_s );
 	}

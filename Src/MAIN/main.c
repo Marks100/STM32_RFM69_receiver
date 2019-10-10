@@ -26,7 +26,7 @@
 
 int main(void)
 {
-	RCC_DeInit();
+ 	RCC_DeInit();
 	SystemInit();
 
 	RCC_HCLKConfig(RCC_SYSCLK_Div1);
@@ -36,25 +36,23 @@ int main(void)
 
 	NVM_init();
 
-	/* Init the HW */
-	//HAL_BRD_init();
-	//HAL_SPI1_init();
-	//CLI_init();
-	//HAL_I2C_init();
-	//HAL_TIM2_init();
+	/* Init the HW drivers */
+	HAL_BRD_init();
+	HAL_SPI1_init();
+	HAL_I2C_init();
+	HAL_TIM2_init();
+    HAL_USART2_init();
 
-	/* Initialise the RF MGR */
-	//RF_MGR_init();
 
-	//MODE_MGR_init();
-
-	//AIRCON_init();
-
+	/* Initialise the SW modules */
+	RF_MGR_init();
+	MODE_MGR_init();
+	AIRCON_init();
 	//NEOPIXEL_int();
-
 	//BTN_MGR_init();
+	TEMP_init();
+	CLI_init();
 
-	//TEMP_init();
 
 	/* Init the systick timer */
 	MAIN_SYSTICK_init();

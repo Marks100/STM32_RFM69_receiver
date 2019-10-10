@@ -47,8 +47,8 @@
 #define	BMP280_MODE_FORCED			0x01
 #define	BMP280_MODE_NORMAL			0x03
 
-#define	BMP280_MEAS_BIT_MASK			(BMP280_OVERSAMPLING_T1 | BMP280_OVERSAMPLING_P1 | BMP280_MODE_NORMAL)
-#define	BMP280_CONFIG_BIT_MASK		    (BMP280_TSB_500 | BMP280_FILTER_COEFFICIENT16)
+#define	BMP280_MEAS_BIT_MASK			(BMP280_OVERSAMPLING_T16 | BMP280_OVERSAMPLING_P16 | BMP280_MODE_NORMAL)
+#define	BMP280_CONFIG_BIT_MASK		    (BMP280_TSB_250 | BMP280_FILTER_COEFFICIENT16)
 
 #define BMP280_READ_TIMEOUT			20u
 
@@ -132,17 +132,15 @@ void  BMP280_set_mode ( BMP280_operating_modes_et mode );
 u32_t BMP280_read_raw_pressure_counts( void );
 u32_t BMP280_read_raw_temp_counts( void );
 void  BMP280_read_calib_values( void );
-void  BMP280_convert( u32_t* temperature, u32_t* pressure);
+void  BMP280_convert( s32_t* temperature, s32_t* pressure);
 void  BMP280_trigger_meas( void );
 pass_fail_et BMP280_self_check( void );
-void  BMP280_wakeup( void );
-void BMP280_shutdown( void );
-void BMP280_set_ctrl_meas( u8_t* data );
-void BMP280_set_config( u8_t* data );
-s32_t BMP280_take_temp_measurement( void );
+void  BMP280_shutdown( void );
+void  BMP280_set_ctrl_meas( u8_t* data );
+void  BMP280_set_config( u8_t* data );
+float BMP280_take_temp_measurement( void );
+void  BMP280_read_all_regs( void );
 
-s32_t BMP280_get_temperature( void );
-pass_fail_et BMP280_get_failure_status( void );
 
 #endif /* BMP280 multiple inclusion guard */
 
