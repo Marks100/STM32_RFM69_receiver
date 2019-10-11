@@ -52,6 +52,7 @@ int main(void)
 	//BTN_MGR_init();
 	TEMP_init();
 	CLI_init();
+	ROTARY_init();
 
 
 	/* Init the systick timer */

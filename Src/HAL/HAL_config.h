@@ -37,5 +37,9 @@
 #define ONBOARD_BTN_PORT GPIOA
 #define ONBOARD_BTN_PIN  GPIO_Pin_8
 
+#define ROTARY_PORT      GPIOA
+#define ROTARY_CLK_PIN   GPIO_Pin_8
+#define ROTARY_DATA_PIN  GPIO_Pin_8
+
 
 #endif /* HAL_CONFIG_H multiple inclusion guard */
