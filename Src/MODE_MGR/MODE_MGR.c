@@ -41,7 +41,7 @@ void MODE_MGR_init( void )
 	for( i = 0u; i < MODE_MGR_NUM_SLIDER_INPUTS; i++ )
 	{
 		/* Need to set the high level state initial on reset, so just read the current state of the selector switches */
-		MODE_MGR_user_input_s[i].slider_state_hl = HAL_BRD_read_selector_switch_pin( (HAL_BRD_switch_slider_et)i );
+		//MODE_MGR_user_input_s[i].slider_state_hl = HAL_BRD_read_selector_switch_pin( (HAL_BRD_switch_slider_et)i );
 	}
 }
 

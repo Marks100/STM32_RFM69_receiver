@@ -420,53 +420,51 @@ void AIRCON_update_outputs( void )
 	/* Set the LED to indicate if the system is enabled or disabled */
 	if( AIRCON_config_s.state == ENABLE_ )
 	{
-		HAL_BRD_set_LED_state( LED_0, HIGH );
-
 		/* Set the LED to indicate if the system is in heat or cool mode */
 		switch( AIRCON_get_mode() )
 		{
 			case AIRCON_COOL_MODE:
 			{
-				HAL_BRD_set_LED_state( LED_1, HIGH );
-				HAL_BRD_set_LED_state( LED_2, LOW );
+//				HAL_BRD_set_LED_state( LED_1, HIGH );
+//				HAL_BRD_set_LED_state( LED_2, LOW );
 			}
 			break;
 
 			case AIRCON_HEAT_MODE:
 			{
-				HAL_BRD_set_LED_state( LED_1, LOW );
-				HAL_BRD_set_LED_state( LED_2, HIGH );
+//				HAL_BRD_set_LED_state( LED_1, LOW );
+//				HAL_BRD_set_LED_state( LED_2, HIGH );
 			}
 			break;
 
 			case AIRCON_AUTO_MODE:
 			{
-				HAL_BRD_set_LED_state( LED_1, LOW );
-				HAL_BRD_set_LED_state( LED_2, LOW );
+//				HAL_BRD_set_LED_state( LED_1, LOW );
+//				HAL_BRD_set_LED_state( LED_2, LOW );
 			}
 			break;
 
 			default:
-				HAL_BRD_set_LED_state( LED_0, HIGH );
-				HAL_BRD_set_LED_state( LED_0, LOW );
+//				HAL_BRD_set_LED_state( LED_0, HIGH );
+//				HAL_BRD_set_LED_state( LED_0, LOW );
 			break;
 		}
 
 		if( ( AIRCON_config_s.heater_state == ENABLE_ ) || ( AIRCON_config_s.cooler_state == ENABLE_ ) )
 		{
-			HAL_BRD_set_LED_state( LED_3, HIGH );
+			//HAL_BRD_set_LED_state( LED_3, HIGH );
 		}
 		else
 		{
-			HAL_BRD_set_LED_state( LED_3, LOW );
+			//HAL_BRD_set_LED_state( LED_3, LOW );
 		}
 	}
 	else
 	{
-		HAL_BRD_set_LED_state( LED_0, LOW );
-		HAL_BRD_set_LED_state( LED_1, LOW );
-		HAL_BRD_set_LED_state( LED_2, LOW );
-		HAL_BRD_set_LED_state( LED_3, LOW );
+//		HAL_BRD_set_LED_state( LED_0, LOW );
+//		HAL_BRD_set_LED_state( LED_1, LOW );
+//		HAL_BRD_set_LED_state( LED_2, LOW );
+//		HAL_BRD_set_LED_state( LED_3, LOW );
 	}
 
 	/***************************************/
@@ -477,11 +475,11 @@ void AIRCON_update_outputs( void )
 		/* Each individual output has a different pin so must be handled individually */
 		if( AIRCON_generic_outputs_s[i] == ENABLE_ )
 		{
-			HAL_BRD_set_generic_output( AIRCON_generic_outputs_s[i], HIGH );
+			//HAL_BRD_set_generic_output( AIRCON_generic_outputs_s[i], HIGH );
 		}
 		else
 		{
-			HAL_BRD_set_generic_output( AIRCON_generic_outputs_s[i], LOW );
+			//HAL_BRD_set_generic_output( AIRCON_generic_outputs_s[i], LOW );
 		}	
 	}
 }

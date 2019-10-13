@@ -855,14 +855,14 @@ CLI_error_et led_handler( u8_t aArgCount, char *aArgVector[] )
 
 	if( led == 0x0a )
 	{
-		HAL_BRD_set_LED_state( LED_0, state );
-		HAL_BRD_set_LED_state( LED_1, state );
-		HAL_BRD_set_LED_state( LED_2, state );
-		HAL_BRD_set_LED_state( LED_3, state );
+//		HAL_BRD_set_LED_state( LED_0, state );
+//		HAL_BRD_set_LED_state( LED_1, state );
+//		HAL_BRD_set_LED_state( LED_2, state );
+//		HAL_BRD_set_LED_state( LED_3, state );
 	}
 	else
 	{
-		HAL_BRD_set_LED_state( led, state );
+		//HAL_BRD_set_LED_state( led, state );
 	}
 
 	return( error );

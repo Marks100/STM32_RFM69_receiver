@@ -12,16 +12,10 @@
 ***************************************************************************************************/
 #include "C_defs.h"
 #include "STDC.h"
-#include "HAL_BRD.h"
-#include "NVM.h"
 #include "COMPILER_defs.h"
-#include "HAL_I2C.h"
 #include "BMP280.h"
 #include "TEMP.h"
 
-
-
-extern NVM_info_st NVM_info_s;
 
 STATIC float TEMP_temperature_c_s;
 STATIC TEMP_state_et TEMP_state_s;

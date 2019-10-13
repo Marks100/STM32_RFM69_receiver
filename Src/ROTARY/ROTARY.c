@@ -94,6 +94,35 @@ low_high_et ROTARY_read_rotary_SW_pin( void )
 }
 
 
+/****************************************************************************************************
+*
+*   \brief         Sets the prev state of the rotary data pin
+*
+*   \author        MS
+*
+*   \return        low_high_et state of the pin
+*
+***************************************************************************************************/
+void ROTARY_set_prev_data_pin_state( low_high_et state )
+{
+    ROTARY_prev_rotary_data_s = state;
+}
+
+/****************************************************************************************************
+*
+*   \brief         Sets the prev state of the rotary clk pin
+*
+*   \author        MS
+*
+*   \return        low_high_et state of the pin
+*
+***************************************************************************************************/
+void ROTARY_set_prev_clk_pin_state( low_high_et state )
+{
+    ROTARY_prev_rotary_clock_s = state;
+}
+
+
 /*!
 ****************************************************************************************************
 *
@@ -111,7 +140,7 @@ void ROTARY_debounce_completed( void )
 	ROTARY_rotary_clock_s = ROTARY_read_rotary_clock_pin();
 
 	/* Check to make sure that the pin is the same state as it was in the ISR */
-	if( ROTARY_prev_rotary_clock == ROTARY_rotary_clock )
+	if( ROTARY_prev_rotary_clock_s == ROTARY_rotary_clock_s )
 	{
 		/* Both the previous state and the current state are the same value and have been
 		 * for at least 1ms so this is a valid pin transition
@@ -128,7 +157,7 @@ void ROTARY_debounce_completed( void )
 			else
 			{
 				/* do nothing */
-				assert(1);
+				//assert(1);
 			}
 		}
 		else
@@ -142,7 +171,7 @@ void ROTARY_debounce_completed( void )
 		 * is probably a glitch that needs debounced ta fuck */
 	}
 
-	ROTARY_toggle_hw_edge_detection();
+	ROTARY_set_hw_edge_detection( ROTARY_trigger_state_s );
 }
 
 
@@ -151,18 +180,15 @@ void ROTARY_set_ROTARY_interrupt_state( disable_enable_et state )
 	HAL_BRD_set_ROTARY_interrupt_state( state );
 }
 
-void ROTARY_toggle_hw_edge_detection( void )
+void ROTARY_set_hw_edge_detection( low_high_et state )
 {
-	if( ROTARY_trigger_state_s == LOW )
-	{
-
-	}
-	else
-	{
-		/* code */
-	}
+	HAL_BRD_set_ROTARY_edge_state( ROTARY_trigger_state_s );
 }
 
+low_high_et ROTARY_get_hw_edge_detection( void )
+{
+	return( ROTARY_trigger_state_s );
+}
 
 
 

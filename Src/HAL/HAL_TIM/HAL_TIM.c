@@ -4,6 +4,7 @@
     #include "misc.h"
 #endif
 
+#include "ROTARY.h"
 #include "HAL_TIM.h"
 #include "HAL_BRD.h"
 
@@ -286,7 +287,7 @@ void TIM2_IRQHandler ( void )
 		TIM_ClearITPendingBit( TIM2, TIM_IT_Update );
 
 		/* The debounce timer has finished, execute the callback */
-		HAL_BRD_debounce_completed();
+		ROTARY_debounce_completed();
 	}
 }
 

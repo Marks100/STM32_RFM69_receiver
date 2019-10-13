@@ -14,10 +14,11 @@
 #include "NEOPIXEL.h"
 #include "SCREENS.h"
 #include "autoversion.h"
+#include "ROTARY.h"
 #include "VERSIONS.h"
 
 EXTI_InitTypeDef EXTI_InitStruct;
-false_true_et    HAL_BRD_rtc_triggered_s;
+
 
 
 /*!
@@ -43,18 +44,6 @@ void HAL_BRD_init( void )
 	/* Configure the GPIOs */
 	GPIO_InitTypeDef GPIO_InitStructure;
 
-	/* Configure the DEBUG selector pin, its important that this comes first */
-	// GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4;
-	// GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;
-	// GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
-	// GPIO_Init(GPIOA, &GPIO_InitStructure);
-
-	/*  */
-	// GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5;
-	// GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
-	// GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;
-	// GPIO_Init(GPIOB, &GPIO_InitStructure);
-
 	/* Configure the GPIO_LED pin */
     GPIO_InitStructure.GPIO_Pin = ONBOARD_LED_PIN;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
@@ -78,8 +67,6 @@ void HAL_BRD_init( void )
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(ONBOARD_BTN_PORT, &GPIO_InitStructure);
-
-
 
 	/* Configure the NEO PIXEL pin */
 	// GPIO_InitStructure.GPIO_Pin = ( GPIO_Pin_12 );
@@ -118,28 +105,26 @@ void HAL_BRD_init( void )
 	// GPIO_Init(GPIOB, &GPIO_InitStructure);
 
 
-	// NVIC_InitTypeDef NVIC_InitStruct;
+	NVIC_InitTypeDef NVIC_InitStruct;
 
-	// GPIO_EXTILineConfig(GPIO_PortSourceGPIOA, GPIO_PinSource11 );
+	GPIO_EXTILineConfig(ROTARY_PORT_SOURCE, ROTARY_PIN_SOURCE);
 
-	// EXTI_InitStruct.EXTI_Line = EXTI_Line11 ;
-	// EXTI_InitStruct.EXTI_LineCmd = ENABLE;
-	// EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt ;
-	// EXTI_InitStruct.EXTI_Trigger = EXTI_Trigger_Falling;
-	// EXTI_Init(&EXTI_InitStruct);
+	EXTI_InitStruct.EXTI_Line = ROTARY_EXT_LINE ;
+	EXTI_InitStruct.EXTI_LineCmd = ENABLE;
+	EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt ;
+	EXTI_InitStruct.EXTI_Trigger = EXTI_Trigger_Falling;
+	EXTI_Init(&EXTI_InitStruct);
 
-	// /* Add IRQ vector to NVIC */
-	// NVIC_InitStruct.NVIC_IRQChannel = EXTI15_10_IRQn;
-	// /* Set priority */
-	// NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = NVIC_PriorityGroup_0;
-	// /* Set sub priority */
-	// NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0x00;
-	// /* Enable interrupt */
-	// NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
-	// /* Add to NVIC */
-	// NVIC_Init(&NVIC_InitStruct);
-
-	// HAL_BRD_rtc_triggered_s = TRUE;
+	/* Add IRQ vector to NVIC */
+	NVIC_InitStruct.NVIC_IRQChannel = EXTI15_10_IRQn;
+	/* Set priority */
+	NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = NVIC_PriorityGroup_0;
+	/* Set sub priority */
+	NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0x00;
+	/* Enable interrupt */
+	NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
+	/* Add to NVIC */
+	NVIC_Init(&NVIC_InitStruct);
 
     /* Turn the led off straight away to save power */
     HAL_BRD_set_onboard_LED( OFF );
@@ -524,32 +509,6 @@ low_high_et HAL_BRD_read_rotary_SW_pin( void )
 }
 
 
-
-
-
-/*!
-****************************************************************************************************
-*
-*   \brief         returns the  status of the RTC trigger
-*
-*   \author        MS
-*
-*   \return        None
-*
-***************************************************************************************************/
-false_true_et HAL_BRD_get_rtc_trigger_status( void )
-{
-	return ( HAL_BRD_rtc_triggered_s );
-}
-
-
-
-void HAL_BRD_set_rtc_trigger_status( false_true_et state )
-{
-	HAL_BRD_rtc_triggered_s = state;
-}
-
-
 void HAL_BRD_set_heater_state( off_on_et state )
 {
 	HAL_BRD_set_LED_state( LED_3, state );
@@ -563,23 +522,23 @@ void HAL_BRD_set_cooler_state( off_on_et state )
 
 
 
-void HAL_BRD_set_ROTARY_interrupt_state( disable_enable_et state )
+void HAL_BRD_set_ROTARY_edge_state( disable_enable_et state )
 {
-	if( state == ENABLE_ )
+	EXTITrigger_TypeDef trigger;
+
+	if( ROTARY_get_hw_edge_detection() == LOW )
 	{
-		EXTI_InitStruct.EXTI_Line = EXTI_Line11 ;
-		EXTI_InitStruct.EXTI_LineCmd = ENABLE;
-		EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt ;
-		EXTI_InitStruct.EXTI_Trigger = trigger;
-		EXTI_Init(&EXTI_InitStruct);
+		trigger = EXTI_Trigger_Falling;
 	}
 	else
 	{
-		EXTI_InitStruct.EXTI_Line = EXTI_Line11 ;
-		EXTI_InitStruct.EXTI_LineCmd = DISABLE;
-		EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt;
-		EXTI_Init(&EXTI_InitStruct);
+		trigger = EXTI_Trigger_Rising;
 	}
+
+	EXTI_InitStruct.EXTI_Line = ROTARY_EXT_LINE ;
+	EXTI_InitStruct.EXTI_LineCmd = ENABLE;
+	EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt;
+	EXTI_Init(&EXTI_InitStruct);
 }
 
 
@@ -633,8 +592,6 @@ void EXTI0_IRQHandler(void)
 		/* Now we keep track of the interrupt edge */
 		/* Clear interrupt flag */
 		EXTI_ClearITPendingBit(EXTI_Line0);
-
-		HAL_BRD_rtc_triggered_s = TRUE;
 	}
 }
 
@@ -684,29 +641,28 @@ void EXTI15_10_IRQHandler(void)
 		EXTI_ClearITPendingBit(EXTI_Line15);
 	}
 
-	if ( EXTI_GetFlagStatus(EXTI_Line11) != RESET )
+	if ( EXTI_GetFlagStatus(ROTARY_EXT_LINE) != RESET )
 	{
 		/* Clear interrupt flag */
-		EXTI_ClearITPendingBit(EXTI_Line11);
+		EXTI_ClearITPendingBit(ROTARY_EXT_LINE);
 
-		/* grab the currect state of the data pin */
-		HAL_BRD_prev_rotary_data = HAL_BRD_read_rotary_data_pin();
-
-		/* Now we keep track of the interrupt edge */
-		if( trigger == EXTI_Trigger_Falling )
-		{
-			HAL_BRD_prev_rotary_clock = LOW;
-		}
-		else
-		{
-			HAL_BRD_prev_rotary_clock = HIGH;
-		}
-
-		EXTI_InitStruct.EXTI_Line = EXTI_Line11 ;
+		EXTI_InitStruct.EXTI_Line = ROTARY_EXT_LINE ;
 		EXTI_InitStruct.EXTI_LineCmd = DISABLE;
 		EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt;
 		EXTI_Init(&EXTI_InitStruct);
 
+		/* grab the currect state of the data pin */
+		ROTARY_set_prev_data_pin_state( HAL_BRD_read_rotary_data_pin() );
+
+		if( ROTARY_get_hw_edge_detection() == LOW )
+		{
+			ROTARY_set_prev_clk_pin_state( LOW );
+		}
+		else
+		{
+			ROTARY_set_prev_clk_pin_state( HIGH );
+		}
+		
 		/* Start a timer to generate a callback in xms to debounce the LOGIC */
 		HAL_TIM2_start();
 	}
