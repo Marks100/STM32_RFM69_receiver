@@ -37,10 +37,12 @@ void        ROTARY_tick( void );
 void        ROTARY_debounce_completed( void );
 void        ROTARY_evaluate_signals( low_high_et clock, low_high_et data );
 void        ROTARY_set_ROTARY_interrupt_state( disable_enable_et state );
-void        ROTARY_set_prev_data_pin_state( low_high_et state );
 void        ROTARY_set_prev_clk_pin_state( low_high_et state );
-low_high_et ROTARY_get_hw_edge_detection( void );
-void        ROTARY_set_hw_edge_detection( low_high_et state );
+low_high_et ROTARY_read_rotary_data_pin( void );
+low_high_et ROTARY_read_rotary_clock_pin( void );
+low_high_et ROTARY_read_rotary_SW_pin( void );
+void        ROTARY_increase_glitch_cnt( void );
+
 
 
 #endif

@@ -522,22 +522,12 @@ void HAL_BRD_set_cooler_state( off_on_et state )
 
 
 
-void HAL_BRD_set_ROTARY_edge_state( disable_enable_et state )
+void HAL_BRD_set_ROTARY_interrupt_state( disable_enable_et state )
 {
-	EXTITrigger_TypeDef trigger;
-
-	if( ROTARY_get_hw_edge_detection() == LOW )
-	{
-		trigger = EXTI_Trigger_Falling;
-	}
-	else
-	{
-		trigger = EXTI_Trigger_Rising;
-	}
-
 	EXTI_InitStruct.EXTI_Line = ROTARY_EXT_LINE ;
-	EXTI_InitStruct.EXTI_LineCmd = ENABLE;
-	EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt;
+	EXTI_InitStruct.EXTI_LineCmd = state;
+	EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt ;
+	EXTI_InitStruct.EXTI_Trigger = EXTI_Trigger_Falling;
 	EXTI_Init(&EXTI_InitStruct);
 }
 
@@ -646,23 +636,12 @@ void EXTI15_10_IRQHandler(void)
 		/* Clear interrupt flag */
 		EXTI_ClearITPendingBit(ROTARY_EXT_LINE);
 
-		EXTI_InitStruct.EXTI_Line = ROTARY_EXT_LINE ;
-		EXTI_InitStruct.EXTI_LineCmd = DISABLE;
-		EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt;
-		EXTI_Init(&EXTI_InitStruct);
+		/* I wont abstract this as it needs to be done ASAP */
+		HAL_BRD_set_ROTARY_interrupt_state( DISABLE );
+		//ROTARY_set_ROTARY_interrupt_state( DISABLE );
 
-		/* grab the currect state of the data pin */
-		ROTARY_set_prev_data_pin_state( HAL_BRD_read_rotary_data_pin() );
+		ROTARY_set_prev_clk_pin_state( ROTARY_read_rotary_clock_pin() );
 
-		if( ROTARY_get_hw_edge_detection() == LOW )
-		{
-			ROTARY_set_prev_clk_pin_state( LOW );
-		}
-		else
-		{
-			ROTARY_set_prev_clk_pin_state( HIGH );
-		}
-		
 		/* Start a timer to generate a callback in xms to debounce the LOGIC */
 		HAL_TIM2_start();
 	}
