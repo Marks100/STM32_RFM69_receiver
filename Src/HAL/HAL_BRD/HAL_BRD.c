@@ -295,11 +295,11 @@ void HAL_BRD_74HC164_set_clk_pin_state( low_high_et state )
 {
 	if( state == HIGH )
 	{
-		HAL_BRD_set_pin_state( GPIOB, GPIO_Pin_0, HIGH );
+		HAL_BRD_set_pin_state( SHIFT_REG_PORT, SHIFT_REG_CLK_PIN, HIGH );
 	}
 	else
 	{
-		HAL_BRD_set_pin_state( GPIOB, GPIO_Pin_0, LOW );
+		HAL_BRD_set_pin_state( SHIFT_REG_PORT, SHIFT_REG_CLK_PIN, LOW );
 	}
 }
 
@@ -308,36 +308,36 @@ void HAL_BRD_74HC164_pulse_clk_pin_state( void )
 {
 
 	/* This is soo time critical that instead of abstracting with function calls ill go direct to the hardware */
-	GPIOB->ODR |= GPIO_Pin_0;
+	SHIFT_REG_PORT->ODR |= SHIFT_REG_CLK_PIN;
 	asm("nop");asm("nop");asm("nop");asm("nop");
-	GPIOB->ODR &= ~GPIO_Pin_0;
+	SHIFT_REG_PORT->ODR &= ~SHIFT_REG_CLK_PIN;
 }
 
 
 void HAL_BRD_74HC164_set_data_pin_high( void )
 {
-	GPIOB->ODR |= GPIO_Pin_1;
+	SHIFT_REG_PORT->ODR |= SHIFT_REG_DATA_PIN;
 }
 
 void HAL_BRD_74HC164_set_data_pin_low( void )
 {
-	GPIOB->ODR &= ~GPIO_Pin_1;
+	SHIFT_REG_PORT->ODR &= ~SHIFT_REG_DATA_PIN;
 }
 
 void HAL_BRD_LCD_set_enable_pin_high( void )
 {
-	GPIOB->ODR |= GPIO_Pin_10;	
+	LCD_PORT->ODR |= LCD_EN_PIN;
 }
 
 void HAL_BRD_LCD_set_enable_pin_low( void )
 {
-	GPIOB->ODR &= ~GPIO_Pin_10;	
+	LCD_PORT->ODR &= ~LCD_EN_PIN;
 }
 
 
 void HAL_BRD_LCD_pulse_enable_pin_state( void )
 {
-	GPIOB->ODR |= GPIO_Pin_10;
+	LCD_PORT->ODR |= LCD_EN_PIN;
 
 	asm("nop");asm("nop");asm("nop");asm("nop");
 	asm("nop");asm("nop");asm("nop");asm("nop");
@@ -348,17 +348,17 @@ void HAL_BRD_LCD_pulse_enable_pin_state( void )
 	asm("nop");asm("nop");asm("nop");asm("nop");
 	asm("nop");asm("nop");asm("nop");asm("nop");
 
-	GPIOB->ODR &= ~GPIO_Pin_10;	
+	LCD_PORT->ODR &= ~LCD_EN_PIN;
 }
 
 void HAL_BRD_LCD_set_RS_pin_high( void )
 {
-	GPIOB->ODR |= GPIO_Pin_11;
+	LCD_PORT->ODR |= LCD_RS_PIN;
 }
 
 void HAL_BRD_LCD_set_RS_pin_low( void )
 {
-	GPIOB->ODR &= ~GPIO_Pin_11;	
+	LCD_PORT->ODR &= ~LCD_RS_PIN;
 }
 #pragma GCC pop_options
 

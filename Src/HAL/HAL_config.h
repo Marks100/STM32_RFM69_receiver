@@ -45,6 +45,14 @@
 #define ROTARY_PIN_SOURCE  GPIO_PinSource11
 #define ROTARY_EXT_LINE    EXTI_Line11
 
+#define SHIFT_REG_PORT
+#define SHIFT_REG_CLK_PIN
+#define SHIFT_REG_DATA_PIN
+
+#define LCD_PORT
+#define LCD_RS_PIN
+#define LCD_EN_PIN
+
 
 
 
