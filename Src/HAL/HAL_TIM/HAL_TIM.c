@@ -4,12 +4,9 @@
     #include "misc.h"
 #endif
 
-#include "ROTARY.h"
 #include "HAL_TIM.h"
-#include "HAL_BRD.h"
 
 u32_t HAL_TIM_seconds_ctr_s;
-low_high_et state = LOW;
 
 
 void HAL_TIM1_init( void )
