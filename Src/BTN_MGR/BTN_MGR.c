@@ -127,10 +127,14 @@ false_true_et BTN_MGR_read_button_state( BTN_MGR_type_et button )
     switch( button )
     {
         case BTN_MGR_ROTARY_BUTTON:
-        	returnType = HAL_BRD_read_rotary_SW_pin();
+        	returnType = HAL_BRD_read_rotary_btn_pin();
 
         	/* The rotary encoder button is inverse logic so lets invert this */
         	returnType ^= TRUE;
+        break;
+
+        case BTN_MGR_ONBOARD_BUTTON:
+            returnType = HAL_BRD_read_Onboard_btn_state();
         break;
 
       default:
@@ -387,6 +391,9 @@ void BTN_MGR_carryout_request( void )
                 AIRCON_handle_rotary_input( ROTARY_SHORT_PPRESS );
             break;
 
+            case 0x02: // OnBaord button
+            break;
+
             default:
             break;
         }
@@ -417,6 +424,10 @@ void BTN_MGR_carryout_request( void )
 
                 case 0x01: //ROTARY_BUTTON:
                 	SCREENS_handle_rotary_input( ROTARY_LONG_PPRESS );
+                    AIRCON_handle_rotary_input( ROTARY_SHORT_PPRESS );
+                break;
+
+                case 0x02: // OnBaord button
                 break;
 
                 default:

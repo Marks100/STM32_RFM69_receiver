@@ -40,7 +40,7 @@ float BMP280_temp_c;
 void BMP280_init( void )
 {
 	STDC_memset( &BMP280_calib_s, 0x00, sizeof( BMP280_calib_st ));
-	float BMP280_temp_c = S16_T_MAX;
+	BMP280_temp_c = S16_T_MAX;
 }
 
 

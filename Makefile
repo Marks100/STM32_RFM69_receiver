@@ -55,6 +55,8 @@ CFLAGS :=  \
 		-mcpu=cortex-m3 \
 		-mthumb \
 		-Wall \
+		-Wno-pragmas \
+		-Wno-pointer-sign \
 		-ffunction-sections \
 		-g \
 		$(OPTIMISATION) \

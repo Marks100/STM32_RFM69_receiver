@@ -322,8 +322,6 @@ void RFM69_get_configuration( RFM69_static_configuration_et config, RFM69_regist
     {
     	data_p[i].RFM69_register = RFM69_config_c[config].buffer_p[i].RFM69_register;
     	data_p[i].register_data  = RFM69_config_c[config].buffer_p[i].register_data;
-
-    	data_p->RFM69_register;
     }
 }
 

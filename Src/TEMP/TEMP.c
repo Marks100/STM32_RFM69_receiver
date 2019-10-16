@@ -110,7 +110,7 @@ void TEMP_increment_fail_cnt( void )
 	}
 }
 
-float TEMP_take_temp_measurement( void )
+void TEMP_take_temp_measurement( void )
 {
 	TEMP_temperature_c_s = BMP280_take_temp_measurement();
 }

@@ -200,7 +200,7 @@ void LCD_send_byte( u8_t byte, LCD_command_type_et type )
 {
     pass_fail_et LCD_ready = FAIL;
 
-    (void*)LCD_ready;
+    (void)LCD_ready;
 
     if( type == LCD_COMMAND )
     {

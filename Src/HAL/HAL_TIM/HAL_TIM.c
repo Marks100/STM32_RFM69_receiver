@@ -1,10 +1,13 @@
 #ifndef UNIT_TEST
     #include "stm32f10x_tim.h"
     #include "stm32f10x_exti.h"
+    #include "stm32f10x_rcc.h"
     #include "misc.h"
 #endif
 
 #include "HAL_TIM.h"
+#include "ROTARY.h"
+
 
 u32_t HAL_TIM_seconds_ctr_s;
 

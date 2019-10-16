@@ -43,9 +43,7 @@
 const NVM_generic_data_blk_st NVM_DEFAULT_GENERIC_DATA_BLK_s =
 {
 	RTC_EXT_DEFAULT_WAKEUP_TIME_SEC,						//Sleep time
-	RFM69_DEFAULT_TX_POWER_LEVEL,				      		//Tx power level
 	0x1234,	    											//Device ID
-	RFM69_433_DEFAULT_CONFIG,								//rf config
 	NRF24_SETUP_RX,											//rf manager mode
 	{
 		{ "help" },											//default CLI commands

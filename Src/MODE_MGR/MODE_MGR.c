@@ -10,6 +10,7 @@
 #include "MAIN.h"
 #include "AIRCON.h"
 #include "CLI.h"
+#include "TEMP.h"
 #include "LCD.h"
 #include "BTN_MGR.h"
 #include "HAL_UART.h"
@@ -117,14 +118,13 @@ void MODE_MGR_action_schedule_normal( void )
     CLI_message_handler();
     //MODE_MGR_check_user_input();
     //NEOPIXEL_tick();
-	//LCD_tick();
-	//ROTARY_tick();
-	//BTN_MGR_tick();
+	LCD_tick();
+	ROTARY_tick();
+	BTN_MGR_tick();
 
     switch( MODE_MGR_tick_timer_msecs_s )
     {
         case 50u:
-
 			AIRCON_tick();
             RF_MGR_tick();
         	break;

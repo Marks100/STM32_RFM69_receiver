@@ -4,6 +4,7 @@
 #include "C_defs.h"
 #include "LCD.h"
 #include "HAL_BRD.h"
+#include "ROTARY.h"
 
 #define SCREENS_MAIN_MEMU_ITEMS 9
 #define SCREENS_INFO_MEMU_ITEMS 4

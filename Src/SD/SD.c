@@ -5,8 +5,6 @@
 #include "NVM.h"
 #include "HAL_SPI.h"
 #include "HAL_BRD.h"
-#include "MAIN.h"
-#include "RFM69.h"
 
 
 extern NVM_info_st NVM_info_s;

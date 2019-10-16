@@ -6,7 +6,6 @@
 #include "RF_MGR.h"
 #include "NRF24.h"
 #include "AIRCON.h"
-#include "RFM69.h"
 
 /***************************************************************************************************
 **                              Defines                                                          **
@@ -53,9 +52,7 @@ the structure of the block or when adding new bytes in
 typedef struct
 {
     u32_t  sleep_time;
-    u8_t   tx_power_level;
     u16_t  device_id;
-    RFM69_static_configuration_et rf_config;
     NRF24_state_et nrf_startup_tx_rx_mode;
     CLI_cmd_st cmd_list[CLI_MAX_COMMAND_HISTORY];
     u16_t rf_whitelist[RF_MGR_RF_DATA_HANDLER_SIZE];

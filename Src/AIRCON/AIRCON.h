@@ -12,6 +12,7 @@
 ***************************************************************************************************/
 #include "C_defs.h"
 #include "HAL_BRD.h"
+#include "ROTARY.h"
 
 #define SETTING_ADJUST_UP			( 1u )
 #define SETTING_ADJUST_DOWN			( 0u )

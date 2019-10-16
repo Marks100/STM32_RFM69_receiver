@@ -14,11 +14,14 @@
 #include "HAL_SPI.h"
 #include "HAL_I2C.h"
 #include "HAL_TIM.h"
+#include "HAL_UART.h"
 #include "MODE_MGR.h"
 #include "BTN_MGR.h"
 #include "RF_MGR.h"
 #include "AIRCON.h"
 #include "nvm.h"
+#include "LCD.h"
+#include "TEMP.h"
 #include "HAL_BRD.h"
 #include "NEOPIXEL.h"
 #include "main.h"
@@ -49,16 +52,17 @@ int main(void)
 	MODE_MGR_init();
 	AIRCON_init();
 	//NEOPIXEL_int();
-	//BTN_MGR_init();
+	BTN_MGR_init();
 	TEMP_init();
 	CLI_init();
 	ROTARY_init();
+	LCD_init();
 
 
 	/* Init the systick timer */
 	MAIN_SYSTICK_init();
 
-	//MAIN_WATCHDOG_init();
+	MAIN_WATCHDOG_init();
 
 	while (1)
 	{

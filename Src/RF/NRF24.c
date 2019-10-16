@@ -95,7 +95,7 @@ pass_fail_et NRF24_self_check( void )
     /* There is no real self check that i can see, so lets try configuring a register with
     known data and try reading it back */
     pass_fail_et returntype = FAIL;
-    const u8_t self_check_data_str[5] = { 0x01, 0x02, 0x03, 0x04, 0x05 };
+    u8_t self_check_data_str[5] = { 0x01, 0x02, 0x03, 0x04, 0x05 };
     u8_t self_check_data[5];
     u8_t old_data[5];
 
@@ -1594,6 +1594,9 @@ void NRF24_tick( void )
         {
             NRF24_set_state( NRF24_FAULT );
         }
+        break;
+
+        default:
         break;
     }
 }

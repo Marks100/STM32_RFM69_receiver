@@ -118,7 +118,7 @@ void HAL_BRD_init( void )
 	/* Add IRQ vector to NVIC */
 	NVIC_InitStruct.NVIC_IRQChannel = EXTI15_10_IRQn;
 	/* Set priority */
-	NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = NVIC_PriorityGroup_0;
+	NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 0;
 	/* Set sub priority */
 	NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0x00;
 	/* Enable interrupt */

@@ -26,6 +26,14 @@
 **                              Data Types and Enums                                              **
 ***************************************************************************************************/
 /* None */
+typedef enum
+{
+    ROTARY_LEFT_SCROLL = 0u,
+    ROTARY_RIGHT_SCROLL,
+    ROTARY_SHORT_PPRESS,
+    ROTARY_LONG_PPRESS,
+    ROTARY_NO_CHANGE
+} ROTARY_scroll_type_et;
 
 
 /***************************************************************************************************
@@ -40,7 +48,7 @@ void        ROTARY_set_ROTARY_interrupt_state( disable_enable_et state );
 void        ROTARY_set_prev_clk_pin_state( low_high_et state );
 low_high_et ROTARY_read_rotary_data_pin( void );
 low_high_et ROTARY_read_rotary_clock_pin( void );
-low_high_et ROTARY_read_rotary_SW_pin( void );
+low_high_et ROTARY_read_rotary_btn_pin( void );
 void        ROTARY_increase_glitch_cnt( void );
 
 

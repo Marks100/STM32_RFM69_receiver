@@ -2,6 +2,7 @@
 #define NEOPIXEL_H
 
 #include "HAL_BRD.h"
+#include "ROTARY.h"
 
 #define NEOPIXEL_LED1	0
 #define NEOPIXEL_LED2	1

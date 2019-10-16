@@ -49,6 +49,7 @@ typedef enum
 typedef enum
 {
 	BTN_MGR_ROTARY_BUTTON = 0u,
+    BTN_MGR_ONBOARD_BUTTON,
 	BTN_MGR_NUM_BUTTONS
 } BTN_MGR_type_et;
 

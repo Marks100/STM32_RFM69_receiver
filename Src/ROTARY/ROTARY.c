@@ -1,6 +1,8 @@
 #include "HAL_BRD.h"
 #include "STDC.h"
-#include "HAL_TIM.h"
+#include "NEOPIXEL.h"
+#include "SCREENS.h"
+#include "ROTARY.h"
 
 
 low_high_et ROTARY_rotary_clock_s;
@@ -82,11 +84,11 @@ low_high_et ROTARY_read_rotary_data_pin( void )
 *   \return        low_high_et state of the pin
 *
 ***************************************************************************************************/
-low_high_et ROTARY_read_rotary_SW_pin( void )
+low_high_et ROTARY_read_rotary_btn_pin( void )
 {
     low_high_et state = LOW;
 
-    state = HAL_BRD_read_rotary_SW_pin();
+    state = HAL_BRD_read_rotary_btn_pin();
 
     return( state );
 }
@@ -211,7 +213,7 @@ void ROTARY_tick( void )
 		SCREENS_handle_rotary_input( ROTARY_LEFT_SCROLL );
 	}
 
-	/* Handle all the left scrolls */
+	/* Handle all the right scrolls */
 	for( i = 0u; i < right; i++ )
 	{
 		NEOPIXEL_handle_rotary_input( ROTARY_RIGHT_SCROLL );

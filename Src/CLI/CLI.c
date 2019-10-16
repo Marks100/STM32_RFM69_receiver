@@ -845,6 +845,7 @@ CLI_error_et led_handler( u8_t aArgCount, char *aArgVector[] )
 	HAL_BRD_led_et led = 0u;
 	off_on_et state = OFF;
 
+	(void)state;
 	(void)output_string;
 
 	CLI_send_newline();
