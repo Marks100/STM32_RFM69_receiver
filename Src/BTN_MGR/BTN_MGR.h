@@ -25,8 +25,9 @@
 #define BTN_MGR_HOLD_3_SEC_TIME   ( 3000u / BTN_MGR_TICK_TIME_MS )
 
 
-#define BTN_MGR_PRESS_SHORT_TIME  1u                                 //50ms time
+#define BTN_MGR_PRESS_SHORT_TIME  1u                                //50ms time
 #define BTN_MGR_PRESS_LONG_TIME   ( 2000 / BTN_MGR_TICK_TIME_MS )   //2sec time
+#define BTN_MGR_TIME_ALLOWANCE	  ( BTN_MGR_PRESS_LONG_TIME * 0.2 )
 
 
 
@@ -74,10 +75,10 @@ typedef struct
 void          BTN_MGR_init( void ) ;
 void          BTN_MGR_tick( void ) ;
 false_true_et BTN_MGR_read_button_state( BTN_MGR_type_et button ) ;
+void 		  BTN_MGR_read_all_buttons( void );
 void          BTN_MGR_analyze_hold_times( void ) ;
 false_true_et BTN_MGR_check_for_valid_press( void );
 void          BTN_MGR_analyze_presses( void );
-false_true_et BTN_MGR_adjust_button_times( void );
 false_true_et BTN_MGR_wait_for_all_buttons_low( void );
 void          BTN_MGR_reset_switches( void );
 void          BTN_MGR_carryout_request( void );

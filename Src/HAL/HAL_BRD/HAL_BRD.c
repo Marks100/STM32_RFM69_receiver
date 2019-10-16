@@ -72,7 +72,7 @@ void HAL_BRD_init( void )
 	// GPIO_Init(GPIOA, &GPIO_InitStructure);
 
 	/* Configure the rotary clock and data pins */
-	GPIO_InitStructure.GPIO_Pin = ( ROTARY_CLK_PIN | ROTARY_DATA_PIN );
+	GPIO_InitStructure.GPIO_Pin = ( ROTARY_CLK_PIN | ROTARY_DATA_PIN | ROTARY_BTN_PIN );
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(ROTARY_PORT, &GPIO_InitStructure);
@@ -496,11 +496,11 @@ low_high_et HAL_BRD_read_rotary_data_pin( void )
 *   \return        low_high_et state of the pin
 *
 ***************************************************************************************************/
-low_high_et HAL_BRD_read_rotary_SW_pin( void )
+low_high_et HAL_BRD_read_rotary_btn_pin( void )
 {
     low_high_et state = LOW;
 
-    state = HAL_BRD_read_pin_state( ROTARY_PORT, ROTARY_SW_PIN );
+    state = HAL_BRD_read_pin_state( ROTARY_PORT, ROTARY_BTN_PIN );
 
     return( state );
 }

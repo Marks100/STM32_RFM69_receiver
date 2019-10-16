@@ -8,8 +8,10 @@
 low_high_et ROTARY_rotary_clock_s;
 low_high_et ROTARY_rotary_data_s;
 low_high_et ROTARY_prev_rotary_clock_s;
-u16_t       ROTARY_plus_cnt_s;
-u16_t       ROTARY_minus_cnt_s;
+u8_t        ROTARY_current_plus_cnt_s;
+u8_t        ROTARY_current_minus_cnt_s;
+u32_t       ROTARY_total_plus_cnt_s;
+u32_t       ROTARY_total_minus_cnt_s;
 u32_t       ROTARY_glitches_s;
 
 
@@ -28,9 +30,12 @@ void ROTARY_init( void )
 	ROTARY_rotary_clock_s = LOW;
 	ROTARY_rotary_data_s = LOW;
     ROTARY_prev_rotary_clock_s = LOW;
-	ROTARY_plus_cnt_s = 0u;
-	ROTARY_minus_cnt_s = 0u;
+	ROTARY_current_plus_cnt_s = 0u;
+	ROTARY_current_minus_cnt_s = 0u;
 	ROTARY_glitches_s = 0u;
+
+	ROTARY_total_plus_cnt_s = 0u;
+	ROTARY_total_minus_cnt_s = 0u;
 }
 
 
@@ -176,11 +181,11 @@ void ROTARY_evaluate_signals( low_high_et clock, low_high_et data )
 {
  	if( ( clock == LOW ) && ( data == LOW ) )
 	{
- 		ROTARY_minus_cnt_s ++;
+ 		ROTARY_current_minus_cnt_s ++;
 	}
 	else if( ( clock == HIGH ) && ( data == LOW ) )
 	{
-		ROTARY_plus_cnt_s ++;
+		ROTARY_current_plus_cnt_s ++;
 	}
 }
 
@@ -199,12 +204,15 @@ void ROTARY_evaluate_signals( low_high_et clock, low_high_et data )
 void ROTARY_tick( void )
 {
 	u16_t i = 0u;
-	u16_t left = ROTARY_minus_cnt_s;
-	u16_t right = ROTARY_plus_cnt_s;
+	u16_t left  = ROTARY_current_minus_cnt_s;
+	u16_t right = ROTARY_current_plus_cnt_s;
+
+	ROTARY_total_plus_cnt_s += ROTARY_current_plus_cnt_s;
+	ROTARY_total_minus_cnt_s += ROTARY_current_minus_cnt_s;
 
 	/* Reset the current counts */
-	ROTARY_minus_cnt_s = 0u;
-	ROTARY_plus_cnt_s = 0u;
+	ROTARY_current_minus_cnt_s = 0u;
+	ROTARY_current_plus_cnt_s = 0u;
 
 	/* Handle all the left scrolls */
 	for( i = 0u; i < left; i++ )

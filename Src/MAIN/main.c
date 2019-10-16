@@ -27,7 +27,7 @@
 
 int main(void)
 {
- 	RCC_DeInit();
+    RCC_DeInit();
 	SystemInit();
 
 	RCC_HCLKConfig(RCC_SYSCLK_Div1);
@@ -59,7 +59,7 @@ int main(void)
 	MAIN_SYSTICK_init();
 
 	/* Init the WDg right at the end */
-	WDG_init();
+	//WDG_init();
 
 	while (1)
 	{
