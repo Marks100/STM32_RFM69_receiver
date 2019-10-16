@@ -4,12 +4,11 @@
 #include "MODE_MGR.h"
 #include "STDC.h"
 #include "NVM.h"
-#include "HAL_ADC.h"
 #include "HAL_BRD.h"
 #include "HAL_TIM.h"
-#include "MAIN.h"
 #include "AIRCON.h"
 #include "CLI.h"
+#include "WDG.h"
 #include "TEMP.h"
 #include "LCD.h"
 #include "BTN_MGR.h"
@@ -50,7 +49,7 @@ void MODE_MGR_init( void )
 
 void MODE_MGR_tick( void )
 {
-	MAIN_WATCHDOG_kick();
+	WDG_kick();
 
 	switch( MODE_MGR_mode_s )
 	{

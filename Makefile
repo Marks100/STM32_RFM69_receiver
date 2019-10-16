@@ -90,7 +90,9 @@ all: GCC_ARM
 
 
 .PHONY: GCC_ARM
-GCC_ARM: build_clean $(AUTOVERS_HEADER) $(OBJS)
+GCC_ARM: build_clean $(AUTOVERS_HEADER) 
+	@echo "--> Building source" 
+	@@$(MAKE) --no-print-directory $(OBJS)
 	@echo "--> Compiling Completed..."
 	@mkdir -p $(GCC_ARM_OBJ_OUT_DIR)
 	@echo "--> Linking Object Files..."
@@ -239,7 +241,8 @@ list:
 
 
 $(AUTOVERS_HEADER):
-	sVersion --autoversion
+	@echo "--> Generating autoversion header file"
+	@sVersion --autoversion
 
 $(GCC_ARM_OUT_DIR)/$(STM32_MAP_FILE):
 	@echo "--> $(STM32_MAP_FILE) does not exist, generating now"

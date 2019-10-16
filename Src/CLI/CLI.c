@@ -13,8 +13,6 @@
 **                              Includes                                                          **
 ***************************************************************************************************/
 
-#include "stm32f10x_usart.h"
-#include "misc.h"
 
 #include <stdint.h>
 #include <stddef.h>
@@ -604,13 +602,13 @@ CLI_error_et ver_handler( u8_t aArgCount, char *aArgVector[] )
 
 	STDC_memset( output_string, 0x20, sizeof( output_string ) );
 
-	HAL_BRD_get_SW_version_num( (u8_t*)version_num );
+	VERSIONS_get_SW_version_num( (u8_t*)version_num );
 
 	CLI_send_newline();
 	sprintf( output_string, "SW version is %d.%d.%d", version_num[0], version_num[1], version_num[2] );
 	CLI_send_data( output_string, strlen(output_string));
 
-	HAL_BRD_get_HW_version_num( (u8_t*)version_num );
+	VERSIONS_get_HW_version_num( (u8_t*)version_num );
 
 	CLI_send_newline();
 	sprintf( output_string, "HW version is %d", version_num[0] );

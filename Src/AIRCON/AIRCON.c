@@ -7,16 +7,7 @@
 /***************************************************************************************************
 **                              Includes                                                          **
 ***************************************************************************************************/
-#ifndef UNIT_TEST
-#endif
 
-#ifdef GCC_TEST
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#endif // GCC_TEST
-
-#include <math.h>
 #include "STDC.h"
 #include "HAL_BRD.h"
 #include "NVM.h"

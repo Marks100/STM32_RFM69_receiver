@@ -2,12 +2,12 @@
 #include <string.h>
 
 #include "STDC.h"
-#include "Screens.h"
+#include "SCREENS.h"
 #include "LCD.h"
 #include "HAL_BRD.h"
 #include "AIRCON.h"
 #include "NVM.h"
-#include "VERSIONS.H"
+#include "VERSIONS.h"
 
 
 const u8_t MESSAGE_PROJECT[]     = ("  AIRCON  2019  ");
@@ -872,13 +872,14 @@ void SCREENS_create_info_screen_1( void )
 
 void SCREENS_create_info_screen_2( void )
 {
-    /* Create a non const array to hold the LCD string */
+    /* Create a non const a
+    rray to hold the LCD string */
     u8_t message[ LCD_COL_COUNT + 1u ];
     u8_t sw_version_string[SW_VERSION_NUM_SIZE];
     u8_t hw_version_string[HW_VERSION_NUM_SIZE];
 
-    HAL_BRD_get_SW_version_num( sw_version_string );
-    HAL_BRD_get_HW_version_num( hw_version_string );
+    VERSIONS_get_SW_version_num( sw_version_string );
+    VERSIONS_get_HW_version_num( hw_version_string );
 
     /* Display the message and keep it on the screen until the timer expires */
     LCD_set_cursor_position(0,0);
@@ -937,7 +938,7 @@ void SCREENS_create_debug_screen_1( void )
     u8_t message[ LCD_COL_COUNT + 1u ];
 
     /* Display the message and keep it on the screen until the timer expires */
-    sprintf( (char*)message, "RF r77ets: %2d   ", NRF24_get_reset_count() );
+    sprintf( (char*)message, "RF r77ets: %4d   ", (int)NRF24_get_reset_count() );
     LCD_set_cursor_position(0,0);
     LCD_write_message( (u8_t*)message, LCD_COL_COUNT );
 
@@ -956,7 +957,7 @@ void SCREENS_create_test_screen( void )
     /* Display the message and keep it on the screen until the timer expires */
     LCD_set_cursor_position(0,0);
 
-    sprintf( (char*)message, "ctr:%010d  ", SCREENS_loop_ctr_s );
+    sprintf( (char*)message, "ctr:%010d  ", (int)SCREENS_loop_ctr_s );
 
     /* Now copy the const string into the new temp buffer */
     LCD_write_message( (u8_t*)message, LCD_COL_COUNT );

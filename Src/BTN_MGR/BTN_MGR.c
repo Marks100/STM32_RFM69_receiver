@@ -5,18 +5,10 @@
 *   \brief      Button Manager module.
 */
 
-#ifdef GCC_TEST
-    #include <stdlib.h>
-    #include <stdio.h>
-    #include <string.h>
-#endif // GCC_TEST
-
 #include "BTN_MGR.h"
-#include "COMPILER_defs.h"
 #include "C_defs.h"
 #include "STDC.h"
 #include "HAL_BRD.h"
-#include "MODE_MGR.h"
 #include "AIRCON.h"
 #include "LCD.h"
 #include "NVM.h"

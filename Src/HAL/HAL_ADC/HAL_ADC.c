@@ -3,7 +3,6 @@
     #include "stm32f10x_rcc.h"
 #endif
 
-#include "COMPILER_defs.h"
 #include "C_defs.h"
 #include "STDC.h"
 #include "HAL_ADC.h"

@@ -10,19 +10,11 @@
 /***************************************************************************************************
 **                              Includes                                                          **
 ***************************************************************************************************/
-#include "stm32f10x_rcc.h"
-#include "stm32f10x_i2c.h"
-#include "stm32f10x_gpio.h"
-#include "misc.h"
-
 #include "C_defs.h"
 #include "STDC.h"
-#include "HAL_BRD.h"
 #include "NVM.h"
-#include "COMPILER_defs.h"
 #include "HAL_I2C.h"
 #include "BMP280.h"
-
 
 
 extern NVM_info_st NVM_info_s;

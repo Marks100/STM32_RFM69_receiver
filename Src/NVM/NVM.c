@@ -206,7 +206,7 @@ ok_nok_et NVM_check_blk_crc_and_version ( void )
     u16_t crc;
     ok_nok_et result = NOK;
 
-    crc = CHKSUM_calc_xor_checksum( (u8_t*)&NVM_info_s.NVM_generic_data_blk_s, sizeof( NVM_info_s.NVM_generic_data_blk_s ) );
+    crc = CHKSUM_calc_xor_checksum( (u8_t*)&NVM_info_s.NVM_generic_data_blk_s, sizeof( NVM_generic_data_blk_st ) );
 
     if( NVM_info_s.checksum == crc )
     {
@@ -249,7 +249,7 @@ false_true_et NVM_populate_blk_crc_and_version( void )
     data_equal = STDC_memcompare( (u8_t*)NVM_FLASH_PTR_START_ADDR, &NVM_info_s, sizeof(NVM_info_s) );
 
     /* Generate the checksum for the block */
-    crc = CHKSUM_calc_xor_checksum( (u8_t*)&NVM_info_s.NVM_generic_data_blk_s, sizeof( NVM_info_s.NVM_generic_data_blk_s ) );
+    crc = CHKSUM_calc_xor_checksum( (u8_t*)&NVM_info_s.NVM_generic_data_blk_s, sizeof( NVM_generic_data_blk_st ) );
 
     if ( ( crc != NVM_info_s.checksum ) || ( data_equal == FALSE ) )
     {

@@ -2,6 +2,7 @@
     "files.associations": {
         "stm32_stubs.h": "c",
         "stm32f10x_i2c.h": "c",
-        "stm32f10x.h": "c"
+        "stm32f10x.h": "c",
+        "wdg.h": "c"
     }
 }
