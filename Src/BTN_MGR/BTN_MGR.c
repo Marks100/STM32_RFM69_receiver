@@ -57,7 +57,7 @@ void BTN_MGR_tick( void )
 	/* Read all the buttons */
 	BTN_MGR_read_all_buttons();
 
-    if( BTN_MGR_active_s == FALSE )
+    if( BTN_MGR_check_for_activity() == FALSE )
     {
         /* now check the button hold time */
         BTN_MGR_analyze_hold_times();
@@ -78,7 +78,7 @@ void BTN_MGR_tick( void )
         been released before letting the user press any more buttons */
         if( BTN_MGR_wait_for_all_buttons_low() == TRUE )
         {
-        	BTN_MGR_active_s = FALSE;
+        	BTN_MGR_set_activity( FALSE );
         }
     }
 }
@@ -157,6 +157,21 @@ void BTN_MGR_read_all_buttons( void )
 
 
 
+false_true_et BTN_MGR_check_for_activity( void )
+{
+    return( BTN_MGR_active_s);
+}
+
+
+void BTN_MGR_set_activity( false_true_et state )
+{
+    BTN_MGR_active_s = state;
+}
+
+
+
+
+
 /*!
 ****************************************************************************************************
 *
@@ -217,14 +232,14 @@ void BTN_MGR_analyze_presses( void )
 	        	BTN_MGR_control_s[i].valid_press = TRUE;
 
 	        	/* We will act on the first button that matches the criteria */
-	        	BTN_MGR_active_s = TRUE;
+	        	BTN_MGR_set_activity(TRUE);
 	        	break;
 	        }
 		}
 		else if( BTN_MGR_control_s[i].state == BTN_MGR_LONG_PRESS )
 		{
 			/* We have at least one button long press thats valid */
-			BTN_MGR_active_s = TRUE;
+			BTN_MGR_set_activity(TRUE);
 			check = TRUE;
 		}
     }
@@ -332,6 +347,7 @@ void BTN_MGR_carryout_request( void )
             if( BTN_MGR_control_s[i].state == BTN_MGR_SHORT_PRESS )
             {
             	button_mask = i;
+                break;
             }
             else if( BTN_MGR_control_s[i].state == BTN_MGR_LONG_PRESS )
             {
@@ -347,7 +363,7 @@ void BTN_MGR_carryout_request( void )
 		{
     		switch( button_mask >> 1 )
 			{
-				/* This is the short press manager */
+				/* This is the long press manager */
 				case BTN_MGR_ROTARY_BUTTON:
 					SCREENS_handle_rotary_input( ROTARY_LONG_PPRESS );
 					AIRCON_handle_rotary_input( ROTARY_LONG_PPRESS );
@@ -364,13 +380,8 @@ void BTN_MGR_carryout_request( void )
 		{
 			switch( button_mask )
 			{
-				/* This is the short press manager */
+				/* This is the combi press manager */
 				case 3:
-					SCREENS_handle_rotary_input( ROTARY_SHORT_PPRESS );
-					AIRCON_handle_rotary_input( ROTARY_SHORT_PPRESS );
-				break;
-
-				case BTN_MGR_ONBOARD_BUTTON:
 				break;
 
 				default:
