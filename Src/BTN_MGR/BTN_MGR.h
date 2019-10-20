@@ -82,6 +82,8 @@ void          BTN_MGR_analyze_presses( void );
 false_true_et BTN_MGR_wait_for_all_buttons_low( void );
 void          BTN_MGR_reset_switches( void );
 void          BTN_MGR_carryout_request( void );
+false_true_et BTN_MGR_check_for_activity( void );
+void          BTN_MGR_set_activity( false_true_et state );
 
 #endif /* BTN_MGR multiple inclusion guard */
 
