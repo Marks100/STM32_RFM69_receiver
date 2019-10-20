@@ -52,7 +52,7 @@ void AIRCON_tick( void )
 	/* Check that the feature is enabled */
 	if( AIRCON_config_s.state == ENABLE_ )
 	{
-		if( ( AIRCON_config_s.oat_c != TMPERATURE_NOT_AVAILABLE ) && ( AIRCON_config_s.oat_c < TMPERATURE_INVALID ) )
+		if( ( AIRCON_config_s.oat_c < TMPERATURE_NOT_AVAILABLE ) && ( AIRCON_config_s.oat_c < TMPERATURE_INVALID ) )
 		{
 			/* Now check the mode that we want to be in */
 			switch( AIRCON_config_s.mode )
@@ -325,49 +325,9 @@ void AIRCON_toggle_state( void )
 }
 
 
-void AIRCON_set_oat( float temperature, u16_t node_id )
+void AIRCON_set_oat( float* new_temp )
 {
-	if( temperature > MAX_ALLOWED_TEMP )
-	{
-		AIRCON_config_s.oat_c = TMPERATURE_INVALID;
-	}
-	else if( temperature < MIN_ALLOWED_TEMP )
-	{
-		AIRCON_config_s.oat_c = TMPERATURE_INVALID;
-	}
-	else
-	{
-		AIRCON_config_s.oat_c = temperature;
-
-		/* Now that the temp is valid lets track max and min */
-		if( ( AIRCON_min_max_s.max_temp_c.value > MAX_ALLOWED_TEMP ) || ( AIRCON_min_max_s.min_temp_c.value > MAX_ALLOWED_TEMP ) )
-		{
-			AIRCON_min_max_s.max_temp_c.value = temperature;
-			AIRCON_min_max_s.max_temp_c.id	  = node_id;
-			AIRCON_min_max_s.min_temp_c.value = temperature;
-			AIRCON_min_max_s.min_temp_c.id	  = node_id;
-		}
-		else
-		{
-			if( AIRCON_config_s.oat_c > AIRCON_min_max_s.max_temp_c.value )
-			{
-				AIRCON_min_max_s.max_temp_c.value = AIRCON_config_s.oat_c;
-				AIRCON_min_max_s.max_temp_c.id	  = node_id;
-			}
-			else if( AIRCON_config_s.oat_c < AIRCON_min_max_s.min_temp_c.value )
-			{
-				AIRCON_min_max_s.min_temp_c.value = AIRCON_config_s.oat_c;
-				AIRCON_min_max_s.min_temp_c.id	  = node_id;
-			}
-			else
-			{
-				/* code */
-			}
-					
-		}
-
-		AIRCON_min_max_s.temp_delta_c = ( AIRCON_min_max_s.max_temp_c.value - AIRCON_min_max_s.min_temp_c.value );
-	}
+	AIRCON_config_s.oat_c = *new_temp;
 }
 
 

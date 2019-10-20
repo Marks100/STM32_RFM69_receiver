@@ -29,7 +29,7 @@ STATIC u16_t TEMP_fail_cnt_s;
 
 void TEMP_init( void )
 {
-	TEMP_temperature_c_s = 32767.1;
+	TEMP_temperature_c_s = S16_T_MAX;
 	TEMP_state_s = TEMP_INIT;
 	TEMP_fail_cnt_s = 0u;
 }
@@ -64,6 +64,8 @@ void TEMP_cyclic( void )
 		break;
 
 		case TEMP_ERROR:
+			TEMP_temperature_c_s = S16_T_MAX;
+
 			TEMP_increment_fail_cnt();
 
 			TEMP_set_state( TEMP_INIT );
@@ -73,6 +75,8 @@ void TEMP_cyclic( void )
 			TEMP_set_state( TEMP_INIT );
 		break;
 	}
+
+	AIRCON_set_oat(&TEMP_temperature_c_s);
 }
 
 
@@ -115,6 +119,7 @@ void TEMP_take_temp_measurement( void )
 	TEMP_temperature_c_s = BMP280_take_temp_measurement();
 }
 
+
 pass_fail_et TEMP_validate_temp( float temp )
 {
 	pass_fail_et test = FAIL;
@@ -135,6 +140,10 @@ pass_fail_et TEMP_get_last_temp_measurement( float* temp )
 	{
 		temp = &TEMP_temperature_c_s;
 		status = PASS;
+	}
+	else
+	{
+		*temp = S16_T_MAX;
 	}
 	return( status );
 } 

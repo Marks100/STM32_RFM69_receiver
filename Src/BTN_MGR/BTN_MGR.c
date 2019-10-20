@@ -265,10 +265,13 @@ false_true_et BTN_MGR_wait_for_all_buttons_low( void )
 {
     false_true_et returnType = TRUE;
     u8_t i = 0u;
+    false_true_et BTN_MGR_button_pushed;
 
     for ( i = 0; i < BTN_MGR_NUM_BUTTONS; i++ )
     {
-        if( BTN_MGR_control_s[i].button_pushed == TRUE )
+        BTN_MGR_button_pushed = BTN_MGR_read_button_state( (BTN_MGR_type_et)i );
+
+        if( BTN_MGR_button_pushed == TRUE )
         {
             /* One of the buttons is not loW  */
             returnType = FALSE;
@@ -367,7 +370,7 @@ void BTN_MGR_carryout_request( void )
 				/* This is the short press manager */
 				case 3:
 					SCREENS_handle_rotary_input( ROTARY_SHORT_PPRESS );
-					AIRCON_handle_rotary_input( ROTARY_SHORT_PPRESS );
+		 			AIRCON_handle_rotary_input( ROTARY_SHORT_PPRESS );
 				break;
 
 				case BTN_MGR_ONBOARD_BUTTON:

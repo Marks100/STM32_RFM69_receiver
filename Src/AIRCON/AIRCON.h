@@ -19,7 +19,7 @@
 
 #define MAX_ALLOWED_TEMP			( 100.0 )
 #define MIN_ALLOWED_TEMP			( -50.0 )
-#define TMPERATURE_NOT_AVAILABLE	( 65535.0f )
+#define TMPERATURE_NOT_AVAILABLE	( 32768.0f )
 #define TMPERATURE_INVALID			( 65534.0f )
 #define MAX_NUM_OUTPUTS 			( 10 )
 
@@ -74,7 +74,7 @@ typedef struct
 ***************************************************************************************************/
 void  			   AIRCON_init( void );
 void  			   AIRCON_tick( void );
-void  			   AIRCON_set_oat( float temperature, u16_t node_id );
+void  			   AIRCON_set_oat( float* new_temp );
 float 			   AIRCON_get_oat( void );
 void  		       AIRCON_set_mode( AIRCON_mode_et mode );
 AIRCON_mode_et     AIRCON_get_mode( void );

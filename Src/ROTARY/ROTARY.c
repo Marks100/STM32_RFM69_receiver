@@ -181,11 +181,11 @@ void ROTARY_evaluate_signals( low_high_et clock, low_high_et data )
 {
  	if( ( clock == LOW ) && ( data == LOW ) )
 	{
- 		ROTARY_current_minus_cnt_s ++;
+ 		ROTARY_current_plus_cnt_s++;
 	}
 	else if( ( clock == HIGH ) && ( data == LOW ) )
 	{
-		ROTARY_current_plus_cnt_s ++;
+		ROTARY_current_minus_cnt_s ++;
 	}
 }
 

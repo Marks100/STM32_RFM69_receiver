@@ -101,4 +101,7 @@ void              HAL_BRD_LCD_set_enable_pin_high( void );
 void              HAL_BRD_LCD_set_RS_pin_high( void );
 void              HAL_BRD_LCD_set_RS_pin_low( void );
 
+
+void 			  HAL_BRD_generic_pin_toggle( void );
+
 #endif

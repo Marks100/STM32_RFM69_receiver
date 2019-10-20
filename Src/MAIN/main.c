@@ -59,7 +59,7 @@ int main(void)
 	MAIN_SYSTICK_init();
 
 	/* Init the WDg right at the end */
-	//WDG_init();
+	WDG_init();
 
 	while (1)
 	{

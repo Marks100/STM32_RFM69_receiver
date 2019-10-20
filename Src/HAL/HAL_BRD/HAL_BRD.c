@@ -78,28 +78,22 @@ void HAL_BRD_init( void )
 	GPIO_Init(ROTARY_PORT, &GPIO_InitStructure);
 
 	/* Configure the 74HC164 clk pin */
-	// GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;
-	// GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-	// GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	// GPIO_Init(GPIOB, &GPIO_InitStructure);
+	 GPIO_InitStructure.GPIO_Pin = SHIFT_REG_CLK_PIN;
+	 GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+	 GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	 GPIO_Init(SHIFT_REG_PORT, &GPIO_InitStructure);
 
 	/* Configure the 74HC164 data pin */
-	// GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1;
-	// GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-	// GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	// GPIO_Init(GPIOB, &GPIO_InitStructure);
+	 GPIO_InitStructure.GPIO_Pin = SHIFT_REG_DATA_PIN;
+	 GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+	 GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	 GPIO_Init(SHIFT_REG_PORT, &GPIO_InitStructure);
 
-	/* Configure the LCD Enable pin */
-	// GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;
-	// GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-	// GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	// GPIO_Init(GPIOB, &GPIO_InitStructure);
-
-	/* Configure the LCD RS pin */
-	// GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11;
-	// GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-	// GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	// GPIO_Init(GPIOB, &GPIO_InitStructure);
+	/* Configure the LCD Enable and RS pins */
+	GPIO_InitStructure.GPIO_Pin = ( LCD_EN_PIN | LCD_RS_PIN );
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(LCD_PORT, &GPIO_InitStructure);
 
 
 	NVIC_InitTypeDef NVIC_InitStruct;
@@ -526,6 +520,17 @@ void HAL_BRD_set_ROTARY_interrupt_state( disable_enable_et state )
 	EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt ;
 	EXTI_InitStruct.EXTI_Trigger = EXTI_Trigger_Falling;
 	EXTI_Init(&EXTI_InitStruct);
+}
+
+
+
+void HAL_BRD_generic_pin_toggle( void )
+{
+	HAL_BRD_toggle_pin_state( LCD_PORT, LCD_RS_PIN );
+	HAL_BRD_toggle_pin_state( LCD_PORT, LCD_EN_PIN );
+
+	HAL_BRD_toggle_pin_state( SHIFT_REG_PORT, SHIFT_REG_CLK_PIN );
+	HAL_BRD_toggle_pin_state( SHIFT_REG_PORT, SHIFT_REG_DATA_PIN );
 }
 
 
