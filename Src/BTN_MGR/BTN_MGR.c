@@ -11,6 +11,7 @@
 #include "HAL_BRD.h"
 #include "AIRCON.h"
 #include "LCD.h"
+#include "RF_MGR.h"
 #include "NVM.h"
 
 
@@ -391,6 +392,7 @@ void BTN_MGR_carryout_request( void )
 				break;
 
 				case BTN_MGR_ONBOARD_BUTTON:
+					RF_MGR_set_state( RF_MGR_TX );
 				break;
 
 				default:

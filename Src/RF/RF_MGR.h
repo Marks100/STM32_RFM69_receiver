@@ -1,26 +1,8 @@
 /*! \file
-*               $Revision: 16923 $
 *
 *               $Author: mstewart $
 *
-*               $Date: 2014-01-16 15:40:40 +0000 (Thu, 16 Jan 2014) $
-*
-*               $HeadURL: https://selacvs01.schrader.local:8443/svn/ECU_Software/LF_TOOL_GEN2/trunk/Src/HAL/RF/RF.h $
-*
 *   \brief      Public header file for RF module.
-*/
-/* COPYRIGHT NOTICE
-* ==================================================================================================
-*
-* The contents of this document are protected under copyright and contain commercially and/or
-* technically confidential information. The content of this document must not be used other than
-* for the purpose for which it was provided nor may it be disclosed or copied (by the authorised
-* recipient or otherwise) without the prior written consent of an authorised officer of Schrader
-* Electronics Ltd.
-*
-*         (C) $Date:: 2014#$ Schrader Electronics Ltd.
-*
-****************************************************************************************************
 */
 #ifndef RF_MGR_H
 #define RF_MGR_H
@@ -55,6 +37,12 @@ typedef enum
 	RF_MGR_MISSING_SENSOR = 0u
 
 } RF_MGR_generic_dtc_et;
+
+typedef enum 
+{
+	RF_MGR_TX = 0u,
+	RF_MGR_RX
+} RF_MGR_rf_state_et;
 
 typedef struct
 {
@@ -117,6 +105,8 @@ typedef struct
 void 					 RF_MGR_init( void );
 void                 	 RF_MGR_packet_received_event( u8_t* rf_data, u8_t rf_data_size );
 void                 	 RF_MGR_tick( void );
+void                     RF_MGR_set_state( RF_MGR_rf_state_et state );
+RF_MGR_rf_state_et       RF_MGR_get_state( void );
 void                 	 RF_MGR_analyse_received_packets( void );
 void                 	 RF_MGR_handle_early_prototype_sed( u16_t sensor_id, u8_t* data_p, u32_t packet_count );
 RF_MGR_rf_data_store_st* RF_MGR_get_all_decoded_IDs_address( void );

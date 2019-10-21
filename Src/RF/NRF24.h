@@ -131,6 +131,7 @@ typedef enum
     NRF24_STANDBY,
     NRF24_SETUP_TX,
     NRF24_TX,
+    NRF24_TX_WAIT_COMPLETE,
     NRF24_TX_TEST_MODE,
     NRF24_SETUP_RX,
     NRF24_RX,
@@ -369,17 +370,15 @@ pass_fail_et         NRF24_read_all_registers( u8_t* data_p );
 void                 NRF24_setup_payload( u8_t* data_p, u8_t len );
 NRF24_state_et       NRF24_get_state( void );
 void                 NRF24_complete_flush( void );
-false_true_et        NRF24_scheduled_tx( void );
 void                 NRF24_handle_acks_and_tx_failures( void );
 void                 NRF24_set_state( NRF24_state_et state );
 void                 NRF24_spi_slave_select( low_high_et state );
 void                 NRF24_ce_select( low_high_et state );
 void 				 NRF24_handle_supervisor_reset( void );
+void     			 NRF24_handle_acks_and_tx_failures( void );
 false_true_et        NRF24_check_for_packet_received( void );
 pass_fail_et         NRF24_self_check( void );
 u32_t                NRF24_get_reset_count( void );
-
-void 				 NRF24_handle_packet_stats( u8_t type );
 
 #endif /* RF_H multiple inclusion guard */
 

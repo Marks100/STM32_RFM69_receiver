@@ -27,6 +27,7 @@
 
 
 STATIC RF_MGR_rf_data_store_st RF_MGR_rf_data_store_s;
+STATIC RF_MGR_rf_state_et      RF_MGR_rf_state_s;
 STATIC RF_MGR_sed_data_st	   RF_MGR_sed_data_s;
 STATIC RF_MGR_sed_data_st	   RF_MGR_controller_data_s;
 
@@ -59,6 +60,8 @@ STATIC disable_enable_et	   RF_MGR_dbg_out_s;
 void RF_MGR_init( void )
 {
 	u8_t i ;
+
+	RF_MGR_rf_state_s = RF_MGR_RX;
 
     STDC_memset( &RF_MGR_rf_data_store_s, 0x00, sizeof( RF_MGR_rf_data_store_s ) );
     STDC_memset( &RF_MGR_sed_data_s, 0x00, sizeof( RF_MGR_sed_data_s ) );
@@ -94,7 +97,40 @@ void RF_MGR_init( void )
 ***************************************************************************************************/
 void RF_MGR_tick( void )
 {
-    RF_MGR_analyse_received_packets();
+	switch( RF_MGR_rf_state_s )
+	{
+		case RF_MGR_TX:
+		break;
+
+		case RF_MGR_RX:
+			RF_MGR_analyse_received_packets();
+		break;
+
+		default:
+		break;
+	}
+}
+
+
+
+void RF_MGR_set_state( RF_MGR_rf_state_et state )
+{
+	RF_MGR_rf_state_s = state;
+
+	if( RF_MGR_get_state() == RF_MGR_TX )
+	{
+		NRF24_set_state( NRF24_SETUP_TX );
+	}
+	else
+	{
+		NRF24_set_state( NRF24_SETUP_RX );
+	}
+}
+
+
+RF_MGR_rf_state_et RF_MGR_get_state( void )
+{
+	return( RF_MGR_rf_state_s );
 }
 
 

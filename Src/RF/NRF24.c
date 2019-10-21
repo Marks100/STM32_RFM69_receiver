@@ -47,7 +47,6 @@ STATIC const u8_t NRF24_data_pipe_custom_s_5[5] = {0xBB, 0xCC, 0xDD, 0xEE, 0xDD}
 STATIC NRF24_state_et NRF24_state_s;
 STATIC u8_t  NRF24_status_register_s;
 STATIC u8_t  NRF24_register_readback_s[DEFAULT_CONFIGURATION_SIZE];
-STATIC u16_t NRF24_cycle_counter_s;
 STATIC NRF24_tx_rx_payload_info_st NRF24_tx_rx_payload_info_s;
 STATIC pass_fail_et NRF24_self_test_s;
 STATIC u32_t NRF24_recieve_timeout_s;
@@ -80,7 +79,6 @@ void NRF24_init( void )
 	/* Set up the state to initialise the module in the 1 sec tick */
 	NRF24_state_s = NRF24_POWERING_UP;
 	NRF24_status_register_s = 0u;
-    NRF24_cycle_counter_s = 0u;
 	NRF24_self_test_s = TRUE;
 	NRF24_recieve_timeout_s = NRF24_TIMEOUT_VAL_SEC;
 	NRF24_resets_s = 0u;
@@ -1007,17 +1005,13 @@ pass_fail_et NRF24_send_payload( void )
     /* release NCS / Slave Select line high */
     NRF24_spi_slave_select( HIGH );
 
-    #if(UNIT_TEST!=1)
     delay_us(100);
-    #endif
 
     /* toggle the CE pin to complete the RF transfer */
     NRF24_ce_select(HIGH);
 
     /* hack a little delay in here */
-    #if(UNIT_TEST!=1)
     delay_us(100);
-    #endif
 
     NRF24_ce_select(LOW);
 
@@ -1450,7 +1444,14 @@ void NRF24_tick( void )
             NRF24_read_all_registers( NRF24_register_readback_s );
 
             /* Setup has completed so now move onto the next state */
-            NRF24_state_s = NVM_info_s.NVM_generic_data_blk_s.nrf_startup_tx_rx_mode;
+            if( RF_MGR_get_state() == RF_MGR_TX )
+            {
+                NRF24_state_s = NRF24_SETUP_TX;
+            }
+            else
+            {
+                NRF24_state_s = NRF24_SETUP_RX;
+            }
         }
         break;
 
@@ -1471,11 +1472,22 @@ void NRF24_tick( void )
 
         case NRF24_TX:
         {
-            /* Handle the ACKS and failed tx's */
-            NRF24_handle_acks_and_tx_failures();
+            u8_t tx_data[10];
 
-            /* Handle the next RF TX time and send payload if necessary */
-            NRF24_scheduled_tx();
+            STDC_memset( tx_data, 0x05, sizeof( tx_data ) );
+            NRF24_setup_payload( tx_data, sizeof( tx_data ) );
+
+            NRF24_send_payload();
+
+            NRF24_set_state( NRF24_TX_WAIT_COMPLETE );
+        }
+        break;
+
+        case NRF24_TX_WAIT_COMPLETE:
+        {
+        	NRF24_handle_acks_and_tx_failures();
+
+        	NRF24_set_state( NRF24_SETUP_RX );
         }
         break;
 
@@ -1513,6 +1525,7 @@ void NRF24_tick( void )
 				/* Reset the supervisor timeout */
 				NRF24_recieve_timeout_s = NRF24_TIMEOUT_VAL_SEC;
             }
+            NRF24_handle_supervisor_reset();
         }
         break;
 
@@ -1524,8 +1537,6 @@ void NRF24_tick( void )
                 NRF24_status_register_clr_bit( RX_DR );
 
                 NRF24_get_payload( NRF24_tx_rx_payload_info_s.NRF24_rx_rf_payload );
-
-                NRF24_handle_packet_stats( 3u );
 
                 if( ( STDC_memcompare( NRF24_tx_rx_payload_info_s.NRF24_rx_rf_payload, "Start Test", 10) ) == TRUE )
                 {
@@ -1579,7 +1590,7 @@ void NRF24_tick( void )
         default:
         break;
     }
-    NRF24_handle_supervisor_reset();
+    
     
     /* Only run the self test in modes that deem it neccessary */
     switch( NRF24_state_s )
@@ -1602,6 +1613,32 @@ void NRF24_tick( void )
 }
 
 
+
+/*!
+****************************************************************************************************
+*
+*   \brief         Handles ACKS and failed tx's
+*
+*   \author        MS
+*
+*   \return        none
+*
+*   \note
+*
+***************************************************************************************************/
+void NRF24_handle_acks_and_tx_failures( void )
+{
+    if( NRF24_check_status_mask( RF24_TX_DATA_SENT, &NRF24_status_register_s ) == HIGH )
+    {
+        /* Clear the Data sent bit or else we cant send any more data */
+        NRF24_status_register_clr_bit( TX_DS );
+    }
+    else if( NRF24_check_status_mask( RF24_MAX_RETR_REACHED, &NRF24_status_register_s ) == HIGH )
+    {
+        /* Clear the max retry bit before sending any further data */
+        NRF24_status_register_clr_bit( MAX_RT );
+    }
+}
 
 
 /*!
@@ -1683,37 +1720,6 @@ u32_t NRF24_get_reset_count( void )
 
 
 
-/*!
-****************************************************************************************************
-*
-*   \brief         Schedules the next TX from the NRF chipRX buffers on the NRF chip
-*
-*   \author        MS
-*
-*   \return        none
-*
-*   \note
-*
-***************************************************************************************************/
-false_true_et NRF24_scheduled_tx( void )
-{
-    false_true_et time_expired = FALSE;
-
-    if( NRF24_cycle_counter_s >= NRF24_TX_SCHEDULE_CNT )
-    {
-        NRF24_cycle_counter_s = 0u;
-        time_expired = TRUE;
-    }
-    else
-    {
-        NRF24_cycle_counter_s ++;
-    }
-
-    return ( time_expired );
-}
-
-
-
 void NRF24_handle_supervisor_reset( void )
 {
 	/* Decrement the supervisor timeout */
@@ -1728,93 +1734,6 @@ void NRF24_handle_supervisor_reset( void )
 
 		NRF24_set_state( NRF24_RESET );
 	}
-}
-
-
-/*!
-****************************************************************************************************
-*
-*   \brief         Handles ACKS and failed tx's
-*
-*   \author        MS
-*
-*   \return        none
-*
-*   \note
-*
-***************************************************************************************************/
-void NRF24_handle_acks_and_tx_failures( void )
-{
-    if( NRF24_check_status_mask( RF24_TX_DATA_SENT, &NRF24_status_register_s ) == HIGH )
-    {
-        /* Clear the Data sent bit or else we cant send any more data */
-        NRF24_status_register_clr_bit( TX_DS );
-
-        NRF24_handle_packet_stats( 1 );
-    }
-    else if( NRF24_check_status_mask( RF24_MAX_RETR_REACHED, &NRF24_status_register_s ) == HIGH )
-    {
-        /* Clear the max retry bit before sending any further data */
-        NRF24_status_register_clr_bit( MAX_RT );
-
-        //HAL_BRD_toggle_debug_pin();
-
-        NRF24_handle_packet_stats( 2 );
-    }
-}
-
-
-/*!
-****************************************************************************************************
-*
-*   \brief         Collect stats about the RF link
-*
-*   \author        MS
-*
-*   \return        none
-*
-*   \note
-*
-***************************************************************************************************/
-void NRF24_handle_packet_stats( u8_t type )
-{
-    if( type == 1 )
-    {
-        /* Data was sent and an ACK was received */
-    }
-    else if ( type == 2)
-    {
-        /* Data was sent and an ACK was not received ( MAX RETRIES ASSERTED ) */
-        if( NRF24_tx_rx_payload_info_s.NRF24_tx_failed_ctr < U16_T_MAX )
-        {
-            NRF24_tx_rx_payload_info_s.NRF24_tx_failed_ctr++;
-        }
-    }
-    else
-    {
-        /* Keep track of the received packets */
-        if( NRF24_tx_rx_payload_info_s.NRF24_rx_payload_ctr < U16_T_MAX )
-        {
-            NRF24_tx_rx_payload_info_s.NRF24_rx_payload_ctr++;
-        }
-
-        /* Now grab the RX fail counter */
-        //NRF24_tx_rx_payload_info_s.NRF24_tx_failed_ctr = ( payload frame ctr - NRF24_rx_payload_ctr );
-    }
-
-    if( NRF24_tx_rx_payload_info_s.NRF24_tx_payload_ctr < NRF_MAX_STATS_SIZE )
-    {
-        /* Get the retry count */
-        NRF24_tx_rx_payload_info_s.NRF24_tx_retry_ctr = NRF24_get_retry_count();
-
-        NRF24_tx_rx_payload_info_s.NRF24_tx_failed_stats[NRF24_tx_rx_payload_info_s.NRF24_tx_payload_ctr] = NRF24_tx_rx_payload_info_s.NRF24_tx_retry_ctr;
-    }
-
-    /* Keep track of the highest fail watermark */
-    if( NRF24_tx_rx_payload_info_s.NRF24_tx_retry_ctr > NRF24_tx_rx_payload_info_s.NRF24_tx_high_retry_cnt_s )
-    {
-        NRF24_tx_rx_payload_info_s.NRF24_tx_high_retry_cnt_s = NRF24_tx_rx_payload_info_s.NRF24_tx_retry_ctr;
-    }
 }
 
 

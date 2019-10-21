@@ -115,8 +115,6 @@ void MODE_MGR_action_schedule_normal( void )
 	HAL_BRD_toggle_onboard_led();
 	NRF24_tick();
     CLI_message_handler();
-    //MODE_MGR_check_user_input();
-    //NEOPIXEL_tick();
 	LCD_tick();
 	ROTARY_tick();
 	BTN_MGR_tick();

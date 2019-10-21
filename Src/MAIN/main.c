@@ -90,12 +90,14 @@ void MAIN_SYSTICK_init( void )
 
 void delay_us(u16_t us)
 {
+#if(UNIT_TEST!=1)
 	asm volatile (	"MOV R0,%[loops]\n\t"\
 			"1: \n\t"\
 			"SUB R0, #1\n\t"\
 			"CMP R0, #0\n\t"\
 			"BNE 1b \n\t" : : [loops] "r" (10*us) : "memory"\
 		      );
+#endif
 }
 
 
