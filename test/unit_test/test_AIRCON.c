@@ -873,11 +873,6 @@ low_high_et HAL_BRD_read_selector_switch_pin( HAL_BRD_switch_slider_et slider )
 	return( 0 );
 }
 
-void HAL_BRD_set_LED_state( HAL_BRD_led_et led, low_high_et state )
-{
-    (void)led;
-    (void)state;
-}
 
 void HAL_BRD_set_generic_output( u8_t generic_output_num, off_on_et state )
 {

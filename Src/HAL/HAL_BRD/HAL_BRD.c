@@ -41,11 +41,17 @@ void HAL_BRD_init( void )
 	/* Configure the GPIOs */
 	GPIO_InitTypeDef GPIO_InitStructure;
 
-	/* Configure the GPIO_LED pin */
+	/* Configure the onboard LED pin */
     GPIO_InitStructure.GPIO_Pin = ONBOARD_LED_PIN;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
     GPIO_Init(ONBOARD_LED_PORT, &GPIO_InitStructure);
+
+	/* Configure the USER_LED1 pin */
+    GPIO_InitStructure.GPIO_Pin = USER_LED1_PORT;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
+    GPIO_Init(USER_LED1_PIN, &GPIO_InitStructure);
 
 	/* Configure the NRF24 NCS pin */
 	GPIO_InitStructure.GPIO_Pin = NRF24_CS_PIN;
@@ -118,7 +124,7 @@ void HAL_BRD_init( void )
 	NVIC_Init(&NVIC_InitStruct);
 
     /* Turn the led off straight away to save power */
-    HAL_BRD_set_onboard_LED( OFF );
+    HAL_BRD_CLR_ONBOARD_LED();
 }
 
 
@@ -408,39 +414,6 @@ void HAL_BRD_NRF24_spi_slave_select( low_high_et state )
 
 
 
-/*!
-****************************************************************************************************
-*
-*   \brief         Toggles the led
-*
-*   \author        MS
-*
-*   \return        None
-*
-***************************************************************************************************/
-void HAL_BRD_toggle_onboard_led( void )
-{
-    HAL_BRD_toggle_pin_state( ONBOARD_LED_PORT, ONBOARD_LED_PIN );
-}
-
-
-void HAL_BRD_set_onboard_LED( off_on_et state )
-{
-	low_high_et val;
-
-	/* LED is inverse logic so flip the states */
-	if( state == OFF )
-	{
-		val = HIGH;
-	}
-	else
-	{
-		val = LOW;
-	}
-	HAL_BRD_set_pin_state( ONBOARD_LED_PORT, ONBOARD_LED_PIN, val);
-}
-
-
 
 /*!
 ****************************************************************************************************
@@ -502,13 +475,13 @@ low_high_et HAL_BRD_read_rotary_btn_pin( void )
 
 void HAL_BRD_set_heater_state( off_on_et state )
 {
-	HAL_BRD_set_LED_state( LED_3, state );
+	
 }
 
 
 void HAL_BRD_set_cooler_state( off_on_et state )
 {
-	HAL_BRD_set_LED_state( LED_3, state );
+	
 }
 
 
@@ -526,11 +499,6 @@ void HAL_BRD_set_ROTARY_interrupt_state( disable_enable_et state )
 
 void HAL_BRD_generic_pin_toggle( void )
 {
-	HAL_BRD_toggle_pin_state( LCD_PORT, LCD_RS_PIN );
-	HAL_BRD_toggle_pin_state( LCD_PORT, LCD_EN_PIN );
-
-	HAL_BRD_toggle_pin_state( SHIFT_REG_PORT, SHIFT_REG_CLK_PIN );
-	HAL_BRD_toggle_pin_state( SHIFT_REG_PORT, SHIFT_REG_DATA_PIN );
 }
 
 

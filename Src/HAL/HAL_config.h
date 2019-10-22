@@ -10,6 +10,9 @@
 #define ONBOARD_LED_PORT   GPIOA
 #define ONBOARD_LED_PIN    GPIO_Pin_1
 
+#define USER_LED1_PORT     GPIOB
+#define USER_LED1_PIN      GPIO_Pin_1
+
 #define NRF24_CS_PORT      GPIOB
 #define NRF24_CS_PIN       GPIO_Pin_2  
 

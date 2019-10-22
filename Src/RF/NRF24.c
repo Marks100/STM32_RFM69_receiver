@@ -1524,6 +1524,8 @@ void NRF24_tick( void )
 
 				/* Reset the supervisor timeout */
 				NRF24_recieve_timeout_s = NRF24_TIMEOUT_VAL_SEC;
+
+                HAL_BRD_TOGGLE_USER_LED1();
             }
             NRF24_handle_supervisor_reset();
         }

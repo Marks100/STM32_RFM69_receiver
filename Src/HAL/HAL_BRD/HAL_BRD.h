@@ -7,6 +7,7 @@
 **                              Includes                                                          **
 ***************************************************************************************************/
 #include "C_defs.h"
+#include "HAL_config.h"
 
 #if(UNIT_TEST == 0)
     #include "stm32f10x_gpio.h"
@@ -21,6 +22,24 @@
 ***************************************************************************************************/
 /* None */
 #define SELECTOR_MODE_BIT_MASK ( 0x0F )
+
+#define HAL_BRD_TOGGLE_ONBOARD_LED() HAL_BRD_toggle_pin_state( ONBOARD_LED_PORT, ONBOARD_LED_PIN );
+#define HAL_BRD_SET_ONBOARD_LED()    HAL_BRD_set_pin_state( ONBOARD_LED_PORT, ONBOARD_LED_PIN, LOW);
+#define HAL_BRD_CLR_ONBOARD_LED()    HAL_BRD_set_pin_state( ONBOARD_LED_PORT, ONBOARD_LED_PIN, HIGH);
+
+#define HAL_BRD_TOGGLE_USER_LED1()   HAL_BRD_toggle_pin_state( USER_LED1_PORT, USER_LED1_PIN );
+#define HAL_BRD_SET_USER_LED1()      HAL_BRD_set_pin_state( USER_LED1_PORT, USER_LED1_PIN, LOW);
+#define HAL_BRD_CLR_USER_LED1()      HAL_BRD_set_pin_state( USER_LED1_PORT, USER_LED1_PIN, HIGH);
+
+/*
+#define HAL_BRD_TOGGLE_USER_LED2()   HAL_BRD_toggle_pin_state( USER_LED1_PORT, ONBOARD_LED_PIN );
+#define HAL_BRD_SET_USER_LED2()      HAL_BRD_set_pin_state( USER_LED1_PORT, ONBOARD_LED_PIN, LOW);
+#define HAL_BRD_CLR_USER_LED2()      HAL_BRD_set_pin_state( USER_LED1_PORT, ONBOARD_LED_PIN, HIGH);
+
+#define HAL_BRD_TOGGLE_USER_LED3()   HAL_BRD_toggle_pin_state( USER_LED1_PORT, ONBOARD_LED_PIN );
+#define HAL_BRD_SET_USER_LED3()      HAL_BRD_set_pin_state( USER_LED1_PORT, ONBOARD_LED_PIN, LOW);
+#define HAL_BRD_CLR_USER_LED3()      HAL_BRD_set_pin_state( USER_LED1_PORT, ONBOARD_LED_PIN, HIGH);
+*/
 
 
 /***************************************************************************************************
@@ -68,17 +87,14 @@ void              HAL_BRD_init( void );
 void              HAL_BRD_reset( void );
 low_high_et       HAL_BRD_read_pin_state( GPIO_TypeDef * port, u16_t pin );
 void              HAL_BRD_set_pin_state(  GPIO_TypeDef * port, u16_t pin, low_high_et state );
-void              HAL_BRD_toggle_onboard_led( void );
 low_high_et       HAL_BRD_read_Onboard_btn_state( void );
+void              HAL_BRD_toggle_pin_state(  GPIO_TypeDef * port, u16_t pin );
 
 void              HAL_BRD_set_batt_monitor_state( disable_enable_et state );
 void              HAL_BRD_set_rf_enable_pin( disable_enable_et state );
-void              HAL_BRD_set_LED( off_on_et state );
 low_high_et       HAL_BRD_read_selector_switch_pin( HAL_BRD_switch_slider_et slider );
 void              HAL_BRD_NRF24_spi_slave_select( low_high_et state );
 void              HAL_BRD_NRF24_set_ce_pin_state( low_high_et state );
-void              HAL_BRD_set_LED_state( HAL_BRD_led_et led, low_high_et state );
-void              HAL_BRD_set_onboard_LED( off_on_et state );
 void              HAL_BRD_set_ROTARY_interrupt_state( disable_enable_et state );
 void              HAL_BRD_debounce_completed( void );
 void              HAL_BRD_set_generic_output( u8_t generic_output_num, off_on_et state );
@@ -100,8 +116,5 @@ void              HAL_BRD_LCD_set_enable_pin_low( void );
 void              HAL_BRD_LCD_set_enable_pin_high( void );
 void              HAL_BRD_LCD_set_RS_pin_high( void );
 void              HAL_BRD_LCD_set_RS_pin_low( void );
-
-
-void 			  HAL_BRD_generic_pin_toggle( void );
 
 #endif

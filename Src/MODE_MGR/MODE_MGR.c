@@ -57,7 +57,7 @@ void MODE_MGR_tick( void )
 			if( LOW == HAL_BRD_read_Onboard_btn_state() )
 			{
 				MODE_MGR_change_mode( MODE_MGR_MODE_WAIT );
-				HAL_BRD_set_onboard_LED( HIGH );
+				HAL_BRD_SET_ONBOARD_LED();
 			}
 			else
 			{
@@ -71,7 +71,7 @@ void MODE_MGR_tick( void )
 				MODE_MGR_change_mode( MODE_MGR_MODE_TEST );
 			}
 
-			HAL_BRD_set_onboard_LED( HIGH );
+			HAL_BRD_SET_ONBOARD_LED();
 		break;
 
 		case MODE_MGR_MODE_NORMAL:
@@ -112,7 +112,7 @@ void MODE_MGR_tick( void )
 ***************************************************************************************************/
 void MODE_MGR_action_schedule_normal( void )
 {
-	HAL_BRD_toggle_onboard_led();
+	HAL_BRD_TOGGLE_ONBOARD_LED();
 	NRF24_tick();
     CLI_message_handler();
 	LCD_tick();
@@ -245,7 +245,7 @@ void MODE_MGR_action_schedule_test( void )
 	{
 		MODE_MGR_tick_timer_msecs_s = MODE_MGR_TICK_RATE_MSECS;
 
-		HAL_BRD_toggle_onboard_led();
+		HAL_BRD_TOGGLE_ONBOARD_LED();
 	}
 	else
 	{
