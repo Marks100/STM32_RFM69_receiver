@@ -46,14 +46,6 @@ const NVM_generic_data_blk_st NVM_DEFAULT_GENERIC_DATA_BLK_s =
 	0x1234,	    											//Device ID
 	NRF24_SETUP_RX,											//rf manager mode
 	{
-		{ "help" },											//default CLI commands
-		{ "ver" },
-		{ "reset" },
-		{ "nvm" },
-		{ "" },
-		{ "" },
-	},
-	{
 		0x0001, 0x0002, 0x0003, 0x0004, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, //Whitelist
 		0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
 		0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
@@ -61,7 +53,6 @@ const NVM_generic_data_blk_st NVM_DEFAULT_GENERIC_DATA_BLK_s =
 	},
 	DISABLE_,   											//Whitelist state
 	DISABLE_,												//RF debug output state
-	AIRCON_COOL_MODE,
 	DISABLE_,
 	15.5f,
 	19.5f,

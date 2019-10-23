@@ -9,8 +9,6 @@
 #include "C_defs.h"
 #include "STDC.h"
 #include "HAL_BRD.h"
-#include "AIRCON.h"
-#include "LCD.h"
 #include "RF_MGR.h"
 #include "NVM.h"
 
@@ -104,10 +102,6 @@ false_true_et BTN_MGR_read_button_state( BTN_MGR_type_et button )
     switch( button )
     {
         case BTN_MGR_ROTARY_BUTTON:
-        	returnType = HAL_BRD_read_rotary_btn_pin();
-
-        	/* The rotary encoder button is inverse logic so lets invert this */
-        	returnType ^= TRUE;
         break;
 
         case BTN_MGR_ONBOARD_BUTTON:
@@ -353,8 +347,6 @@ void BTN_MGR_carryout_request( void )
 			{
 				/* This is the short press manager */
 				case BTN_MGR_ROTARY_BUTTON:
-					SCREENS_handle_rotary_input( ROTARY_LONG_PPRESS );
-					AIRCON_handle_rotary_input( ROTARY_LONG_PPRESS );
 				break;
 
 				case BTN_MGR_ONBOARD_BUTTON:
@@ -370,8 +362,6 @@ void BTN_MGR_carryout_request( void )
 			{
 				/* This is the short press manager */
 				case 3:
-					SCREENS_handle_rotary_input( ROTARY_SHORT_PPRESS );
-		 			AIRCON_handle_rotary_input( ROTARY_SHORT_PPRESS );
 				break;
 
 				case BTN_MGR_ONBOARD_BUTTON:
@@ -387,8 +377,6 @@ void BTN_MGR_carryout_request( void )
 			{
 				/* This is the short press manager */
 				case BTN_MGR_ROTARY_BUTTON:
-					SCREENS_handle_rotary_input( ROTARY_SHORT_PPRESS );
-					AIRCON_handle_rotary_input( ROTARY_SHORT_PPRESS );
 				break;
 
 				case BTN_MGR_ONBOARD_BUTTON:

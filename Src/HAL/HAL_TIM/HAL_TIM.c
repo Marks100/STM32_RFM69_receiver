@@ -6,7 +6,6 @@
 #endif
 
 #include "HAL_TIM.h"
-#include "ROTARY.h"
 
 
 u32_t HAL_TIM_seconds_ctr_s;
@@ -285,9 +284,6 @@ void TIM2_IRQHandler ( void )
 	{
 		HAL_TIM2_stop();
 		TIM_ClearITPendingBit( TIM2, TIM_IT_Update );
-
-		/* The debounce timer has finished, execute the callback */
-		ROTARY_debounce_completed();
 	}
 }
 

@@ -6,14 +6,10 @@
 #include "NVM.h"
 #include "HAL_BRD.h"
 #include "HAL_TIM.h"
-#include "AIRCON.h"
-#include "CLI.h"
 #include "WDG.h"
-#include "TEMP.h"
-#include "LCD.h"
 #include "BTN_MGR.h"
 #include "HAL_UART.h"
-#include "NEOPIXEL.h"
+
 
 
 
@@ -114,20 +110,15 @@ void MODE_MGR_action_schedule_normal( void )
 {
 	HAL_BRD_TOGGLE_ONBOARD_LED();
 	NRF24_tick();
-    CLI_message_handler();
-	LCD_tick();
-	ROTARY_tick();
 	BTN_MGR_tick();
 
     switch( MODE_MGR_tick_timer_msecs_s )
     {
         case 50u:
-			AIRCON_tick();
             RF_MGR_tick();
         	break;
 
         case 100u:
-			TEMP_cyclic();
         	break;
 
         case 150u:
@@ -136,16 +127,13 @@ void MODE_MGR_action_schedule_normal( void )
 
         case 200u:
 			NVM_tick();
-			TEMP_cyclic();
         	break;
 
         case 250u:
-			AIRCON_tick();
             RF_MGR_tick();
         	break;
 
         case 300u:
-			TEMP_cyclic();
         	break;
 
         case 350u:
@@ -153,17 +141,14 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 400u:
-			TEMP_cyclic();
 			NVM_tick();
         	break;
 
         case 450u:
-			AIRCON_tick();
             RF_MGR_tick();
         	break;
 
         case 500u:
-			TEMP_cyclic();
         	break;
 
         case 550u:
@@ -172,16 +157,13 @@ void MODE_MGR_action_schedule_normal( void )
 
         case 600u:
 			NVM_tick();
-			TEMP_cyclic();
         	break;
 
         case 650u:
-			AIRCON_tick();
             RF_MGR_tick();
         	break;
 
         case 700u:
-			TEMP_cyclic();
         	break;
 
         case 750u:
@@ -190,16 +172,13 @@ void MODE_MGR_action_schedule_normal( void )
 
         case 800u:
 			NVM_tick();
-			TEMP_cyclic();
         	break;
 
         case 850u:
-			AIRCON_tick();
             RF_MGR_tick();
         	break;
 
         case 900u:
-			TEMP_cyclic();
         	break;
 
         case 950u:
@@ -209,7 +188,6 @@ void MODE_MGR_action_schedule_normal( void )
         case 1000u:
 			RF_MGR_analyse_fault_conditions();
 			NVM_tick();
-			TEMP_cyclic();
 
 			 /* keep track of time in secs */
             HAL_TIM_increment_secs();
@@ -277,13 +255,10 @@ void MODE_MGR_action_selector_switch_changes( HAL_BRD_switch_slider_et slider, l
 	switch ( slider )
 	{
 		case SLIDER_1:
-			AIRCON_toggle_state();
 			break;
 
 
 		case SLIDER_2:
-			/* This switch has changed state, we dont care what the actual state is ( high or low ) 0 as long as we detect a change */
-			AIRCON_toggle_mode();
 			break;
 
 		default:

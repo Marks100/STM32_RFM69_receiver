@@ -19,9 +19,6 @@
 #include "STDC.h"
 #include "HAL_BRD.h"
 #include "NVM.h"
-#include "CLI.h"
-
-#include "AIRCON.h"
 #include "NRF24.h"
 #include "RF_MGR.h"
 
@@ -274,10 +271,6 @@ void RF_MGR_handle_early_prototype_sed( u16_t sensor_id, u8_t* data_p, u32_t pac
     RF_MGR_sed_data_s.packet_ctr  = packet_count;
     RF_MGR_sed_data_s.tx_interval_secs = STDC_make_16_bit( data_p[5], data_p[6] );
 
-	if( RF_MGR_get_dbg_output_state() == ENABLE_ )
-	{
-		RF_MGR_display_sed_data();
-	}
 }
 
 
@@ -379,94 +372,6 @@ void RF_MGR_packet_received_event( u8_t* rf_data, u8_t rf_data_size )
 
 
 
-
-
-/*!
-****************************************************************************************************
-*
-*   \brief         Displays the received sensor data
-*
-*   \author        MS
-*
-*   \return        none
-*
-*   \note
-*
-***************************************************************************************************/
-void RF_MGR_display_sed_data( void )
-{
-	u8_t display_data[200];
-
-	const char* sensor_type[6] =
-	{
-		"1",
-		"2",
-		"3",
-		"4",
-		"5",
-		"1st Gen Sleepy Sensor Device"
-	};
-
-	const char* mode_type[2] =
-	{
-		"NORMAL MODE",
-		"DEBUG MODE",
-	};
-
-	STDC_memset( display_data, 0x00, sizeof( display_data ) );
-
-	CLI_send_newline();
-	sprintf( display_data, "**------------------------------------------------**");
-	CLI_send_data( display_data, strlen( display_data ) );
-	STDC_memset( display_data, 0x00, sizeof( display_data ) );
-
-	CLI_send_newline();
-	sprintf( display_data, "Sensor ID:\t0x%04X\r\n",
-			RF_MGR_sed_data_s.node_id );
-	CLI_send_data( display_data, strlen( display_data ) );
-	STDC_memset( display_data, 0x00, sizeof( display_data ) );
-
-	sprintf( display_data, "Sensor Type: \t%s\r\n", sensor_type[ RF_MGR_sed_data_s.packet_type ]);
-	CLI_send_data( display_data, strlen( display_data ) );
-	STDC_memset( display_data, 0x00, sizeof( display_data ) );
-
-	sprintf( display_data, "Mode Type:\t%s\r\n", mode_type[ RF_MGR_sed_data_s.mode_type ]);
-	CLI_send_data( display_data, strlen( display_data ) );
-	STDC_memset( display_data, 0x00, sizeof( display_data ) );
-
-	sprintf( display_data, "Status 1:\t0x%02X\r\nStatus 2:\t0x%02X\r\n", 0, 0 );
-	CLI_send_data( display_data, strlen( display_data ) );
-	STDC_memset( display_data, 0x00, sizeof( display_data ) );
-
-	/* The temperature needs to be divided by 10 */
-	s16_t temp_whole = ( RF_MGR_sed_data_s.temperature/10 );
-	u8_t remainder = ( abs( RF_MGR_sed_data_s.temperature ) - ( abs(temp_whole) * 10 ) );
-
-	sprintf( display_data, "Packet ctr:\t%d\r\nTemperature:\t%d.%d degree c\r\nTX rate secs:\t%d",
-			 RF_MGR_sed_data_s.packet_ctr, temp_whole, remainder, RF_MGR_sed_data_s.tx_interval_secs  );
-	CLI_send_data( display_data, strlen( display_data ) );
-	STDC_memset( display_data, 0x00, sizeof( display_data ) );
-	CLI_send_newline();
-	CLI_send_newline();
-}
-
-
-
-/*!
-****************************************************************************************************
-*
-*   \brief         Displays the received sensor data
-*
-*   \author        MS
-*
-*   \return        none
-*
-*   \note
-*
-***************************************************************************************************/
-void RF_MGR_display_controller_data( void )
-{
-}
 
 
 

@@ -15,12 +15,8 @@
 #include "MODE_MGR.h"
 #include "BTN_MGR.h"
 #include "RF_MGR.h"
-#include "AIRCON.h"
 #include "NVM.h"
-#include "LCD.h"
-#include "TEMP.h"
 #include "HAL_BRD.h"
-#include "NEOPIXEL.h"
 #include "WDG.h"
 #include "main.h"
 
@@ -47,13 +43,7 @@ int main(void)
 	/* Initialise the SW modules */
 	RF_MGR_init();
 	MODE_MGR_init();
-	AIRCON_init();
-	//NEOPIXEL_int();
 	BTN_MGR_init();
-	TEMP_init();
-	CLI_init();
-	ROTARY_init();
-	LCD_init();
 
 	/* Init the systick timer */
 	MAIN_SYSTICK_init();

@@ -31,6 +31,9 @@
 #define HAL_BRD_SET_USER_LED1()      HAL_BRD_set_pin_state( USER_LED1_PORT, USER_LED1_PIN, LOW);
 #define HAL_BRD_CLR_USER_LED1()      HAL_BRD_set_pin_state( USER_LED1_PORT, USER_LED1_PIN, HIGH);
 
+#define HAL_BRD_TOGGLE_RELAY()       HAL_BRD_toggle_pin_state( RELAY_PORT, RELAY_PIN );
+#define HAL_BRD_SET_RELAY()          HAL_BRD_set_pin_state( RELAY_PORT, RELAY_PIN, LOW);
+#define HAL_BRD_CLR_RELAY()          HAL_BRD_set_pin_state( RELAY_PORT, RELAY_PIN, HIGH);
 /*
 #define HAL_BRD_TOGGLE_USER_LED2()   HAL_BRD_toggle_pin_state( USER_LED1_PORT, ONBOARD_LED_PIN );
 #define HAL_BRD_SET_USER_LED2()      HAL_BRD_set_pin_state( USER_LED1_PORT, ONBOARD_LED_PIN, LOW);

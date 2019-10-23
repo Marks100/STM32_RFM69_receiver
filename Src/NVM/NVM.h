@@ -2,10 +2,8 @@
 #define NVM_H
 
 #include "C_defs.h"
-#include "CLI.h"
 #include "RF_MGR.h"
 #include "NRF24.h"
-#include "AIRCON.h"
 
 /***************************************************************************************************
 **                              Defines                                                          **
@@ -54,11 +52,9 @@ typedef struct
     u32_t  sleep_time;
     u16_t  device_id;
     NRF24_state_et nrf_startup_tx_rx_mode;
-    CLI_cmd_st cmd_list[CLI_MAX_COMMAND_HISTORY];
     u16_t rf_whitelist[RF_MGR_RF_DATA_HANDLER_SIZE];
     disable_enable_et rf_dbg_out;
     disable_enable_et whitelist_state;
-    AIRCON_mode_et aircon_mode;
     disable_enable_et aircon_state;
     float cool_target_temp;
     float heat_target_temp;

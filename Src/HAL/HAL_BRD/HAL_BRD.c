@@ -11,8 +11,6 @@
 #include "STDC.h"
 #include "HAL_TIM.h"
 #include "MAIN.h"
-#include "NEOPIXEL.h"
-#include "ROTARY.h"
 
 EXTI_InitTypeDef EXTI_InitStruct;
 
@@ -41,17 +39,24 @@ void HAL_BRD_init( void )
 	/* Configure the GPIOs */
 	GPIO_InitTypeDef GPIO_InitStructure;
 
-	/* Configure the onboard LED pin */
+	/* Configure the Onboard LED pin */
     GPIO_InitStructure.GPIO_Pin = ONBOARD_LED_PIN;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
     GPIO_Init(ONBOARD_LED_PORT, &GPIO_InitStructure);
 
-	/* Configure the USER_LED1 pin */
-    GPIO_InitStructure.GPIO_Pin = USER_LED1_PORT;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
-    GPIO_Init(USER_LED1_PIN, &GPIO_InitStructure);
+    /* Configure the USER1 LED pin */
+	GPIO_InitStructure.GPIO_Pin = USER_LED1_PIN;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
+	GPIO_Init(USER_LED1_PORT, &GPIO_InitStructure);
+
+    /* Configure the RELAY pin */
+	GPIO_InitStructure.GPIO_Pin = RELAY_PIN;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
+	GPIO_Init(RELAY_PORT, &GPIO_InitStructure);
+
 
 	/* Configure the NRF24 NCS pin */
 	GPIO_InitStructure.GPIO_Pin = NRF24_CS_PIN;
@@ -71,60 +76,9 @@ void HAL_BRD_init( void )
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(ONBOARD_BTN_PORT, &GPIO_InitStructure);
 
-	/* Configure the NEO PIXEL pin */
-	// GPIO_InitStructure.GPIO_Pin = ( GPIO_Pin_12 );
-	// GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-	// GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	// GPIO_Init(GPIOA, &GPIO_InitStructure);
-
-	/* Configure the rotary clock and data pins */
-	GPIO_InitStructure.GPIO_Pin = ( ROTARY_CLK_PIN | ROTARY_DATA_PIN | ROTARY_BTN_PIN );
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_Init(ROTARY_PORT, &GPIO_InitStructure);
-
-	/* Configure the 74HC164 clk pin */
-	 GPIO_InitStructure.GPIO_Pin = SHIFT_REG_CLK_PIN;
-	 GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-	 GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	 GPIO_Init(SHIFT_REG_PORT, &GPIO_InitStructure);
-
-	/* Configure the 74HC164 data pin */
-	 GPIO_InitStructure.GPIO_Pin = SHIFT_REG_DATA_PIN;
-	 GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-	 GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	 GPIO_Init(SHIFT_REG_PORT, &GPIO_InitStructure);
-
-	/* Configure the LCD Enable and RS pins */
-	GPIO_InitStructure.GPIO_Pin = ( LCD_EN_PIN | LCD_RS_PIN );
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_Init(LCD_PORT, &GPIO_InitStructure);
-
-
-	NVIC_InitTypeDef NVIC_InitStruct;
-
-	GPIO_EXTILineConfig(ROTARY_PORT_SOURCE, ROTARY_PIN_SOURCE);
-
-	EXTI_InitStruct.EXTI_Line = ROTARY_EXT_LINE ;
-	EXTI_InitStruct.EXTI_LineCmd = ENABLE;
-	EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt ;
-	EXTI_InitStruct.EXTI_Trigger = EXTI_Trigger_Falling;
-	EXTI_Init(&EXTI_InitStruct);
-
-	/* Add IRQ vector to NVIC */
-	NVIC_InitStruct.NVIC_IRQChannel = EXTI15_10_IRQn;
-	/* Set priority */
-	NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 0;
-	/* Set sub priority */
-	NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0x00;
-	/* Enable interrupt */
-	NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
-	/* Add to NVIC */
-	NVIC_Init(&NVIC_InitStruct);
-
     /* Turn the led off straight away to save power */
     HAL_BRD_CLR_ONBOARD_LED();
+    HAL_BRD_CLR_RELAY();
 }
 
 
@@ -275,91 +229,6 @@ void HAL_BRD_set_batt_monitor_state( disable_enable_et state )
 
 
 
-/*!
-****************************************************************************************************
-*
-*   \brief         SETS the 74HC164 clk pin
-*
-*   \author        MS
-*
-*   \return        None
-*
-***************************************************************************************************/
-#pragma GCC push_options
-#pragma GCC optimize ("O1")
-
-void HAL_BRD_74HC164_set_clk_pin_state( low_high_et state )
-{
-	if( state == HIGH )
-	{
-		HAL_BRD_set_pin_state( SHIFT_REG_PORT, SHIFT_REG_CLK_PIN, HIGH );
-	}
-	else
-	{
-		HAL_BRD_set_pin_state( SHIFT_REG_PORT, SHIFT_REG_CLK_PIN, LOW );
-	}
-}
-
-
-void HAL_BRD_74HC164_pulse_clk_pin_state( void )
-{
-
-	/* This is soo time critical that instead of abstracting with function calls ill go direct to the hardware */
-	SHIFT_REG_PORT->ODR |= SHIFT_REG_CLK_PIN;
-	asm("nop");asm("nop");asm("nop");asm("nop");
-	SHIFT_REG_PORT->ODR &= ~SHIFT_REG_CLK_PIN;
-}
-
-
-void HAL_BRD_74HC164_set_data_pin_high( void )
-{
-	SHIFT_REG_PORT->ODR |= SHIFT_REG_DATA_PIN;
-}
-
-void HAL_BRD_74HC164_set_data_pin_low( void )
-{
-	SHIFT_REG_PORT->ODR &= ~SHIFT_REG_DATA_PIN;
-}
-
-void HAL_BRD_LCD_set_enable_pin_high( void )
-{
-	LCD_PORT->ODR |= LCD_EN_PIN;
-}
-
-void HAL_BRD_LCD_set_enable_pin_low( void )
-{
-	LCD_PORT->ODR &= ~LCD_EN_PIN;
-}
-
-
-void HAL_BRD_LCD_pulse_enable_pin_state( void )
-{
-	LCD_PORT->ODR |= LCD_EN_PIN;
-
-	asm("nop");asm("nop");asm("nop");asm("nop");
-	asm("nop");asm("nop");asm("nop");asm("nop");
-	asm("nop");asm("nop");asm("nop");asm("nop");
-	asm("nop");asm("nop");asm("nop");asm("nop");
-	asm("nop");asm("nop");asm("nop");asm("nop");
-	asm("nop");asm("nop");asm("nop");asm("nop");
-	asm("nop");asm("nop");asm("nop");asm("nop");
-	asm("nop");asm("nop");asm("nop");asm("nop");
-
-	LCD_PORT->ODR &= ~LCD_EN_PIN;
-}
-
-void HAL_BRD_LCD_set_RS_pin_high( void )
-{
-	LCD_PORT->ODR |= LCD_RS_PIN;
-}
-
-void HAL_BRD_LCD_set_RS_pin_low( void )
-{
-	LCD_PORT->ODR &= ~LCD_RS_PIN;
-}
-#pragma GCC pop_options
-
-
 
 /*!
 ****************************************************************************************************
@@ -388,7 +257,6 @@ void HAL_BRD_NRF24_set_ce_pin_state( low_high_et state )
 
 
 
-
 /*!
 ****************************************************************************************************
 *
@@ -411,95 +279,6 @@ void HAL_BRD_NRF24_spi_slave_select( low_high_et state )
 	}
 }
 
-
-
-
-
-/*!
-****************************************************************************************************
-*
-*   \brief         Reads the state of the rotary clock pin
-*
-*   \author        MS
-*
-*   \return        low_high_et state of the pin
-*
-***************************************************************************************************/
-low_high_et HAL_BRD_read_rotary_clock_pin( void )
-{
-    low_high_et state = LOW;
-
-    state = HAL_BRD_read_pin_state( ROTARY_PORT, ROTARY_CLK_PIN );
-
-    return( state );
-}
-
-/*!
-****************************************************************************************************
-*
-*   \brief         Reads the state of the rotary data pin
-*
-*   \author        MS
-*
-*   \return        low_high_et state of the pin
-*
-***************************************************************************************************/
-low_high_et HAL_BRD_read_rotary_data_pin( void )
-{
-    low_high_et state = LOW;
-
-    state = HAL_BRD_read_pin_state( ROTARY_PORT, ROTARY_DATA_PIN );
-
-    return( state );
-}
-
-
-/****************************************************************************************************
-*
-*   \brief         Reads the state of the rotary SW pin
-*
-*   \author        MS
-*
-*   \return        low_high_et state of the pin
-*
-***************************************************************************************************/
-low_high_et HAL_BRD_read_rotary_btn_pin( void )
-{
-    low_high_et state = LOW;
-
-    state = HAL_BRD_read_pin_state( ROTARY_PORT, ROTARY_BTN_PIN );
-
-    return( state );
-}
-
-
-void HAL_BRD_set_heater_state( off_on_et state )
-{
-	
-}
-
-
-void HAL_BRD_set_cooler_state( off_on_et state )
-{
-	
-}
-
-
-
-void HAL_BRD_set_ROTARY_interrupt_state( disable_enable_et state )
-{
-	EXTI_InitStruct.EXTI_Line = ROTARY_EXT_LINE ;
-	EXTI_InitStruct.EXTI_LineCmd = state;
-	EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt ;
-	EXTI_InitStruct.EXTI_Trigger = EXTI_Trigger_Falling;
-	EXTI_Init(&EXTI_InitStruct);
-}
-
-
-
-void HAL_BRD_generic_pin_toggle( void )
-{
-}
 
 
 
@@ -560,20 +339,5 @@ void EXTI15_10_IRQHandler(void)
 	    /* Now we keep track of the interrupt edge */
 		/* Clear interrupt flag */
 		EXTI_ClearITPendingBit(EXTI_Line15);
-	}
-
-	if ( EXTI_GetFlagStatus(ROTARY_EXT_LINE) != RESET )
-	{
-		/* Clear interrupt flag */
-		EXTI_ClearITPendingBit(ROTARY_EXT_LINE);
-
-		/* I wont abstract this as it needs to be done ASAP */
-		HAL_BRD_set_ROTARY_interrupt_state( DISABLE );
-		//ROTARY_set_ROTARY_interrupt_state( DISABLE );
-
-		ROTARY_set_prev_clk_pin_state( ROTARY_read_rotary_clock_pin() );
-
-		/* Start a timer to generate a callback in xms to debounce the LOGIC */
-		HAL_TIM2_start();
 	}
 }

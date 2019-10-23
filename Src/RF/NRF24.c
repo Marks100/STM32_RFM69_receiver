@@ -25,7 +25,6 @@
 #include "HAL_BRD.h"
 #include "HAL_SPI.h"
 #include "NVM.h"
-#include "CLI.h"
 #include "RF_MGR.h"
 #include "main.h"
 #include "NRF24.h"
@@ -1526,6 +1525,7 @@ void NRF24_tick( void )
 				NRF24_recieve_timeout_s = NRF24_TIMEOUT_VAL_SEC;
 
                 HAL_BRD_TOGGLE_USER_LED1();
+                HAL_BRD_TOGGLE_RELAY();
             }
             NRF24_handle_supervisor_reset();
         }

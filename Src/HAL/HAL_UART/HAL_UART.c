@@ -10,7 +10,6 @@
 #include "STDC.h"
 #include "HAL_BRD.h"
 #include "COMPILER_defs.h"
-#include "CLI.h"
 #include "HAL_config.h"
 #include "HAL_UART.h"
 
@@ -229,7 +228,7 @@ void USART2_IRQHandler(void)
 	{
 		HAL_UART_rx_buf_char_s = USART_ReceiveData(USART2);
 
-		CLI_handle_received_char( HAL_UART_rx_buf_char_s );
+		//CLI_handle_received_char( HAL_UART_rx_buf_char_s );
 	}
 }
 
