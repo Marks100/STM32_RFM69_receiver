@@ -186,7 +186,6 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 1000u:
-			RF_MGR_analyse_fault_conditions();
 			NVM_tick();
 
 			 /* keep track of time in secs */

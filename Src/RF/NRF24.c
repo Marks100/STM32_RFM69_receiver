@@ -1480,8 +1480,8 @@ void NRF24_tick( void )
 
             NRF24_set_state( NRF24_TX_WAIT_COMPLETE );
         }
-        break;
 
+        /* Intentional fallthrough */
         case NRF24_TX_WAIT_COMPLETE:
         {
         	NRF24_handle_acks_and_tx_failures();
@@ -1510,7 +1510,6 @@ void NRF24_tick( void )
         {
             /* We are now in Receive mode so lets just wait for a packet to come in */
             /* Eventually might be interrupt driven but for now lets poll */
-
             if( NRF24_check_for_packet_received() == TRUE )
             {
 				NRF24_get_payload( NRF24_tx_rx_payload_info_s.NRF24_rx_rf_payload );
@@ -1523,9 +1522,6 @@ void NRF24_tick( void )
 
 				/* Reset the supervisor timeout */
 				NRF24_recieve_timeout_s = NRF24_TIMEOUT_VAL_SEC;
-
-                HAL_BRD_TOGGLE_USER_LED1();
-                HAL_BRD_TOGGLE_RELAY();
             }
             NRF24_handle_supervisor_reset();
         }

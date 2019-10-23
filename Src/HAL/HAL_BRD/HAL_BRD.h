@@ -34,6 +34,7 @@
 #define HAL_BRD_TOGGLE_RELAY()       HAL_BRD_toggle_pin_state( RELAY_PORT, RELAY_PIN );
 #define HAL_BRD_SET_RELAY()          HAL_BRD_set_pin_state( RELAY_PORT, RELAY_PIN, LOW);
 #define HAL_BRD_CLR_RELAY()          HAL_BRD_set_pin_state( RELAY_PORT, RELAY_PIN, HIGH);
+#define HAL_BRD_READ_RELAY()         HAL_BRD_read_pin_state( RELAY_PORT, RELAY_PIN );
 /*
 #define HAL_BRD_TOGGLE_USER_LED2()   HAL_BRD_toggle_pin_state( USER_LED1_PORT, ONBOARD_LED_PIN );
 #define HAL_BRD_SET_USER_LED2()      HAL_BRD_set_pin_state( USER_LED1_PORT, ONBOARD_LED_PIN, LOW);
@@ -43,6 +44,8 @@
 #define HAL_BRD_SET_USER_LED3()      HAL_BRD_set_pin_state( USER_LED1_PORT, ONBOARD_LED_PIN, LOW);
 #define HAL_BRD_CLR_USER_LED3()      HAL_BRD_set_pin_state( USER_LED1_PORT, ONBOARD_LED_PIN, HIGH);
 */
+
+
 
 
 /***************************************************************************************************
@@ -110,14 +113,6 @@ low_high_et       HAL_BRD_read_rotary_clock_pin( void );
 low_high_et       HAL_BRD_read_rotary_data_pin( void );
 low_high_et       HAL_BRD_read_rotary_btn_pin( void );
 
-void              HAL_BRD_74HC164_set_clk_pin_state( low_high_et state );
-void              HAL_BRD_74HC164_pulse_clk_pin_state( void );
-void              HAL_BRD_74HC164_set_data_pin_high( void );
-void              HAL_BRD_74HC164_set_data_pin_low( void );
-void              HAL_BRD_LCD_pulse_enable_pin_state( void );
-void              HAL_BRD_LCD_set_enable_pin_low( void );
-void              HAL_BRD_LCD_set_enable_pin_high( void );
-void              HAL_BRD_LCD_set_RS_pin_high( void );
-void              HAL_BRD_LCD_set_RS_pin_low( void );
+
 
 #endif

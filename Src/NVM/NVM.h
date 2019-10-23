@@ -52,7 +52,6 @@ typedef struct
     u32_t  sleep_time;
     u16_t  device_id;
     NRF24_state_et nrf_startup_tx_rx_mode;
-    u16_t rf_whitelist[RF_MGR_RF_DATA_HANDLER_SIZE];
     disable_enable_et rf_dbg_out;
     disable_enable_et whitelist_state;
     disable_enable_et aircon_state;
