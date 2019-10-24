@@ -168,23 +168,15 @@ void RF_MGR_analyse_received_packets( void )
             action_req = RF_MGR_rf_data_store_s.data_packet_s[q_index].payload[0];
             mode_req = RF_MGR_rf_data_store_s.data_packet_s[q_index].payload[1];
 
-            switch( mode_req )
-            {
-				case 1 ... 5:
-					switch( action_req )
-					{
-						case 1 ... 5:
-						 HAL_BRD_TOGGLE_RELAY();
-						break;
-
-						default:
-							break;
-					}
+			switch( action_req )
+			{
+				case 0x80:
+					HAL_BRD_TOGGLE_RELAY();
 				break;
 
 				default:
 					break;
-            }
+			}
         }
     }
 }
@@ -208,7 +200,9 @@ void RF_MGR_analyse_received_packets( void )
 pass_fail_et RF_MGR_setup_tx_event( void )
 {
 	pass_fail_et status = FAIL;
-	u8_t tx_data[10];
+	u8_t tx_data[32];
+
+	STDC_memset( tx_data, 0x00, sizeof( tx_data ) );
 
 	tx_data[0] = ( rand() % 0xFF );
 	STDC_copy_16bit_to_buffer_msb_first( &tx_data[1], NVM_info_s.NVM_generic_data_blk_s.device_id );

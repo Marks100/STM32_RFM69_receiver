@@ -1528,6 +1528,7 @@ void NRF24_tick( void )
             /* Eventually might be interrupt driven but for now lets poll */
             if( NRF24_check_for_packet_received() == TRUE )
             {
+            	STDC_memset( NRF24_tx_rx_payload_info_s.NRF24_rx_rf_payload, 0x00, sizeof( NRF24_tx_rx_payload_info_s.NRF24_rx_rf_payload ));
 				NRF24_get_payload( NRF24_tx_rx_payload_info_s.NRF24_rx_rf_payload );
 
 				/* The first byte in every RF frame is random and needs to be discarded */
