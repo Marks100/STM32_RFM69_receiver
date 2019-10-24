@@ -72,8 +72,8 @@ void MAIN_SYSTICK_init( void )
 
 	SysTick_CLKSourceConfig( SysTick_CLKSource_HCLK_Div8 );
 
-	/* Trigger an interrupt every 1ms */
-	SysTick_Config(3600000);
+	/* Trigger an interrupt every 20ms */
+	SysTick_Config(1450000);
 }
 
 

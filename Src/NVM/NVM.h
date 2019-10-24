@@ -49,16 +49,8 @@ the structure of the block or when adding new bytes in
 
 typedef struct
 {
-    u32_t  sleep_time;
     u16_t  device_id;
     NRF24_state_et nrf_startup_tx_rx_mode;
-    disable_enable_et rf_dbg_out;
-    disable_enable_et whitelist_state;
-    disable_enable_et aircon_state;
-    float cool_target_temp;
-    float heat_target_temp;
-    float auto_target_temp;
-
 } NVM_generic_data_blk_st;
 
 

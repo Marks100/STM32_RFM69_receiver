@@ -26,6 +26,8 @@
 STATIC RF_MGR_rf_data_store_st RF_MGR_rf_data_store_s;
 STATIC RF_MGR_rf_state_et      RF_MGR_rf_state_s;
 STATIC u16_t                   RF_MGR_tick_ctr_s;
+STATIC false_true_et           RF_MGR_send_complete_s;
+STATIC u8_t                    RF_MGR_send_item_s;
 
 
 /***************************************************************************************************
@@ -55,6 +57,8 @@ void RF_MGR_init( void )
 
 	RF_MGR_rf_state_s = RF_MGR_RX;
 	RF_MGR_tick_ctr_s = 0u;
+	RF_MGR_send_complete_s = TRUE;
+	RF_MGR_send_item_s = 0u;
 
 	STDC_memset( &RF_MGR_rf_data_store_s, 0x00, sizeof( RF_MGR_rf_data_store_st ) );
 
@@ -81,8 +85,11 @@ void RF_MGR_tick( void )
 	switch( RF_MGR_rf_state_s )
 	{
 		case RF_MGR_TX:
-			RF_MGR_setup_tx_event();
-			RF_MGR_set_state(RF_MGR_RX);
+			if( PASS == RF_MGR_setup_tx_event() )
+			{
+				/* Done so go back to RX mode */
+				RF_MGR_set_state(RF_MGR_RX);
+			}
 		break;
 
 		case RF_MGR_RX:
@@ -93,14 +100,20 @@ void RF_MGR_tick( void )
 		break;
 	}
 
-	if( RF_MGR_tick_ctr_s < 10 )
+	if( RF_MGR_tick_ctr_s < RF_MGR_TRANSMIT_TIME )
 	{
 		RF_MGR_tick_ctr_s ++;
 	}
 	else
 	{
 		RF_MGR_tick_ctr_s = 0u;
+		RF_MGR_send_complete_s = FALSE;
 		RF_MGR_set_state(RF_MGR_TX);
+
+		if( NRF24_get_state() > NRF24_INITIALISING )
+		{
+			NRF24_set_state( NRF24_SETUP_TX );
+		}
 	}
 }
 
@@ -109,15 +122,6 @@ void RF_MGR_tick( void )
 void RF_MGR_set_state( RF_MGR_rf_state_et state )
 {
 	RF_MGR_rf_state_s = state;
-
-	if( RF_MGR_get_state() == RF_MGR_TX )
-	{
-		NRF24_set_state( NRF24_SETUP_TX );
-	}
-	else
-	{
-		NRF24_set_state( NRF24_SETUP_RX );
-	}
 }
 
 
@@ -127,6 +131,12 @@ RF_MGR_rf_state_et RF_MGR_get_state( void )
 	return( RF_MGR_rf_state_s );
 }
 
+
+
+void RF_MGR_notify_send_complete( void )
+{
+	RF_MGR_send_complete_s = TRUE;
+}
 
 
 /*!
@@ -195,9 +205,22 @@ void RF_MGR_analyse_received_packets( void )
 *   \note
 *
 ***************************************************************************************************/
-void RF_MGR_setup_tx_event( void )
+pass_fail_et RF_MGR_setup_tx_event( void )
 {
-    
+	pass_fail_et status = FAIL;
+	u8_t tx_data[10];
+
+	tx_data[0] = ( rand() % 0xFF );
+	STDC_copy_16bit_to_buffer_msb_first( &tx_data[1], NVM_info_s.NVM_generic_data_blk_s.device_id );
+	tx_data[3] = HAL_BRD_READ_RELAY();
+	NRF24_setup_tx_payload( tx_data, sizeof( tx_data ) );
+
+	if( RF_MGR_send_complete_s == TRUE )
+	{
+		status = PASS;
+	}
+
+	return ( status );
 }
 
 

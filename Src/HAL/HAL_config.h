@@ -7,6 +7,9 @@
 #include "C_defs.h"
 #include "COMPILER_defs.h"
 
+
+#define DEFAULT_DEV_ID	   0x0001
+
 #define ONBOARD_LED_PORT   GPIOA
 #define ONBOARD_LED_PIN    GPIO_Pin_1
 

@@ -18,7 +18,7 @@
 **                              Defines                                                           **
 ***************************************************************************************************/
 
-#define BTN_MGR_TICK_TIME_MS      50
+#define BTN_MGR_TICK_TIME_MS      20
 #define BTN_MGR_DAB_TIME 	      5u
 #define BTN_MGR_HOLD_1_SEC_TIME   ( 1000u / BTN_MGR_TICK_TIME_MS )
 #define BTN_MGR_HOLD_2_SEC_TIME   ( 2000u / BTN_MGR_TICK_TIME_MS )

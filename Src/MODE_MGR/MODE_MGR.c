@@ -111,18 +111,17 @@ void MODE_MGR_action_schedule_normal( void )
 	HAL_BRD_TOGGLE_ONBOARD_LED();
 	NRF24_tick();
 	BTN_MGR_tick();
+	RF_MGR_tick();
 
     switch( MODE_MGR_tick_timer_msecs_s )
     {
         case 50u:
-            RF_MGR_tick();
         	break;
 
         case 100u:
         	break;
 
         case 150u:
-            RF_MGR_tick();
         	break;
 
         case 200u:
@@ -130,14 +129,12 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 250u:
-            RF_MGR_tick();
         	break;
 
         case 300u:
         	break;
 
         case 350u:
-            RF_MGR_tick();
         	break;
 
         case 400u:
@@ -145,14 +142,12 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 450u:
-            RF_MGR_tick();
         	break;
 
         case 500u:
         	break;
 
         case 550u:
-            RF_MGR_tick();
         	break;
 
         case 600u:
@@ -160,14 +155,12 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 650u:
-            RF_MGR_tick();
         	break;
 
         case 700u:
         	break;
 
         case 750u:
-            RF_MGR_tick();
         	break;
 
         case 800u:
@@ -175,14 +168,12 @@ void MODE_MGR_action_schedule_normal( void )
         	break;
 
         case 850u:
-            RF_MGR_tick();
         	break;
 
         case 900u:
         	break;
 
         case 950u:
-            RF_MGR_tick();
         	break;
 
         case 1000u:

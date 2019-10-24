@@ -50,6 +50,7 @@ STATIC NRF24_tx_rx_payload_info_st NRF24_tx_rx_payload_info_s;
 STATIC pass_fail_et                NRF24_self_test_s;
 STATIC u32_t                       NRF24_recieve_timeout_s;
 STATIC u16_t                       NRF24_resets_s;
+STATIC u16_t                       NRF24_send_timeout_s;
 
 /***************************************************************************************************
 **                              Data declarations and definitions                                 **
@@ -81,6 +82,7 @@ void NRF24_init( void )
 	NRF24_self_test_s = TRUE;
 	NRF24_recieve_timeout_s = NRF24_TIMEOUT_VAL_SEC;
 	NRF24_resets_s = 0u;
+	NRF24_send_timeout_s = 2;
 
     STDC_memset( &NRF24_tx_rx_payload_info_s, 0x00, sizeof( NRF24_tx_rx_payload_info_s ) );
     STDC_memset( &NRF24_register_readback_s, 0x00, DEFAULT_CONFIGURATION_SIZE );
@@ -1198,7 +1200,7 @@ pass_fail_et NRF24_read_all_registers( u8_t* data_p )
 *
 *******************************************************************************
 */
-void NRF24_setup_payload( u8_t* data_p, u8_t len )
+void NRF24_setup_tx_payload( u8_t* data_p, u8_t len )
 {
     /* First reset the entire tx payload to 0 */
     STDC_memset( NRF24_tx_rx_payload_info_s.NRF24_tx_rf_payload, 0x00 , sizeof( NRF24_tx_rx_payload_info_s.NRF24_tx_rf_payload ) );
@@ -1207,7 +1209,7 @@ void NRF24_setup_payload( u8_t* data_p, u8_t len )
     NRF24_tx_rx_payload_info_s.NRF24_tx_payload_size = len;
 
     /* Copy the data into the tx buffer */
-    STDC_memcpy( NRF24_tx_rx_payload_info_s.NRF24_tx_rf_payload, data_p , NRF24_tx_rx_payload_info_s.NRF24_tx_payload_size );
+    STDC_memcpy( NRF24_tx_rx_payload_info_s.NRF24_tx_rf_payload, data_p, NRF24_tx_rx_payload_info_s.NRF24_tx_payload_size );
 }
 
 
@@ -1471,10 +1473,7 @@ void NRF24_tick( void )
 
         case NRF24_TX:
         {
-            u8_t tx_data[10];
-
-            STDC_memset( tx_data, 0x05, sizeof( tx_data ) );
-            NRF24_setup_payload( tx_data, sizeof( tx_data ) );
+        	NRF24_send_timeout_s = 2;
 
             NRF24_send_payload();
 
@@ -1484,12 +1483,29 @@ void NRF24_tick( void )
         /* Intentional fallthrough */
         case NRF24_TX_WAIT_COMPLETE:
         {
-        	NRF24_handle_acks_and_tx_failures();
+        	if( NRF24_handle_acks_and_tx_failures() == PASS )
+        	{
+        		NRF24_set_state( NRF24_SETUP_RX );
 
-        	NRF24_set_state( NRF24_SETUP_RX );
+        		/* Notify the RF_MGR that we have finished */
+        		RF_MGR_notify_send_complete();
+        	}
+        	else
+        	{
+        		if( NRF24_send_timeout_s > 0 )
+        		{
+        			NRF24_send_timeout_s --;
+        		}
+        		else
+        		{
+            		/* Try again */
+            		NRF24_set_state( NRF24_TX );
+				}
+        		break;
+        	}
         }
-        break;
 
+        /* Intentional fallthrough */
         case NRF24_SETUP_RX:
         {
         	/* carry out the necessary steps to transition to TX_MODE */
@@ -1624,18 +1640,23 @@ void NRF24_tick( void )
 *   \note
 *
 ***************************************************************************************************/
-void NRF24_handle_acks_and_tx_failures( void )
+pass_fail_et NRF24_handle_acks_and_tx_failures( void )
 {
+	pass_fail_et status = FAIL;
+
     if( NRF24_check_status_mask( RF24_TX_DATA_SENT, &NRF24_status_register_s ) == HIGH )
     {
         /* Clear the Data sent bit or else we cant send any more data */
         NRF24_status_register_clr_bit( TX_DS );
+
+        status = PASS;
     }
     else if( NRF24_check_status_mask( RF24_MAX_RETR_REACHED, &NRF24_status_register_s ) == HIGH )
     {
         /* Clear the max retry bit before sending any further data */
         NRF24_status_register_clr_bit( MAX_RT );
     }
+    return( status );
 }
 
 

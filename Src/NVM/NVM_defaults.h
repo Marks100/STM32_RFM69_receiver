@@ -42,15 +42,8 @@
 
 const NVM_generic_data_blk_st NVM_DEFAULT_GENERIC_DATA_BLK_s =
 {
-	RTC_EXT_DEFAULT_WAKEUP_TIME_SEC,						//Sleep time
-	0x1234,	    											//Device ID
+	DEFAULT_DEV_ID,	  										//Device ID
 	NRF24_SETUP_RX,											//rf manager mode
-	DISABLE_,   											//Whitelist state
-	DISABLE_,												//RF debug output state
-	DISABLE_,
-	15.5f,
-	19.5f,
-	18.0f,
 };
 
 
