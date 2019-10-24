@@ -43,13 +43,13 @@ STATIC const u8_t NRF24_data_pipe_custom_s_3[5] = {0xBB, 0xCC, 0xDD, 0xEE, 0xBB}
 STATIC const u8_t NRF24_data_pipe_custom_s_4[5] = {0xBB, 0xCC, 0xDD, 0xEE, 0xCC};
 STATIC const u8_t NRF24_data_pipe_custom_s_5[5] = {0xBB, 0xCC, 0xDD, 0xEE, 0xDD};
 
-STATIC NRF24_state_et NRF24_state_s;
-STATIC u8_t  NRF24_status_register_s;
-STATIC u8_t  NRF24_register_readback_s[DEFAULT_CONFIGURATION_SIZE];
+STATIC NRF24_state_et              NRF24_state_s;
+STATIC u8_t                        NRF24_status_register_s;
+STATIC u8_t                        NRF24_register_readback_s[DEFAULT_CONFIGURATION_SIZE];
 STATIC NRF24_tx_rx_payload_info_st NRF24_tx_rx_payload_info_s;
-STATIC pass_fail_et NRF24_self_test_s;
-STATIC u32_t NRF24_recieve_timeout_s;
-STATIC u16_t NRF24_resets_s;
+STATIC pass_fail_et                NRF24_self_test_s;
+STATIC u32_t                       NRF24_recieve_timeout_s;
+STATIC u16_t                       NRF24_resets_s;
 
 /***************************************************************************************************
 **                              Data declarations and definitions                                 **

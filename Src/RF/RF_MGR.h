@@ -87,6 +87,7 @@ void                     RF_MGR_set_state( RF_MGR_rf_state_et state );
 RF_MGR_rf_state_et       RF_MGR_get_state( void );
 void                 	 RF_MGR_analyse_received_packets( void );
 void 					 RF_MGR_analyse_fault_conditions( void );
+void 					 RF_MGR_setup_tx_event( void );
 
 
 

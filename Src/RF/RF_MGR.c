@@ -81,6 +81,7 @@ void RF_MGR_tick( void )
 	switch( RF_MGR_rf_state_s )
 	{
 		case RF_MGR_TX:
+			RF_MGR_setup_tx_event();
 			RF_MGR_set_state(RF_MGR_RX);
 		break;
 
@@ -178,6 +179,26 @@ void RF_MGR_analyse_received_packets( void )
     }
 }
 
+
+
+
+
+/*!
+****************************************************************************************************
+*
+*   \brief         This sets up the next tx event
+*
+*   \author        MS
+*
+*   \return        none
+*
+*   \note
+*
+***************************************************************************************************/
+void RF_MGR_setup_tx_event( void )
+{
+    
+}
 
 
 
