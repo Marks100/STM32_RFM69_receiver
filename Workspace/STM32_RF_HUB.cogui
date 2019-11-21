@@ -119,9 +119,9 @@
 <input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STM32_RF_HUB/Src/RF/RFM69.c"/>
 <editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="12755" selectionTopPixel="6720"/>
 </editor>
-<editor activePart="true" focus="true" id="org.eclipse.cdt.ui.editor.CEditor" name="MODE_MGR.c" partName="MODE_MGR.c" path="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/MODE_MGR/MODE_MGR.c" title="MODE_MGR.c" tooltip="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/MODE_MGR/MODE_MGR.c" workbook="DefaultEditorWorkbook">
+<editor id="org.eclipse.cdt.ui.editor.CEditor" name="MODE_MGR.c" partName="MODE_MGR.c" path="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/MODE_MGR/MODE_MGR.c" title="MODE_MGR.c" tooltip="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/MODE_MGR/MODE_MGR.c" workbook="DefaultEditorWorkbook">
 <input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STM32_RF_HUB/Src/MODE_MGR/MODE_MGR.c"/>
-<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="2531" selectionTopPixel="1365"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="2623" selectionTopPixel="1365"/>
 </editor>
 <editor id="org.eclipse.cdt.ui.editor.CEditor" name="CLI.h" partName="CLI.h" path="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/CLI/CLI.h" title="CLI.h" tooltip="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/CLI/CLI.h" workbook="DefaultEditorWorkbook">
 <input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STM32_RF_HUB/Src/CLI/CLI.h"/>
@@ -455,9 +455,9 @@
 <input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STM32_RF_HUB/Src/BTN_MGR/BTN_MGR.h"/>
 <editorState selectionHorizontalPixel="0" selectionLength="13" selectionOffset="2216" selectionTopPixel="798"/>
 </editor>
-<editor id="org.eclipse.cdt.ui.editor.CEditor" name="main.c" partName="main.c" path="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/MAIN/main.c" title="main.c" tooltip="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/MAIN/main.c" workbook="DefaultEditorWorkbook">
+<editor activePart="true" focus="true" id="org.eclipse.cdt.ui.editor.CEditor" name="main.c" partName="main.c" path="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/MAIN/main.c" title="main.c" tooltip="C:/Users/mark/Desktop/STM32_RFM69_receiver/Src/MAIN/main.c" workbook="DefaultEditorWorkbook">
 <input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STM32_RF_HUB/Src/MAIN/main.c"/>
-<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="1014" selectionTopPixel="585"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="458" selectionTopPixel="240"/>
 </editor>
 </editors>
 <views>
@@ -503,7 +503,7 @@
 </view>
 <view id="org.eclipse.debug.ui.ExpressionView" partName="Expressions">
 <viewState>
-<ExpressionKeySet ExpKeys="ROTARY_prev_rotary_clock_s,ROTARY_rotary_clock_s,ROTARY_rotary_data_s,ROTARY_glitches_s,ROTARY_current_minus_cnt_s,ROTARY_current_plus_cnt_s,ROTARY_total_plus_cnt_s,ROTARY_total_minus_cnt_s,BTN_MGR_control_s,button_mask,BTN_MGR_active_s,BTN_MGR_PRESS_LONG_TIME - BTN_MGR_control_s[i].hold_time_ms,( BTN_MGR_PRESS_LONG_TIME - BTN_MGR_control_s[i].hold_time_ms ),TEMP_temperature_c_s,"/>
+<ExpressionKeySet ExpKeys="ROTARY_prev_rotary_clock_s,ROTARY_rotary_clock_s,ROTARY_rotary_data_s,ROTARY_glitches_s,ROTARY_current_minus_cnt_s,ROTARY_current_plus_cnt_s,ROTARY_total_plus_cnt_s,ROTARY_total_minus_cnt_s,BTN_MGR_control_s,button_mask,BTN_MGR_active_s,BTN_MGR_PRESS_LONG_TIME - BTN_MGR_control_s[i].hold_time_ms,( BTN_MGR_PRESS_LONG_TIME - BTN_MGR_control_s[i].hold_time_ms ),TEMP_temperature_c_s,RF_MGR_rf_data_store_s,rf_data,tx_data,NRF24_tx_rx_payload_info_s,tx_data,NRF24_tx_rx_payload_info_s,"/>
 </viewState>
 </view>
 <view id="org.coocox.component.ui.ComponentView" partName="Components">
@@ -694,8 +694,8 @@
 <hide_toolbar_item_id id="org.eclipse.ui.edit.text.toggleShowSelectedElementOnly"/>
 <hide_toolbar_item_id id="org.coocox.builder.ui.build"/>
 <hide_toolbar_item_id id="org.coocox.welcome.ui.action.welcome"/>
-<hide_toolbar_item_id id="org.coocox.codebugger.configuration.coideProgramDownloadAction"/>
 <hide_toolbar_item_id id="org.coocox.component.ui.ShowRepositoryAction"/>
+<hide_toolbar_item_id id="org.coocox.codebugger.configuration.coideProgramDownloadAction"/>
 <view id="org.eclipse.ui.console.ConsoleView"/>
 <view id="org.eclipse.debug.ui.BreakpointView"/>
 <view id="org.eclipse.debug.ui.DebugView"/>
@@ -940,14 +940,17 @@
 <file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="main.c" tooltip="STM32_RF_HUB/Src/MAIN/main.c">
 <persistable path="/STM32_RF_HUB/Src/MAIN/main.c"/>
 </file>
-<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="TEMP.c" tooltip="STM32_RF_HUB/Src/TEMP/TEMP.c">
-<persistable path="/STM32_RF_HUB/Src/TEMP/TEMP.c"/>
-</file>
 <file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="startup_stm32f10x_md.c" tooltip="STM32_RF_HUB/cmsis_boot/startup/startup_stm32f10x_md.c">
 <persistable path="/STM32_RF_HUB/cmsis_boot/startup/startup_stm32f10x_md.c"/>
 </file>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="LCD.h" tooltip="STM32_RF_HUB/Src/LCD/LCD.h">
+<persistable path="/STM32_RF_HUB/Src/LCD/LCD.h"/>
+</file>
 <file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="LCD.c" tooltip="STM32_RF_HUB/Src/LCD/LCD.c">
 <persistable path="/STM32_RF_HUB/Src/LCD/LCD.c"/>
+</file>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="TEMP.c" tooltip="STM32_RF_HUB/Src/TEMP/TEMP.c">
+<persistable path="/STM32_RF_HUB/Src/TEMP/TEMP.c"/>
 </file>
 <file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="BTN_MGR.h" tooltip="STM32_RF_HUB/Src/BTN_MGR/BTN_MGR.h">
 <persistable path="/STM32_RF_HUB/Src/BTN_MGR/BTN_MGR.h"/>
@@ -975,9 +978,6 @@
 </file>
 <file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="stm32f10x_i2c.c" tooltip="STM32_RF_HUB/stm_lib/src/stm32f10x_i2c.c">
 <persistable path="/STM32_RF_HUB/stm_lib/src/stm32f10x_i2c.c"/>
-</file>
-<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="HAL_UART.c" tooltip="STM32_RF_HUB/Src/HAL/HAL_UART/HAL_UART.c">
-<persistable path="/STM32_RF_HUB/Src/HAL/HAL_UART/HAL_UART.c"/>
 </file>
 </mruList>
 </workbench>
