@@ -89,7 +89,8 @@ void                     RF_MGR_set_state( RF_MGR_rf_state_et state );
 RF_MGR_rf_state_et       RF_MGR_get_state( void );
 void                 	 RF_MGR_analyse_received_packets( void );
 void 					 RF_MGR_analyse_fault_conditions( void );
-pass_fail_et     		 RF_MGR_setup_tx_event( void );
+pass_fail_et             RF_MGR_setup_tx_event( u8_t event_id );
+pass_fail_et     		 RF_MGR_send_tx_event( void );
 void 				     RF_MGR_notify_send_complete( void );
 
 
