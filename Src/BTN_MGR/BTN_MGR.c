@@ -380,7 +380,7 @@ void BTN_MGR_carryout_request( void )
 				break;
 
 				case BTN_MGR_ONBOARD_BUTTON:
-					RF_MGR_set_state( RF_MGR_TX );
+					RF_MGR_setup_tx_event(2);
 				break;
 
 				default:

@@ -20,7 +20,7 @@
 #define QUEUE_SIZE                      5u
 #define RF_WATCHDOG_TIMEOUT             ( 60u * 60u )    //1hr
 #define PAYLOAD_START_POS				2u
-#define RF_MGR_TRANSMIT_TIME			(500u/RF_MGR_TICK_RATE)
+#define RF_MGR_TRANSMIT_TIME			(1000u/RF_MGR_TICK_RATE)
 
 
 /***************************************************************************************************
@@ -92,6 +92,9 @@ void 					 RF_MGR_analyse_fault_conditions( void );
 pass_fail_et             RF_MGR_setup_tx_event( u8_t event_id );
 pass_fail_et     		 RF_MGR_send_tx_event( void );
 void 				     RF_MGR_notify_send_complete( void );
+
+void                     RF_MGR_sending_rf( false_true_et status );
+false_true_et            RF_MGR_get_sending_rf_status( void );
 
 
 

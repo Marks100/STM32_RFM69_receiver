@@ -109,9 +109,10 @@ void MODE_MGR_tick( void )
 void MODE_MGR_action_schedule_normal( void )
 {
 	HAL_BRD_TOGGLE_ONBOARD_LED();
+	RF_MGR_tick();
 	NRF24_tick();
 	BTN_MGR_tick();
-	RF_MGR_tick();
+
 
     switch( MODE_MGR_tick_timer_msecs_s )
     {

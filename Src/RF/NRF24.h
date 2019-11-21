@@ -111,7 +111,7 @@
 
 #define NRF24_TIMEOUT_VAL_SEC       ( 60u * 60u * ( 1000u / NRF24_TICK_RATE_MS ) )
 #define NRF24_SEND_TIMEOUT      	2u
-#define NRF24_RETRY_CNT				2u
+#define NRF24_RETRY_CNT				1u
 
 
 /***************************************************************************************************

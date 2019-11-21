@@ -1489,9 +1489,6 @@ void NRF24_tick( void )
         	if( NRF24_handle_acks_and_tx_failures() == PASS )
         	{
         		NRF24_set_state( NRF24_SETUP_RX );
-
-        		/* Notify the RF_MGR that we have finished */
-        		RF_MGR_notify_send_complete();
         	}
         	else
         	{
@@ -1507,14 +1504,13 @@ void NRF24_tick( void )
         				NRF24_set_state( NRF24_TX );
         				NRF24_send_timeout_s = NRF24_SEND_TIMEOUT;
         				NRF24_send_retry_cnt_s --;
-
         			}
         			else
         			{
         				NRF24_set_state( NRF24_SETUP_RX );
 
         				/* Notify the RF_MGR that we have finished */
-        				RF_MGR_notify_send_complete();
+        				RF_MGR_sending_rf( FALSE );
 
         				NRF24_send_retry_cnt_s = NRF24_RETRY_CNT;
         				NRF24_send_timeout_s = NRF24_SEND_TIMEOUT;
