@@ -51,6 +51,8 @@ STATIC pass_fail_et                NRF24_self_test_s;
 STATIC u32_t                       NRF24_recieve_timeout_s;
 STATIC u16_t                       NRF24_resets_s;
 STATIC u16_t                       NRF24_send_timeout_s;
+STATIC u16_t                       NRF24_send_retry_cnt_s;
+
 
 /***************************************************************************************************
 **                              Data declarations and definitions                                 **
@@ -82,7 +84,8 @@ void NRF24_init( void )
 	NRF24_self_test_s = TRUE;
 	NRF24_recieve_timeout_s = NRF24_TIMEOUT_VAL_SEC;
 	NRF24_resets_s = 0u;
-	NRF24_send_timeout_s = 2;
+	NRF24_send_timeout_s = NRF24_SEND_TIMEOUT;
+	NRF24_send_retry_cnt_s = NRF24_RETRY_CNT;
 
     STDC_memset( &NRF24_tx_rx_payload_info_s, 0x00, sizeof( NRF24_tx_rx_payload_info_s ) );
     STDC_memset( &NRF24_register_readback_s, 0x00, DEFAULT_CONFIGURATION_SIZE );
@@ -1498,8 +1501,24 @@ void NRF24_tick( void )
         		}
         		else
         		{
-            		/* Try again */
-            		NRF24_set_state( NRF24_TX );
+            		/* Try again if we arent out of retries */
+        			if( NRF24_send_retry_cnt_s > 0 )
+        			{
+        				NRF24_set_state( NRF24_TX );
+        				NRF24_send_timeout_s = NRF24_SEND_TIMEOUT;
+        				NRF24_send_retry_cnt_s --;
+
+        			}
+        			else
+        			{
+        				NRF24_set_state( NRF24_SETUP_RX );
+
+        				/* Notify the RF_MGR that we have finished */
+        				RF_MGR_notify_send_complete();
+
+        				NRF24_send_retry_cnt_s = NRF24_RETRY_CNT;
+        				NRF24_send_timeout_s = NRF24_SEND_TIMEOUT;
+        			}
 				}
         		break;
         	}
